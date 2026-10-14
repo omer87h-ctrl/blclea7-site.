@@ -1,1 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#070a10"/><path d="M16 16h32v8H24v16h24v8H16z" fill="#ff9a67"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="t">
+<title id="t">BL CLEA7 — C7 icon</title>
+<defs>
+<linearGradient id="blue" x1=".02" y1=".9" x2=".96" y2=".04" gradientUnits="objectBoundingBox"><stop offset="0" stop-color="#5c7cfa"/><stop offset=".5" stop-color="#4269ff"/><stop offset="1" stop-color="#8bcaff"/></linearGradient>
+<linearGradient id="seven" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#304ef1"/><stop offset=".65" stop-color="#5c7cfa"/><stop offset="1" stop-color="#8bcaff"/></linearGradient>
+<linearGradient id="spark" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#ff9754"/><stop offset="1" stop-color="#ffd457"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="128" height="128" rx="26" fill="#06080c"/>
+<path d="M91 20 H47 C37 20 31 24 24 31 L18 37 C12 43 10 48 10 59 V77 C10 88 13 94 20 101 L28 109 C33 115 40 118 50 118 H87 C95 118 100 114 105 109 L111 102 H85 L83 104 H50 C45 104 41 103 37 99 L27 89 C25 85 24 82 24 77 V59 C24 53 25 50 29 46 L38 36 C41 33 44 32 49 32 H103 Z" fill="url(#blue)"/>
+<path d="M57 55 H104 L90 71 L61 106 H41 L72 68 H50 C49 68 48 66 50 64 Z" fill="url(#seven)"/>
+<path d="M105 55 H119 L108 70 H92 Z" fill="url(#spark)"/>
+</svg>
