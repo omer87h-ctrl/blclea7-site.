@@ -36,6 +36,13 @@ for forbidden in ['main.py','runtime_main.py','clea7/desktop.py','clea7/host.py'
 catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='e30e619841a6d93e6295bc89c7f50e89778bcac0'
 for entry in catalog['published']:
  p=ROOT/entry['url'];data=p.read_bytes();assert p.is_relative_to(ROOT) and len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],p
+if catalog['native']['state']=='published':
+ native=catalog['native'];assert native['repository']=='omer87h-ctrl/blclea7-site.' and native['tag']=='clea7-0.5.0-e30e619'
+ assert len(native['assets'])==3 and {a['key'] for a in native['assets']}=={'studio','runtime','android'}
+ page=(ROOT/'preuzimanja.html').read_text()
+ for a in native['assets']:
+  assert a['url']=='https://github.com/'+native['repository']+'/releases/download/'+native['tag']+'/'+a['name']
+  assert len(a['sha256'])==64 and a['size_bytes']>0 and a['url'] in page and a['sha256'] in page
 with zipfile.ZipFile(ROOT/'downloads/BL-CLEA7-SDK-0.5.0.zip') as archive:
  assert archive.testzip() is None
  assert 'clea7/__main__.py' in archive.namelist() and 'web/workbench/diagnostics.js' in archive.namelist()

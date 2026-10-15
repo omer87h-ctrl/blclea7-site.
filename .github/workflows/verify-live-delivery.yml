@@ -4,7 +4,8 @@ on:
   push:
     branches: [work/complete-public-downloads]
   workflow_run:
-    workflows: ['pages build and deployment']
+    workflows: ['pages build and deployment', 'Verify public BL CLEA7 website and applications']
+    branches: [main]
     types: [completed]
 permissions:
   contents: read
