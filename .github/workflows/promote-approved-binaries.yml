@@ -1,0 +1,28 @@
+name: Promote owner-approved CLEA7 binaries
+on:
+  issues:
+    types: [opened]
+permissions:
+  contents: read
+jobs:
+  publish:
+    if: github.event.issue.user.login == 'omer87h-ctrl' && github.actor == 'omer87h-ctrl' && github.event.issue.title == 'CLEA7 approved binary promotion e30e619'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: clea7-approved-native-release
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify transfer boundaries before publication
+        run: python -m unittest discover -s tests -p test_binary_transfer.py -v
+      - name: Publish only exact verified binaries using this repository token
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/promote_approved_binaries.py
