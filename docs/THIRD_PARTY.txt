@@ -79,3 +79,12 @@ design content is covered by MATERIALS-LICENSE.txt; notices accompany App DNA /4
 packages and generated applications. No AI model or paid image API was used to
 produce the included compositions. A future AI-generated asset requires its own
 source/terms record and rights review; generation is not a legal clearance.
+
+## BIL increment
+
+BIL compiler, IR executor, intent resolver, visual source adapter and bundled
+math/text/collection operations are original project implementation. No new
+external parser, compiler, model weights, font or library dependency was added.
+Existing host and development dependency notices remain applicable. This entry
+does not change the core distribution terms or the separate materials MIT grant.
+See docs/bil/ORIGIN-AND-IP.md.

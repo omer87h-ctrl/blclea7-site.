@@ -1,0 +1,17 @@
+import collections
+record Item { quantity: Number, price: Number }
+fn amount(item: Item) -> Number {
+    return item.quantity * item.price
+}
+const items = [new Item { quantity: 2, price: 15 }, new Item { quantity: 3, price: 4 }]
+let total = 0
+for item in items {
+    total = total + amount(item)
+}
+let note: Text? = null
+let status = "Ukupno je izračunato"
+if note != null {
+    status = note
+}
+show total
+show status

@@ -1,22 +1,22 @@
 {
   "format": "clea7.public-downloads/1",
-  "version": "0.5.0",
-  "source_commit": "e30e619841a6d93e6295bc89c7f50e89778bcac0",
-  "verified_run": 38639160160,
+  "version": "0.6.0",
+  "source_commit": "72249d92e1d817fe2b5c726e4c18b6b0a83ed74b",
+  "verified_run": 38800912577,
   "published": [
     {
       "key": "sdk",
-      "name": "BL-CLEA7-SDK-0.5.0.zip",
-      "url": "downloads/BL-CLEA7-SDK-0.5.0.zip",
-      "size_bytes": 58045,
-      "sha256": "e233c4fddfab96b1ff4a9ab01c623144e1f26edd3c7763cbd3f55730e8f9e32a"
+      "name": "BL-CLEA7-SDK-0.6.0.zip",
+      "url": "downloads/BL-CLEA7-SDK-0.6.0.zip",
+      "size_bytes": 102737,
+      "sha256": "f68f7681142c999836273b8f30c7bf8a62c8392dacd2d70ad0a59dbcafff04d7"
     },
     {
       "key": "preview",
       "name": "BLclea7-Studio-pregled.html",
       "url": "downloads/BLclea7-Studio-pregled.html",
-      "size_bytes": 388077,
-      "sha256": "5cf4d8a0faf3a91d63a7597da4c6ef93f720d95a374658185dafc2730f01441b"
+      "size_bytes": 523652,
+      "sha256": "0f4e82044d51e9f2ca1c89ac0662c09d421b81d8f70e585b8aa92827f850bac1"
     },
     {
       "key": "example",
@@ -24,35 +24,49 @@
       "url": "downloads/primjer-pretvarac.clea7",
       "size_bytes": 1521,
       "sha256": "b1db193ebbee9b2be5b9bcbbf609809bcfd335d7d36f05f35ba354bb0ef92c7c"
+    },
+    {
+      "key": "bil-example",
+      "name": "primjer-bil.clea7",
+      "url": "downloads/primjer-bil.clea7",
+      "size_bytes": 6296,
+      "sha256": "b41278fcc3cc6d8757114f0e6296db226b7f8d7e884277cd2b4d22288c7e4466"
+    },
+    {
+      "key": "bil-source",
+      "name": "primjer-bil.bil",
+      "url": "downloads/primjer-bil.bil",
+      "size_bytes": 462,
+      "sha256": "add72a6f576205b85282e297ac2782e889c66bb479cc4299220ade73c990251d"
     }
   ],
   "native": {
     "state": "published",
     "repository": "omer87h-ctrl/blclea7-site.",
-    "tag": "clea7-0.5.0-e30e619",
+    "tag": "clea7-0.6.0-72249d9",
     "assets": [
       {
-        "key": "studio",
-        "name": "BL-CLEA7-Studio-Windows-x64.zip",
-        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.5.0-e30e619/BL-CLEA7-Studio-Windows-x64.zip",
-        "size_bytes": 357057068,
-        "sha256": "45d8179e7a1e600181a7d5eec2bb4069d9a15ac64e595a929478768acc851775"
+        "key": "android",
+        "name": "BL-CLEA7-Runtime-Android-debug.apk",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.6.0-72249d9/BL-CLEA7-Runtime-Android-debug.apk",
+        "size_bytes": 109069,
+        "sha256": "a470ed2bc836c1368412c2140600c7cebb3692512fc94f938410fc287fca414e"
       },
       {
         "key": "runtime",
         "name": "BL-CLEA7-Runtime-Windows-x64.zip",
-        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.5.0-e30e619/BL-CLEA7-Runtime-Windows-x64.zip",
-        "size_bytes": 338251057,
-        "sha256": "3ba57545ef11a01656f96fe1ec12a47ca49b584014bbd94846d8915e0c3b30df"
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.6.0-72249d9/BL-CLEA7-Runtime-Windows-x64.zip",
+        "size_bytes": 338278001,
+        "sha256": "20a387caf12fc0e07397584889a0194d950b6957264f71da844fdc75784ecf40"
       },
       {
-        "key": "android",
-        "name": "BL-CLEA7-Runtime-Android-debug.apk",
-        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.5.0-e30e619/BL-CLEA7-Runtime-Android-debug.apk",
-        "size_bytes": 86614,
-        "sha256": "4a65f0e3fdc57a90d8d6a90c39670a6e8a179b3d02021350b8ddb7bcd62ec507"
+        "key": "studio",
+        "name": "BL-CLEA7-Studio-Windows-x64.zip",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.6.0-72249d9/BL-CLEA7-Studio-Windows-x64.zip",
+        "size_bytes": 357120759,
+        "sha256": "2e5ec6eeab98b6b41b2e4949ccbd746e0e7bf0b5d86b02cfc4540897040a9293"
       }
     ],
-    "release_url": "https://github.com/omer87h-ctrl/blclea7-site./releases/tag/clea7-0.5.0-e30e619"
+    "release_url": "https://github.com/omer87h-ctrl/blclea7-site./releases/tag/clea7-0.6.0-72249d9"
   }
 }

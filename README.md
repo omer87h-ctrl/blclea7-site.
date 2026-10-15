@@ -1,9 +1,9 @@
-# BL CLEA7 public website
+# BLclea7 public website — BIL 0.6
 
-Published domain: https://clea7.brzoilokalno.com/
+Domain: https://clea7.brzoilokalno.com/
 
-This repo contains the public website, browser execution target and curated application SDK. It does not contain the private Windows host, AI service, publisher profiles or user data. Browser runtime engine assets come from tested source e30e619841a6d93e6295bc89c7f50e89778bcac0.
+Browser target and curated SDK from tested source 72249d92e1d817fe2b5c726e4c18b6b0a83ed74b. The private native host, AI service, publisher identities and user data are excluded. Existing public launcher compatibility fixes are preserved. Original distribution terms in docs/USLOVI.txt and SDK LICENSE.txt are unchanged.
 
-The website has no analytics, external fonts, mandatory account or API key input. Core app data stay in browser storage. Native packages are offered only after a verified public release catalogue exists.
+BIL grammar, supported visual subset and limits are described at bil.html. Native public downloads are pinned to verified release clea7-0.6.0-72249d9. The optional BIL AI proposal API has no default model connection.
 
-Run `python scripts/check_public.py` and `python scripts/package_public_sdk.py` for local checks/packaging. Actual Chrome checks run in GitHub Actions before publication. See docs/USLOVI.txt and separate dependency/material notices.
+Checks: python scripts/check_public.py; python -m unittest discover -s tests -v. Real browser, independent SDK and anonymous live delivery checks run in Actions. No main Brzo i Lokalno app, PWA or TECH portal is part of this repository.

@@ -20,9 +20,10 @@ def validate(raw):
     try:p=json.loads(json.dumps(raw,allow_nan=False))
     except (TypeError,ValueError):raise UserError('Projekt sadrži neispravne vrijednosti.')
     if len(json.dumps(p).encode())>1048576:raise UserError('Projekt prelazi 1 MiB.')
-    v4=p.get('format')=='clea7.application/4'
+    v5=p.get('format')=='clea7.application/5'
+    v4=v5 or p.get('format')=='clea7.application/4'
     living=v4 or p.get('format')=='clea7.application/3'
-    if any(k not in ('format','id','name','package','version','start','permissions','state','screens','flows','tables')+(('machines','animations','components') if living else ())+(('licenses',) if v4 else ()) for k in p):raise UserError('Nepodržano svojstvo projekta.')
+    if any(k not in ('format','id','name','package','version','start','permissions','state','screens','flows','tables')+(('machines','animations','components') if living else ())+(('licenses',) if v4 else ())+(('bil',) if v5 else ()) for k in p):raise UserError('Nepodržano svojstvo projekta.')
     if p.get('format')!='clea7.application/2' and not living:raise UserError('Potreban je application/2 format.')
     def key(value):return isinstance(value,str) and KEY.fullmatch(value) and value not in ('constructor','prototype','__proto__')
     if not key(p.get('id')) or not isinstance(p.get('name'),str) or not p['name'].strip() or len(p['name'])>100:raise UserError('Neispravan naziv ili identitet.')
@@ -62,7 +63,7 @@ def validate(raw):
             seen.add(entry['id'])
     nodes=set()
     def node(n,depth=0):
-        if depth>12 or not isinstance(n,dict) or not key(n.get('id')) or n['id'] in nodes or n.get('type') not in TYPES:raise UserError('Neispravna komponenta.')
+        if depth>12 or not isinstance(n,dict) or not key(n.get('id')) or n['id'] in nodes or not (n.get('type') in TYPES or v5 and n.get('type')=='bil'):raise UserError('Neispravna komponenta.')
         if any(k not in ('id','type','text','label','bind','options','events','children','style','source')+(('review',) if v4 else ()) for k in n):raise UserError('Nepodržano svojstvo komponente.')
         nodes.add(n['id'])
         if 'review' in n and (type(n['review']) is not bool or n['type']!='button'):raise UserError('Pregled izmjene je dozvoljen samo na dugmetu.')
@@ -92,8 +93,8 @@ def validate(raw):
     def steps(xs,depth=0):
         if not isinstance(xs,list) or len(xs)>100 or depth>8:raise UserError('Tok je prevelik.')
         for x in xs:
-            if not isinstance(x,dict) or x.get('action') not in ACTIONS or not living and x.get('action') in ('machine.event','animate'):raise UserError('Nepodržana akcija.')
-            if any(k not in ('action','key','value','condition','count','screen','operation','then','else','steps','table','id','where','limit')+(('machine','event','animation') if living else ())+(('offset','search') if v4 else ()) for k in x):raise UserError('Nepodržano svojstvo akcije.')
+            if not isinstance(x,dict) or not (x.get('action') in ACTIONS or v5 and x.get('action')=='bil') or not living and x.get('action') in ('machine.event','animate'):raise UserError('Nepodržana akcija.')
+            if any(k not in ('action','key','value','condition','count','screen','operation','then','else','steps','table','id','where','limit')+(('machine','event','animation') if living else ())+(('offset','search') if v4 else ())+(('block',) if v5 else ()) for k in x):raise UserError('Nepodržano svojstvo akcije.')
             if x['action'] in ('set','increment','append','remove','calculate','native') and x.get('key') not in p['state']:raise UserError('Nepostojeće stanje u toku.')
             if x['action']=='navigate' and x.get('screen') not in ids:raise UserError('Nepostojeće odredište.')
             if x['action'].startswith('record.'):
@@ -121,7 +122,10 @@ def validate(raw):
                 nodes=set();node(n)
             finally:nodes=previous
         validate_living(p,expression,definition)
-    expression(p['state'])
+    if not v5:expression(p['state'])
+    if v5:
+        from .bil import validate_program
+        validate_program(p)
     p['permissions']=permissions;p['version']=p.get('version') if type(p.get('version')) is int and p['version']>0 else 1
     return p
 

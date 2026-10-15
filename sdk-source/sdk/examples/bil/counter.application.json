@@ -1,0 +1,413 @@
+{
+  "format": "clea7.application/5",
+  "id": "bil_counter",
+  "name": "BIL prikaz i brojač",
+  "package": "com.brzoilokalno.bil.counter",
+  "version": 1,
+  "start": "home",
+  "permissions": [],
+  "state": {
+    "bilValues": {
+      "number": 0
+    },
+    "bilViews": [],
+    "bilMotion": []
+  },
+  "screens": [
+    {
+      "id": "home",
+      "name": "BIL",
+      "children": [
+        {
+          "id": "bil_surface",
+          "type": "bil"
+        },
+        {
+          "id": "bil_c44cdf18",
+          "type": "button",
+          "text": "Povećaj",
+          "events": {
+            "click": "bil_increase"
+          }
+        },
+        {
+          "id": "bil_e28a9a27",
+          "type": "button",
+          "text": "Vrati na 10",
+          "events": {
+            "click": "bil_reset"
+          }
+        }
+      ]
+    }
+  ],
+  "flows": {
+    "bil_main": [
+      {
+        "action": "bil",
+        "block": "main"
+      }
+    ],
+    "bil_increase": [
+      {
+        "action": "bil",
+        "block": "increase"
+      }
+    ],
+    "bil_reset": [
+      {
+        "action": "bil",
+        "block": "reset"
+      }
+    ]
+  },
+  "tables": {},
+  "machines": {},
+  "animations": {},
+  "components": {},
+  "bil": {
+    "format": "bil.program/1",
+    "source": "# BLclea Intent Language — by Brzo i Lokalno\n# The same typed value drives both displays. No AI service is required.\nimport math\nlet number = 10\nshow number\nvisualize number using runtime within [progress, counter] range [0, 100] fallback counter\nmove number on change through runtime\nexplain last decision\non increase {\n    number = math.clamp(number + 1, 0, 100)\n}\non reset {\n    number = 10\n}\nbutton \"Povećaj\" runs increase\nbutton \"Vrati na 10\" runs reset\n",
+    "ir": {
+      "format": "bil.ir/1",
+      "language": "bil/1",
+      "globals": {
+        "number": {
+          "type": "Number",
+          "mutable": true
+        }
+      },
+      "records": {},
+      "imports": [
+        "math"
+      ],
+      "functions": {},
+      "handlers": {
+        "increase": [
+          {
+            "op": "STORE",
+            "id": "bil_469f6b24",
+            "loc": {
+              "start": 325,
+              "end": 364,
+              "line": 10,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "CALL",
+              "type": "Number",
+              "loc": {
+                "start": 334,
+                "end": 364,
+                "line": 10,
+                "column": 14
+              },
+              "call": "math.clamp",
+              "args": [
+                {
+                  "op": "BINARY",
+                  "type": "Number",
+                  "loc": {
+                    "start": 345,
+                    "end": 355,
+                    "line": 10,
+                    "column": 25
+                  },
+                  "operator": "+",
+                  "left": {
+                    "op": "LOAD",
+                    "type": "Number",
+                    "loc": {
+                      "start": 345,
+                      "end": 351,
+                      "line": 10,
+                      "column": 25
+                    },
+                    "name": "number"
+                  },
+                  "right": {
+                    "op": "CONST",
+                    "type": "Number",
+                    "loc": {
+                      "start": 354,
+                      "end": 355,
+                      "line": 10,
+                      "column": 34
+                    },
+                    "value": 1
+                  }
+                },
+                {
+                  "op": "CONST",
+                  "type": "Number",
+                  "loc": {
+                    "start": 357,
+                    "end": 358,
+                    "line": 10,
+                    "column": 37
+                  },
+                  "value": 0
+                },
+                {
+                  "op": "CONST",
+                  "type": "Number",
+                  "loc": {
+                    "start": 360,
+                    "end": 363,
+                    "line": 10,
+                    "column": 40
+                  },
+                  "value": 100
+                }
+              ]
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Number",
+              "loc": {
+                "start": 325,
+                "end": 331,
+                "line": 10,
+                "column": 5
+              },
+              "name": "number"
+            }
+          }
+        ],
+        "reset": [
+          {
+            "op": "STORE",
+            "id": "bil_a35f9277",
+            "loc": {
+              "start": 382,
+              "end": 393,
+              "line": 13,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "CONST",
+              "type": "Number",
+              "loc": {
+                "start": 391,
+                "end": 393,
+                "line": 13,
+                "column": 14
+              },
+              "value": 10
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Number",
+              "loc": {
+                "start": 382,
+                "end": 388,
+                "line": 13,
+                "column": 5
+              },
+              "name": "number"
+            }
+          }
+        ]
+      },
+      "main": [
+        {
+          "op": "STORE_NEW",
+          "id": "bil_b9fbcd79",
+          "loc": {
+            "start": 129,
+            "end": 144,
+            "line": 4,
+            "column": 1
+          },
+          "name": "number",
+          "mutable": true,
+          "global": true,
+          "declaredType": "Number",
+          "value": {
+            "op": "CONST",
+            "type": "Number",
+            "loc": {
+              "start": 142,
+              "end": 144,
+              "line": 4,
+              "column": 14
+            },
+            "value": 10
+          }
+        },
+        {
+          "op": "INTENT",
+          "id": "bil_b4146efb",
+          "loc": {
+            "start": 145,
+            "end": 156,
+            "line": 5,
+            "column": 1
+          },
+          "mode": "show",
+          "ai": false,
+          "within": null,
+          "fallback": null,
+          "inputType": "Number",
+          "value": {
+            "op": "LOAD",
+            "type": "Number",
+            "loc": {
+              "start": 150,
+              "end": 156,
+              "line": 5,
+              "column": 6
+            },
+            "name": "number"
+          }
+        },
+        {
+          "op": "INTENT",
+          "id": "bil_b514708e",
+          "loc": {
+            "start": 157,
+            "end": 246,
+            "line": 6,
+            "column": 1
+          },
+          "mode": "visualize",
+          "ai": false,
+          "within": [
+            "progress",
+            "counter"
+          ],
+          "fallback": "counter",
+          "inputType": "Number",
+          "value": {
+            "op": "LOAD",
+            "type": "Number",
+            "loc": {
+              "start": 167,
+              "end": 173,
+              "line": 6,
+              "column": 11
+            },
+            "name": "number"
+          },
+          "range": [
+            {
+              "op": "CONST",
+              "type": "Number",
+              "loc": {
+                "start": 222,
+                "end": 223,
+                "line": 6,
+                "column": 66
+              },
+              "value": 0
+            },
+            {
+              "op": "CONST",
+              "type": "Number",
+              "loc": {
+                "start": 225,
+                "end": 228,
+                "line": 6,
+                "column": 69
+              },
+              "value": 100
+            }
+          ]
+        },
+        {
+          "op": "MOTION",
+          "id": "bil_d16ee9c6",
+          "loc": {
+            "start": 247,
+            "end": 284,
+            "line": 7,
+            "column": 1
+          },
+          "name": "number"
+        },
+        {
+          "op": "EXPLAIN",
+          "id": "bil_522d9263",
+          "loc": {
+            "start": 285,
+            "end": 306,
+            "line": 8,
+            "column": 1
+          }
+        }
+      ],
+      "controls": [
+        {
+          "id": "bil_c44cdf18",
+          "label": "Povećaj",
+          "handler": "increase"
+        },
+        {
+          "id": "bil_e28a9a27",
+          "label": "Vrati na 10",
+          "handler": "reset"
+        }
+      ],
+      "sourceMap": [
+        {
+          "id": "bil_469f6b24",
+          "op": "STORE",
+          "start": 325,
+          "end": 364,
+          "line": 10,
+          "column": 5
+        },
+        {
+          "id": "bil_a35f9277",
+          "op": "STORE",
+          "start": 382,
+          "end": 393,
+          "line": 13,
+          "column": 5
+        },
+        {
+          "id": "bil_b9fbcd79",
+          "op": "STORE_NEW",
+          "start": 129,
+          "end": 144,
+          "line": 4,
+          "column": 1
+        },
+        {
+          "id": "bil_b4146efb",
+          "op": "INTENT",
+          "start": 145,
+          "end": 156,
+          "line": 5,
+          "column": 1
+        },
+        {
+          "id": "bil_b514708e",
+          "op": "INTENT",
+          "start": 157,
+          "end": 246,
+          "line": 6,
+          "column": 1
+        },
+        {
+          "id": "bil_d16ee9c6",
+          "op": "MOTION",
+          "start": 247,
+          "end": 284,
+          "line": 7,
+          "column": 1
+        },
+        {
+          "id": "bil_522d9263",
+          "op": "EXPLAIN",
+          "start": 285,
+          "end": 306,
+          "line": 8,
+          "column": 1
+        }
+      ]
+    }
+  }
+}

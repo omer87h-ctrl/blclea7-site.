@@ -1,0 +1,7 @@
+let number = 10
+let AI decide how to present number
+    using runtime
+    within [counter, progress]
+    range [0, 100]
+    fallback counter
+explain last decision

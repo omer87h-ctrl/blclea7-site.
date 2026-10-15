@@ -1,0 +1,16 @@
+# BLclea Intent Language — by Brzo i Lokalno
+# The same typed value drives both displays. No AI service is required.
+import math
+let number = 10
+show number
+visualize number using runtime within [progress, counter] range [0, 100] fallback counter
+move number on change through runtime
+explain last decision
+on increase {
+    number = math.clamp(number + 1, 0, 100)
+}
+on reset {
+    number = 10
+}
+button "Povećaj" runs increase
+button "Vrati na 10" runs reset
