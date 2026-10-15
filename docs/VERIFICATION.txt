@@ -11,3 +11,5 @@ Prikaz s 300 komponenti, 8 zagrijavanja + 60 uzoraka: puni/adaptivni medijani za
 Nema tvrdnje o punoj funkcionalnoj jednakosti Android Studiju, univerzalnoj adaptaciji, nižem ukupnom RAM-u ili bateriji, svjetskoj novosti ili nezavisnoj sigurnosnoj certifikaciji. Fizički uređaji i produkcijski potpisi nisu potvrđeni ovim CI rezultatom.
 
 Javno hostovana kopija i preuzimanja dodatno prolaze provjeru linkova, SHA-256, browsera i odvajanja privatnih native host datoteka u zasebnom javnom repozitoriju prije objave.
+
+Javna binarna objava: GitHub Actions 38737856976, uspješno. Izvorni Windows ZIP-ovi provjereni bajt-po-bajt SHA-256 vrijednostima; iz Android artefakta izdvojen samo APK. Izdanje i kontrolne sume: https://github.com/omer87h-ctrl/blclea7-site./releases/tag/clea7-0.5.0-e30e619
