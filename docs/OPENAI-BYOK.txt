@@ -1,0 +1,76 @@
+# Optional OpenAI API in Windows Studio
+
+Scope: owner's latest instruction focuses this release increment on OpenAI only.
+Existing local model and browser-model functions remain. Claude/Gemini are not
+offered by the new controls. The independent Runtime/SDK do not require AI.
+
+## Use
+
+In the native Windows Studio, choose OpenAI API, enter your own API key, acknowledge
+your account rights/terms/billing and press the connection check. The model catalog
+comes from your account. Choose an accessible text model that supports Chat
+Completions; not every listed image/audio/embedding model supports that endpoint.
+Changing the model requires a fresh connection check, reusing the same session's
+key if its field is left blank. No model is downloaded or sold by BLclea7.
+
+Type the request. Before generation, explicitly approve sending the current
+description and application model, including default state values. Runtime tables,
+other projects, local files and execution-trace history are not included by this
+operation. Do not place secrets or unauthorized personal/copyrighted material in
+the description or default state.
+
+Only the selected provider is called, once, without automatic retries or provider
+fallback. The user pays OpenAI directly under their API account. A ChatGPT
+subscription is separate. BLclea7 neither sells/transfers API keys nor provides
+included API credits. Account/model/region access and applicable terms still apply.
+
+The answer is untrusted input: parse/validate the project and require review.
+Identity is preserved; invalid/truncated output is rejected. No returned shell
+commands, scripts, file operations or build claims are executed. Schema validation
+does not prove functioning software, original output or legal clearance.
+
+## Secret and network boundary
+
+- The password field exists only in the trusted native owner workflow. Browser/
+  standalone HTML controls remain disabled and do not collect API keys.
+- The key crosses the authenticated, same-origin loopback owner endpoint once,
+  then is held by the native host in session memory. It is not written to settings,
+  project JSON, package exports, application data, trace records or repositories.
+- Only the fixed HTTPS api.openai.com catalog/chat routes are accepted. Redirects
+  are rejected. Header authentication is never put in a URL or returned to UI.
+- Configuration, checking, forgetting and generation share a gate. Scoped app
+  tokens cannot use these owner operations or inherit the Studio's key.
+- Each remote generation requires true boolean consent and an expected provider
+  check. HTTP errors are sanitized; provider bodies/prompts/keys are not echoed.
+- Forget clears the active reference. Python, WebView and the OS do not guarantee
+  immediate physical RAM zeroing; this is not an OS secret vault. It also does not
+  cancel/erase a request already sent to OpenAI or revoke the upstream key.
+- Output is bounded to 2000 completion tokens; transport response to 2 MiB.
+  These are resource limits, not a currency budget or a guarantee of final app size.
+
+The request uses store=false. That does not establish zero provider retention.
+OpenAI's account controls, security/abuse retention, policies and jurisdictional
+requirements apply. The site itself has no AI form or inference calls.
+
+## Verification and release limits
+
+Tests use explicit HTTP response fixtures for request formatting, auth headers,
+redaction, consent, identity preservation, truncation, forgetting and no retries.
+The actual HTTP handler is tested with in-memory sockets. Chrome tests exercise
+native UI transport wiring through labelled route fixtures, proposal review and
+disabled browser-only controls. None of these is paid provider inference.
+
+No actual customer key is available in this environment. A real account/model
+request remains an owner test in Windows; never paste keys in chat or GitHub.
+Native GUI builds and other regressions are verified separately by CI.
+
+## Official references checked 2026-10-14
+
+- Integration and restrictions: https://openai.com/policies/services-agreement/
+- Key handling: https://help.openai.com/en/articles/5112595-best-practices-for-api-key-safety
+- API/ChatGPT billing separation: https://help.openai.com/en/articles/9039756-managing-billing-settings-on-chatgpt-web-and-platform
+- Retention and training controls: https://developers.openai.com/api/docs/guides/your-data
+- Endpoint: https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create
+
+These references support this integration design; they do not certify universal
+legal compliance, trademark clearance or the originality of generated output.

@@ -1,0 +1,19 @@
+# Executable responsibilities of the seven pillars
+
+Names are retained; they do not imply that an AI model is installed or invent
+capabilities absent from the implementation. The browser interpreter and native
+fixed-operation service are distinct execution paths sharing application contracts.
+
+| Pillar | Implemented responsibility and output | Evidence / unfinished scope |
+|---|---|---|
+| Core AI Manager | Fixed-operation task scheduling, queue limits, explicit optional local AI consent and errors | Kernel task/concurrency tests; real model inference not verified |
+| Link Bridge Elite | Owned loopback host, scoped SDK requests; portable package contract across hosts | Host/session tests, native consumers; general device sync not implemented |
+| Expansion Q | Whitelisted operation catalog, declarative app format, trusted compiled Android SDK extensions | Unknown-op/permission rejection tests; no untrusted dynamic plugin installer |
+| Adaptive Recovery | Transactional rollback, persisted state restore, worker failure recovery and uncertain-effect journal | Rollback/stale-write/native-journal tests; no automatic retry of hardware effects |
+| Holo Interaction | Visual components, real input/button flow dispatch, standalone app rendering | Chrome and native UI verification; spatial/holographic UI not claimed |
+| Fallback Executor | Bounded worker fallback using the same fixed operation semantics; conservative resource modes | Standard/light semantic equivalence and crash tests; no arbitrary native fallback |
+| Vision Q | Actual trace, measured worker/task costs, explicit policy diagnostics, SHADOW/REPLAY comparisons | Ecosystem/causal trace tests; prediction/anomaly AI not implemented |
+
+Living Runtime adds app installation, atomic lifecycle guards, safe compatible
+morphing, isolated alternatives and reproducible pure-flow replay. No benchmark
+supports claims of universal superiority, zero battery use or global originality.

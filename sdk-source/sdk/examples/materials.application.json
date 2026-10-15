@@ -1,0 +1,245 @@
+{
+  "format": "clea7.application/4",
+  "id": "sdk_materials",
+  "name": "Moj lokalni prostor",
+  "package": "com.brzoilokalno.sdk.materials",
+  "version": 1,
+  "start": "home",
+  "permissions": [],
+  "state": {
+    "material_95992499b234d4f03aabfc7ebd896ea2_draft": "",
+    "material_95992499b234d4f03aabfc7ebd896ea2_record": {},
+    "material_95992499b234d4f03aabfc7ebd896ea2_rows": []
+  },
+  "screens": [
+    {
+      "id": "home",
+      "name": "Početni ekran",
+      "children": [
+        {
+          "id": "material_95992499b234d4f03aabfc7ebd896ea2_root",
+          "type": "card",
+          "style": {
+            "background": "#162534",
+            "color": "#f2f6fa",
+            "padding": 20,
+            "radius": 18,
+            "gap": 14
+          },
+          "children": [
+            {
+              "id": "material_95992499b234d4f03aabfc7ebd896ea2_title",
+              "type": "heading",
+              "text": "Zapisi koji ostaju kod tebe",
+              "style": {
+                "color": "#f2f6fa",
+                "fontSize": 26,
+                "fontWeight": 800
+              }
+            },
+            {
+              "id": "material_95992499b234d4f03aabfc7ebd896ea2_draft_input",
+              "type": "input",
+              "label": "Naziv novog zapisa",
+              "bind": "material_95992499b234d4f03aabfc7ebd896ea2_draft"
+            },
+            {
+              "id": "material_95992499b234d4f03aabfc7ebd896ea2_controls",
+              "type": "row",
+              "style": {
+                "gap": 10,
+                "wrap": true
+              },
+              "children": [
+                {
+                  "id": "material_95992499b234d4f03aabfc7ebd896ea2_add",
+                  "type": "button",
+                  "text": "Dodaj zapis",
+                  "events": {
+                    "click": "material_95992499b234d4f03aabfc7ebd896ea2_add"
+                  },
+                  "style": {
+                    "background": "#ffb27f",
+                    "color": "#17202a",
+                    "radius": 12,
+                    "padding": 12,
+                    "fontWeight": 700
+                  },
+                  "review": true
+                },
+                {
+                  "id": "material_95992499b234d4f03aabfc7ebd896ea2_refresh",
+                  "type": "button",
+                  "text": "Osvježi",
+                  "events": {
+                    "click": "material_95992499b234d4f03aabfc7ebd896ea2_refresh"
+                  },
+                  "style": {
+                    "background": "#ffb27f",
+                    "color": "#17202a",
+                    "radius": 12,
+                    "padding": 12,
+                    "fontWeight": 700
+                  }
+                }
+              ]
+            },
+            {
+              "id": "material_95992499b234d4f03aabfc7ebd896ea2_list",
+              "type": "list",
+              "bind": "material_95992499b234d4f03aabfc7ebd896ea2_rows",
+              "children": [
+                {
+                  "id": "material_95992499b234d4f03aabfc7ebd896ea2_entry",
+                  "type": "card",
+                  "children": [
+                    {
+                      "id": "material_95992499b234d4f03aabfc7ebd896ea2_entry_title",
+                      "type": "text",
+                      "text": {
+                        "op": "field",
+                        "args": [
+                          {
+                            "op": "field",
+                            "args": [
+                              {
+                                "ref": "item",
+                                "key": "value"
+                              },
+                              "data"
+                            ]
+                          },
+                          "title"
+                        ]
+                      },
+                      "style": {
+                        "color": "#bdd0df",
+                        "fontSize": 16
+                      }
+                    },
+                    {
+                      "id": "material_95992499b234d4f03aabfc7ebd896ea2_remove",
+                      "type": "button",
+                      "text": "Obriši ovaj zapis",
+                      "events": {
+                        "click": "material_95992499b234d4f03aabfc7ebd896ea2_remove"
+                      },
+                      "style": {
+                        "background": "#ffb27f",
+                        "color": "#17202a",
+                        "radius": 12,
+                        "padding": 12,
+                        "fontWeight": 700
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "flows": {
+    "material_95992499b234d4f03aabfc7ebd896ea2_add": [
+      {
+        "action": "if",
+        "condition": {
+          "op": "greater",
+          "args": [
+            {
+              "op": "length",
+              "args": [
+                {
+                  "ref": "state",
+                  "key": "material_95992499b234d4f03aabfc7ebd896ea2_draft"
+                }
+              ]
+            },
+            0
+          ]
+        },
+        "then": [
+          {
+            "action": "record.create",
+            "table": "material_95992499b234d4f03aabfc7ebd896ea2_entries",
+            "key": "material_95992499b234d4f03aabfc7ebd896ea2_record",
+            "value": {
+              "title": {
+                "ref": "state",
+                "key": "material_95992499b234d4f03aabfc7ebd896ea2_draft"
+              }
+            }
+          },
+          {
+            "action": "set",
+            "key": "material_95992499b234d4f03aabfc7ebd896ea2_draft",
+            "value": ""
+          },
+          {
+            "action": "record.query",
+            "table": "material_95992499b234d4f03aabfc7ebd896ea2_entries",
+            "key": "material_95992499b234d4f03aabfc7ebd896ea2_rows",
+            "where": {},
+            "limit": 100
+          }
+        ],
+        "else": [
+          {
+            "action": "notify",
+            "value": "Unesi naziv zapisa."
+          }
+        ]
+      }
+    ],
+    "material_95992499b234d4f03aabfc7ebd896ea2_refresh": [
+      {
+        "action": "record.query",
+        "table": "material_95992499b234d4f03aabfc7ebd896ea2_entries",
+        "key": "material_95992499b234d4f03aabfc7ebd896ea2_rows",
+        "where": {},
+        "limit": 100
+      }
+    ],
+    "material_95992499b234d4f03aabfc7ebd896ea2_remove": [
+      {
+        "action": "record.delete",
+        "table": "material_95992499b234d4f03aabfc7ebd896ea2_entries",
+        "key": "material_95992499b234d4f03aabfc7ebd896ea2_record",
+        "id": {
+          "op": "field",
+          "args": [
+            {
+              "ref": "item",
+              "key": "value"
+            },
+            "id"
+          ]
+        }
+      },
+      {
+        "action": "record.query",
+        "table": "material_95992499b234d4f03aabfc7ebd896ea2_entries",
+        "key": "material_95992499b234d4f03aabfc7ebd896ea2_rows",
+        "where": {},
+        "limit": 100
+      }
+    ]
+  },
+  "tables": {
+    "material_95992499b234d4f03aabfc7ebd896ea2_entries": {
+      "title": "text"
+    }
+  },
+  "machines": {},
+  "animations": {},
+  "components": {},
+  "licenses": [
+    {
+      "id": "clea7_materials_mit",
+      "name": "MIT · originalni CLEA7 materijali",
+      "text": "MIT License — original CLEA7 reusable design materials\n\nCopyright (c) 2026 Brzo i Lokalno\n\nScope: original composition design data, palette definitions, motion presets and\nmaterialized application components supplied by the CLEA7 Materials library.\nGenerated applications may reuse, modify and redistribute those materials,\nincluding in commercial applications. This grant does not change the licence\nof the Studio, Runtime, SDK implementation, trademarks or third-party components.\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof these materials and associated documentation files (the \"Materials\"), to deal\nin the Materials without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Materials, and to permit persons to whom the Materials are furnished to\ndo so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Materials.\n\nTHE MATERIALS ARE PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE MATERIALS OR THE USE OR OTHER DEALINGS IN THE\nMATERIALS.\n"
+    }
+  ]
+}

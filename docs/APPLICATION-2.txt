@@ -1,0 +1,71 @@
+# CLEA7 application/2: authored application format and SDK contract
+
+This is original declarative application code interpreted by CLEA7, not Android,
+Linux or Windows source code. Platform APIs and licensed build tools still execute
+it. No exclusive invention or universal application support is claimed.
+
+A project contains `format`, `id`, `name`, Android `package`, positive `version`,
+`start`, named `state`, a `screens` list and named `flows`, and optional typed `tables`. Components contain
+unique `id`, a supported `type`, optional content expression, state binding,
+events and nested children. Events identify flows; they are not script strings.
+
+Expressions are JSON literals, `{ref: "state"|"event"|"item"|"loop", key: ...}`
+or `{op: ..., args: [...]}`. Supported operations are addition, subtraction,
+multiplication, division, comparison, Boolean operations, concatenation, length
+and own-field access. There is no eval, user JavaScript, shell command, dynamic
+module URL or external network operation in this format release.
+
+Flows use set, increment, append, remove, navigate, notify, if, repeat and
+calculate, native, record.create/update/delete/query. Calculate invokes one of the existing audited fixed data operations.
+A flow runs against a cloned state and commits atomically after success. Failure
+preserves earlier persisted state. Execution is serialized per application;
+optimistic storage checks reject stale writers. Limits: 1 MiB project, 50 screens,
+500 components, 200 flows, 100 steps per block, 100 repeat iterations and 1000
+executed steps per dispatch. Yielding avoids one large synchronous UI loop.
+
+Runtime library Android entry: `Clea7Runtime.create(context, JSONObject project)`
+returns a WebView; close it with `Clea7Runtime.close(view)`. The AAR supplies the
+host plus interpreter/renderer assets. The Android app depends on `:runtime`;
+without the library the class/assets are absent and the app cannot run. This is
+an embedded SDK, not an external obligatory app or a replacement Android OS.
+
+The Android host serves only packaged assets on a synthetic secure local origin,
+blocks remote navigation/resource requests, disables file/content access and has
+a restricted typed native bridge. No INTERNET permission is requested. Camera,
+GPS and notifications require declared project permissions and Android consent.
+Captured JPEGs remain in private local files; there are no image uploads. Storage is sandboxed by Android application package.
+
+Android APK packaging uses JDK 17, Gradle 8.10.2, Android SDK 35 and AGP 8.7.3.
+Those are existing tooling dependencies, not inventions. Local source export
+includes original runtime source and build configuration. Debug APKs use a debug
+key for owner testing; public distribution requires owner-controlled release
+signing, app-store disclosures and licence review. No keys or private projects
+are sent to GitHub by the local export/build API. CI builds only the committed
+example project, never a user's local project.
+
+## Seven pillars as implemented, not aspirations
+
+- Core AI Manager: serialized task/flow coordination; AI is optional legacy SDK.
+- Link Bridge Elite: format, event and platform-host contracts.
+- Expansion Q: validated component and fixed-operation registry.
+- Adaptive Recovery: failed-flow rollback, persisted recovery and explicit errors.
+- Holo Interaction: generated controls, visual properties and event-driven render.
+- Fallback Executor: explicit permitted fallback for fixed data worker operations.
+- Vision Q: dispatch trace and existing witnessed cache/task metrics.
+
+## Remaining major capabilities
+
+This application/2 development increment is not the complete Studio requested by
+the owner. Network integrations, advanced databases, release signing UI, richer layout
+styling, reusable component authoring, full debugger/breakpoints and broader
+Windows/native exports are not complete. Do not advertise them as implemented. Local typed tables now
+support bounded CRUD/equality queries with state and records in one transaction.
+Full data backup now includes typed table records; native JPEG files remain excluded.
+The added plan compiler lowers steps and exposes source mappings, read/write
+dependencies and capability requirements. This is not a JIT or universal compiler.
+Native effect metadata is persisted before invocation and confirmed afterwards.
+Interrupted/unconfirmed operations become uncertain; they are not retried.
+Confirmed effects remain confirmed if a later data transaction fails. The optional
+local CPU model connector validates and presents candidates for explicit review;
+no model weights are bundled and real inference has not been verified.
+Existing application/1 tools and exports remain available separately.

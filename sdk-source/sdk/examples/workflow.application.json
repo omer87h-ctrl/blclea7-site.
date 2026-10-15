@@ -1,0 +1,98 @@
+{
+  "format": "clea7.application/3",
+  "id": "independent_workflow",
+  "name": "Nezavisni radni nalog",
+  "package": "com.brzoilokalno.sdk.workflow",
+  "version": 1,
+  "start": "home",
+  "permissions": [],
+  "state": {
+    "status": "open"
+  },
+  "tables": {},
+  "screens": [
+    {
+      "id": "home",
+      "children": [
+        {
+          "id": "title",
+          "type": "heading",
+          "text": "Radni nalog"
+        },
+        {
+          "id": "status_text",
+          "type": "text",
+          "text": {
+            "ref": "state",
+            "key": "status"
+          }
+        },
+        {
+          "id": "finish",
+          "type": "button",
+          "text": "Završi nalog",
+          "events": {
+            "click": "finish"
+          }
+        }
+      ]
+    }
+  ],
+  "flows": {
+    "finish": [
+      {
+        "action": "machine.event",
+        "machine": "order",
+        "event": "finish"
+      },
+      {
+        "action": "animate",
+        "animation": "done"
+      }
+    ]
+  },
+  "machines": {
+    "order": {
+      "stateKey": "status",
+      "initial": "open",
+      "states": {
+        "open": {
+          "on": {
+            "finish": [
+              {
+                "to": "done"
+              }
+            ]
+          }
+        },
+        "done": {
+          "on": {}
+        }
+      }
+    }
+  },
+  "animations": {
+    "done": {
+      "duration": 300,
+      "iterations": 1,
+      "easing": "ease-out",
+      "tracks": [
+        {
+          "target": "status_text",
+          "property": "opacity",
+          "frames": [
+            {
+              "at": 0,
+              "value": 0
+            },
+            {
+              "at": 300,
+              "value": 1
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "components": {}
+}

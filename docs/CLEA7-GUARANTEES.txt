@@ -1,0 +1,79 @@
+# CLEA7 reliability contract
+
+CLEA7's intended distinction is a shared, inspectable execution contract for
+visually authored and independently authored applications. Seven names alone do
+not create a new application category or prove superiority over another runtime.
+The following responsibilities define what must actually happen.
+
+| Pillar | Responsibility | Observable result and acceptance condition |
+|---|---|---|
+| Core AI Manager | Bound and schedule application work; accept optional AI proposals through validation | A compiled plan reports actions, reads, writes and requirements. Invalid or over-budget plans are rejected before application execution. Optional model output has no direct host privileges. |
+| Link Bridge Elite | Translate explicitly supported capabilities through a controlled host adapter | Each operation identifies a required permission and an available adapter. Unsupported operations fail explicitly. Android retains OS permission checks. General cross-device sync is outside the implemented contract. |
+| Expansion Q | Extend through versioned, registered contracts | Public App DNA and package ABI are validated by SDK and consumers. Unknown instructions, unsupported dependencies and unrestricted native/script plugins are rejected. |
+| Adaptive Recovery | Preserve the last committed data across a failed flow or process | State/record writes commit atomically with stale-write guards. Failure cannot be reported as success. Backups and restart tests verify persisted data. External effects are journaled and are not automatically undone or retried. |
+| Holo Interaction | Connect visual intent to real input, state and accessible controls | The same application model drives Studio preview and separate consumers. Review-marked buttons show actual isolated before/after changes before explicit confirmation. No holographic capability is implied. |
+| Fallback Executor | Use bounded, validated alternatives | Standard/light execution preserves tested semantics. Missing adapters or unsafe effects cannot silently turn into simulated success. Recovery does not escalate permissions. |
+| Vision Q | Explain actual execution using trace evidence | Diagnostics show executed action paths, evaluated conditions, state access, transitions and errors. SHADOW has separate storage and no hardware adapter; REPLAY runs only captured supported inputs. Explanations are not fabricated model predictions. |
+
+## A complete event
+
+1. Validate the application format, permissions and bounded execution plan.
+2. For an explicitly review-marked button, copy a consistent data snapshot into an
+   isolated in-memory engine and execute the selected flow in SHADOW.
+3. Show real data differences, validation notices and the actual execution trace.
+4. On confirmation, verify that application identity/model and the original data
+   revision still match. Approval is single-use, expires after two minutes and is
+   discarded when the engine closes. A conflicting or expired review must be rerun.
+5. Execute the original LIVE flow and commit its state/record writes atomically.
+   A new revision prevents change-and-revert from reusing stale approval.
+6. Record the real outcome. Preserve the previous committed data if the transaction
+   fails. Effects on hardware/services require their own explicit contract.
+
+Record identifiers and timestamps generated in SHADOW are not promises that LIVE
+will reuse the same nondeterministic values. Hardware effects are blocked in
+SHADOW. Pure-flow replay and record-mutating review have different guarantees;
+record flows are not labelled deterministically replayable without captured inputs.
+
+## Optional AI
+
+The existing OpenAI integration uses the customer's own key, explicit consent and
+previewed outbound context. It does not run automatically, include model weights,
+or make the offline core paid. Generated App DNA is validated before application.
+AI assistance does not prove correctness, author identity or application safety.
+The name Core AI Manager does not mean an installed inference model is active.
+
+## Distribution and trust
+
+Windows Studio contains a clean Runtime consumer and a pinned, app-local Microsoft
+WebView2 Fixed Version renderer. An exported Windows application embeds those
+components; a separate Studio, Python or CLEA7 Runtime install is unnecessary.
+The OS and its built-in platform services remain prerequisites. Android uses the
+platform WebView and app sandbox; this is not a new operating system.
+
+A distribution manifest bounds and hashes files eligible for export so local
+profiles, API keys and unrelated files are excluded. It is not a signature of the
+Windows executable. Standard ECDSA-signed `.clea7` packages bind the complete app
+manifest and payload to a publisher key. First installation requires fingerprint
+approval. Signed updates must keep that key, and signed-to-unsigned downgrade is
+rejected. A local policy can require signatures for new installations. A valid key
+signature does not independently identify a legal company or establish safety.
+
+## Measurements and limits
+
+- Resource policy exposes worker/cache/yield budgets and the reasons for selection.
+  A 2 or 8 MiB cache budget is not total RAM usage. WebView, OS and optional AI
+  memory must be measured separately.
+- No current benchmark establishes zero battery use, universal speedups, immunity
+  to crashes/attacks, or an advantage of five generations over competing systems.
+- A bundled renderer increases download size and requires maintained security
+  updates. Its Microsoft licence/notices remain intact. This is a deliberate
+  trade-off for offline first-run installation without a second runtime download.
+- Existing local automated tests do not stand in for Windows GUI, Android emulator,
+  physical low-end phone, battery, accessibility or independent security assessment.
+- Software can be original while using legally distributed standard components.
+  Original implementation is not a worldwide patent or trademark clearance.
+
+`tests/test_distribution.py`, `tests/test_signing.py`,
+`tests/test_business_runtime.cjs`, `tests/test_review_ui.cjs` and the native scripts
+exercise these boundaries. A test name is not a passing result: use the actual CI
+run and reports for the precise commit being evaluated.

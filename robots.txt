@@ -1,3 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /studio/
+Disallow: /sdk-source/
 Sitemap: https://clea7.brzoilokalno.com/sitemap.xml
