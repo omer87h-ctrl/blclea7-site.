@@ -34,6 +34,10 @@ def read(path):
   return response.read(2*1024*1024)
 def check():
  home=read('').decode();assert 'ILDuA90WSVz2FTZdmWleQ0lzbGCLmFndZ6wlT5V74Ow' in home;assert 'studio/workbench/' in home
+ verified_pages=[]
+ for name in ['index.html','proizvodi.html','vizija.html','dokumentacija.html','preuzimanja.html','ai.html','privatnost.html','bil.html']:
+  assert read(name)==(ROOT/name).read_bytes(),'Published page is not yet current: '+name
+  verified_pages.append(name)
  page=read('preuzimanja.html').decode();assert 'Preuzmi SDK' in page and '/actions/runs/' not in page
  assert b'BIL' in read('bil.html')
  compiler=read('studio/workbench/bil-compiler.js');assert compiler==(ROOT/'studio/workbench/bil-compiler.js').read_bytes(),'Published BIL compiler differs.'
@@ -48,7 +52,7 @@ def check():
  expected=json.loads((ROOT/'releases.json').read_text())
  if expected['native']['state']=='published':assert catalog['native']==expected['native'],'Published catalog is not yet current.'
  native=native_checks(catalog['native']) if catalog['native']['state']=='published' else []
- report={'format':'clea7.live-delivery-check/1','url':BASE,'anonymous':True,'runtimeMatchesVerifiedSource':True,'downloads':verified,'nativeStatus':catalog['native']['state'],'nativeDownloads':native}
+ report={'format':'clea7.live-delivery-check/1','url':BASE,'anonymous':True,'runtimeMatchesVerifiedSource':True,'publicPagesMatchVerifiedSource':verified_pages,'downloads':verified,'nativeStatus':catalog['native']['state'],'nativeDownloads':native}
  target=ROOT/'test-evidence/live-delivery.json';target.parent.mkdir(exist_ok=True);target.write_text(json.dumps(report,indent=2)+'\n');print('PUBLIC_LIVE_DELIVERY '+json.dumps(report))
 if __name__=='__main__':
  for attempt in range(4):

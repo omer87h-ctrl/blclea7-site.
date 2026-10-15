@@ -1,0 +1,35 @@
+BLclea7 0.6 — tehnički pregled za developere
+By Brzo i Lokalno
+
+FORMATI I KOMPATIBILNOST
+clea7.package/1 je JSON omotnica s manifestom, base64 sadržajem i SHA-256 provjerom. clea7.package/2 dodaje potpis ECDSA P-256.
+clea7.application/2: ekrani, izrazi, stanje, tokovi i tabele.
+clea7.application/3: state machines, animacija i komponente; minimum Runtime 0.4.
+clea7.application/4: pregled promjena i materijali; minimum Runtime 0.5.
+clea7.application/5: bil.program/1 i bil.ir/1; minimum Runtime 0.6.
+Najveći paket je 2 MiB, sadržaj aplikacije 1 MiB. Proizvoljni host skriptovi, native kod i nepodržane zavisnosti nisu dozvoljeni.
+
+IZVRŠAVANJE I ZAŠTITA PODATAKA
+LIVE mijenja stvarno stanje aplikacije. SHADOW ispituje podržani alternativni plan na odvojenoj kopiji. REPLAY ponavlja podržane događaje s kontrolisanim ulazima. Vanjski i native efekti nisu općenito ponovljivi. Stvarni AI provider poziv se ne ponavlja kao deterministički događaj.
+Stanje i tabele koriste scoped storage i provjerene transakcije. Aplikacije nemaju zaseban OS proces. Budžeti interpretera nisu ukupna granica RAM-a operativnog sistema.
+Kompatibilna viša verzija može zadržati podržano stanje. Opće eksplicitne migracije nisu implementirane.
+Potpis potvrđuje kontrolu ključa; ne potvrđuje pravni identitet autora ili odsustvo svih štetnih ponašanja.
+Application/5 nosi izvor i IR radi ponovne provjere. Paket nije spremište tajni.
+
+BIL PODRŠKA
+Number, Text, Boolean, List, Record, nullable vrijednosti, statički tipovi, uslovi, ograničene petlje, čiste tipizirane funkcije, kontrolisani ugrađeni moduli i tipizirane greške.
+Prikazi: tekst, broj, status i napredak s poznatim rasponom. Ograničena animacija poštuje reduced-motion postavku.
+Vizuelno se uređuju početne primitivne vrijednosti i show/visualize. Opće BIL forme, layout, tabele, native bindingi i automatsko povezivanje modela nisu dio sadašnjeg ugovora. Postojeći JSON projekti zadržavaju ranije mogućnosti.
+Opcionalni model predlaže samo dozvoljeni strukturirani plan. Nema podrazumijevanog model adaptera. Windows OpenAI pomoćnik za izradu projekta je odvojen tok.
+
+PROVJERE I GRANICE
+Produktni izvor 72249d92e1d817fe2b5c726e4c18b6b0a83ed74b:
+93 Python testa na Windowsu; 121 Node grupa; 104 Chrome grupe. Na Linuxu je jedan Windows-only DPAPI slučaj preskočen.
+Windows frozen Studio i zasebni Runtime GUI te Android API30 emulator potvrdili su izvršavanje, čuvanje podataka, replay i shadow u navedenom obimu.
+Javna web/SDK objava ima zasebnih 12 Python i 22 Chrome grupa u CI-ju. Detalji su u VERIFICATION.txt i javnoj Actions historiji repozitorija.
+Fizički uređaji, force-stop/reboot, svi nativni birači datoteka, puna pristupačnost, široka kompatibilnost, produkcijsko potpisivanje i nezavisni sigurnosni pregled nisu potvrđeni. Nema tvrdnje o univerzalnoj brzini, uštedi baterije ili neprobojnosti.
+
+DALJNJI RAZVOJ
+Širenje tipiziranih formi i native veza, vizuelnog BIL uređivanja, izričitih migracija i dodatne izolacije mora imati stvarnu implementaciju i provjeru prije predstavljanja kao dostupne mogućnosti.
+Specifikacije: BIL-LANGUAGE-SPEC.txt, BIL-CORE.txt, BIL-INTENT-RUNTIME.txt, BIL-EXECUTION-TRACE.txt, BIL-SECURITY.txt, BIL-ARCHITECTURE.txt i BIL-LIMITATIONS.txt.
+Postojeće AI specifikacije, licence i autorske obavijesti ostaju u OPENAI-BYOK.txt, USLOVI.txt, THIRD_PARTY.txt i MATERIALS-LICENSE.txt.
