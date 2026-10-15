@@ -8,13 +8,13 @@ from pathlib import Path,PurePosixPath
 import argparse,base64,hashlib,io,json,os,re,urllib.request,urllib.error,urllib.parse,zipfile
 SOURCE='omer87h-ctrl/BL-Clea7-by-brzoilokalno'
 TARGET='omer87h-ctrl/blclea7-site.'
-COMMIT='e30e619841a6d93e6295bc89c7f50e89778bcac0'
-RUN=38639160160
-TAG='clea7-0.5.0-e30e619'
+COMMIT='72249d92e1d817fe2b5c726e4c18b6b0a83ed74b'
+RUN=38800912577
+TAG='clea7-0.6.0-72249d9'
 ARTIFACTS={
- 'studio':{'id':11929791928,'name':'BL-CLEA7-Windows-x64','sha256':'45d8179e7a1e600181a7d5eec2bb4069d9a15ac64e595a929478768acc851775','size':357057068,'output':'BL-CLEA7-Studio-Windows-x64.zip'},
- 'runtime':{'id':11929896664,'name':'BL-CLEA7-Windows-Runtime-x64','sha256':'3ba57545ef11a01656f96fe1ec12a47ca49b584014bbd94846d8915e0c3b30df','size':338251057,'output':'BL-CLEA7-Runtime-Windows-x64.zip'},
- 'android':{'id':11929263979,'name':'BL-CLEA7-Android-Runtime-development','sha256':'f04aaeeccb1f8d8c87bcaf47f70d05031c356ca854850dc7774504755c03e9a3','size':82765,'output':'BL-CLEA7-Runtime-Android-debug.apk'},
+ 'studio':{'id':12004167892,'name':'BL-CLEA7-Windows-x64','sha256':'2e5ec6eeab98b6b41b2e4949ccbd746e0e7bf0b5d86b02cfc4540897040a9293','size':357120759,'output':'BL-CLEA7-Studio-Windows-x64.zip'},
+ 'runtime':{'id':12003239974,'name':'BL-CLEA7-Windows-Runtime-x64','sha256':'20a387caf12fc0e07397584889a0194d950b6957264f71da844fdc75784ecf40','size':338278001,'output':'BL-CLEA7-Runtime-Windows-x64.zip'},
+ 'android':{'id':12003984759,'name':'BL-CLEA7-Android-Runtime-development','sha256':'0dbd92b370cde0e06b5d3785ba614eb0de63aa78228368299793dc20bb4328b7','size':105146,'output':'BL-CLEA7-Runtime-Android-debug.apk'},
 }
 class ReleaseError(Exception):pass
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -66,7 +66,7 @@ def publish_asset(release,name,data,token):
 
 
 OWNER = 'omer87h-ctrl'
-TITLE = 'CLEA7 approved binary promotion e30e619'
+TITLE = 'CLEA7 approved binary promotion 72249d9'
 
 def transfer_url(url):
  try:
@@ -119,7 +119,7 @@ def publish(folder,token):
  releases=api('/repos/'+TARGET+'/releases?per_page=100',token)
  release=next((r for r in releases if r.get('tag_name')==TAG),None)
  if release is None:
-  release=api('/repos/'+TARGET+'/releases',token,'POST',{'tag_name':TAG,'target_commitish':'main','name':'BL CLEA7 0.5 — verified development release','draft':True,'prerelease':True,'body':'Source '+COMMIT+'; verification run '+str(RUN)+'. Browser, Windows and Android automated jobs passed. Windows x64 ZIPs include the renderer for offline use. Android is the separately installable Runtime, debug signed. Windows executables are unsigned. Preserve the attached use terms and all vendor/material notices. This development release is not a claim of complete Android Studio equivalence, physical-device verification, battery superiority or impenetrable security.'})
+  release=api('/repos/'+TARGET+'/releases',token,'POST',{'tag_name':TAG,'target_commitish':'main','name':'BL CLEA7 0.6 BIL — verified development release','draft':True,'prerelease':True,'body':'Source '+COMMIT+'; verification run '+str(RUN)+'. BIL compiler, Studio-to-package browser workflow, independent Windows Runtime and Android API30 BIL execution checks passed. The BIL visual subset supports initial primitive values and show/visualize; generic BIL forms/tables/native bindings, automatic model connections and general migrations are not included. Windows x64 ZIPs include the renderer for offline use. Android is the separately installable Runtime, debug signed. Windows executables are unsigned. Preserve the attached use terms and all vendor/material notices. This development release is not a claim of complete Android Studio equivalence, physical-device verification, battery superiority or impenetrable security.'})
  records=[]
  for key,spec in ARTIFACTS.items():
   data=(folder/(key+'.zip')).read_bytes()
