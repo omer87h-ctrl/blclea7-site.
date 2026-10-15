@@ -19,6 +19,7 @@ jobs:
         with:
           node-version: '22'
       - run: python scripts/check_public.py
+      - run: python -m unittest discover -s tests -p test_binary_transfer.py -v
       - name: Independently execute curated public SDK
         working-directory: sdk-source
         run: |
