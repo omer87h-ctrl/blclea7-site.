@@ -1,0 +1,46 @@
+name: Verify public BL CLEA7 website and applications
+on:
+  push:
+    branches: [main, work/complete-public-downloads]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python scripts/check_public.py
+      - name: Independently execute curated public SDK
+        working-directory: sdk-source
+        run: |
+          python -m clea7 validate sdk/examples/units.application.json
+          python -m clea7 test-suite sdk/examples/units.application.json sdk/examples/units.tests.json --mode light
+          python -m clea7 test sdk/examples/workflow.application.json --flow finish
+      - run: npm install --prefix /tmp/clea7-public-qa --no-audit --no-fund playwright@1.56.1
+      - name: Actual Chrome website and create-package-install-persist acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/clea7-qa test-evidence
+          ln -s /tmp/clea7-public-qa/node_modules /tmp/clea7-qa/node_modules
+          python -m http.server 4173 --bind 127.0.0.1 > /tmp/clea7-public-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" || true' EXIT
+          export CLEA7_CHROME="$(command -v google-chrome)"
+          node tests/test_public_site.cjs
+          node tests/test_public_acceptance.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BL-CLEA7-public-browser-evidence
+          path: test-evidence/
+          retention-days: 14

@@ -1,0 +1,13 @@
+'use strict';
+(function(scope){
+function attach(root,engine){
+ const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;},tools=el('section'),message=el('p'),table=el('select');tools.className='clea7-tools';tools.setAttribute('aria-label','Podaci aplikacije');message.setAttribute('role','status');table.setAttribute('aria-label','Tabela za CSV izvoz');
+ const download=(name,text,type='application/json')=>{const url=URL.createObjectURL(new Blob([text],{type})),a=el('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+ const button=(text,run)=>{const b=el('button',text);b.type='button';b.onclick=async()=>{b.disabled=true;try{await run();}catch(e){message.textContent=e.message;}finally{b.disabled=false;}};return b;};
+ for(const name of Object.keys(engine.project.tables)){const o=el('option',name);o.value=name;table.append(o);}table.hidden=!table.options.length;
+ tools.append(el('h2','Tvoji podaci'),button('Preuzmi kopiju podataka',async()=>{download(engine.project.id+'-podaci.json',JSON.stringify(await engine.backupFull(),null,2));message.textContent='Kopija podataka je pripremljena za preuzimanje.';}),table);
+ const csv=button('Preuzmi CSV',async()=>{const backup=await engine.backupFull(),name=table.value,fields=Object.keys(engine.project.tables[name]),cell=value=>'"'+String(value??'').replace(/^(\s*[=+@-])/,'\'$1').replace(/"/g,'""')+'"';const rows=[fields.map(cell).join(','),...backup.tables[name].map(row=>fields.map(k=>cell(row.data[k])).join(','))];download(engine.project.id+'-'+name+'.csv','\ufeff'+rows.join('\r\n'),'text/csv;charset=utf-8');message.textContent='Izvezeni su svi sačuvani zapisi odabrane tabele.';});csv.hidden=!table.options.length;tools.append(csv);
+ const input=el('input');input.type='file';input.accept='.json';input.hidden=true;input.onchange=async()=>{try{const file=input.files[0];if(!file)return;if(file.size>20*1024*1024)throw Error('Kopija prelazi 20 MiB.');const data=JSON.parse(await file.text());if(!confirm('Zamijeniti podatke ove aplikacije kopijom? Prvo preuzmi trenutnu kopiju.'))return;await engine.restoreFull(data);message.textContent='Podaci su vraćeni iz kopije.';}catch(e){message.textContent=e.message;}finally{input.value='';}};tools.append(button('Vrati kopiju podataka',()=>input.click()),input,message);if(engine.project.licenses?.length){const notices=el('details');notices.append(el('summary','Licence materijala'));for(const entry of engine.project.licenses)notices.append(el('h3',entry.name),el('pre',entry.text));tools.append(notices);}root.after(tools);return tools;
+}
+scope.CLEA7Consumer={attach};
+})(globalThis);

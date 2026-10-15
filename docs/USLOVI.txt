@@ -1,0 +1,12 @@
+BL CLEA7 — uslovi besplatnog razvojnog izdanja 0.5
+Copyright 2026 Brzo i Lokalno za originalnu implementaciju.
+
+Brzo i Lokalno dopušta besplatno korištenje ovog javno objavljenog razvojnog izdanja Studija, Runtimea i pripadajućeg SDK-a radi kreiranja, provjere i korištenja vlastitih CLEA7 aplikacija. Aplikacije koje korisnik izradi ostaju njegove; može ih distribuirati besplatno ili komercijalno, uključujući neizmijenjeno ugrađeno CLEA7 jezgro potrebno za njihovo izvršavanje, uz zadržavanje obavijesti o pravima i licenci.
+
+Ova dozvola ne prenosi vlasništvo nad originalnom platformom, nazivom ili oznakama Brzo i Lokalno i ne daje pravo predstavljanja tuđe izmjene kao službenog CLEA7 izdanja. Za zasebnu distribuciju izmijenjenog jezgra ili Studija treba odobrenje nosioca prava. Ovo nije tvrdnja da je cijeli projekat pod open-source licencom.
+
+Zasebne licence komponenti trećih strana i MIT licenca originalnih dizajnerskih materijala ostaju na snazi. Ovi uslovi ne ograničavaju prava koja te licence samostalno daju. Korisnik zadržava odgovornost za sadržaj i potrebna prava aplikacije koju distribuira.
+
+Ovo je razvojno izdanje. Nema obećanja neprobojnosti, odsustva svih grešaka, univerzalne kompatibilnosti, patentne novosti ili rada za svaku posebnu namjenu. U mjeri dopuštenoj primjenjivim propisima izdanje se pruža u postojećem stanju; ova obavijest ne isključuje prava koja se po zakonu ne mogu isključiti.
+
+Opcionalni OpenAI servis podliježe vlastitim uslovima i naplati korisnikovog računa. Web Studio ne prikuplja API ključeve. Nema obaveznog cloud računa ili telemetrije platforme. GitHub Pages obrađuje pristupne podatke prema pravilima hostinga.

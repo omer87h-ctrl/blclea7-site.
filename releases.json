@@ -1,0 +1,34 @@
+{
+  "format": "clea7.public-downloads/1",
+  "version": "0.5.0",
+  "source_commit": "e30e619841a6d93e6295bc89c7f50e89778bcac0",
+  "verified_run": 38639160160,
+  "published": [
+    {
+      "key": "sdk",
+      "name": "BL-CLEA7-SDK-0.5.0.zip",
+      "url": "downloads/BL-CLEA7-SDK-0.5.0.zip",
+      "size_bytes": 58045,
+      "sha256": "e233c4fddfab96b1ff4a9ab01c623144e1f26edd3c7763cbd3f55730e8f9e32a"
+    },
+    {
+      "key": "preview",
+      "name": "BLclea7-Studio-pregled.html",
+      "url": "downloads/BLclea7-Studio-pregled.html",
+      "size_bytes": 388077,
+      "sha256": "5cf4d8a0faf3a91d63a7597da4c6ef93f720d95a374658185dafc2730f01441b"
+    },
+    {
+      "key": "example",
+      "name": "primjer-pretvarac.clea7",
+      "url": "downloads/primjer-pretvarac.clea7",
+      "size_bytes": 1521,
+      "sha256": "b1db193ebbee9b2be5b9bcbbf609809bcfd335d7d36f05f35ba354bb0ef92c7c"
+    }
+  ],
+  "native": {
+    "state": "awaiting-public-release",
+    "repository": "omer87h-ctrl/blclea7-site.",
+    "tag": "clea7-0.5.0-e30e619"
+  }
+}

@@ -1,0 +1,38 @@
+# Original CLEA7 material library
+
+The Studio Materials panel supplies 12 editable compositions, 8 original colour
+palettes and 6 bounded animation recipes. Previews use the actual application
+renderer. They contain no uploaded photos, stock images, external fonts, copied
+UI templates, downloaded artwork or mandatory AI call.
+
+Interactive compositions include real navigation, local notes, table records,
+condition checks, disclosures, a bounded stepper and a state-machine lifecycle.
+Typography and geometry entries are explicitly design material. Composition
+insertion materializes independent components, state, flows and required screens;
+users edit the ordinary public App DNA model. It is undoable. Palettes change
+presentation without replacing logic. Motion recipes create actual timeline
+tracks and an animation flow to wire to an event; they do not invent behavior.
+Reduced-motion support and existing animation budgets remain in force.
+
+`MATERIALS-LICENSE.txt` grants MIT reuse of the original material design data,
+including commercial apps. Keep the notice with substantial copies. The Studio,
+Runtime and SDK implementation retain their separate distribution terms.
+The library does not establish rights to third-party material a user later adds.
+AI-generated assets, if later introduced, need recorded provider terms and review
+for third-party rights; generation alone does not establish legal clearance.
+
+App DNA /4 carries optional `licenses`, an array of at most 20 unique
+`{id, name, text}` entries. IDs follow ordinary application identifier rules;
+names are at most 100 characters and notice text at most 16,000 characters.
+Entries are data, never executable HTML or fetched URLs. SDK/browser validators
+reject duplicate IDs, path-like IDs, malformed entries and old ABI understatement.
+Licences are covered by the package payload integrity/signature. They are also
+retained in HTML consumer notices and generated Windows/Android source archives.
+The original material notice is inserted once when materials, palettes or motion
+recipes are used. Removing a notice does not revoke the corresponding obligations.
+
+Evidence comes from `tests/test_materials.cjs`, independent Python contract/export
+validation in `scripts/check_material_contract.py`, real Chrome material editor
+checks, and the signed `sdk_materials` Android instrumentation fixture. A fixture
+publisher is not a customer or a verified organisation. Physical low-end device
+performance and paid AI calls are separate checks.

@@ -1,0 +1,148 @@
+# Adaptive presentation and portable application tests
+
+This slice extends the existing Studio, Runtime interpreter and SDK. App DNA /2,
+/3, /4, package formats, installation rules and existing export routes are kept.
+No application scripts, host privileges, services, paid APIs, models, photos or
+third-party code were added. These changes are original implementation work in
+this repository; they do not establish patent novelty or trademark clearance.
+
+## Actual Studio workflow
+
+1. Open or create a project. In **Laboratorij**, give a test a name.
+2. Choose its real flow, an optional input state field and a typed input value.
+3. Choose a state field to check and enter the expected value. Numbers, booleans,
+   arrays and objects use JSON values; text fields accept ordinary text.
+4. **Dodaj provjeru**, then **Pokreni sve provjere**. The report shows expected
+   versus actual values and a bounded real execution trace. A mismatch is a fail.
+5. Run the same suite under standard or light resource policies. These are bounded
+   execution policies, not emulation of a real phone.
+6. Save locally or download the tests. Import them for the same application ID and
+   version. Download the actual result report separately.
+7. Advanced source editing supports ordered multi-step scenarios, screen
+   assertions and expected failures. It validates before applying.
+8. Use the SDK command below to execute the same interpreter, validation and
+   assertion code without Studio. A failed assertion returns a nonzero exit code.
+
+```
+python -m clea7 test-suite sdk/examples/units.application.json sdk/examples/units.tests.json --mode standard
+python -m clea7 test-suite sdk/examples/units.application.json sdk/examples/units.tests.json --mode light
+```
+
+Tests are separate authoring files, not executable scripts or part of an installed
+app package. Each case starts from project defaults with a new MemoryVault. Its
+steps share that case's state/tables; cases cannot share them. Native operations
+are blocked by SHADOW mode, and no LIVE storage adapter is passed to the runner.
+It does not silently read the author's live records. Reload restores explicitly
+saved suites when IndexedDB is available. Unsaved suites are retained within this
+Studio session when switching projects; exporting is required before closing an
+HTML preview that uses session-only storage. Concurrent saved-suite changes reject
+through the same compare-and-commit mechanism as project saves.
+
+### Test contract: clea7.tests/1
+
+```
+{
+  "format": "clea7.tests/1",
+  "application": "sdk_units",
+  "version": 1,
+  "cases": [{
+    "name": "Conversion",
+    "steps": [{
+      "flow": "convert",
+      "inputs": {"kilometres": 2.5},
+      "event": {},
+      "expect": {"state": {"metres": 2500}}
+    }]
+  }]
+}
+```
+
+Top-level identity/version must match. Case names are unique. Each step needs at
+least a state, screen or error assertion. `expect.error` is a nonempty literal
+substring that must occur in a real interpreter failure. Without it, any execution
+error fails. Expected state values compare canonical complete JSON values, not
+string coercions. Unknown contract fields, unknown flows, invalid typed inputs,
+empty assertions and foreign versions reject. The first failing step ends that
+case, and later cases still run.
+
+Limits: 256 KiB input, 20 cases, 10 steps/case, 100 steps total, 30-second deadline
+checked between bounded interpreter steps/flows, 2 MiB report. A flow retains the
+existing 1000-instruction runtime limit. Cancellation is cooperative between test
+flows, not an OS-level preemption guarantee. Reports retain up to 64 trace entries
+per step and mark truncation; actual state values larger than 32 KiB are summarized
+only after full comparison. Tests/reports can contain user data; all save/export
+operations are local. There is no telemetry.
+
+## Measured presentation adaptation
+
+`engine.js` owns a per-root WeakMap of rendered elements and dynamic bindings.
+Before reuse it checks the current screen definition, list data, media
+requirements and known DOM parent/child relationships. All binding reads complete
+before updates are applied. A structural change, changed repeated-item context,
+media dependency, prior animation style or invalidated host tree uses a full mount.
+On an eligible update, typed input properties and dynamic text nodes are refreshed
+without replacing controls. Text stays text; it is never assigned through innerHTML.
+List changes rebuild event closures with the new actual item context.
+
+Modes: `full` is the reference renderer; `retained` requests reuse with structural
+fallbacks; `auto` also uses measured mount costs. It records separate full/retained
+cost EWMAs (weight 0.2). After at least four retained renders, a retained EWMA more
+than 1.25 times the full EWMA triggers up to eight full renders before another
+reuse attempt. These are documented heuristics, not learned AI or a globally
+optimal scheduler. Initial full cost can include warmup; measurements are noisy.
+There is no timer/polling loop when idle. The existing event policy and resource
+budgets remain in force. Only presentation strategy changes; instructions,
+transaction semantics, permissions and final authoritative state do not change.
+
+Diagnostics expose the actual strategy, reason, duration, created/updated node
+counts, fallback count and bounded histories (120 samples, 32 decisions). They do
+not include application state values. This bounds the history, not overall host
+RAM. Retaining descriptors/witnesses itself uses memory; reduced DOM allocation
+must not be advertised as demonstrated lower total RAM or energy consumption.
+
+## Reproducible evidence
+
+- `tests/test_project_lab.cjs`: resource-policy parity, real mismatch reporting,
+  fresh-case/LIVE isolation, expected failures and rollback, blocked native effects,
+  contract rejection/cancellation, and 200 seeded arithmetic inputs.
+- `tests/test_package.py`: real CLI success and unsuccessful exit on a wrong result.
+- `tests/test_adaptive_browser.cjs`: actual Studio creation/save/reload/download,
+  visible mismatches, 390px layout, focused-control identity, list-context rebuild,
+  invalidated-tree fallback, hostile text and 80 differential real renders.
+- The same Chrome test records 300-component presentation workloads, with one or
+  all text bindings dynamic, at normal and CDP 4x throttled CPU. Each strategy has
+  8 warmup and 60 measured renders. It flushes layout and preserves raw timings,
+  median, p95, allocation counts, browser/version/platform and workload metadata in
+  `test-evidence/adaptive-runtime.json` in the browser artifact. Timing differences
+  are observations, not a flaky pass/fail performance threshold. Synthetic
+  controller-branch inputs are explicitly excluded from measured workloads.
+- `clea7/desktop.py` and native QA record a real Windows host/renderer process
+  snapshot with working-set and private-commit bytes. Access failures are marked
+  partial. Working-set sums may double-count shared pages; private commit is not
+  private resident RAM. This has no competitor baseline or energy measurement.
+- Existing complete browser, Windows frozen GUI/consumer restart and Android
+  emulator suites remain required. Syntax or Node-only results are not GUI proof.
+
+The comparison is against CLEA7's own full-render implementation. It does not
+compare Java/ART/.NET/Flutter/Rive or establish global technical superiority. It
+excludes native process RSS, persistence, cold application start, total package
+size, GPU/energy, battery and real low-end devices. Security rejection/isolation
+checks establish their tested boundaries, not impenetrability or certification.
+The fixed embedded renderer still needs security maintenance.
+
+## Seven pillars: measurable responsibilities in this slice
+
+| Pillar | Existing/extended executable role | Evidence/output |
+|---|---|---|
+| Core AI Manager | Bounded interpreter queue and resource policies; optional AI stays separate | Queue/step limits and standard/light suite parity; no inference claim |
+| Link Bridge Elite | Host operation/permission contracts | SHADOW/native rejection before hardware invocation |
+| Expansion Q | Shared versioned App DNA and SDK contracts | Same suite in Studio and CLI; unknown fields reject |
+| Adaptive Recovery | Transaction rollback, CAS storage and complete backups | Failed-step assertions, unchanged LIVE snapshot, existing recovery checks |
+| Holo Interaction | Typed bindings, actual events and guarded retained rendering | Focus identity, list item closures and differential DOM/state checks |
+| Fallback Executor | Validated fixed-operation fallback and full presentation fallback | Invalidated-tree rebuild, measured strategy decisions |
+| Vision Q | Real source-path causal trace and presentation diagnostics | Expected/actual report, observed costs, trace download |
+
+These are engineering responsibilities in a bounded application ecosystem. Full
+adaptive hardware support, explicit schema migration, general plugin ecosystems,
+aggregate app quotas, broad IDE tooling and comparative product benchmarks need
+separate completed contracts and evidence before they can be promised.

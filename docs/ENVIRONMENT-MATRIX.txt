@@ -1,0 +1,35 @@
+# Environment contracts — development release, not universal certification
+
+Core App DNA is portable within supported declarative operations. A host is not
+allowed to invent a successful camera/network/build operation when it lacks it.
+The interpreter/SDK contract and native host restrictions remain explicit.
+
+| Environment | Working scope | Prerequisites and behavior | Verification/limits |
+|---|---|---|---|
+| Windows Studio x64 | Existing visual/source/structured-flow editor, preview, package export, diagnostics | Bundled app-local WebView2; extract every file, including RuntimeConsumer and _internal | Actual frozen GUI in CI; no signed installer or complete Windows device matrix |
+| Windows standalone Runtime | Install/library/launch/update/remove local CLEA7 apps | Complete offline distribution with bundled renderer; separate profile; no Studio requirement; permission-free installed apps | Actual process restart/persistence tested; OS picker flow needs manual testing |
+| Android Runtime | Separate APK/library/player | API 26+, suitable ES2020 WebView; Android app sandbox; current launcher has no internet/hardware grants | Actual emulator APK/instrumentation, not physical phones or force-stop/reboot |
+| Android embedded SDK consumer | Existing camera, location, notifications and app model | Compiled trusted host adapters plus user permissions; build SDK/JDK/Gradle | Emulator GPS, Camera2 and OS notifications tested; no arbitrary package hardware grants |
+| HTTP browser Studio/Runtime | Existing model editing/execution, library and diagnostics | Current JS browser; stable origin/profile for IndexedDB; native builds unavailable | Actual Chrome; not all engines, keyboards or assistive technologies certified |
+| Local HTML Studio preview | Session editor, components, actual example logic, project download | Open outside ChatGPT in JS browser; MemoryVault; no native builds or key collection | Actual Chrome file URL at 390px/touch, not a physical Android document viewer |
+| Denied IndexedDB/private policy | Studio can continue in session memory | Clear storage warning, export before closing; Runtime durable install rejects unavailable persistence | Throwing getter and missing DOM-method scenarios tested |
+| Storage quota/corruption | Writes must reject without reporting saved success | Export backups, reviewed corrupt-install removal; no total app storage quota yet | CAS/rollback/bounds tests; aggregate quota remains unfinished |
+| Offline core | Supported local creation, package validation, library and interpretation | No mandatory AI/cloud account; required platform prerequisites must already be installed | Local tests; new build-tool/model downloads need a network and licences |
+| OpenAI BYOK in Windows | Owner-selected API help and reviewable proposal | Own account/key/model; online HTTPS; explicit terms and per-request transmission consent | Contract/UI fixtures only until an owner performs a paid real-model test |
+| Offline/failed OpenAI | Local core remains usable; AI returns an error | No retry, provider fallback, fake answer, API credential export or secret in URL | Failure, redaction, routing, gating and consent tests |
+| SDK CLI | Validate, package, actual bounded interpreter test | Python 3.12+; Node 22+ for execution test; offline supported core | Python/Node roundtrip with independent SDK app |
+| Generated Android project | Real source/build route | JDK17+, SDK35, compatible Gradle/AGP and accepted toolchain terms | CI actually builds APK from Studio-exported directory |
+| Third-party CLEA7 package | Validated whitelisted model, scoped data | Correct ABI/version/target/hash; no arbitrary scripts/native code/dependencies | Lifecycle and adversarial input checks; ECDSA package signatures, fingerprint approval and same-key updates tested; separate OS process per app is not provided |
+| Unsupported OS/host/capability | Explicitly unsupported | No claim of desktop Linux/macOS/iOS native delivery, x86 Windows, arbitrary EXE/APK loading, or native builds inside browser | Must receive separate implementation and evidence before advertising |
+
+Native GPU/OS memory use is controlled by the host platform. Worker/cache budgets
+are not total RSS, battery guarantees or proof of better speed than other tools.
+AI is outside the privileged runtime interpreter: a proposal cannot run scripts,
+install plugins, execute shell commands or directly modify user files.
+
+The tested workspace includes source editing, a visual graph, reusable components,
+licensed material compositions, keyframe animation, explicit state machines and
+trace diagnostics. Current limits include explicit schema migrations, aggregate
+app storage quotas, physical-device/battery testing, complete accessibility/security
+assessment and release-signing/distribution decisions. See the exact verified
+commit and artifact records rather than treating this matrix as certification.

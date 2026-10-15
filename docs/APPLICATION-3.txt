@@ -1,0 +1,31 @@
+# CLEA7 application/3 — Living contracts
+
+Application/3 extends the strict application/2 data model. Runtime 0.4.0 accepts both; an application/3 package must declare ABI application/3 and minimum runtime 0.4.0. Studio, SDK, Windows, browser and Android load the same original interpreter. App-defined scripts/native binaries and remote dependencies remain prohibited.
+
+## State machines
+
+`machines` maps an identifier to `{stateKey, initial, states}`. `stateKey` names a unique declared string state value. Its initial value must equal `initial`. Each state is `{on: {event: [{to, guard?}]}}`. Guards use the existing safe expression language. Ordered alternatives stop at the first passing guard. An unguarded alternative must be last. An unhandled event leaves state unchanged; diagnostics record the attempted transition and evaluated guards.
+
+Action: `{"action":"machine.event","machine":"order","event":"finish"}`. The transition shares the enclosing flow's transaction. Failure rolls back the flow's transactional changes. State is checked during open, input, restore, update and rendering. Incompatible persisted states require migration and are rejected. Trace entries include machine, event, state key, from, to and actual guard outcomes. REPLAY and SHADOW run the same interpreter with isolated state.
+
+Limits: 20 machines, 32 states/machine, 16 events/state, 8 alternatives/event. No automatic entry/exit scripts or implicit transitions.
+
+## Animation timeline
+
+`animations` maps identifiers to `{duration, iterations, easing, tracks}`. Duration is an integer 16–10000 ms, iterations 1–5; easing is linear/ease-in/ease-out/ease-in-out. Up to 32 tracks each target a materialized component ID and opacity, translateX/Y, scale or rotate. Each has 2–32 strictly ordered `{at,value}` keyframes, beginning at 0 and ending at duration. Numeric ranges are validated in JavaScript and Python. No arbitrary CSS, URLs, shader or script fields are accepted.
+
+Action: `{"action":"animate","animation":"done"}`. A successful flow commits data, renders, then requests presentation. Presentation failure is reported separately and cannot pretend committed data rolled back. SHADOW/REPLAY record requests without touching live DOM. Timeline interpolation and exported playback share the same adapter. Supported hosts use real Web Animations; reduced-motion, missing WAAPI or more than 128 active animation instances use an explicit static final pose. A flow is limited to eight animation requests. Render/restart/close cancels active animations; there is no background animation loop.
+
+Trace replay reproduces logical state and presentation requests, not device-specific frame timing. Off-screen targets are reported as not-visible. Browser frame scheduling is not deterministic.
+
+## Reusable components
+
+`components` maps identifiers to `{name,root}` with a fully validated ordinary component tree. Up to 40 entries. Studio inserts a materialized copy with new IDs; each copy is independently editable and remains executable without Studio or the library. Data bindings and flow names are project-scoped and validated. Libraries travel with the project/package. There is no hidden network component registry or live linked-instance synchronisation claim.
+
+## Editor and SDK
+
+The graph edits the same nested action AST as the code editor and interpreter. A visual move cannot create cycles. Source changes are validated before applying; a stale source base cannot overwrite later visual edits. Source drafts are local and bounded by the project limit. The code editor supports JSON highlighting, line/column, find, replacement, formatting, indentation and CLEA7 expression snippets. It is an editor for the documented CLEA7 DSL, not a Kotlin/Java compiler.
+
+The independently hand-authored SDK example is `sdk/examples/workflow.application.json`. Run validate/package/test using `python -m clea7`; its `finish` flow changes status open→done and requests a bounded animation. Browser tests export a separate Studio-authored app and install it in Runtime. Native tests additionally execute the independent SDK example in Windows/Android.
+
+Integrity remains SHA-256, not publisher authentication. Existing local capability restrictions, consent-gated OpenAI and storage protections still apply. These mechanisms do not establish novelty over every other runtime, universal native API support, a security certification or equivalence to the Android Studio toolchain.

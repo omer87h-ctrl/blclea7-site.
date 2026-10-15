@@ -1,0 +1,19 @@
+{
+  "format": "clea7.application/2",
+  "id": "sdk_units",
+  "name": "Pretvarač mjera",
+  "package": "com.brzoilokalno.clea7.sdkunits",
+  "version": 1,
+  "start": "convert",
+  "permissions": [],
+  "state": {"kilometres": 0, "metres": 0},
+  "tables": {},
+  "screens": [{"id": "convert", "name": "Dužina", "children": [
+    {"id": "title", "type": "heading", "text": "Kilometri u metre"},
+    {"id": "km", "type": "number", "label": "Kilometri", "bind": "kilometres"},
+    {"id": "convert_button", "type": "button", "text": "Pretvori", "events": {"click": "convert"}},
+    {"id": "result", "type": "text", "text": {"op": "concat", "args": ["Metara: ", {"ref": "state", "key": "metres"}]}},
+    {"id": "explanation", "type": "text", "text": "Lokalni izračun: 1 kilometar = 1000 metara. Ova aplikacija je napisana direktno prema SDK ugovoru, bez Studija."}
+  ]}],
+  "flows": {"convert": [{"action": "set", "key": "metres", "value": {"op": "multiply", "args": [{"ref": "state", "key": "kilometres"}, 1000]}}]}
+}

@@ -1,0 +1,13 @@
+BL CLEA7 0.5 — granice provjere
+Izvor: e30e619841a6d93e6295bc89c7f50e89778bcac0
+Provjera: GitHub Actions run 38639160160 u vlasničkom izvornom repozitoriju.
+
+Sva tri posla uspješno završena: Linux/Chrome, Windows x64 i Android API30 emulator. 85 Python testova na Windowsu; jedan Windows-only slučaj preskočen na Linuxu. 93 grupe Node provjera i 96 grupa stvarnih Chrome provjera.
+
+Stvarni frozen Windows Studio GUI, potrošačka aplikacija i nezavisni Runtime s ponovnim pokretanjem; actual Android APK sa provjerenim adapterima i launcher tokovima application/2, /3 i potpisane /4. Samostalni SDK testovi izvršavaju pravu logiku. Testni AI odgovori nisu plaćena stvarna inferencija.
+
+Prikaz s 300 komponenti, 8 zagrijavanja + 60 uzoraka: puni/adaptivni medijani za jedan promjenjivi tekst 3,8/0,4 ms; za sve promjenjive tekstove 2,5/1,4 ms. Ovo je usporedba istog izdanja s njegovim referentnim punim prikazom, ne s konkurentskim proizvodom.
+
+Nema tvrdnje o punoj funkcionalnoj jednakosti Android Studiju, univerzalnoj adaptaciji, nižem ukupnom RAM-u ili bateriji, svjetskoj novosti ili nezavisnoj sigurnosnoj certifikaciji. Fizički uređaji i produkcijski potpisi nisu potvrđeni ovim CI rezultatom.
+
+Javno hostovana kopija i preuzimanja dodatno prolaze provjeru linkova, SHA-256, browsera i odvajanja privatnih native host datoteka u zasebnom javnom repozitoriju prije objave.
