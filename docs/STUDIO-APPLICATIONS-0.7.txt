@@ -124,3 +124,5 @@ native hardware support, a SQL server or production readiness.
 A test being listed here describes its purpose. Actual pass/fail evidence is
 reported separately from the executed workflow. Physical Android hardware, manual
 Windows installation and release signing require their own evidence.
+
+Runtime diagnostic panels show bounded event metadata and omit duplicate replay captures and input values from the default display. Complete captures remain in the bounded session Engine API for replay and Studio diagnostic export. This avoids repeatedly laying out application source/IR on small Android WebViews. The visual summary reports the actual number of events/instructions retained and any display truncation.

@@ -33,7 +33,7 @@ assert 'ILDuA90WSVz2FTZdmWleQ0lzbGCLmFndZ6wlT5V74Ow' in (ROOT/'index.html').read
 assert not list(ROOT.rglob('session.json')) and not list(ROOT.rglob('identity.json'))
 for forbidden in ['main.py','runtime_main.py','clea7/desktop.py','clea7/host.py','clea7/cloud_ai.py','clea7/ai.py']:
  assert not (ROOT/'sdk-source'/forbidden).exists(),forbidden
-catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='6ef951a6d3444e2fac0db171eca4fac997477f68'
+catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='e092cfeda4adb9a35d0e39749dfc99bd744b56bb'
 for entry in catalog['published']:
  p=ROOT/entry['url'];data=p.read_bytes();assert p.is_relative_to(ROOT) and len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],p
 if catalog['native']['state']=='published':

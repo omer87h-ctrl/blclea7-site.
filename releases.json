@@ -1,15 +1,15 @@
 {
   "format": "clea7.public-downloads/1",
   "version": "0.7.0",
-  "source_commit": "6ef951a6d3444e2fac0db171eca4fac997477f68",
-  "verified_run": 38917407193,
+  "source_commit": "e092cfeda4adb9a35d0e39749dfc99bd744b56bb",
+  "verified_run": 38919749947,
   "published": [
     {
       "key": "sdk",
       "name": "BL-CLEA7-SDK-0.7.0.zip",
       "url": "downloads/BL-CLEA7-SDK-0.7.0.zip",
-      "size_bytes": 134325,
-      "sha256": "110bfecdd09531d801ce53309a6447826e097b5ed3aaf4430da9e379bf60c68d"
+      "size_bytes": 134472,
+      "sha256": "3033fc0f1a21975543ac8899693e275821b71f73735a359f4f7afc95cb46fa33"
     },
     {
       "key": "preview",
