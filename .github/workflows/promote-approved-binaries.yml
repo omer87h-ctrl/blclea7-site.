@@ -6,7 +6,7 @@ permissions:
   contents: read
 jobs:
   publish:
-    if: github.event.issue.user.login == 'omer87h-ctrl' && github.actor == 'omer87h-ctrl' && github.event.issue.title == 'CLEA7 approved binary promotion 72249d9'
+    if: github.event.issue.user.login == 'omer87h-ctrl' && github.actor == 'omer87h-ctrl' && github.event.issue.title == 'CLEA7 approved binary promotion e092cfe'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency:

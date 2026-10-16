@@ -37,7 +37,7 @@ catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_co
 for entry in catalog['published']:
  p=ROOT/entry['url'];data=p.read_bytes();assert p.is_relative_to(ROOT) and len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],p
 if catalog['native']['state']=='published':
- native=catalog['native'];assert native['repository']=='omer87h-ctrl/blclea7-site.' and native['tag']=='clea7-0.6.0-72249d9'
+ native=catalog['native'];assert native['repository']=='omer87h-ctrl/blclea7-site.' and native['tag']=='clea7-0.7.0-e092cfe'
  assert len(native['assets'])==3 and {a['key'] for a in native['assets']}=={'studio','runtime','android'}
  page=(ROOT/'preuzimanja.html').read_text()
  for a in native['assets']:

@@ -2,3 +2,6 @@ BLclea7 0.6 BIL development verification
 Source: 72249d92e1d817fe2b5c726e4c18b6b0a83ed74b
 Core verification run: 38800912577
 All three jobs succeeded. Python: 93 cases on Windows, all passed; Linux: 92 passed, one Windows DPAPI case skipped. Node: 121 groups including 28 BIL. Chrome: 104 groups including 8 BIL Studio/Runtime scenarios. Windows frozen Studio and independent Runtime; Android API30 emulator BIL execution, trace, replay, isolated shadow and recreation persistence passed. No real AI model was invoked. Physical-device verification, broad platform support and production signing are not established. Public-site delivery has separate Actions checks in this public repository.
+
+
+Studio 0.7 — source e092cfeda4adb9a35d0e39749dfc99bd744b56bb; verified run 38919749947. All jobs passed: 99 Python cases (Linux 98 passed + Windows DPAPI skip; Windows 99 passed), 138 Node groups, 112 actual Chromium groups, real frozen Windows GUI/restart/embedded application, and Android API30 emulator including BIL forms, saved records, replay, isolated shadow and recreation. The public browser/SDK delivery has separate checks. Physical-device/manual native document pickers, production signing, real paid AI inference and competitor comparisons are not certified.

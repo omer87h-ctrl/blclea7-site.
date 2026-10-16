@@ -7,3 +7,7 @@ Browser target and curated SDK from tested source 72249d92e1d817fe2b5c726e4c18b6
 BIL grammar, supported visual subset and limits are described at bil.html. Native public downloads are pinned to verified release clea7-0.6.0-72249d9. The optional BIL AI proposal API has no default model connection.
 
 Checks: python scripts/check_public.py; python -m unittest discover -s tests -v. Real browser, independent SDK and anonymous live delivery checks run in Actions. No main Brzo i Lokalno app, PWA or TECH portal is part of this repository.
+
+## Studio 0.7
+
+Connected BIL screens/forms/tables, original visual authoring, typed source/IR and SDK examples. Private-source verification: e092cfeda4adb9a35d0e39749dfc99bd744b56bb / run 38919749947. Public binaries are append-only release assets pinned in releases.json. No licence terms changed and no native host source is included in the curated SDK.

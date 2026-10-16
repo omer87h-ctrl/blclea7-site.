@@ -64,30 +64,30 @@
   "native": {
     "state": "published",
     "repository": "omer87h-ctrl/blclea7-site.",
-    "tag": "clea7-0.6.0-72249d9",
+    "tag": "clea7-0.7.0-e092cfe",
+    "release_url": "https://github.com/omer87h-ctrl/blclea7-site./releases/tag/clea7-0.7.0-e092cfe",
     "assets": [
       {
-        "key": "android",
-        "name": "BL-CLEA7-Runtime-Android-debug.apk",
-        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.6.0-72249d9/BL-CLEA7-Runtime-Android-debug.apk",
-        "size_bytes": 109069,
-        "sha256": "a470ed2bc836c1368412c2140600c7cebb3692512fc94f938410fc287fca414e"
+        "key": "studio",
+        "name": "BL-CLEA7-Studio-Windows-x64.zip",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.7.0-e092cfe/BL-CLEA7-Studio-Windows-x64.zip",
+        "size_bytes": 357162060,
+        "sha256": "fc7724884e11b5780948173aca9bcc809195899f7611bd38807b8dd84b9c964a"
       },
       {
         "key": "runtime",
         "name": "BL-CLEA7-Runtime-Windows-x64.zip",
-        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.6.0-72249d9/BL-CLEA7-Runtime-Windows-x64.zip",
-        "size_bytes": 338278001,
-        "sha256": "20a387caf12fc0e07397584889a0194d950b6957264f71da844fdc75784ecf40"
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.7.0-e092cfe/BL-CLEA7-Runtime-Windows-x64.zip",
+        "size_bytes": 338288691,
+        "sha256": "3fc4fd06cbb6f2ced00ec487d29ceec53b5fce99e2b1a3f065879c890eddd2c9"
       },
       {
-        "key": "studio",
-        "name": "BL-CLEA7-Studio-Windows-x64.zip",
-        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.6.0-72249d9/BL-CLEA7-Studio-Windows-x64.zip",
-        "size_bytes": 357120759,
-        "sha256": "2e5ec6eeab98b6b41b2e4949ccbd746e0e7bf0b5d86b02cfc4540897040a9293"
+        "key": "android",
+        "name": "BL-CLEA7-Runtime-Android-debug.apk",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.7.0-e092cfe/BL-CLEA7-Runtime-Android-debug.apk",
+        "size_bytes": 118821,
+        "sha256": "9937313872385fd7c171629aa86455e1e03356d71cd3830b83926280ae5cc076"
       }
-    ],
-    "release_url": "https://github.com/omer87h-ctrl/blclea7-site./releases/tag/clea7-0.6.0-72249d9"
+    ]
   }
 }

@@ -33,3 +33,5 @@ trace diagnostics. Current limits include explicit schema migrations, aggregate
 app storage quotas, physical-device/battery testing, complete accessibility/security
 assessment and release-signing/distribution decisions. See the exact verified
 commit and artifact records rather than treating this matrix as certification.
+
+Android document boundary: the current launcher wires the native file chooser for installing packages from the library. Native backup/download and restore adapters are not provided for the application player; browser and Windows file workflows are separate. Do not rely on the development APK as the sole copy of important data.
