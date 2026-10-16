@@ -1,22 +1,22 @@
 {
   "format": "clea7.public-downloads/1",
-  "version": "0.6.0",
-  "source_commit": "72249d92e1d817fe2b5c726e4c18b6b0a83ed74b",
-  "verified_run": 38800912577,
+  "version": "0.7.0",
+  "source_commit": "6ef951a6d3444e2fac0db171eca4fac997477f68",
+  "verified_run": 38917407193,
   "published": [
     {
       "key": "sdk",
-      "name": "BL-CLEA7-SDK-0.6.0.zip",
-      "url": "downloads/BL-CLEA7-SDK-0.6.0.zip",
-      "size_bytes": 102737,
-      "sha256": "f68f7681142c999836273b8f30c7bf8a62c8392dacd2d70ad0a59dbcafff04d7"
+      "name": "BL-CLEA7-SDK-0.7.0.zip",
+      "url": "downloads/BL-CLEA7-SDK-0.7.0.zip",
+      "size_bytes": 134325,
+      "sha256": "110bfecdd09531d801ce53309a6447826e097b5ed3aaf4430da9e379bf60c68d"
     },
     {
       "key": "preview",
       "name": "BLclea7-Studio-pregled.html",
       "url": "downloads/BLclea7-Studio-pregled.html",
-      "size_bytes": 523652,
-      "sha256": "0f4e82044d51e9f2ca1c89ac0662c09d421b81d8f70e585b8aa92827f850bac1"
+      "size_bytes": 606486,
+      "sha256": "7958fe21aa2bb25b073100cb2a80af903e5c7afb91d5485747543e18e6ef18d2"
     },
     {
       "key": "example",
@@ -38,6 +38,27 @@
       "url": "downloads/primjer-bil.bil",
       "size_bytes": 462,
       "sha256": "add72a6f576205b85282e297ac2782e889c66bb479cc4299220ade73c990251d"
+    },
+    {
+      "key": "business-example",
+      "name": "primjer-radni-nalozi.clea7",
+      "url": "downloads/primjer-radni-nalozi.clea7",
+      "size_bytes": 53349,
+      "sha256": "9250665f1380e906cfd0352796b4b866a22f5b62297dca063f611c446ffa04b4"
+    },
+    {
+      "key": "business-source",
+      "name": "primjer-radni-nalozi.bil",
+      "url": "downloads/primjer-radni-nalozi.bil",
+      "size_bytes": 3754,
+      "sha256": "e379342b646c7768510a18c69d82fede2f6d714a2d2067d93a8561ef07820054"
+    },
+    {
+      "key": "bil-quote-source",
+      "name": "primjer-ponuda.bil",
+      "url": "downloads/primjer-ponuda.bil",
+      "size_bytes": 246,
+      "sha256": "c98374503315c5356014b86c92e3575ecefeb74bf586ad4d0bb5ac43ee823a2e"
     }
   ],
   "native": {

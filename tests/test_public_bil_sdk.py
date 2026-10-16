@@ -44,8 +44,18 @@ class PublicBILSDKTests(unittest.TestCase):
             result=cli('test',str(source),'--flow','bil_increase')
             self.assertNotEqual(result.returncode,0)
 
+    def test_record_app_compiles_independently_with_current_contract(self):
+        result=cli('bil','check','sdk/examples/bil/orders.bil')
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertEqual(json.loads(result.stdout)['ir'],'bil.ir/2')
+        with tempfile.TemporaryDirectory() as folder:
+            output=Path(folder)/'orders.clea7'
+            result=cli('bil','package','sdk/examples/bil/orders.bil','--output',str(output),'--id','public_orders')
+            self.assertEqual(result.returncode,0,result.stderr)
+            self.assertEqual(json.loads(output.read_text())['manifest']['runtime'],'0.7.0')
+
     def test_archive_contains_language_but_no_private_host_or_generated_cache(self):
-        with zipfile.ZipFile(ROOT/'downloads/BL-CLEA7-SDK-0.6.0.zip') as z:
+        with zipfile.ZipFile(ROOT/'downloads/BL-CLEA7-SDK-0.7.0.zip') as z:
             self.assertIsNone(z.testzip())
             names=set(z.namelist())
             self.assertTrue({'clea7/bil.py','sdk/bil-cli.cjs','web/workbench/bil-compiler.js',

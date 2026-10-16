@@ -7,7 +7,7 @@ from .application import validate
 from .schema import UserError
 
 FORMAT='clea7.package/1'
-RUNTIME='0.6.0'
+RUNTIME='0.7.0'
 MAX_PACKAGE=2*1024*1024
 MAX_APPLICATION=1024*1024
 TARGETS={'browser','windows','android'}
@@ -17,7 +17,7 @@ def encode(project,targets=('browser','windows'),publisher=''):
     app=validate(project)
     payload=json.dumps(app,ensure_ascii=False,allow_nan=False,separators=(',',':')).encode()
     if len(payload)>MAX_APPLICATION:raise UserError('Aplikacija prelazi 1 MiB.')
-    manifest={'id':app['id'],'name':app['name'],'version':app['version'],'runtime':'0.6.0' if app['format']=='clea7.application/5' else '0.5.0' if app['format']=='clea7.application/4' else '0.4.0' if app['format']=='clea7.application/3' else '0.3.0',
+    manifest={'id':app['id'],'name':app['name'],'version':app['version'],'runtime':'0.7.0' if app['format']=='clea7.application/6' else '0.6.0' if app['format']=='clea7.application/5' else '0.5.0' if app['format']=='clea7.application/4' else '0.4.0' if app['format']=='clea7.application/3' else '0.3.0',
               'abi':app['format'],'targets':list(targets),'permissions':sorted(set(app['permissions'])),
               'dependencies':[],'sha256':hashlib.sha256(payload).hexdigest(),'publisher':publisher}
     package={'format':FORMAT,'manifest':manifest,'payload':base64.b64encode(payload).decode('ascii')}
@@ -36,7 +36,7 @@ def decode(raw,target=None):
         if not isinstance(value,dict) or set(value)!={'format','manifest','payload'} or value['format']!=FORMAT:raise ValueError()
         manifest=value['manifest']
         if not isinstance(manifest,dict) or set(manifest)!=MANIFEST_KEYS:raise ValueError()
-        if manifest['abi'] not in ('clea7.application/2','clea7.application/3','clea7.application/4','clea7.application/5') or not isinstance(manifest['runtime'],str) or not re.fullmatch(r'\d+\.\d+\.\d+',manifest['runtime']):raise ValueError()
+        if manifest['abi'] not in ('clea7.application/2','clea7.application/3','clea7.application/4','clea7.application/5','clea7.application/6') or not isinstance(manifest['runtime'],str) or not re.fullmatch(r'\d+\.\d+\.\d+',manifest['runtime']):raise ValueError()
         if tuple(map(int,manifest['runtime'].split('.')))>tuple(map(int,RUNTIME.split('.'))):raise UserError('Paket zahtijeva noviji runtime.')
         if not isinstance(manifest['targets'],list) or not manifest['targets'] or any(x not in TARGETS for x in manifest['targets']) or len(set(manifest['targets']))!=len(manifest['targets']):raise ValueError()
         if target and target not in manifest['targets']:raise UserError('Paket ne podržava ovaj izvršni cilj.')
@@ -47,6 +47,7 @@ def decode(raw,target=None):
         payload=base64.b64decode(value['payload'],validate=True)
         if len(payload)>MAX_APPLICATION or hashlib.sha256(payload).hexdigest()!=manifest['sha256']:raise UserError('Integritet aplikacije nije potvrđen.')
         app=validate(json.loads(payload))
+        if app['format']=='clea7.application/6' and tuple(map(int,manifest['runtime'].split('.'))) < (0,7,0):raise UserError('BIL ekrani zahtijevaju Runtime 0.7.0.')
         if app['format']=='clea7.application/5' and tuple(map(int,manifest['runtime'].split('.'))) < (0,6,0):raise UserError('BIL zahtijeva Runtime 0.6.0.')
         if app['format']!=manifest['abi'] or app['format']=='clea7.application/4' and tuple(map(int,manifest['runtime'].split('.'))) < (0,5,0) or app['format']=='clea7.application/3' and tuple(map(int,manifest['runtime'].split('.'))) < (0,4,0):raise ValueError('ABI ili Runtime nisu kompatibilni.')
         if any(manifest[key]!=app[key] for key in ('id','name','version')) or type(manifest['version']) is not int or not 1<=manifest['version']<=2147483647:raise ValueError()

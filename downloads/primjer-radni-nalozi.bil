@@ -1,0 +1,103 @@
+# Radni nalozi — BLclea Intent Language, by Brzo i Lokalno
+# Lokalna aplikacija: pregled, uređivanje i stvarno čuvanje podataka.
+import collections
+import text
+record Entry { customer: Text, description: Text, amount: Number, status: Text }
+let entries: List<Entry> = []
+let selected = -1
+let savedCount = 0
+let total = 0
+let draft_customer = ""
+let draft_description = ""
+let draft_amount = 0
+let draft_status = "Planirano"
+
+screen overview "Radni nalozi" {
+    text "Odaberi zapis za uređivanje ili dodaj novi." key overview_intro
+    row {
+        card "Sačuvani zapisi" {
+            show savedCount key saved_count
+        } key count_card
+        card "Ukupno · Iznos" {
+            show total key total_value
+        } key total_card
+    } key metrics
+    table entries columns [customer: "Kupac", description: "Opis posla", amount: "Iznos", status: "Status"] select selected key records
+    row {
+        button "Novi zapis" runs begin_new key add_record
+        button "Uredi odabrani" runs begin_edit key edit_record
+        button "Obriši odabrani" runs delete_record key delete_record
+        button "O aplikaciji" opens about key about_button
+    } key overview_actions
+}
+
+screen editor "Uredi zapis" {
+    text "Obavezna polja su označena zvjezdicom." key form_intro
+    card "Podaci zapisa" {
+        input draft_customer label "Kupac" required key field_customer
+        input draft_description label "Opis posla" multiline key field_description
+        input draft_amount label "Iznos" range [0, 1000000] key field_amount
+        select draft_status label "Status" options ["Planirano","U toku","Gotovo"] key field_status
+    } key form_fields
+    row {
+        button "Spremi zapis" runs save_record validate key save_record
+        button "Nazad na pregled" opens overview key cancel_edit
+    } key form_actions
+}
+
+screen about "O aplikaciji" {
+    text "Radni nalozi je lokalna aplikacija izrađena u BLclea7 Studiju. Podaci se ne šalju na server." key about_text
+    text "Za sigurnosnu kopiju koristi izvoz podataka u Runtimeu. Brisanje podataka preglednika može ukloniti lokalne zapise." key backup_text
+    button "Nazad" opens overview key about_back
+}
+start overview
+
+on begin_new {
+    selected = -1
+    draft_customer = ""
+    draft_description = ""
+    draft_amount = 0
+    draft_status = "Planirano"
+    open editor
+}
+
+on begin_edit {
+    if selected < 0 or selected >= collections.length(entries) {
+        raise "Selection", "Prvo odaberi zapis iz tabele."
+    }
+    draft_customer = entries[selected].customer
+    draft_description = entries[selected].description
+    draft_amount = entries[selected].amount
+    draft_status = entries[selected].status
+    open editor
+}
+
+on save_record {
+    if text.length(draft_customer) == 0 {
+        raise "Required", "Kupac: ovo polje je obavezno."
+    }
+    if draft_amount < 0 or draft_amount > 1000000 {
+        raise "Range", "Iznos: vrijednost je izvan dozvoljenog raspona."
+    }
+    let entry = new Entry { customer: draft_customer, description: draft_description, amount: draft_amount, status: draft_status }
+    if selected < 0 {
+        entries = collections.append(entries, entry)
+        total = total + draft_amount
+    } else {
+        total = total - entries[selected].amount + draft_amount
+        entries = collections.replace(entries, selected, entry)
+    }
+    savedCount = collections.length(entries)
+    selected = -1
+    open overview
+}
+
+on delete_record {
+    if selected < 0 or selected >= collections.length(entries) {
+        raise "Selection", "Prvo odaberi zapis iz tabele."
+    }
+    total = total - entries[selected].amount
+    entries = collections.remove(entries, selected)
+    selected = -1
+    savedCount = collections.length(entries)
+}

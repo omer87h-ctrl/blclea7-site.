@@ -1,4 +1,4 @@
-# BL CLEA7 public developer SDK 0.6 BIL
+# BL CLEA7 public developer SDK 0.7 BIL
 
 Python 3.12+; Node.js 22+ for execution. Offline validation, packaging and real tests:
 
@@ -24,3 +24,7 @@ python -m clea7 bil package sdk/examples/bil/counter.bil --output moja-bil.clea7
 ```
 
 BIL source has its own parser, static types and checked IR. Run from this SDK root. Install application/5 in Runtime 0.6 or newer. The package intentionally contains source and IR; never embed secrets. See docs/BIL-LANGUAGE-SPEC.md and docs/BIL-LIMITATIONS.md. The optional AI proposal contract has no default model connection. Existing JSON application workflows remain supported.
+
+## Povezane aplikacije
+
+BIL application/6 opisuje ekrane, obrasce i tabele. Primjer: sdk/examples/bil/orders.bil. Potreban je Runtime 0.7.0+. Ugovor i granice: docs/STUDIO-APPLICATIONS-0.7.md.

@@ -89,3 +89,42 @@ progress has no bounds and is ineligible; the declared counter fallback executes
 See BIL-CORE.md for type semantics, BIL-INTENT-RUNTIME.md for decisions and
 BIL-LIMITATIONS.md for the exact current scope. The full lexer/parser is the
 executable authority for contract 1. Future syntax/IR changes require versioning.
+
+
+## Version 2: screen and input contracts
+
+The bil/1 grammar and generated IR remain unchanged for existing programs. A
+program using screens, navigation or collection remove/replace emits bil/2 and
+bil.ir/2, packaged as application/6 (Runtime >= 0.7.0). Contextual `screen`,
+`start` and `open` do not reserve old variable names.
+
+```ebnf
+screen       = "screen", identifier, string, "{", { ui, end }, "}" ;
+start        = "start", identifier ;
+navigate     = "open", identifier ;
+ui           = (static | group | field | table | button | intent), [key] ;
+static       = ("heading" | "text"), string ;
+group        = ("row" | "card"), [string], "{", {ui, end}, "}" ;
+field        = ("input" | "select" | "toggle"), identifier, "label", string,
+               { "required" | "multiline" | "range", "[", number, ",", number, "]"
+                 | "options", "[", string, {",", string}, "]" } ;
+table        = "table", identifier, "columns", "[", column, {",", column}, "]",
+               "select", identifier ;
+column       = identifier, [":", string] ;
+button       = "button", string, ("runs", identifier | "opens", identifier), ["validate"] ;
+key          = "key", identifier ;
+```
+
+`key` gives a component an explicit stable identity (48 identifier characters).
+Keys must be unique across all screens. A component input binds an existing
+mutable primitive global of the matching type; table data is `List<Record>` with
+primitive columns and a mutable Number selection. Screens are top-level, while
+`open` is an effect and cannot occur inside a pure function. Every target and
+handler is resolved before execution. UI blocks do not execute arbitrary BIL
+statements; event handlers contain program logic.
+
+`validate` checks required fields and declared bounds before the event commits.
+Inputs arriving with a submit event and its handler form one atomic transaction.
+Lists use immutable `collections.remove(list, index)` and
+`collections.replace(list, index, item)` with static item types and checked bounds.
+See [Studio applications](STUDIO-APPLICATIONS-0.7.md) for budgets and security.

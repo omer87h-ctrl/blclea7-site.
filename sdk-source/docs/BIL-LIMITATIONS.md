@@ -1,3 +1,5 @@
+> For bil/2 and Studio 0.7, see [connected applications](STUDIO-APPLICATIONS-0.7.md). Screens, forms, tables and source-linked design extend the language-1 scope below.
+
 # BIL contract 1 — delivered scope and limits
 
 This is an incremental language implementation in the existing project. It is

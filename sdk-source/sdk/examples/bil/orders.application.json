@@ -1,0 +1,3421 @@
+{
+  "format": "clea7.application/6",
+  "id": "bil_work_orders",
+  "name": "Radni nalozi",
+  "package": "com.brzoilokalno.bil.app",
+  "version": 1,
+  "start": "home",
+  "permissions": [],
+  "state": {
+    "bilValues": {
+      "entries": [],
+      "selected": 0,
+      "savedCount": 0,
+      "total": 0,
+      "draft_customer": "",
+      "draft_description": "",
+      "draft_amount": 0,
+      "draft_status": ""
+    },
+    "bilViews": [],
+    "bilMotion": [],
+    "bilScreen": "overview"
+  },
+  "screens": [
+    {
+      "id": "home",
+      "name": "BIL",
+      "children": [
+        {
+          "id": "bil_surface",
+          "type": "bil"
+        }
+      ]
+    }
+  ],
+  "flows": {
+    "bil_main": [
+      {
+        "action": "bil",
+        "block": "main"
+      }
+    ],
+    "bil_begin_new": [
+      {
+        "action": "bil",
+        "block": "begin_new"
+      }
+    ],
+    "bil_begin_edit": [
+      {
+        "action": "bil",
+        "block": "begin_edit"
+      }
+    ],
+    "bil_save_record": [
+      {
+        "action": "bil",
+        "block": "save_record"
+      }
+    ],
+    "bil_delete_record": [
+      {
+        "action": "bil",
+        "block": "delete_record"
+      }
+    ],
+    "bil_ui_bilui_records": [
+      {
+        "action": "bil",
+        "block": "ui_bilui_records"
+      }
+    ],
+    "bil_ui_bilui_add_record": [
+      {
+        "action": "bil",
+        "block": "ui_bilui_add_record"
+      }
+    ],
+    "bil_ui_bilui_edit_record": [
+      {
+        "action": "bil",
+        "block": "ui_bilui_edit_record"
+      }
+    ],
+    "bil_ui_bilui_delete_record": [
+      {
+        "action": "bil",
+        "block": "ui_bilui_delete_record"
+      }
+    ],
+    "bil_ui_bilui_about_button": [
+      {
+        "action": "bil",
+        "block": "ui_bilui_about_button"
+      }
+    ],
+    "bil_ui_bilui_field_customer": [
+      {
+        "action": "bil",
+        "block": "ui_bilui_field_customer"
+      }
+    ],
+    "bil_ui_bilui_field_description": [
+      {
+        "action": "bil",
+        "block": "ui_bilui_field_description"
+      }
+    ],
+    "bil_ui_bilui_field_amount": [
+      {
+        "action": "bil",
+        "block": "ui_bilui_field_amount"
+      }
+    ],
+    "bil_ui_bilui_field_status": [
+      {
+        "action": "bil",
+        "block": "ui_bilui_field_status"
+      }
+    ],
+    "bil_ui_bilui_save_record": [
+      {
+        "action": "bil",
+        "block": "ui_bilui_save_record"
+      }
+    ],
+    "bil_ui_bilui_cancel_edit": [
+      {
+        "action": "bil",
+        "block": "ui_bilui_cancel_edit"
+      }
+    ],
+    "bil_ui_bilui_about_back": [
+      {
+        "action": "bil",
+        "block": "ui_bilui_about_back"
+      }
+    ]
+  },
+  "tables": {},
+  "machines": {},
+  "animations": {},
+  "components": {},
+  "bil": {
+    "format": "bil.program/2",
+    "source": "# Radni nalozi — BLclea Intent Language, by Brzo i Lokalno\n# Lokalna aplikacija: pregled, uređivanje i stvarno čuvanje podataka.\nimport collections\nimport text\nrecord Entry { customer: Text, description: Text, amount: Number, status: Text }\nlet entries: List<Entry> = []\nlet selected = -1\nlet savedCount = 0\nlet total = 0\nlet draft_customer = \"\"\nlet draft_description = \"\"\nlet draft_amount = 0\nlet draft_status = \"Planirano\"\n\nscreen overview \"Radni nalozi\" {\n    text \"Odaberi zapis za uređivanje ili dodaj novi.\" key overview_intro\n    row {\n        card \"Sačuvani zapisi\" {\n            show savedCount key saved_count\n        } key count_card\n        card \"Ukupno · Iznos\" {\n            show total key total_value\n        } key total_card\n    } key metrics\n    table entries columns [customer: \"Kupac\", description: \"Opis posla\", amount: \"Iznos\", status: \"Status\"] select selected key records\n    row {\n        button \"Novi zapis\" runs begin_new key add_record\n        button \"Uredi odabrani\" runs begin_edit key edit_record\n        button \"Obriši odabrani\" runs delete_record key delete_record\n        button \"O aplikaciji\" opens about key about_button\n    } key overview_actions\n}\n\nscreen editor \"Uredi zapis\" {\n    text \"Obavezna polja su označena zvjezdicom.\" key form_intro\n    card \"Podaci zapisa\" {\n        input draft_customer label \"Kupac\" required key field_customer\n        input draft_description label \"Opis posla\" multiline key field_description\n        input draft_amount label \"Iznos\" range [0, 1000000] key field_amount\n        select draft_status label \"Status\" options [\"Planirano\",\"U toku\",\"Gotovo\"] key field_status\n    } key form_fields\n    row {\n        button \"Spremi zapis\" runs save_record validate key save_record\n        button \"Nazad na pregled\" opens overview key cancel_edit\n    } key form_actions\n}\n\nscreen about \"O aplikaciji\" {\n    text \"Radni nalozi je lokalna aplikacija izrađena u BLclea7 Studiju. Podaci se ne šalju na server.\" key about_text\n    text \"Za sigurnosnu kopiju koristi izvoz podataka u Runtimeu. Brisanje podataka preglednika može ukloniti lokalne zapise.\" key backup_text\n    button \"Nazad\" opens overview key about_back\n}\nstart overview\n\non begin_new {\n    selected = -1\n    draft_customer = \"\"\n    draft_description = \"\"\n    draft_amount = 0\n    draft_status = \"Planirano\"\n    open editor\n}\n\non begin_edit {\n    if selected < 0 or selected >= collections.length(entries) {\n        raise \"Selection\", \"Prvo odaberi zapis iz tabele.\"\n    }\n    draft_customer = entries[selected].customer\n    draft_description = entries[selected].description\n    draft_amount = entries[selected].amount\n    draft_status = entries[selected].status\n    open editor\n}\n\non save_record {\n    if text.length(draft_customer) == 0 {\n        raise \"Required\", \"Kupac: ovo polje je obavezno.\"\n    }\n    if draft_amount < 0 or draft_amount > 1000000 {\n        raise \"Range\", \"Iznos: vrijednost je izvan dozvoljenog raspona.\"\n    }\n    let entry = new Entry { customer: draft_customer, description: draft_description, amount: draft_amount, status: draft_status }\n    if selected < 0 {\n        entries = collections.append(entries, entry)\n        total = total + draft_amount\n    } else {\n        total = total - entries[selected].amount + draft_amount\n        entries = collections.replace(entries, selected, entry)\n    }\n    savedCount = collections.length(entries)\n    selected = -1\n    open overview\n}\n\non delete_record {\n    if selected < 0 or selected >= collections.length(entries) {\n        raise \"Selection\", \"Prvo odaberi zapis iz tabele.\"\n    }\n    total = total - entries[selected].amount\n    entries = collections.remove(entries, selected)\n    selected = -1\n    savedCount = collections.length(entries)\n}\n",
+    "ir": {
+      "format": "bil.ir/2",
+      "language": "bil/2",
+      "globals": {
+        "entries": {
+          "type": {
+            "list": {
+              "record": {
+                "customer": "Text",
+                "description": "Text",
+                "amount": "Number",
+                "status": "Text"
+              },
+              "name": "Entry"
+            }
+          },
+          "mutable": true
+        },
+        "selected": {
+          "type": "Number",
+          "mutable": true
+        },
+        "savedCount": {
+          "type": "Number",
+          "mutable": true
+        },
+        "total": {
+          "type": "Number",
+          "mutable": true
+        },
+        "draft_customer": {
+          "type": "Text",
+          "mutable": true
+        },
+        "draft_description": {
+          "type": "Text",
+          "mutable": true
+        },
+        "draft_amount": {
+          "type": "Number",
+          "mutable": true
+        },
+        "draft_status": {
+          "type": "Text",
+          "mutable": true
+        }
+      },
+      "records": {
+        "Entry": {
+          "customer": "Text",
+          "description": "Text",
+          "amount": "Number",
+          "status": "Text"
+        }
+      },
+      "imports": [
+        "collections",
+        "text"
+      ],
+      "functions": {},
+      "handlers": {
+        "begin_new": [
+          {
+            "op": "STORE",
+            "id": "bil_97e69078",
+            "loc": {
+              "start": 2212,
+              "end": 2225,
+              "line": 56,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "UNARY",
+              "type": "Number",
+              "loc": {
+                "start": 2223,
+                "end": 2225,
+                "line": 56,
+                "column": 16
+              },
+              "operator": "-",
+              "value": {
+                "op": "CONST",
+                "type": "Number",
+                "loc": {
+                  "start": 2224,
+                  "end": 2225,
+                  "line": 56,
+                  "column": 17
+                },
+                "value": 1
+              }
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Number",
+              "loc": {
+                "start": 2212,
+                "end": 2220,
+                "line": 56,
+                "column": 5
+              },
+              "name": "selected"
+            }
+          },
+          {
+            "op": "STORE",
+            "id": "bil_72c1d3b5",
+            "loc": {
+              "start": 2230,
+              "end": 2249,
+              "line": 57,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "CONST",
+              "type": "Text",
+              "loc": {
+                "start": 2247,
+                "end": 2249,
+                "line": 57,
+                "column": 22
+              },
+              "value": ""
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Text",
+              "loc": {
+                "start": 2230,
+                "end": 2244,
+                "line": 57,
+                "column": 5
+              },
+              "name": "draft_customer"
+            }
+          },
+          {
+            "op": "STORE",
+            "id": "bil_c062fb9d",
+            "loc": {
+              "start": 2254,
+              "end": 2276,
+              "line": 58,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "CONST",
+              "type": "Text",
+              "loc": {
+                "start": 2274,
+                "end": 2276,
+                "line": 58,
+                "column": 25
+              },
+              "value": ""
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Text",
+              "loc": {
+                "start": 2254,
+                "end": 2271,
+                "line": 58,
+                "column": 5
+              },
+              "name": "draft_description"
+            }
+          },
+          {
+            "op": "STORE",
+            "id": "bil_5e8f4135",
+            "loc": {
+              "start": 2281,
+              "end": 2297,
+              "line": 59,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "CONST",
+              "type": "Number",
+              "loc": {
+                "start": 2296,
+                "end": 2297,
+                "line": 59,
+                "column": 20
+              },
+              "value": 0
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Number",
+              "loc": {
+                "start": 2281,
+                "end": 2293,
+                "line": 59,
+                "column": 5
+              },
+              "name": "draft_amount"
+            }
+          },
+          {
+            "op": "STORE",
+            "id": "bil_9c94932f",
+            "loc": {
+              "start": 2302,
+              "end": 2328,
+              "line": 60,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "CONST",
+              "type": "Text",
+              "loc": {
+                "start": 2317,
+                "end": 2328,
+                "line": 60,
+                "column": 20
+              },
+              "value": "Planirano"
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Text",
+              "loc": {
+                "start": 2302,
+                "end": 2314,
+                "line": 60,
+                "column": 5
+              },
+              "name": "draft_status"
+            }
+          },
+          {
+            "op": "NAVIGATE",
+            "id": "bil_1435c5f3",
+            "loc": {
+              "start": 2333,
+              "end": 2344,
+              "line": 61,
+              "column": 5
+            },
+            "name": "editor"
+          }
+        ],
+        "begin_edit": [
+          {
+            "op": "BRANCH",
+            "id": "bil_785a6d0d",
+            "loc": {
+              "start": 2368,
+              "end": 2493,
+              "line": 65,
+              "column": 5
+            },
+            "condition": {
+              "op": "BINARY",
+              "type": "Boolean",
+              "loc": {
+                "start": 2371,
+                "end": 2426,
+                "line": 65,
+                "column": 8
+              },
+              "operator": "or",
+              "left": {
+                "op": "BINARY",
+                "type": "Boolean",
+                "loc": {
+                  "start": 2371,
+                  "end": 2383,
+                  "line": 65,
+                  "column": 8
+                },
+                "operator": "<",
+                "left": {
+                  "op": "LOAD",
+                  "type": "Number",
+                  "loc": {
+                    "start": 2371,
+                    "end": 2379,
+                    "line": 65,
+                    "column": 8
+                  },
+                  "name": "selected"
+                },
+                "right": {
+                  "op": "CONST",
+                  "type": "Number",
+                  "loc": {
+                    "start": 2382,
+                    "end": 2383,
+                    "line": 65,
+                    "column": 19
+                  },
+                  "value": 0
+                }
+              },
+              "right": {
+                "op": "BINARY",
+                "type": "Boolean",
+                "loc": {
+                  "start": 2387,
+                  "end": 2426,
+                  "line": 65,
+                  "column": 24
+                },
+                "operator": ">=",
+                "left": {
+                  "op": "LOAD",
+                  "type": "Number",
+                  "loc": {
+                    "start": 2387,
+                    "end": 2395,
+                    "line": 65,
+                    "column": 24
+                  },
+                  "name": "selected"
+                },
+                "right": {
+                  "op": "CALL",
+                  "type": "Number",
+                  "loc": {
+                    "start": 2399,
+                    "end": 2426,
+                    "line": 65,
+                    "column": 36
+                  },
+                  "call": "collections.length",
+                  "args": [
+                    {
+                      "op": "LOAD",
+                      "type": {
+                        "list": {
+                          "record": {
+                            "customer": "Text",
+                            "description": "Text",
+                            "amount": "Number",
+                            "status": "Text"
+                          },
+                          "name": "Entry"
+                        }
+                      },
+                      "loc": {
+                        "start": 2418,
+                        "end": 2425,
+                        "line": 65,
+                        "column": 55
+                      },
+                      "name": "entries"
+                    }
+                  ]
+                }
+              }
+            },
+            "then": [
+              {
+                "op": "RAISE",
+                "id": "bil_9414d4cc",
+                "loc": {
+                  "start": 2437,
+                  "end": 2487,
+                  "line": 66,
+                  "column": 9
+                },
+                "code": "Selection",
+                "value": {
+                  "op": "CONST",
+                  "type": "Text",
+                  "loc": {
+                    "start": 2456,
+                    "end": 2487,
+                    "line": 66,
+                    "column": 28
+                  },
+                  "value": "Prvo odaberi zapis iz tabele."
+                }
+              }
+            ],
+            "otherwise": []
+          },
+          {
+            "op": "STORE",
+            "id": "bil_21fd5277",
+            "loc": {
+              "start": 2498,
+              "end": 2541,
+              "line": 68,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "FIELD",
+              "type": "Text",
+              "loc": {
+                "start": 2515,
+                "end": 2541,
+                "line": 68,
+                "column": 22
+              },
+              "name": "customer",
+              "object": {
+                "op": "INDEX",
+                "type": {
+                  "record": {
+                    "customer": "Text",
+                    "description": "Text",
+                    "amount": "Number",
+                    "status": "Text"
+                  },
+                  "name": "Entry"
+                },
+                "loc": {
+                  "start": 2515,
+                  "end": 2532,
+                  "line": 68,
+                  "column": 22
+                },
+                "object": {
+                  "op": "LOAD",
+                  "type": {
+                    "list": {
+                      "record": {
+                        "customer": "Text",
+                        "description": "Text",
+                        "amount": "Number",
+                        "status": "Text"
+                      },
+                      "name": "Entry"
+                    }
+                  },
+                  "loc": {
+                    "start": 2515,
+                    "end": 2522,
+                    "line": 68,
+                    "column": 22
+                  },
+                  "name": "entries"
+                },
+                "index": {
+                  "op": "LOAD",
+                  "type": "Number",
+                  "loc": {
+                    "start": 2523,
+                    "end": 2531,
+                    "line": 68,
+                    "column": 30
+                  },
+                  "name": "selected"
+                }
+              }
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Text",
+              "loc": {
+                "start": 2498,
+                "end": 2512,
+                "line": 68,
+                "column": 5
+              },
+              "name": "draft_customer"
+            }
+          },
+          {
+            "op": "STORE",
+            "id": "bil_5307b45f",
+            "loc": {
+              "start": 2546,
+              "end": 2595,
+              "line": 69,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "FIELD",
+              "type": "Text",
+              "loc": {
+                "start": 2566,
+                "end": 2595,
+                "line": 69,
+                "column": 25
+              },
+              "name": "description",
+              "object": {
+                "op": "INDEX",
+                "type": {
+                  "record": {
+                    "customer": "Text",
+                    "description": "Text",
+                    "amount": "Number",
+                    "status": "Text"
+                  },
+                  "name": "Entry"
+                },
+                "loc": {
+                  "start": 2566,
+                  "end": 2583,
+                  "line": 69,
+                  "column": 25
+                },
+                "object": {
+                  "op": "LOAD",
+                  "type": {
+                    "list": {
+                      "record": {
+                        "customer": "Text",
+                        "description": "Text",
+                        "amount": "Number",
+                        "status": "Text"
+                      },
+                      "name": "Entry"
+                    }
+                  },
+                  "loc": {
+                    "start": 2566,
+                    "end": 2573,
+                    "line": 69,
+                    "column": 25
+                  },
+                  "name": "entries"
+                },
+                "index": {
+                  "op": "LOAD",
+                  "type": "Number",
+                  "loc": {
+                    "start": 2574,
+                    "end": 2582,
+                    "line": 69,
+                    "column": 33
+                  },
+                  "name": "selected"
+                }
+              }
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Text",
+              "loc": {
+                "start": 2546,
+                "end": 2563,
+                "line": 69,
+                "column": 5
+              },
+              "name": "draft_description"
+            }
+          },
+          {
+            "op": "STORE",
+            "id": "bil_e0a479a7",
+            "loc": {
+              "start": 2600,
+              "end": 2639,
+              "line": 70,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "FIELD",
+              "type": "Number",
+              "loc": {
+                "start": 2615,
+                "end": 2639,
+                "line": 70,
+                "column": 20
+              },
+              "name": "amount",
+              "object": {
+                "op": "INDEX",
+                "type": {
+                  "record": {
+                    "customer": "Text",
+                    "description": "Text",
+                    "amount": "Number",
+                    "status": "Text"
+                  },
+                  "name": "Entry"
+                },
+                "loc": {
+                  "start": 2615,
+                  "end": 2632,
+                  "line": 70,
+                  "column": 20
+                },
+                "object": {
+                  "op": "LOAD",
+                  "type": {
+                    "list": {
+                      "record": {
+                        "customer": "Text",
+                        "description": "Text",
+                        "amount": "Number",
+                        "status": "Text"
+                      },
+                      "name": "Entry"
+                    }
+                  },
+                  "loc": {
+                    "start": 2615,
+                    "end": 2622,
+                    "line": 70,
+                    "column": 20
+                  },
+                  "name": "entries"
+                },
+                "index": {
+                  "op": "LOAD",
+                  "type": "Number",
+                  "loc": {
+                    "start": 2623,
+                    "end": 2631,
+                    "line": 70,
+                    "column": 28
+                  },
+                  "name": "selected"
+                }
+              }
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Number",
+              "loc": {
+                "start": 2600,
+                "end": 2612,
+                "line": 70,
+                "column": 5
+              },
+              "name": "draft_amount"
+            }
+          },
+          {
+            "op": "STORE",
+            "id": "bil_6844ccd9",
+            "loc": {
+              "start": 2644,
+              "end": 2683,
+              "line": 71,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "FIELD",
+              "type": "Text",
+              "loc": {
+                "start": 2659,
+                "end": 2683,
+                "line": 71,
+                "column": 20
+              },
+              "name": "status",
+              "object": {
+                "op": "INDEX",
+                "type": {
+                  "record": {
+                    "customer": "Text",
+                    "description": "Text",
+                    "amount": "Number",
+                    "status": "Text"
+                  },
+                  "name": "Entry"
+                },
+                "loc": {
+                  "start": 2659,
+                  "end": 2676,
+                  "line": 71,
+                  "column": 20
+                },
+                "object": {
+                  "op": "LOAD",
+                  "type": {
+                    "list": {
+                      "record": {
+                        "customer": "Text",
+                        "description": "Text",
+                        "amount": "Number",
+                        "status": "Text"
+                      },
+                      "name": "Entry"
+                    }
+                  },
+                  "loc": {
+                    "start": 2659,
+                    "end": 2666,
+                    "line": 71,
+                    "column": 20
+                  },
+                  "name": "entries"
+                },
+                "index": {
+                  "op": "LOAD",
+                  "type": "Number",
+                  "loc": {
+                    "start": 2667,
+                    "end": 2675,
+                    "line": 71,
+                    "column": 28
+                  },
+                  "name": "selected"
+                }
+              }
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Text",
+              "loc": {
+                "start": 2644,
+                "end": 2656,
+                "line": 71,
+                "column": 5
+              },
+              "name": "draft_status"
+            }
+          },
+          {
+            "op": "NAVIGATE",
+            "id": "bil_b6260f99",
+            "loc": {
+              "start": 2688,
+              "end": 2699,
+              "line": 72,
+              "column": 5
+            },
+            "name": "editor"
+          }
+        ],
+        "save_record": [
+          {
+            "op": "BRANCH",
+            "id": "bil_510d072c",
+            "loc": {
+              "start": 2724,
+              "end": 2825,
+              "line": 76,
+              "column": 5
+            },
+            "condition": {
+              "op": "BINARY",
+              "type": "Boolean",
+              "loc": {
+                "start": 2727,
+                "end": 2759,
+                "line": 76,
+                "column": 8
+              },
+              "operator": "==",
+              "left": {
+                "op": "CALL",
+                "type": "Number",
+                "loc": {
+                  "start": 2727,
+                  "end": 2754,
+                  "line": 76,
+                  "column": 8
+                },
+                "call": "text.length",
+                "args": [
+                  {
+                    "op": "LOAD",
+                    "type": "Text",
+                    "loc": {
+                      "start": 2739,
+                      "end": 2753,
+                      "line": 76,
+                      "column": 20
+                    },
+                    "name": "draft_customer"
+                  }
+                ]
+              },
+              "right": {
+                "op": "CONST",
+                "type": "Number",
+                "loc": {
+                  "start": 2758,
+                  "end": 2759,
+                  "line": 76,
+                  "column": 39
+                },
+                "value": 0
+              }
+            },
+            "then": [
+              {
+                "op": "RAISE",
+                "id": "bil_a9d08f4f",
+                "loc": {
+                  "start": 2770,
+                  "end": 2819,
+                  "line": 77,
+                  "column": 9
+                },
+                "code": "Required",
+                "value": {
+                  "op": "CONST",
+                  "type": "Text",
+                  "loc": {
+                    "start": 2788,
+                    "end": 2819,
+                    "line": 77,
+                    "column": 27
+                  },
+                  "value": "Kupac: ovo polje je obavezno."
+                }
+              }
+            ],
+            "otherwise": []
+          },
+          {
+            "op": "BRANCH",
+            "id": "bil_540d0be5",
+            "loc": {
+              "start": 2830,
+              "end": 2956,
+              "line": 79,
+              "column": 5
+            },
+            "condition": {
+              "op": "BINARY",
+              "type": "Boolean",
+              "loc": {
+                "start": 2833,
+                "end": 2875,
+                "line": 79,
+                "column": 8
+              },
+              "operator": "or",
+              "left": {
+                "op": "BINARY",
+                "type": "Boolean",
+                "loc": {
+                  "start": 2833,
+                  "end": 2849,
+                  "line": 79,
+                  "column": 8
+                },
+                "operator": "<",
+                "left": {
+                  "op": "LOAD",
+                  "type": "Number",
+                  "loc": {
+                    "start": 2833,
+                    "end": 2845,
+                    "line": 79,
+                    "column": 8
+                  },
+                  "name": "draft_amount"
+                },
+                "right": {
+                  "op": "CONST",
+                  "type": "Number",
+                  "loc": {
+                    "start": 2848,
+                    "end": 2849,
+                    "line": 79,
+                    "column": 23
+                  },
+                  "value": 0
+                }
+              },
+              "right": {
+                "op": "BINARY",
+                "type": "Boolean",
+                "loc": {
+                  "start": 2853,
+                  "end": 2875,
+                  "line": 79,
+                  "column": 28
+                },
+                "operator": ">",
+                "left": {
+                  "op": "LOAD",
+                  "type": "Number",
+                  "loc": {
+                    "start": 2853,
+                    "end": 2865,
+                    "line": 79,
+                    "column": 28
+                  },
+                  "name": "draft_amount"
+                },
+                "right": {
+                  "op": "CONST",
+                  "type": "Number",
+                  "loc": {
+                    "start": 2868,
+                    "end": 2875,
+                    "line": 79,
+                    "column": 43
+                  },
+                  "value": 1000000
+                }
+              }
+            },
+            "then": [
+              {
+                "op": "RAISE",
+                "id": "bil_aad090e2",
+                "loc": {
+                  "start": 2886,
+                  "end": 2950,
+                  "line": 80,
+                  "column": 9
+                },
+                "code": "Range",
+                "value": {
+                  "op": "CONST",
+                  "type": "Text",
+                  "loc": {
+                    "start": 2901,
+                    "end": 2950,
+                    "line": 80,
+                    "column": 24
+                  },
+                  "value": "Iznos: vrijednost je izvan dozvoljenog raspona."
+                }
+              }
+            ],
+            "otherwise": []
+          },
+          {
+            "op": "STORE_NEW",
+            "id": "bil_17d3f095",
+            "loc": {
+              "start": 2961,
+              "end": 3087,
+              "line": 82,
+              "column": 5
+            },
+            "name": "entry",
+            "mutable": true,
+            "global": false,
+            "declaredType": {
+              "record": {
+                "customer": "Text",
+                "description": "Text",
+                "amount": "Number",
+                "status": "Text"
+              },
+              "name": "Entry"
+            },
+            "value": {
+              "op": "RECORD",
+              "type": {
+                "record": {
+                  "customer": "Text",
+                  "description": "Text",
+                  "amount": "Number",
+                  "status": "Text"
+                },
+                "name": "Entry"
+              },
+              "loc": {
+                "start": 2973,
+                "end": 3087,
+                "line": 82,
+                "column": 17
+              },
+              "name": "Entry",
+              "fields": {
+                "customer": {
+                  "op": "LOAD",
+                  "type": "Text",
+                  "loc": {
+                    "start": 2995,
+                    "end": 3009,
+                    "line": 82,
+                    "column": 39
+                  },
+                  "name": "draft_customer"
+                },
+                "description": {
+                  "op": "LOAD",
+                  "type": "Text",
+                  "loc": {
+                    "start": 3024,
+                    "end": 3041,
+                    "line": 82,
+                    "column": 68
+                  },
+                  "name": "draft_description"
+                },
+                "amount": {
+                  "op": "LOAD",
+                  "type": "Number",
+                  "loc": {
+                    "start": 3051,
+                    "end": 3063,
+                    "line": 82,
+                    "column": 95
+                  },
+                  "name": "draft_amount"
+                },
+                "status": {
+                  "op": "LOAD",
+                  "type": "Text",
+                  "loc": {
+                    "start": 3073,
+                    "end": 3085,
+                    "line": 82,
+                    "column": 117
+                  },
+                  "name": "draft_status"
+                }
+              }
+            }
+          },
+          {
+            "op": "BRANCH",
+            "id": "bil_530d0a52",
+            "loc": {
+              "start": 3092,
+              "end": 3346,
+              "line": 83,
+              "column": 5
+            },
+            "condition": {
+              "op": "BINARY",
+              "type": "Boolean",
+              "loc": {
+                "start": 3095,
+                "end": 3107,
+                "line": 83,
+                "column": 8
+              },
+              "operator": "<",
+              "left": {
+                "op": "LOAD",
+                "type": "Number",
+                "loc": {
+                  "start": 3095,
+                  "end": 3103,
+                  "line": 83,
+                  "column": 8
+                },
+                "name": "selected"
+              },
+              "right": {
+                "op": "CONST",
+                "type": "Number",
+                "loc": {
+                  "start": 3106,
+                  "end": 3107,
+                  "line": 83,
+                  "column": 19
+                },
+                "value": 0
+              }
+            },
+            "then": [
+              {
+                "op": "STORE",
+                "id": "bil_581230d8",
+                "loc": {
+                  "start": 3118,
+                  "end": 3162,
+                  "line": 84,
+                  "column": 9
+                },
+                "global": true,
+                "value": {
+                  "op": "CALL",
+                  "type": {
+                    "list": {
+                      "record": {
+                        "customer": "Text",
+                        "description": "Text",
+                        "amount": "Number",
+                        "status": "Text"
+                      },
+                      "name": "Entry"
+                    }
+                  },
+                  "loc": {
+                    "start": 3128,
+                    "end": 3162,
+                    "line": 84,
+                    "column": 19
+                  },
+                  "call": "collections.append",
+                  "args": [
+                    {
+                      "op": "LOAD",
+                      "type": {
+                        "list": {
+                          "record": {
+                            "customer": "Text",
+                            "description": "Text",
+                            "amount": "Number",
+                            "status": "Text"
+                          },
+                          "name": "Entry"
+                        }
+                      },
+                      "loc": {
+                        "start": 3147,
+                        "end": 3154,
+                        "line": 84,
+                        "column": 38
+                      },
+                      "name": "entries"
+                    },
+                    {
+                      "op": "LOAD",
+                      "type": {
+                        "record": {
+                          "customer": "Text",
+                          "description": "Text",
+                          "amount": "Number",
+                          "status": "Text"
+                        },
+                        "name": "Entry"
+                      },
+                      "loc": {
+                        "start": 3156,
+                        "end": 3161,
+                        "line": 84,
+                        "column": 47
+                      },
+                      "name": "entry"
+                    }
+                  ]
+                },
+                "target": {
+                  "op": "LOAD",
+                  "type": {
+                    "list": {
+                      "record": {
+                        "customer": "Text",
+                        "description": "Text",
+                        "amount": "Number",
+                        "status": "Text"
+                      },
+                      "name": "Entry"
+                    }
+                  },
+                  "loc": {
+                    "start": 3118,
+                    "end": 3125,
+                    "line": 84,
+                    "column": 9
+                  },
+                  "name": "entries"
+                }
+              },
+              {
+                "op": "STORE",
+                "id": "bil_5d0fcbfe",
+                "loc": {
+                  "start": 3171,
+                  "end": 3199,
+                  "line": 85,
+                  "column": 9
+                },
+                "global": true,
+                "value": {
+                  "op": "BINARY",
+                  "type": "Number",
+                  "loc": {
+                    "start": 3179,
+                    "end": 3199,
+                    "line": 85,
+                    "column": 17
+                  },
+                  "operator": "+",
+                  "left": {
+                    "op": "LOAD",
+                    "type": "Number",
+                    "loc": {
+                      "start": 3179,
+                      "end": 3184,
+                      "line": 85,
+                      "column": 17
+                    },
+                    "name": "total"
+                  },
+                  "right": {
+                    "op": "LOAD",
+                    "type": "Number",
+                    "loc": {
+                      "start": 3187,
+                      "end": 3199,
+                      "line": 85,
+                      "column": 25
+                    },
+                    "name": "draft_amount"
+                  }
+                },
+                "target": {
+                  "op": "LOAD",
+                  "type": "Number",
+                  "loc": {
+                    "start": 3171,
+                    "end": 3176,
+                    "line": 85,
+                    "column": 9
+                  },
+                  "name": "total"
+                }
+              }
+            ],
+            "otherwise": [
+              {
+                "op": "STORE",
+                "id": "bil_5c0fca6b",
+                "loc": {
+                  "start": 3221,
+                  "end": 3276,
+                  "line": 87,
+                  "column": 9
+                },
+                "global": true,
+                "value": {
+                  "op": "BINARY",
+                  "type": "Number",
+                  "loc": {
+                    "start": 3229,
+                    "end": 3276,
+                    "line": 87,
+                    "column": 17
+                  },
+                  "operator": "+",
+                  "left": {
+                    "op": "BINARY",
+                    "type": "Number",
+                    "loc": {
+                      "start": 3229,
+                      "end": 3261,
+                      "line": 87,
+                      "column": 17
+                    },
+                    "operator": "-",
+                    "left": {
+                      "op": "LOAD",
+                      "type": "Number",
+                      "loc": {
+                        "start": 3229,
+                        "end": 3234,
+                        "line": 87,
+                        "column": 17
+                      },
+                      "name": "total"
+                    },
+                    "right": {
+                      "op": "FIELD",
+                      "type": "Number",
+                      "loc": {
+                        "start": 3237,
+                        "end": 3261,
+                        "line": 87,
+                        "column": 25
+                      },
+                      "name": "amount",
+                      "object": {
+                        "op": "INDEX",
+                        "type": {
+                          "record": {
+                            "customer": "Text",
+                            "description": "Text",
+                            "amount": "Number",
+                            "status": "Text"
+                          },
+                          "name": "Entry"
+                        },
+                        "loc": {
+                          "start": 3237,
+                          "end": 3254,
+                          "line": 87,
+                          "column": 25
+                        },
+                        "object": {
+                          "op": "LOAD",
+                          "type": {
+                            "list": {
+                              "record": {
+                                "customer": "Text",
+                                "description": "Text",
+                                "amount": "Number",
+                                "status": "Text"
+                              },
+                              "name": "Entry"
+                            }
+                          },
+                          "loc": {
+                            "start": 3237,
+                            "end": 3244,
+                            "line": 87,
+                            "column": 25
+                          },
+                          "name": "entries"
+                        },
+                        "index": {
+                          "op": "LOAD",
+                          "type": "Number",
+                          "loc": {
+                            "start": 3245,
+                            "end": 3253,
+                            "line": 87,
+                            "column": 33
+                          },
+                          "name": "selected"
+                        }
+                      }
+                    }
+                  },
+                  "right": {
+                    "op": "LOAD",
+                    "type": "Number",
+                    "loc": {
+                      "start": 3264,
+                      "end": 3276,
+                      "line": 87,
+                      "column": 52
+                    },
+                    "name": "draft_amount"
+                  }
+                },
+                "target": {
+                  "op": "LOAD",
+                  "type": "Number",
+                  "loc": {
+                    "start": 3221,
+                    "end": 3226,
+                    "line": 87,
+                    "column": 9
+                  },
+                  "name": "total"
+                }
+              },
+              {
+                "op": "STORE",
+                "id": "bil_5b123591",
+                "loc": {
+                  "start": 3285,
+                  "end": 3340,
+                  "line": 88,
+                  "column": 9
+                },
+                "global": true,
+                "value": {
+                  "op": "CALL",
+                  "type": {
+                    "list": {
+                      "record": {
+                        "customer": "Text",
+                        "description": "Text",
+                        "amount": "Number",
+                        "status": "Text"
+                      },
+                      "name": "Entry"
+                    }
+                  },
+                  "loc": {
+                    "start": 3295,
+                    "end": 3340,
+                    "line": 88,
+                    "column": 19
+                  },
+                  "call": "collections.replace",
+                  "args": [
+                    {
+                      "op": "LOAD",
+                      "type": {
+                        "list": {
+                          "record": {
+                            "customer": "Text",
+                            "description": "Text",
+                            "amount": "Number",
+                            "status": "Text"
+                          },
+                          "name": "Entry"
+                        }
+                      },
+                      "loc": {
+                        "start": 3315,
+                        "end": 3322,
+                        "line": 88,
+                        "column": 39
+                      },
+                      "name": "entries"
+                    },
+                    {
+                      "op": "LOAD",
+                      "type": "Number",
+                      "loc": {
+                        "start": 3324,
+                        "end": 3332,
+                        "line": 88,
+                        "column": 48
+                      },
+                      "name": "selected"
+                    },
+                    {
+                      "op": "LOAD",
+                      "type": {
+                        "record": {
+                          "customer": "Text",
+                          "description": "Text",
+                          "amount": "Number",
+                          "status": "Text"
+                        },
+                        "name": "Entry"
+                      },
+                      "loc": {
+                        "start": 3334,
+                        "end": 3339,
+                        "line": 88,
+                        "column": 58
+                      },
+                      "name": "entry"
+                    }
+                  ]
+                },
+                "target": {
+                  "op": "LOAD",
+                  "type": {
+                    "list": {
+                      "record": {
+                        "customer": "Text",
+                        "description": "Text",
+                        "amount": "Number",
+                        "status": "Text"
+                      },
+                      "name": "Entry"
+                    }
+                  },
+                  "loc": {
+                    "start": 3285,
+                    "end": 3292,
+                    "line": 88,
+                    "column": 9
+                  },
+                  "name": "entries"
+                }
+              }
+            ]
+          },
+          {
+            "op": "STORE",
+            "id": "bil_1a01feb4",
+            "loc": {
+              "start": 3351,
+              "end": 3391,
+              "line": 90,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "CALL",
+              "type": "Number",
+              "loc": {
+                "start": 3364,
+                "end": 3391,
+                "line": 90,
+                "column": 18
+              },
+              "call": "collections.length",
+              "args": [
+                {
+                  "op": "LOAD",
+                  "type": {
+                    "list": {
+                      "record": {
+                        "customer": "Text",
+                        "description": "Text",
+                        "amount": "Number",
+                        "status": "Text"
+                      },
+                      "name": "Entry"
+                    }
+                  },
+                  "loc": {
+                    "start": 3383,
+                    "end": 3390,
+                    "line": 90,
+                    "column": 37
+                  },
+                  "name": "entries"
+                }
+              ]
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Number",
+              "loc": {
+                "start": 3351,
+                "end": 3361,
+                "line": 90,
+                "column": 5
+              },
+              "name": "savedCount"
+            }
+          },
+          {
+            "op": "STORE",
+            "id": "bil_fb7a2b2f",
+            "loc": {
+              "start": 3396,
+              "end": 3409,
+              "line": 91,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "UNARY",
+              "type": "Number",
+              "loc": {
+                "start": 3407,
+                "end": 3409,
+                "line": 91,
+                "column": 16
+              },
+              "operator": "-",
+              "value": {
+                "op": "CONST",
+                "type": "Number",
+                "loc": {
+                  "start": 3408,
+                  "end": 3409,
+                  "line": 91,
+                  "column": 17
+                },
+                "value": 1
+              }
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Number",
+              "loc": {
+                "start": 3396,
+                "end": 3404,
+                "line": 91,
+                "column": 5
+              },
+              "name": "selected"
+            }
+          },
+          {
+            "op": "NAVIGATE",
+            "id": "bil_e79b94aa",
+            "loc": {
+              "start": 3414,
+              "end": 3427,
+              "line": 92,
+              "column": 5
+            },
+            "name": "overview"
+          }
+        ],
+        "delete_record": [
+          {
+            "op": "BRANCH",
+            "id": "bil_d6d88fc2",
+            "loc": {
+              "start": 3454,
+              "end": 3579,
+              "line": 96,
+              "column": 5
+            },
+            "condition": {
+              "op": "BINARY",
+              "type": "Boolean",
+              "loc": {
+                "start": 3457,
+                "end": 3512,
+                "line": 96,
+                "column": 8
+              },
+              "operator": "or",
+              "left": {
+                "op": "BINARY",
+                "type": "Boolean",
+                "loc": {
+                  "start": 3457,
+                  "end": 3469,
+                  "line": 96,
+                  "column": 8
+                },
+                "operator": "<",
+                "left": {
+                  "op": "LOAD",
+                  "type": "Number",
+                  "loc": {
+                    "start": 3457,
+                    "end": 3465,
+                    "line": 96,
+                    "column": 8
+                  },
+                  "name": "selected"
+                },
+                "right": {
+                  "op": "CONST",
+                  "type": "Number",
+                  "loc": {
+                    "start": 3468,
+                    "end": 3469,
+                    "line": 96,
+                    "column": 19
+                  },
+                  "value": 0
+                }
+              },
+              "right": {
+                "op": "BINARY",
+                "type": "Boolean",
+                "loc": {
+                  "start": 3473,
+                  "end": 3512,
+                  "line": 96,
+                  "column": 24
+                },
+                "operator": ">=",
+                "left": {
+                  "op": "LOAD",
+                  "type": "Number",
+                  "loc": {
+                    "start": 3473,
+                    "end": 3481,
+                    "line": 96,
+                    "column": 24
+                  },
+                  "name": "selected"
+                },
+                "right": {
+                  "op": "CALL",
+                  "type": "Number",
+                  "loc": {
+                    "start": 3485,
+                    "end": 3512,
+                    "line": 96,
+                    "column": 36
+                  },
+                  "call": "collections.length",
+                  "args": [
+                    {
+                      "op": "LOAD",
+                      "type": {
+                        "list": {
+                          "record": {
+                            "customer": "Text",
+                            "description": "Text",
+                            "amount": "Number",
+                            "status": "Text"
+                          },
+                          "name": "Entry"
+                        }
+                      },
+                      "loc": {
+                        "start": 3504,
+                        "end": 3511,
+                        "line": 96,
+                        "column": 55
+                      },
+                      "name": "entries"
+                    }
+                  ]
+                }
+              }
+            },
+            "then": [
+              {
+                "op": "RAISE",
+                "id": "bil_3d1b4a29",
+                "loc": {
+                  "start": 3523,
+                  "end": 3573,
+                  "line": 97,
+                  "column": 9
+                },
+                "code": "Selection",
+                "value": {
+                  "op": "CONST",
+                  "type": "Text",
+                  "loc": {
+                    "start": 3542,
+                    "end": 3573,
+                    "line": 97,
+                    "column": 28
+                  },
+                  "value": "Prvo odaberi zapis iz tabele."
+                }
+              }
+            ],
+            "otherwise": []
+          },
+          {
+            "op": "STORE",
+            "id": "bil_e522072",
+            "loc": {
+              "start": 3584,
+              "end": 3624,
+              "line": 99,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "BINARY",
+              "type": "Number",
+              "loc": {
+                "start": 3592,
+                "end": 3624,
+                "line": 99,
+                "column": 13
+              },
+              "operator": "-",
+              "left": {
+                "op": "LOAD",
+                "type": "Number",
+                "loc": {
+                  "start": 3592,
+                  "end": 3597,
+                  "line": 99,
+                  "column": 13
+                },
+                "name": "total"
+              },
+              "right": {
+                "op": "FIELD",
+                "type": "Number",
+                "loc": {
+                  "start": 3600,
+                  "end": 3624,
+                  "line": 99,
+                  "column": 21
+                },
+                "name": "amount",
+                "object": {
+                  "op": "INDEX",
+                  "type": {
+                    "record": {
+                      "customer": "Text",
+                      "description": "Text",
+                      "amount": "Number",
+                      "status": "Text"
+                    },
+                    "name": "Entry"
+                  },
+                  "loc": {
+                    "start": 3600,
+                    "end": 3617,
+                    "line": 99,
+                    "column": 21
+                  },
+                  "object": {
+                    "op": "LOAD",
+                    "type": {
+                      "list": {
+                        "record": {
+                          "customer": "Text",
+                          "description": "Text",
+                          "amount": "Number",
+                          "status": "Text"
+                        },
+                        "name": "Entry"
+                      }
+                    },
+                    "loc": {
+                      "start": 3600,
+                      "end": 3607,
+                      "line": 99,
+                      "column": 21
+                    },
+                    "name": "entries"
+                  },
+                  "index": {
+                    "op": "LOAD",
+                    "type": "Number",
+                    "loc": {
+                      "start": 3608,
+                      "end": 3616,
+                      "line": 99,
+                      "column": 29
+                    },
+                    "name": "selected"
+                  }
+                }
+              }
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Number",
+              "loc": {
+                "start": 3584,
+                "end": 3589,
+                "line": 99,
+                "column": 5
+              },
+              "name": "total"
+            }
+          },
+          {
+            "op": "STORE",
+            "id": "bil_5635391c",
+            "loc": {
+              "start": 3629,
+              "end": 3676,
+              "line": 100,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "CALL",
+              "type": {
+                "list": {
+                  "record": {
+                    "customer": "Text",
+                    "description": "Text",
+                    "amount": "Number",
+                    "status": "Text"
+                  },
+                  "name": "Entry"
+                }
+              },
+              "loc": {
+                "start": 3639,
+                "end": 3676,
+                "line": 100,
+                "column": 15
+              },
+              "call": "collections.remove",
+              "args": [
+                {
+                  "op": "LOAD",
+                  "type": {
+                    "list": {
+                      "record": {
+                        "customer": "Text",
+                        "description": "Text",
+                        "amount": "Number",
+                        "status": "Text"
+                      },
+                      "name": "Entry"
+                    }
+                  },
+                  "loc": {
+                    "start": 3658,
+                    "end": 3665,
+                    "line": 100,
+                    "column": 34
+                  },
+                  "name": "entries"
+                },
+                {
+                  "op": "LOAD",
+                  "type": "Number",
+                  "loc": {
+                    "start": 3667,
+                    "end": 3675,
+                    "line": 100,
+                    "column": 43
+                  },
+                  "name": "selected"
+                }
+              ]
+            },
+            "target": {
+              "op": "LOAD",
+              "type": {
+                "list": {
+                  "record": {
+                    "customer": "Text",
+                    "description": "Text",
+                    "amount": "Number",
+                    "status": "Text"
+                  },
+                  "name": "Entry"
+                }
+              },
+              "loc": {
+                "start": 3629,
+                "end": 3636,
+                "line": 100,
+                "column": 5
+              },
+              "name": "entries"
+            }
+          },
+          {
+            "op": "STORE",
+            "id": "bil_a8740a51",
+            "loc": {
+              "start": 3681,
+              "end": 3694,
+              "line": 101,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "UNARY",
+              "type": "Number",
+              "loc": {
+                "start": 3692,
+                "end": 3694,
+                "line": 101,
+                "column": 16
+              },
+              "operator": "-",
+              "value": {
+                "op": "CONST",
+                "type": "Number",
+                "loc": {
+                  "start": 3693,
+                  "end": 3694,
+                  "line": 101,
+                  "column": 17
+                },
+                "value": 1
+              }
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Number",
+              "loc": {
+                "start": 3681,
+                "end": 3689,
+                "line": 101,
+                "column": 5
+              },
+              "name": "selected"
+            }
+          },
+          {
+            "op": "STORE",
+            "id": "bil_b2eba932",
+            "loc": {
+              "start": 3699,
+              "end": 3739,
+              "line": 102,
+              "column": 5
+            },
+            "global": true,
+            "value": {
+              "op": "CALL",
+              "type": "Number",
+              "loc": {
+                "start": 3712,
+                "end": 3739,
+                "line": 102,
+                "column": 18
+              },
+              "call": "collections.length",
+              "args": [
+                {
+                  "op": "LOAD",
+                  "type": {
+                    "list": {
+                      "record": {
+                        "customer": "Text",
+                        "description": "Text",
+                        "amount": "Number",
+                        "status": "Text"
+                      },
+                      "name": "Entry"
+                    }
+                  },
+                  "loc": {
+                    "start": 3731,
+                    "end": 3738,
+                    "line": 102,
+                    "column": 37
+                  },
+                  "name": "entries"
+                }
+              ]
+            },
+            "target": {
+              "op": "LOAD",
+              "type": "Number",
+              "loc": {
+                "start": 3699,
+                "end": 3709,
+                "line": 102,
+                "column": 5
+              },
+              "name": "savedCount"
+            }
+          }
+        ],
+        "ui_bilui_records": [
+          {
+            "op": "UI_EVENT",
+            "id": "bilui_records",
+            "loc": {
+              "start": 763,
+              "end": 894,
+              "line": 25,
+              "column": 5
+            },
+            "screen": "overview",
+            "control": "bilui_records"
+          }
+        ],
+        "ui_bilui_add_record": [
+          {
+            "op": "UI_EVENT",
+            "id": "bilui_add_record",
+            "loc": {
+              "start": 913,
+              "end": 962,
+              "line": 27,
+              "column": 9
+            },
+            "screen": "overview",
+            "control": "bilui_add_record"
+          }
+        ],
+        "ui_bilui_edit_record": [
+          {
+            "op": "UI_EVENT",
+            "id": "bilui_edit_record",
+            "loc": {
+              "start": 971,
+              "end": 1026,
+              "line": 28,
+              "column": 9
+            },
+            "screen": "overview",
+            "control": "bilui_edit_record"
+          }
+        ],
+        "ui_bilui_delete_record": [
+          {
+            "op": "UI_EVENT",
+            "id": "bilui_delete_record",
+            "loc": {
+              "start": 1035,
+              "end": 1096,
+              "line": 29,
+              "column": 9
+            },
+            "screen": "overview",
+            "control": "bilui_delete_record"
+          }
+        ],
+        "ui_bilui_about_button": [
+          {
+            "op": "UI_EVENT",
+            "id": "bilui_about_button",
+            "loc": {
+              "start": 1105,
+              "end": 1155,
+              "line": 30,
+              "column": 9
+            },
+            "screen": "overview",
+            "control": "bilui_about_button"
+          }
+        ],
+        "ui_bilui_field_customer": [
+          {
+            "op": "UI_EVENT",
+            "id": "bilui_field_customer",
+            "loc": {
+              "start": 1316,
+              "end": 1378,
+              "line": 37,
+              "column": 9
+            },
+            "screen": "editor",
+            "control": "bilui_field_customer"
+          }
+        ],
+        "ui_bilui_field_description": [
+          {
+            "op": "UI_EVENT",
+            "id": "bilui_field_description",
+            "loc": {
+              "start": 1387,
+              "end": 1461,
+              "line": 38,
+              "column": 9
+            },
+            "screen": "editor",
+            "control": "bilui_field_description"
+          }
+        ],
+        "ui_bilui_field_amount": [
+          {
+            "op": "UI_EVENT",
+            "id": "bilui_field_amount",
+            "loc": {
+              "start": 1470,
+              "end": 1538,
+              "line": 39,
+              "column": 9
+            },
+            "screen": "editor",
+            "control": "bilui_field_amount"
+          }
+        ],
+        "ui_bilui_field_status": [
+          {
+            "op": "UI_EVENT",
+            "id": "bilui_field_status",
+            "loc": {
+              "start": 1547,
+              "end": 1638,
+              "line": 40,
+              "column": 9
+            },
+            "screen": "editor",
+            "control": "bilui_field_status"
+          }
+        ],
+        "ui_bilui_save_record": [
+          {
+            "op": "UI_EVENT",
+            "id": "bilui_save_record",
+            "loc": {
+              "start": 1679,
+              "end": 1742,
+              "line": 43,
+              "column": 9
+            },
+            "screen": "editor",
+            "control": "bilui_save_record"
+          }
+        ],
+        "ui_bilui_cancel_edit": [
+          {
+            "op": "UI_EVENT",
+            "id": "bilui_cancel_edit",
+            "loc": {
+              "start": 1751,
+              "end": 1807,
+              "line": 44,
+              "column": 9
+            },
+            "screen": "editor",
+            "control": "bilui_cancel_edit"
+          }
+        ],
+        "ui_bilui_about_back": [
+          {
+            "op": "UI_EVENT",
+            "id": "bilui_about_back",
+            "loc": {
+              "start": 2130,
+              "end": 2174,
+              "line": 51,
+              "column": 5
+            },
+            "screen": "about",
+            "control": "bilui_about_back"
+          }
+        ]
+      },
+      "main": [
+        {
+          "op": "STORE_NEW",
+          "id": "bil_d17181dc",
+          "loc": {
+            "start": 241,
+            "end": 270,
+            "line": 6,
+            "column": 1
+          },
+          "name": "entries",
+          "mutable": true,
+          "global": true,
+          "declaredType": {
+            "list": {
+              "record": {
+                "customer": "Text",
+                "description": "Text",
+                "amount": "Number",
+                "status": "Text"
+              },
+              "name": "Entry"
+            }
+          },
+          "value": {
+            "op": "LIST",
+            "type": {
+              "list": {
+                "record": {
+                  "customer": "Text",
+                  "description": "Text",
+                  "amount": "Number",
+                  "status": "Text"
+                },
+                "name": "Entry"
+              }
+            },
+            "loc": {
+              "start": 268,
+              "end": 270,
+              "line": 6,
+              "column": 28
+            },
+            "items": []
+          }
+        },
+        {
+          "op": "STORE_NEW",
+          "id": "bil_e8503e11",
+          "loc": {
+            "start": 271,
+            "end": 288,
+            "line": 7,
+            "column": 1
+          },
+          "name": "selected",
+          "mutable": true,
+          "global": true,
+          "declaredType": "Number",
+          "value": {
+            "op": "UNARY",
+            "type": "Number",
+            "loc": {
+              "start": 286,
+              "end": 288,
+              "line": 7,
+              "column": 16
+            },
+            "operator": "-",
+            "value": {
+              "op": "CONST",
+              "type": "Number",
+              "loc": {
+                "start": 287,
+                "end": 288,
+                "line": 7,
+                "column": 17
+              },
+              "value": 1
+            }
+          }
+        },
+        {
+          "op": "STORE_NEW",
+          "id": "bil_eeb01df2",
+          "loc": {
+            "start": 289,
+            "end": 307,
+            "line": 8,
+            "column": 1
+          },
+          "name": "savedCount",
+          "mutable": true,
+          "global": true,
+          "declaredType": "Number",
+          "value": {
+            "op": "CONST",
+            "type": "Number",
+            "loc": {
+              "start": 306,
+              "end": 307,
+              "line": 8,
+              "column": 18
+            },
+            "value": 0
+          }
+        },
+        {
+          "op": "STORE_NEW",
+          "id": "bil_59b2ed32",
+          "loc": {
+            "start": 308,
+            "end": 321,
+            "line": 9,
+            "column": 1
+          },
+          "name": "total",
+          "mutable": true,
+          "global": true,
+          "declaredType": "Number",
+          "value": {
+            "op": "CONST",
+            "type": "Number",
+            "loc": {
+              "start": 320,
+              "end": 321,
+              "line": 9,
+              "column": 13
+            },
+            "value": 0
+          }
+        },
+        {
+          "op": "STORE_NEW",
+          "id": "bil_2fa6c898",
+          "loc": {
+            "start": 322,
+            "end": 345,
+            "line": 10,
+            "column": 1
+          },
+          "name": "draft_customer",
+          "mutable": true,
+          "global": true,
+          "declaredType": "Text",
+          "value": {
+            "op": "CONST",
+            "type": "Text",
+            "loc": {
+              "start": 343,
+              "end": 345,
+              "line": 10,
+              "column": 22
+            },
+            "value": ""
+          }
+        },
+        {
+          "op": "STORE_NEW",
+          "id": "bil_1538a7e",
+          "loc": {
+            "start": 346,
+            "end": 372,
+            "line": 11,
+            "column": 1
+          },
+          "name": "draft_description",
+          "mutable": true,
+          "global": true,
+          "declaredType": "Text",
+          "value": {
+            "op": "CONST",
+            "type": "Text",
+            "loc": {
+              "start": 370,
+              "end": 372,
+              "line": 11,
+              "column": 25
+            },
+            "value": ""
+          }
+        },
+        {
+          "op": "STORE_NEW",
+          "id": "bil_e6c06c34",
+          "loc": {
+            "start": 373,
+            "end": 393,
+            "line": 12,
+            "column": 1
+          },
+          "name": "draft_amount",
+          "mutable": true,
+          "global": true,
+          "declaredType": "Number",
+          "value": {
+            "op": "CONST",
+            "type": "Number",
+            "loc": {
+              "start": 392,
+              "end": 393,
+              "line": 12,
+              "column": 20
+            },
+            "value": 0
+          }
+        },
+        {
+          "op": "STORE_NEW",
+          "id": "bil_ee70bf8e",
+          "loc": {
+            "start": 394,
+            "end": 424,
+            "line": 13,
+            "column": 1
+          },
+          "name": "draft_status",
+          "mutable": true,
+          "global": true,
+          "declaredType": "Text",
+          "value": {
+            "op": "CONST",
+            "type": "Text",
+            "loc": {
+              "start": 413,
+              "end": 424,
+              "line": 13,
+              "column": 20
+            },
+            "value": "Planirano"
+          }
+        },
+        {
+          "op": "INTENT",
+          "id": "bilui_saved_count",
+          "loc": {
+            "start": 588,
+            "end": 619,
+            "line": 19,
+            "column": 13
+          },
+          "mode": "show",
+          "ai": false,
+          "within": null,
+          "fallback": null,
+          "inputType": "Number",
+          "value": {
+            "op": "LOAD",
+            "type": "Number",
+            "loc": {
+              "start": 593,
+              "end": 603,
+              "line": 19,
+              "column": 18
+            },
+            "name": "savedCount"
+          }
+        },
+        {
+          "op": "INTENT",
+          "id": "bilui_total_value",
+          "loc": {
+            "start": 689,
+            "end": 715,
+            "line": 22,
+            "column": 13
+          },
+          "mode": "show",
+          "ai": false,
+          "within": null,
+          "fallback": null,
+          "inputType": "Number",
+          "value": {
+            "op": "LOAD",
+            "type": "Number",
+            "loc": {
+              "start": 694,
+              "end": 699,
+              "line": 22,
+              "column": 18
+            },
+            "name": "total"
+          }
+        }
+      ],
+      "controls": [],
+      "sourceMap": [
+        {
+          "id": "bil_97e69078",
+          "op": "STORE",
+          "start": 2212,
+          "end": 2225,
+          "line": 56,
+          "column": 5
+        },
+        {
+          "id": "bil_72c1d3b5",
+          "op": "STORE",
+          "start": 2230,
+          "end": 2249,
+          "line": 57,
+          "column": 5
+        },
+        {
+          "id": "bil_c062fb9d",
+          "op": "STORE",
+          "start": 2254,
+          "end": 2276,
+          "line": 58,
+          "column": 5
+        },
+        {
+          "id": "bil_5e8f4135",
+          "op": "STORE",
+          "start": 2281,
+          "end": 2297,
+          "line": 59,
+          "column": 5
+        },
+        {
+          "id": "bil_9c94932f",
+          "op": "STORE",
+          "start": 2302,
+          "end": 2328,
+          "line": 60,
+          "column": 5
+        },
+        {
+          "id": "bil_1435c5f3",
+          "op": "NAVIGATE",
+          "start": 2333,
+          "end": 2344,
+          "line": 61,
+          "column": 5
+        },
+        {
+          "id": "bil_785a6d0d",
+          "op": "BRANCH",
+          "start": 2368,
+          "end": 2493,
+          "line": 65,
+          "column": 5
+        },
+        {
+          "id": "bil_9414d4cc",
+          "op": "RAISE",
+          "start": 2437,
+          "end": 2487,
+          "line": 66,
+          "column": 9
+        },
+        {
+          "id": "bil_21fd5277",
+          "op": "STORE",
+          "start": 2498,
+          "end": 2541,
+          "line": 68,
+          "column": 5
+        },
+        {
+          "id": "bil_5307b45f",
+          "op": "STORE",
+          "start": 2546,
+          "end": 2595,
+          "line": 69,
+          "column": 5
+        },
+        {
+          "id": "bil_e0a479a7",
+          "op": "STORE",
+          "start": 2600,
+          "end": 2639,
+          "line": 70,
+          "column": 5
+        },
+        {
+          "id": "bil_6844ccd9",
+          "op": "STORE",
+          "start": 2644,
+          "end": 2683,
+          "line": 71,
+          "column": 5
+        },
+        {
+          "id": "bil_b6260f99",
+          "op": "NAVIGATE",
+          "start": 2688,
+          "end": 2699,
+          "line": 72,
+          "column": 5
+        },
+        {
+          "id": "bil_510d072c",
+          "op": "BRANCH",
+          "start": 2724,
+          "end": 2825,
+          "line": 76,
+          "column": 5
+        },
+        {
+          "id": "bil_a9d08f4f",
+          "op": "RAISE",
+          "start": 2770,
+          "end": 2819,
+          "line": 77,
+          "column": 9
+        },
+        {
+          "id": "bil_540d0be5",
+          "op": "BRANCH",
+          "start": 2830,
+          "end": 2956,
+          "line": 79,
+          "column": 5
+        },
+        {
+          "id": "bil_aad090e2",
+          "op": "RAISE",
+          "start": 2886,
+          "end": 2950,
+          "line": 80,
+          "column": 9
+        },
+        {
+          "id": "bil_17d3f095",
+          "op": "STORE_NEW",
+          "start": 2961,
+          "end": 3087,
+          "line": 82,
+          "column": 5
+        },
+        {
+          "id": "bil_530d0a52",
+          "op": "BRANCH",
+          "start": 3092,
+          "end": 3346,
+          "line": 83,
+          "column": 5
+        },
+        {
+          "id": "bil_581230d8",
+          "op": "STORE",
+          "start": 3118,
+          "end": 3162,
+          "line": 84,
+          "column": 9
+        },
+        {
+          "id": "bil_5d0fcbfe",
+          "op": "STORE",
+          "start": 3171,
+          "end": 3199,
+          "line": 85,
+          "column": 9
+        },
+        {
+          "id": "bil_5c0fca6b",
+          "op": "STORE",
+          "start": 3221,
+          "end": 3276,
+          "line": 87,
+          "column": 9
+        },
+        {
+          "id": "bil_5b123591",
+          "op": "STORE",
+          "start": 3285,
+          "end": 3340,
+          "line": 88,
+          "column": 9
+        },
+        {
+          "id": "bil_1a01feb4",
+          "op": "STORE",
+          "start": 3351,
+          "end": 3391,
+          "line": 90,
+          "column": 5
+        },
+        {
+          "id": "bil_fb7a2b2f",
+          "op": "STORE",
+          "start": 3396,
+          "end": 3409,
+          "line": 91,
+          "column": 5
+        },
+        {
+          "id": "bil_e79b94aa",
+          "op": "NAVIGATE",
+          "start": 3414,
+          "end": 3427,
+          "line": 92,
+          "column": 5
+        },
+        {
+          "id": "bil_d6d88fc2",
+          "op": "BRANCH",
+          "start": 3454,
+          "end": 3579,
+          "line": 96,
+          "column": 5
+        },
+        {
+          "id": "bil_3d1b4a29",
+          "op": "RAISE",
+          "start": 3523,
+          "end": 3573,
+          "line": 97,
+          "column": 9
+        },
+        {
+          "id": "bil_e522072",
+          "op": "STORE",
+          "start": 3584,
+          "end": 3624,
+          "line": 99,
+          "column": 5
+        },
+        {
+          "id": "bil_5635391c",
+          "op": "STORE",
+          "start": 3629,
+          "end": 3676,
+          "line": 100,
+          "column": 5
+        },
+        {
+          "id": "bil_a8740a51",
+          "op": "STORE",
+          "start": 3681,
+          "end": 3694,
+          "line": 101,
+          "column": 5
+        },
+        {
+          "id": "bil_b2eba932",
+          "op": "STORE",
+          "start": 3699,
+          "end": 3739,
+          "line": 102,
+          "column": 5
+        },
+        {
+          "id": "bil_d17181dc",
+          "op": "STORE_NEW",
+          "start": 241,
+          "end": 270,
+          "line": 6,
+          "column": 1
+        },
+        {
+          "id": "bil_e8503e11",
+          "op": "STORE_NEW",
+          "start": 271,
+          "end": 288,
+          "line": 7,
+          "column": 1
+        },
+        {
+          "id": "bil_eeb01df2",
+          "op": "STORE_NEW",
+          "start": 289,
+          "end": 307,
+          "line": 8,
+          "column": 1
+        },
+        {
+          "id": "bil_59b2ed32",
+          "op": "STORE_NEW",
+          "start": 308,
+          "end": 321,
+          "line": 9,
+          "column": 1
+        },
+        {
+          "id": "bil_2fa6c898",
+          "op": "STORE_NEW",
+          "start": 322,
+          "end": 345,
+          "line": 10,
+          "column": 1
+        },
+        {
+          "id": "bil_1538a7e",
+          "op": "STORE_NEW",
+          "start": 346,
+          "end": 372,
+          "line": 11,
+          "column": 1
+        },
+        {
+          "id": "bil_e6c06c34",
+          "op": "STORE_NEW",
+          "start": 373,
+          "end": 393,
+          "line": 12,
+          "column": 1
+        },
+        {
+          "id": "bil_ee70bf8e",
+          "op": "STORE_NEW",
+          "start": 394,
+          "end": 424,
+          "line": 13,
+          "column": 1
+        },
+        {
+          "id": "bilui_saved_count",
+          "op": "INTENT",
+          "start": 588,
+          "end": 619,
+          "line": 19,
+          "column": 13
+        },
+        {
+          "id": "bilui_total_value",
+          "op": "INTENT",
+          "start": 689,
+          "end": 715,
+          "line": 22,
+          "column": 13
+        },
+        {
+          "id": "bilui_records",
+          "op": "UI_EVENT",
+          "start": 763,
+          "end": 894,
+          "line": 25,
+          "column": 5
+        },
+        {
+          "id": "bilui_add_record",
+          "op": "UI_EVENT",
+          "start": 913,
+          "end": 962,
+          "line": 27,
+          "column": 9
+        },
+        {
+          "id": "bilui_edit_record",
+          "op": "UI_EVENT",
+          "start": 971,
+          "end": 1026,
+          "line": 28,
+          "column": 9
+        },
+        {
+          "id": "bilui_delete_record",
+          "op": "UI_EVENT",
+          "start": 1035,
+          "end": 1096,
+          "line": 29,
+          "column": 9
+        },
+        {
+          "id": "bilui_about_button",
+          "op": "UI_EVENT",
+          "start": 1105,
+          "end": 1155,
+          "line": 30,
+          "column": 9
+        },
+        {
+          "id": "bilui_field_customer",
+          "op": "UI_EVENT",
+          "start": 1316,
+          "end": 1378,
+          "line": 37,
+          "column": 9
+        },
+        {
+          "id": "bilui_field_description",
+          "op": "UI_EVENT",
+          "start": 1387,
+          "end": 1461,
+          "line": 38,
+          "column": 9
+        },
+        {
+          "id": "bilui_field_amount",
+          "op": "UI_EVENT",
+          "start": 1470,
+          "end": 1538,
+          "line": 39,
+          "column": 9
+        },
+        {
+          "id": "bilui_field_status",
+          "op": "UI_EVENT",
+          "start": 1547,
+          "end": 1638,
+          "line": 40,
+          "column": 9
+        },
+        {
+          "id": "bilui_save_record",
+          "op": "UI_EVENT",
+          "start": 1679,
+          "end": 1742,
+          "line": 43,
+          "column": 9
+        },
+        {
+          "id": "bilui_cancel_edit",
+          "op": "UI_EVENT",
+          "start": 1751,
+          "end": 1807,
+          "line": 44,
+          "column": 9
+        },
+        {
+          "id": "bilui_about_back",
+          "op": "UI_EVENT",
+          "start": 2130,
+          "end": 2174,
+          "line": 51,
+          "column": 5
+        }
+      ],
+      "ui": {
+        "format": "bil.ui/1",
+        "start": "overview",
+        "screens": [
+          {
+            "id": "overview",
+            "label": "Radni nalozi",
+            "loc": {
+              "start": 426,
+              "end": 1184,
+              "line": 15,
+              "column": 1
+            },
+            "children": [
+              {
+                "id": "bilui_overview_intro",
+                "type": "text",
+                "loc": {
+                  "start": 463,
+                  "end": 532,
+                  "line": 16,
+                  "column": 5
+                },
+                "label": "Odaberi zapis za uređivanje ili dodaj novi."
+              },
+              {
+                "id": "bilui_metrics",
+                "type": "row",
+                "loc": {
+                  "start": 537,
+                  "end": 758,
+                  "line": 17,
+                  "column": 5
+                },
+                "label": "",
+                "children": [
+                  {
+                    "id": "bilui_count_card",
+                    "type": "card",
+                    "loc": {
+                      "start": 551,
+                      "end": 644,
+                      "line": 18,
+                      "column": 9
+                    },
+                    "label": "Sačuvani zapisi",
+                    "children": [
+                      {
+                        "id": "bilui_saved_count",
+                        "type": "view",
+                        "loc": {
+                          "start": 588,
+                          "end": 619,
+                          "line": 19,
+                          "column": 13
+                        },
+                        "target": "savedCount"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "bilui_total_card",
+                    "type": "card",
+                    "loc": {
+                      "start": 653,
+                      "end": 740,
+                      "line": 21,
+                      "column": 9
+                    },
+                    "label": "Ukupno · Iznos",
+                    "children": [
+                      {
+                        "id": "bilui_total_value",
+                        "type": "view",
+                        "loc": {
+                          "start": 689,
+                          "end": 715,
+                          "line": 22,
+                          "column": 13
+                        },
+                        "target": "total"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "bilui_records",
+                "type": "table",
+                "loc": {
+                  "start": 763,
+                  "end": 894,
+                  "line": 25,
+                  "column": 5
+                },
+                "name": "entries",
+                "columns": [
+                  {
+                    "field": "customer",
+                    "label": "Kupac"
+                  },
+                  {
+                    "field": "description",
+                    "label": "Opis posla"
+                  },
+                  {
+                    "field": "amount",
+                    "label": "Iznos"
+                  },
+                  {
+                    "field": "status",
+                    "label": "Status"
+                  }
+                ],
+                "selection": "selected",
+                "entry": "ui_bilui_records"
+              },
+              {
+                "id": "bilui_overview_actions",
+                "type": "row",
+                "loc": {
+                  "start": 899,
+                  "end": 1182,
+                  "line": 26,
+                  "column": 5
+                },
+                "label": "",
+                "children": [
+                  {
+                    "id": "bilui_add_record",
+                    "type": "button",
+                    "loc": {
+                      "start": 913,
+                      "end": 962,
+                      "line": 27,
+                      "column": 9
+                    },
+                    "label": "Novi zapis",
+                    "handler": "begin_new",
+                    "target": null,
+                    "validate": false,
+                    "entry": "ui_bilui_add_record"
+                  },
+                  {
+                    "id": "bilui_edit_record",
+                    "type": "button",
+                    "loc": {
+                      "start": 971,
+                      "end": 1026,
+                      "line": 28,
+                      "column": 9
+                    },
+                    "label": "Uredi odabrani",
+                    "handler": "begin_edit",
+                    "target": null,
+                    "validate": false,
+                    "entry": "ui_bilui_edit_record"
+                  },
+                  {
+                    "id": "bilui_delete_record",
+                    "type": "button",
+                    "loc": {
+                      "start": 1035,
+                      "end": 1096,
+                      "line": 29,
+                      "column": 9
+                    },
+                    "label": "Obriši odabrani",
+                    "handler": "delete_record",
+                    "target": null,
+                    "validate": false,
+                    "entry": "ui_bilui_delete_record"
+                  },
+                  {
+                    "id": "bilui_about_button",
+                    "type": "button",
+                    "loc": {
+                      "start": 1105,
+                      "end": 1155,
+                      "line": 30,
+                      "column": 9
+                    },
+                    "label": "O aplikaciji",
+                    "handler": null,
+                    "target": "about",
+                    "validate": false,
+                    "entry": "ui_bilui_about_button"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "editor",
+            "label": "Uredi zapis",
+            "loc": {
+              "start": 1186,
+              "end": 1832,
+              "line": 34,
+              "column": 1
+            },
+            "children": [
+              {
+                "id": "bilui_form_intro",
+                "type": "text",
+                "loc": {
+                  "start": 1220,
+                  "end": 1280,
+                  "line": 35,
+                  "column": 5
+                },
+                "label": "Obavezna polja su označena zvjezdicom."
+              },
+              {
+                "id": "bilui_form_fields",
+                "type": "card",
+                "loc": {
+                  "start": 1285,
+                  "end": 1660,
+                  "line": 36,
+                  "column": 5
+                },
+                "label": "Podaci zapisa",
+                "children": [
+                  {
+                    "id": "bilui_field_customer",
+                    "type": "input",
+                    "loc": {
+                      "start": 1316,
+                      "end": 1378,
+                      "line": 37,
+                      "column": 9
+                    },
+                    "label": "Kupac",
+                    "name": "draft_customer",
+                    "required": true,
+                    "multiline": false,
+                    "range": null,
+                    "options": null,
+                    "inputType": "Text",
+                    "entry": "ui_bilui_field_customer"
+                  },
+                  {
+                    "id": "bilui_field_description",
+                    "type": "input",
+                    "loc": {
+                      "start": 1387,
+                      "end": 1461,
+                      "line": 38,
+                      "column": 9
+                    },
+                    "label": "Opis posla",
+                    "name": "draft_description",
+                    "required": false,
+                    "multiline": true,
+                    "range": null,
+                    "options": null,
+                    "inputType": "Text",
+                    "entry": "ui_bilui_field_description"
+                  },
+                  {
+                    "id": "bilui_field_amount",
+                    "type": "input",
+                    "loc": {
+                      "start": 1470,
+                      "end": 1538,
+                      "line": 39,
+                      "column": 9
+                    },
+                    "label": "Iznos",
+                    "name": "draft_amount",
+                    "required": false,
+                    "multiline": false,
+                    "range": [
+                      0,
+                      1000000
+                    ],
+                    "options": null,
+                    "inputType": "Number",
+                    "entry": "ui_bilui_field_amount"
+                  },
+                  {
+                    "id": "bilui_field_status",
+                    "type": "select",
+                    "loc": {
+                      "start": 1547,
+                      "end": 1638,
+                      "line": 40,
+                      "column": 9
+                    },
+                    "label": "Status",
+                    "name": "draft_status",
+                    "required": false,
+                    "multiline": false,
+                    "range": null,
+                    "options": [
+                      "Planirano",
+                      "U toku",
+                      "Gotovo"
+                    ],
+                    "inputType": "Text",
+                    "entry": "ui_bilui_field_status"
+                  }
+                ]
+              },
+              {
+                "id": "bilui_form_actions",
+                "type": "row",
+                "loc": {
+                  "start": 1665,
+                  "end": 1830,
+                  "line": 42,
+                  "column": 5
+                },
+                "label": "",
+                "children": [
+                  {
+                    "id": "bilui_save_record",
+                    "type": "button",
+                    "loc": {
+                      "start": 1679,
+                      "end": 1742,
+                      "line": 43,
+                      "column": 9
+                    },
+                    "label": "Spremi zapis",
+                    "handler": "save_record",
+                    "target": null,
+                    "validate": true,
+                    "entry": "ui_bilui_save_record"
+                  },
+                  {
+                    "id": "bilui_cancel_edit",
+                    "type": "button",
+                    "loc": {
+                      "start": 1751,
+                      "end": 1807,
+                      "line": 44,
+                      "column": 9
+                    },
+                    "label": "Nazad na pregled",
+                    "handler": null,
+                    "target": "overview",
+                    "validate": false,
+                    "entry": "ui_bilui_cancel_edit"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "about",
+            "label": "O aplikaciji",
+            "loc": {
+              "start": 1834,
+              "end": 2176,
+              "line": 48,
+              "column": 1
+            },
+            "children": [
+              {
+                "id": "bilui_about_text",
+                "type": "text",
+                "loc": {
+                  "start": 1868,
+                  "end": 1982,
+                  "line": 49,
+                  "column": 5
+                },
+                "label": "Radni nalozi je lokalna aplikacija izrađena u BLclea7 Studiju. Podaci se ne šalju na server."
+              },
+              {
+                "id": "bilui_backup_text",
+                "type": "text",
+                "loc": {
+                  "start": 1987,
+                  "end": 2125,
+                  "line": 50,
+                  "column": 5
+                },
+                "label": "Za sigurnosnu kopiju koristi izvoz podataka u Runtimeu. Brisanje podataka preglednika može ukloniti lokalne zapise."
+              },
+              {
+                "id": "bilui_about_back",
+                "type": "button",
+                "loc": {
+                  "start": 2130,
+                  "end": 2174,
+                  "line": 51,
+                  "column": 5
+                },
+                "label": "Nazad",
+                "handler": null,
+                "target": "overview",
+                "validate": false,
+                "entry": "ui_bilui_about_back"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

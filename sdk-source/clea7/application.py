@@ -20,7 +20,7 @@ def validate(raw):
     try:p=json.loads(json.dumps(raw,allow_nan=False))
     except (TypeError,ValueError):raise UserError('Projekt sadrži neispravne vrijednosti.')
     if len(json.dumps(p).encode())>1048576:raise UserError('Projekt prelazi 1 MiB.')
-    v5=p.get('format')=='clea7.application/5'
+    v5=p.get('format') in ('clea7.application/5','clea7.application/6')
     v4=v5 or p.get('format')=='clea7.application/4'
     living=v4 or p.get('format')=='clea7.application/3'
     if any(k not in ('format','id','name','package','version','start','permissions','state','screens','flows','tables')+(('machines','animations','components') if living else ())+(('licenses',) if v4 else ())+(('bil',) if v5 else ()) for k in p):raise UserError('Nepodržano svojstvo projekta.')

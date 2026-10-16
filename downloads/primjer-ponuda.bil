@@ -1,0 +1,12 @@
+let quantity = 1
+let price = 20
+let total = 20
+screen quote "Moja ponuda" {
+    input quantity label "Količina"
+    input price label "Cijena"
+    button "Izračunaj" runs calculate
+    show total
+}
+on calculate {
+    total = quantity * price
+}

@@ -1,2 +1,2 @@
-BLclea7 0.6 BIL development release by Brzo i Lokalno.
+BLclea7 0.7 BIL development release by Brzo i Lokalno.
 Distributed under the same owner-controlled terms in LICENSE.txt, retained verbatim from the preceding development release. Separate third-party and material licences remain applicable. No native host, AI service or private signing identity is included in this public SDK.

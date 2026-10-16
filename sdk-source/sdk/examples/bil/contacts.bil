@@ -1,0 +1,93 @@
+# Moji kontakti — BLclea Intent Language, by Brzo i Lokalno
+# Lokalna aplikacija: pregled, uređivanje i stvarno čuvanje podataka.
+import collections
+import text
+record Entry { name: Text, company: Text, phone: Text, notes: Text }
+let entries: List<Entry> = []
+let selected = -1
+let savedCount = 0
+let draft_name = ""
+let draft_company = ""
+let draft_phone = ""
+let draft_notes = ""
+
+screen overview "Moji kontakti" {
+    text "Odaberi zapis za uređivanje ili dodaj novi." key overview_intro
+    row {
+        card "Sačuvani zapisi" {
+            show savedCount key saved_count
+        } key count_card
+    } key metrics
+    table entries columns [name: "Ime i prezime", company: "Firma", phone: "Telefon", notes: "Bilješka"] select selected key records
+    row {
+        button "Novi zapis" runs begin_new key add_record
+        button "Uredi odabrani" runs begin_edit key edit_record
+        button "Obriši odabrani" runs delete_record key delete_record
+        button "O aplikaciji" opens about key about_button
+    } key overview_actions
+}
+
+screen editor "Uredi zapis" {
+    text "Obavezna polja su označena zvjezdicom." key form_intro
+    card "Podaci zapisa" {
+        input draft_name label "Ime i prezime" required key field_name
+        input draft_company label "Firma" key field_company
+        input draft_phone label "Telefon" key field_phone
+        input draft_notes label "Bilješka" multiline key field_notes
+    } key form_fields
+    row {
+        button "Spremi zapis" runs save_record validate key save_record
+        button "Nazad na pregled" opens overview key cancel_edit
+    } key form_actions
+}
+
+screen about "O aplikaciji" {
+    text "Moji kontakti je lokalna aplikacija izrađena u BLclea7 Studiju. Podaci se ne šalju na server." key about_text
+    text "Za sigurnosnu kopiju koristi izvoz podataka u Runtimeu. Brisanje podataka preglednika može ukloniti lokalne zapise." key backup_text
+    button "Nazad" opens overview key about_back
+}
+start overview
+
+on begin_new {
+    selected = -1
+    draft_name = ""
+    draft_company = ""
+    draft_phone = ""
+    draft_notes = ""
+    open editor
+}
+
+on begin_edit {
+    if selected < 0 or selected >= collections.length(entries) {
+        raise "Selection", "Prvo odaberi zapis iz tabele."
+    }
+    draft_name = entries[selected].name
+    draft_company = entries[selected].company
+    draft_phone = entries[selected].phone
+    draft_notes = entries[selected].notes
+    open editor
+}
+
+on save_record {
+    if text.length(draft_name) == 0 {
+        raise "Required", "Ime i prezime: ovo polje je obavezno."
+    }
+    let entry = new Entry { name: draft_name, company: draft_company, phone: draft_phone, notes: draft_notes }
+    if selected < 0 {
+        entries = collections.append(entries, entry)
+    } else {
+        entries = collections.replace(entries, selected, entry)
+    }
+    savedCount = collections.length(entries)
+    selected = -1
+    open overview
+}
+
+on delete_record {
+    if selected < 0 or selected >= collections.length(entries) {
+        raise "Selection", "Prvo odaberi zapis iz tabele."
+    }
+    entries = collections.remove(entries, selected)
+    selected = -1
+    savedCount = collections.length(entries)
+}
