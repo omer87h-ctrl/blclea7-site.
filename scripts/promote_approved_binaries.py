@@ -8,14 +8,15 @@ from pathlib import Path,PurePosixPath
 import argparse,base64,hashlib,io,json,os,re,urllib.request,urllib.error,urllib.parse,zipfile
 SOURCE='omer87h-ctrl/BL-Clea7-by-brzoilokalno'
 TARGET='omer87h-ctrl/blclea7-site.'
-COMMIT='72249d92e1d817fe2b5c726e4c18b6b0a83ed74b'
-RUN=38800912577
-TAG='clea7-0.6.0-72249d9'
+COMMIT='e092cfeda4adb9a35d0e39749dfc99bd744b56bb'
+RUN=38919749947
+TAG='clea7-0.7.0-e092cfe'
 ARTIFACTS={
- 'studio':{'id':12004167892,'name':'BL-CLEA7-Windows-x64','sha256':'2e5ec6eeab98b6b41b2e4949ccbd746e0e7bf0b5d86b02cfc4540897040a9293','size':357120759,'output':'BL-CLEA7-Studio-Windows-x64.zip'},
- 'runtime':{'id':12003239974,'name':'BL-CLEA7-Windows-Runtime-x64','sha256':'20a387caf12fc0e07397584889a0194d950b6957264f71da844fdc75784ecf40','size':338278001,'output':'BL-CLEA7-Runtime-Windows-x64.zip'},
- 'android':{'id':12003984759,'name':'BL-CLEA7-Android-Runtime-development','sha256':'0dbd92b370cde0e06b5d3785ba614eb0de63aa78228368299793dc20bb4328b7','size':105146,'output':'BL-CLEA7-Runtime-Android-debug.apk'},
+ 'studio':{'id':12054327992,'name':'BL-CLEA7-Windows-x64','sha256':'fc7724884e11b5780948173aca9bcc809195899f7611bd38807b8dd84b9c964a','size':357162060,'output':'BL-CLEA7-Studio-Windows-x64.zip'},
+ 'runtime':{'id':12054950385,'name':'BL-CLEA7-Windows-Runtime-x64','sha256':'3fc4fd06cbb6f2ced00ec487d29ceec53b5fce99e2b1a3f065879c890eddd2c9','size':338288691,'output':'BL-CLEA7-Runtime-Windows-x64.zip'},
+ 'android':{'id':12054457104,'name':'BL-CLEA7-Android-Runtime-development','sha256':'dc294bed074c84f6275ce2c33cd5787bae458037ac3c1049bb60e637771c6052','size':114977,'output':'BL-CLEA7-Runtime-Android-debug.apk'},
 }
+
 class ReleaseError(Exception):pass
 class NoRedirect(urllib.request.HTTPRedirectHandler):
  def redirect_request(self,*args,**kwargs):return None
@@ -66,7 +67,7 @@ def publish_asset(release,name,data,token):
 
 
 OWNER = 'omer87h-ctrl'
-TITLE = 'CLEA7 approved binary promotion 72249d9'
+TITLE = 'CLEA7 approved binary promotion e092cfe'
 
 def transfer_url(url):
  try:
@@ -119,7 +120,7 @@ def publish(folder,token):
  releases=api('/repos/'+TARGET+'/releases?per_page=100',token)
  release=next((r for r in releases if r.get('tag_name')==TAG),None)
  if release is None:
-  release=api('/repos/'+TARGET+'/releases',token,'POST',{'tag_name':TAG,'target_commitish':'main','name':'BL CLEA7 0.6 BIL — verified development release','draft':True,'prerelease':True,'body':'Source '+COMMIT+'; verification run '+str(RUN)+'. BIL compiler, Studio-to-package browser workflow, independent Windows Runtime and Android API30 BIL execution checks passed. The BIL visual subset supports initial primitive values and show/visualize; generic BIL forms/tables/native bindings, automatic model connections and general migrations are not included. Windows x64 ZIPs include the renderer for offline use. Android is the separately installable Runtime, debug signed. Windows executables are unsigned. Preserve the attached use terms and all vendor/material notices. This development release is not a claim of complete Android Studio equivalence, physical-device verification, battery superiority or impenetrable security.'})
+  release=api('/repos/'+TARGET+'/releases',token,'POST',{'tag_name':TAG,'target_commitish':'main','name':'BL CLEA7 0.7 — connected applications, verified development release','draft':True,'prerelease':True,'body':'Source '+COMMIT+'; verification run '+str(RUN)+'. Typed BIL screens, forms, searchable record tables, source-linked visual editing, mouse/touch/keyboard authoring, SDK packaging and independent Runtime execution were verified. Actual frozen Windows GUI and Android API30 emulator checks cover application data, UI events, replay, isolated shadow and restart/recreation. BIL native hardware bindings, automatic model connections, general schema migrations and full Android Studio/Rive feature parity are not included. Windows x64 ZIPs include the renderer for offline use. Android is the separately installable Runtime, debug signed. Windows executables are unsigned. Preserve the attached use terms and all vendor/material notices. This development release is not a claim of complete Android Studio equivalence, physical-device verification, battery superiority or impenetrable security.'})
  records=[]
  for key,spec in ARTIFACTS.items():
   data=(folder/(key+'.zip')).read_bytes()
