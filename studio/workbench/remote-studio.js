@@ -49,5 +49,11 @@ async function configure(project,vault){if(!project.remote)return null;if(!scope
   cancel.onclick=abort;dialog.addEventListener('cancel',event=>{event.preventDefault();abort();});form.addEventListener('submit',async event=>{event.preventDefault();if(!form.reportValidity()||settled)return;approve.disabled=true;try{const config={contract:(scope.CLEA7?.stable||JSON.stringify)(project.remote),bindings:{},grants:{}};for(const row of entries){config.bindings[row.alias]={adapter:row.contract.adapter,projectId:row.projectId.value.trim(),authOrigin:row.authOrigin.value.trim(),firestoreOrigin:row.firestoreOrigin.value.trim()};config.grants[row.alias]=row.grants.filter(x=>x.control.checked).map(x=>x.operation);}const validated=validateConfig(project,config);await vault.put(key,validated);if(settled)return;settled=true;dialog.close();dialog.remove();resolve(copy(validated));}catch(error){message.textContent=error.message;approve.disabled=false;}});dialog.showModal();dialog.querySelector('input')?.focus();
  });
 }
-scope.CLEA7RemoteStudio={OPERATIONS,addRequest,attachSource,validateConfig,configure};
+async function resetState(engine){
+ if(!engine||engine.closed||!engine.project.remote)throw Error('Prvo pokreni udaljenu aplikaciju.');
+ if(engine.remoteJobs.size)throw Error('Sačekaj završetak udaljenih radnji prije vraćanja početnog stanja.');
+ const epoch=engine.principalEpoch,probe=new scope.CLEA7Engine.Engine(engine.project,{vault:new scope.CLEA7.MemoryVault(),modules:null,reality:'SHADOW',principal:engine.principal,bilCapabilities:engine.bilCapabilities});
+ try{await probe.open();if(engine.closed||epoch!==engine.principalEpoch)throw Error('Račun je promijenjen tokom pripreme početnog stanja.');const backup=engine.backup();backup.state=copy(probe.state);await engine.restore(backup);}finally{probe.close();}
+}
+scope.CLEA7RemoteStudio={OPERATIONS,addRequest,attachSource,validateConfig,configure,resetState};
 })(globalThis);

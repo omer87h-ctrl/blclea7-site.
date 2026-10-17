@@ -15,8 +15,8 @@
       "key": "preview",
       "name": "BLclea7-Studio-pregled.html",
       "url": "downloads/BLclea7-Studio-pregled.html",
-      "size_bytes": 708394,
-      "sha256": "c8092fbf0b77d6bfbad50a410fd1394e5cde40586b0efb1b51ffc4d88b9535a0"
+      "size_bytes": 709264,
+      "sha256": "77be64b5dc5ea6978c48e06636da8488551feed3acfbec5db85e7a4e7d542b30"
     },
     {
       "key": "example",
@@ -89,6 +89,9 @@
         "size_bytes": 357240516,
         "sha256": "e6e2e07031b44890b51cb3134572df91a7d86975f8f65c84e8a25be09c290e64"
       }
-    ]
-  }
+    ],
+    "source_commit": "a3e267b15f3b7f41187c5a78577f7d9d67c70549"
+  },
+  "web_patch_source_commit": "e3044bd90d1a668b252df80f263304fd531ae701",
+  "web_patch": "Studio account-state reset uses scoped Runtime restore; native binaries remain exact a3e267b builds."
 }
