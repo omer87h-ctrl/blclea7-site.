@@ -2,7 +2,7 @@
   "format": "clea7.public-downloads/1",
   "version": "0.9.0",
   "source_commit": "a3e267b15f3b7f41187c5a78577f7d9d67c70549",
-  "verified_run": null,
+  "verified_run": 39002583413,
   "published": [
     {
       "key": "sdk",
