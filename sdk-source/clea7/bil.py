@@ -16,12 +16,24 @@ KEY=re.compile(r'^[A-Za-z][A-Za-z0-9_]{0,63}$')
 def safe(value):
     return isinstance(value,str) and KEY.fullmatch(value) and value not in ('constructor','prototype','__proto__')
 
+REMOTE_OPS=frozenset(('auth.register','auth.session','auth.signIn','auth.signOut','document.delete','document.get','document.set'))
+
+def validate_remote(value):
+    if not isinstance(value,dict) or set(value)!={'format','backends'} or value['format']!='bil.remote/1' or not isinstance(value['backends'],dict) or not 1<=len(value['backends'])<=4:raise UserError('Neispravan BIL remote ugovor.')
+    for name,backend in value['backends'].items():
+        if not safe(name) or not isinstance(backend,dict) or set(backend)!={'adapter','operations'} or backend['adapter']!='firebase.development/1':raise UserError('Nepodržan udaljeni adapter.')
+        operations=backend['operations']
+        if not isinstance(operations,list) or any(not isinstance(op,str) or op not in REMOTE_OPS for op in operations) or operations!=sorted(set(operations)):raise UserError('Neispravne udaljene operacije.')
+    return value
+
 def validate_program(project):
-    extended=project.get('format')=='clea7.application/6'
+    remote=project.get('format')=='clea7.application/7'
+    extended=remote or project.get('format')=='clea7.application/6'
+    version=3 if remote else 2 if extended else 1
     bundle=project.get('bil')
-    if not isinstance(bundle,dict) or set(bundle)!={'format','source','ir'} or bundle['format']!=('bil.program/2' if extended else 'bil.program/1'):raise UserError('Neispravna BIL omotnica.')
+    if not isinstance(bundle,dict) or set(bundle)!={'format','source','ir'} or bundle['format']!='bil.program/'+str(version):raise UserError('Neispravna BIL omotnica.')
     source=bundle['source'];ir=bundle['ir']
-    if not isinstance(source,str) or len(source)>131072 or not isinstance(ir,dict) or set(ir)!=({'format','language','globals','records','imports','functions','handlers','main','controls','sourceMap'}|({'ui'} if extended else set())) or ir['format']!=('bil.ir/2' if extended else 'bil.ir/1') or ir['language']!=('bil/2' if extended else 'bil/1'):raise UserError('Nepodržan BIL ugovor.')
+    if not isinstance(source,str) or len(source)>131072 or not isinstance(ir,dict) or set(ir)!=({'format','language','globals','records','imports','functions','handlers','main','controls','sourceMap'}|({'ui'} if extended else set())|({'remote'} if remote else set())) or ir['format']!='bil.ir/'+str(version) or ir['language']!='bil/'+str(version):raise UserError('Nepodržan BIL ugovor.')
     for key in ('globals','records','functions','handlers'):
         if not isinstance(ir[key],dict) or len(ir[key])>(192 if extended and key=='handlers' else 64) or any(not safe(k) for k in ir[key]):raise UserError('Neispravni BIL simboli.')
     if not isinstance(ir['imports'],list) or len(ir['imports'])>3 or any(x not in ('math','text','collections') for x in ir['imports']):raise UserError('Nedozvoljen BIL modul.')
@@ -40,6 +52,34 @@ def validate_program(project):
             for v in value:walk(v,depth+1)
         elif value is not None and type(value) not in (str,int,float,bool):raise UserError('BIL treba podatkovne vrijednosti.')
     walk(ir)
+    if remote:
+        validate_remote(project.get('remote'));validate_remote(ir.get('remote'))
+        if project['remote']!=ir['remote']:raise UserError('Udaljene mogućnosti ne odgovaraju BIL izvoru.')
+        actual={name:set() for name in ir['remote']['backends']}
+        def requests(value):
+            if isinstance(value,list):
+                for entry in value:requests(entry)
+            elif isinstance(value,dict):
+                if value.get('op')=='REQUEST':
+                    if set(value)!={'op','id','loc','backend','operation','args','target','error','resultType'} or not isinstance(value.get('backend'),str) or value['backend'] not in actual or not isinstance(value.get('operation'),str) or value['operation'] not in REMOTE_OPS or not isinstance(value.get('args'),list) or not safe(value.get('target')) or not safe(value.get('error')) or value['target'] not in ir['globals'] or value['error'] not in ir['globals']:raise UserError('Neispravan udaljeni BIL zahtjev.')
+                    target=ir['globals'][value['target']];error=ir['globals'][value['error']]
+                    if not isinstance(target,dict) or target.get('mutable') is not True or value['resultType']!=target.get('type'):raise UserError('Tip udaljenog rezultata ne odgovara stanju.')
+                    failure_type=error.get('type',{}) if isinstance(error,dict) else {}
+                    failure=failure_type.get('nullable',{}) if isinstance(failure_type,dict) else {}
+                    if not isinstance(error,dict) or error.get('mutable') is not True or not isinstance(failure,dict) or failure.get('record')!={'code':'Text','message':'Text','uncertain':'Boolean'} or value['target']==value['error']:raise UserError('Udaljeni zahtjev treba odvojeni promjenjivi nullable RemoteFailure rezultat.')
+                    result=value['resultType'];nullable=isinstance(result,dict) and 'nullable' in result
+                    result_type=result['nullable'] if nullable else result
+                    if value['operation'].startswith('auth.') and value['operation']!='auth.signOut':
+                        if not isinstance(result_type,dict) or result_type.get('record')!={'uid':'Text','email':'Text'} or value['operation']=='auth.session' and not nullable:raise UserError('Autentifikacija treba provjeren RemoteSession rezultat.')
+                    elif value['operation']=='document.get':
+                        if not nullable or not isinstance(result_type,dict) or not isinstance(result_type.get('record'),dict):raise UserError('Dokument treba nullable Record rezultat.')
+                    elif result!='Boolean':raise UserError('Udaljena izmjena treba Boolean rezultat.')
+                    expected_args={'auth.session':0,'auth.register':0,'auth.signIn':0,'auth.signOut':0,'document.get':1,'document.set':2,'document.delete':1}[value['operation']]
+                    if len(value['args'])!=expected_args:raise UserError('Udaljeni zahtjev ima neispravan broj argumenata.')
+                    actual[value['backend']].add(value['operation'])
+                for entry in value.values():requests(entry)
+        for block in (ir['main'],ir['handlers'],ir['functions']):requests(block)
+        if any(sorted(actual[name])!=backend['operations'] for name,backend in ir['remote']['backends'].items()):raise UserError('Deklarisane udaljene operacije ne odgovaraju izvršnom planu.')
     def default(t,depth=0):
         if depth>16:raise UserError('BIL tip je predubok.')
         if t=='Number':return 0

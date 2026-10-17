@@ -28,3 +28,7 @@ BIL source has its own parser, static types and checked IR. Run from this SDK ro
 ## Povezane aplikacije
 
 BIL application/6 opisuje ekrane, obrasce i tabele. Primjer: sdk/examples/bil/orders.bil. Potreban je Runtime 0.7.0+. Ugovor i granice: docs/STUDIO-APPLICATIONS-0.7.md.
+
+## SDK0.9 — development backend contracts
+
+Compile/validate/package application7 with the original BIL compiler. `--targets browser` is the portable development default. Execute remote events only in a configured Runtime with explicit grants and local demo-clea7 Firebase emulators. This curated SDK excludes the private native host and Android build sources. Existing local applications remain supported. See docs/BIL-ASYNC-REQUESTS.md and docs/PRINCIPAL-STORAGE.md. No production backend, chat, uploads or push service is supplied.

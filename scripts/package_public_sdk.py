@@ -3,7 +3,7 @@ from pathlib import Path
 import hashlib,json,zipfile
 ROOT=Path(__file__).resolve().parents[1]
 def main():
- source=ROOT/'sdk-source';target=ROOT/'downloads/BL-CLEA7-SDK-0.7.0.zip'
+ source=ROOT/'sdk-source';target=ROOT/'downloads/BL-CLEA7-SDK-0.9.0.zip'
  with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED) as archive:
   for p in sorted(source.rglob('*')):
    if p.is_file() and '__pycache__' not in p.parts:

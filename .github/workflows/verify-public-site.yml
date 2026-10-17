@@ -1,7 +1,7 @@
 name: Verify public BL CLEA7 website and applications
 on:
   push:
-    branches: [main, work/complete-public-downloads, work/bil-public-0-6, work/studio-applications-07]
+    branches: [main, work/complete-public-downloads, work/bil-public-0-6, work/studio-applications-07, work/verified-web-backend-09]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -48,5 +48,39 @@ jobs:
         if: always()
         with:
           name: BL-CLEA7-public-browser-evidence
+          path: test-evidence/
+          retention-days: 14
+
+  backend-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CI: 'true'
+      GCLOUD_PROJECT: demo-clea7-runtime
+      FIREBASE_CLI_DISABLE_UPDATE_CHECK: 'true'
+      CLEA7_CHROME: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm install --prefix /tmp/clea7-firebase --no-audit --no-fund firebase-tools@14.18.0
+      - run: npm install --prefix /tmp/clea7-qa --no-audit --no-fund playwright@1.56.1
+      - name: Verify the public Studio and Runtime against real isolated test services
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m http.server 4173 --bind 127.0.0.1 > /tmp/clea7-public-backend.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" || true' EXIT
+          /tmp/clea7-firebase/node_modules/.bin/firebase emulators:exec --config tests/firebase/firebase.json --project demo-clea7-runtime --only auth,firestore 'node tests/test_public_remote_studio.cjs'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BL-CLEA7-public-backend-evidence
           path: test-evidence/
           retention-days: 14

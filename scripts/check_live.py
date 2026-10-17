@@ -35,7 +35,7 @@ def read(path):
 def check():
  home=read('').decode();assert 'ILDuA90WSVz2FTZdmWleQ0lzbGCLmFndZ6wlT5V74Ow' in home;assert 'studio/workbench/' in home
  verified_pages=[]
- for name in ['index.html','proizvodi.html','vizija.html','dokumentacija.html','preuzimanja.html','ai.html','privatnost.html','bil.html']:
+ for name in ['index.html','proizvodi.html','vizija.html','dokumentacija.html','preuzimanja.html','ai.html','privatnost.html','bil.html','novosti.html']:
   assert read(name)==(ROOT/name).read_bytes(),'Published page is not yet current: '+name
   verified_pages.append(name)
  page=read('preuzimanja.html').decode();assert 'Preuzmi SDK' in page and '/actions/runs/' not in page
@@ -43,7 +43,7 @@ def check():
  compiler=read('studio/workbench/bil-compiler.js');assert compiler==(ROOT/'studio/workbench/bil-compiler.js').read_bytes(),'Published BIL compiler differs.'
  engine=read('studio/workbench/engine.js');assert engine==(ROOT/'studio/workbench/engine.js').read_bytes(),'Published runtime differs from verified source.'
  assert b'CLEA7Library' in read('studio/launcher/library.js')
- catalog=json.loads(read('releases.json'));assert catalog['source_commit']=='e092cfeda4adb9a35d0e39749dfc99bd744b56bb'
+ catalog=json.loads(read('releases.json'));assert catalog['source_commit']=='a3e267b15f3b7f41187c5a78577f7d9d67c70549'
  verified=[]
  for entry in catalog['published']:
   path=entry['url'];assert path.startswith('downloads/') and '..' not in path and ':' not in path
