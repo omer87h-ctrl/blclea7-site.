@@ -55,7 +55,7 @@ class PublicBILSDKTests(unittest.TestCase):
             self.assertEqual(json.loads(output.read_text())['manifest']['runtime'],'0.7.0')
 
     def test_archive_contains_language_but_no_private_host_or_generated_cache(self):
-        with zipfile.ZipFile(ROOT/'downloads/BL-CLEA7-SDK-0.7.0.zip') as z:
+        with zipfile.ZipFile(ROOT/'downloads/BL-CLEA7-SDK-0.9.0.zip') as z:
             self.assertIsNone(z.testzip())
             names=set(z.namelist())
             self.assertTrue({'clea7/bil.py','sdk/bil-cli.cjs','web/workbench/bil-compiler.js',
@@ -64,6 +64,16 @@ class PublicBILSDKTests(unittest.TestCase):
             self.assertFalse({'main.py','runtime_main.py','clea7/host.py','clea7/desktop.py',
                               'clea7/cloud_ai.py','clea7/ai.py'}&names)
             self.assertEqual(z.read('LICENSE.txt'),(ROOT/'docs/USLOVI.txt').read_bytes())
+
+    def test_current_archive_independently_compiles_and_packages_application7(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            with zipfile.ZipFile(ROOT/'downloads/BL-CLEA7-SDK-0.9.0.zip') as archive:archive.extractall(root)
+            source=root/'independent.bil';source.write_text('backend community using "firebase.development/1"\nlet session: RemoteSession? = null\nlet failure: RemoteFailure? = null\non status { request community.auth.session() into session catch failure }\n')
+            output=root/'independent.clea7'
+            result=subprocess.run([sys.executable,'-m','clea7','bil','package',str(source),'--output',str(output)],cwd=root,text=True,capture_output=True,timeout=30)
+            self.assertEqual(result.returncode,0,result.stderr)
+            package=json.loads(output.read_text());self.assertEqual(package['manifest']['abi'],'clea7.application/7');self.assertEqual(package['manifest']['targets'],['browser']);self.assertEqual(package['manifest']['remote']['backends']['community']['operations'],['auth.session'])
 
     def test_existing_json_application_still_executes(self):
         result=cli('test','sdk/examples/units.application.json','--flow','convert','--state','{"kilometres":2.5}')

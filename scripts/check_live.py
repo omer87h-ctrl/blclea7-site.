@@ -4,7 +4,7 @@ import hashlib,json,time,urllib.request,urllib.error,urllib.parse
 ROOT=Path(__file__).resolve().parents[1]
 BASE='https://clea7.brzoilokalno.com/'
 REPO='omer87h-ctrl/blclea7-site.'
-TAG='clea7-0.7.0-e092cfe'
+TAG='clea7-0.9.0-a3e267b'
 def native_checks(native):
  url='https://api.github.com/repos/'+REPO+'/releases/tags/'+TAG
  with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'BL-CLEA7-anonymous-download-check'}),timeout=30) as response:
