@@ -61,9 +61,17 @@ function fields(value,depth=0){
  if(!value||typeof value!=='object'||Array.isArray(value))throw fault('BackendResponse','Invalid document fields.');
  return Object.fromEntries(Object.entries(value).map(([key,v])=>[key,decode(v,depth+1)]));
 }
+function query(collection,q){
+ if(typeof collection!=='string'||collection.length>1600)throw fault('BackendInput','Invalid collection path.');const parts=collection.split('/');if(parts.length<1||parts.length>11||parts.length%2!==1||parts.some(x=>!/^[A-Za-z0-9_-]{1,128}$/.test(x)))throw fault('BackendInput','Invalid collection path.');
+ if(!q||typeof q!=='object'||Array.isArray(q)||Object.keys(q).sort().join(',')!=='descending,limit,offset,orderBy,where'||typeof q.descending!=='boolean'||!Number.isInteger(q.limit)||q.limit<1||q.limit>50||!Number.isInteger(q.offset)||q.offset<0||q.offset>1000||typeof q.orderBy!=='string'||q.orderBy!==''&&q.orderBy!=='__name__'&&(!SAFE.test(q.orderBy)||BAD.has(q.orderBy))||!Array.isArray(q.where)||q.where.length>5)throw fault('BackendInput','Invalid query contract.');
+ const operations={'==':'EQUAL','!=':'NOT_EQUAL','<':'LESS_THAN','<=':'LESS_THAN_OR_EQUAL','>':'GREATER_THAN','>=':'GREATER_THAN_OR_EQUAL','array-contains':'ARRAY_CONTAINS'},filters=q.where.map(f=>{if(!f||typeof f!=='object'||Object.keys(f).sort().join(',')!=='field,flag,kind,number,op,text'||!SAFE.test(f.field)||BAD.has(f.field)||!Object.prototype.hasOwnProperty.call(operations,f.op)||!['text','number','flag','null'].includes(f.kind))throw fault('BackendInput','Invalid query filter.');for(const k of ['text','number','flag'])if(k===f.kind?f[k]===null||typeof f[k]!=={text:'string',number:'number',flag:'boolean'}[k]:f[k]!==null)throw fault('BackendInput','Filter value does not match its kind.');const value=f.kind==='null'?null:f[f.kind];data(value);return {fieldFilter:{field:{fieldPath:f.field},op:operations[f.op],value:encode(value)}};});
+ const field=q.orderBy||'__name__',structuredQuery={from:[{collectionId:parts[parts.length-1]}],orderBy:[{field:{fieldPath:field},direction:q.descending?'DESCENDING':'ASCENDING'}],limit:q.limit,offset:q.offset};if(field!=='__name__')structuredQuery.orderBy.push({field:{fieldPath:'__name__'},direction:q.descending?'DESCENDING':'ASCENDING'});if(filters.length)structuredQuery.where=filters.length===1?filters[0]:{compositeFilter:{op:'AND',filters}};
+ return {parent:parts.slice(0,-1).join('/'),structuredQuery};
+}
 function create(options){
- if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(k=>!['application','projectId','authOrigin','firestoreOrigin','credentials','fetch','timeoutMs','credentialTimeoutMs'].includes(k)))throw fault('BackendConfiguration','Unsupported emulator adapter configuration.');
+ if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(k=>!['application','projectId','authOrigin','firestoreOrigin','credentials','fetch','adapter','timeoutMs','credentialTimeoutMs'].includes(k)))throw fault('BackendConfiguration','Unsupported emulator adapter configuration.');
  const {application,projectId,credentials}=options;
+ const version=options.adapter||VERSION;if(![VERSION,'firebase.development/2','firebase.development/3'].includes(version))throw fault('BackendConfiguration','Unsupported adapter version.');
  if(!SAFE.test(application)||BAD.has(application)||typeof projectId!=='string'||!/^demo-clea7-[a-z0-9][a-z0-9-]{0,35}$/.test(projectId))throw fault('BackendConfiguration','A CLEA7 application and demo-clea7-* emulator project are required.');
  const authOrigin=origin(options.authOrigin),firestoreOrigin=origin(options.firestoreOrigin);
  if(typeof credentials!=='function')throw fault('BackendConfiguration','A trusted credential callback is required.');
@@ -129,6 +137,16 @@ function create(options){
    if(typeof result.localId!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(result.localId)||typeof result.email!=='string'||typeof result.idToken!=='string'||typeof result.refreshToken!=='string')throw fault('BackendResponse','The emulator returned an invalid session.',name==='auth.register');
    session={uid:result.localId,email:result.email,token:result.idToken,refresh:result.refreshToken,expiresAt:Date.now()+Math.min(3600,Math.max(1,Number(result.expiresIn)||1))*1000};return publicSession();
   }
+  if(name==='document.add'){if(!['firebase.development/2','firebase.development/3'].includes(version))throw fault('BackendInput','Creation requires adapter2.');query(args[0],{where:[],orderBy:'',descending:false,limit:1,offset:0});if(!args[1]||typeof args[1]!=='object'||Array.isArray(args[1]))throw fault('BackendInput','A document must be a Record.');data(args[1]);const authToken=await token(context),response=await request(firestoreOrigin+'/v1/projects/'+projectId+'/databases/(default)/documents/'+args[0],'POST',{fields:encode(args[1]).mapValue.fields},context,{token:authToken,write:true}),prefix='projects/'+projectId+'/databases/(default)/documents/'+args[0]+'/';if(typeof response.name!=='string'||!response.name.startsWith(prefix)||!/^[A-Za-z0-9_-]{1,128}$/.test(response.name.slice(prefix.length)))throw fault('BackendResponse','Invalid created document identity.',true);return {id:response.name.slice(prefix.length),path:response.name.slice(('projects/'+projectId+'/databases/(default)/documents/').length)};}
+  if(name==='query.list'||name==='query.documents'){
+   if(name==='query.documents'&&version!=='firebase.development/3')throw fault('BackendInput','Document identities require adapter3.');
+   if(!['firebase.development/2','firebase.development/3'].includes(version))throw fault('BackendInput','Queries require adapter2.');
+   const compiled=query(args[0],args[1]),authToken=await token(context),parent=compiled.parent?'/'+compiled.parent:'';
+   const result=await request(firestoreOrigin+'/v1/projects/'+projectId+'/databases/(default)/documents'+parent+':runQuery','POST',{structuredQuery:compiled.structuredQuery},context,{token:authToken});
+   if(!Array.isArray(result)||result.length>args[1].limit+1)throw fault('BackendResponse','Query response exceeds its declared bound.');const rows=[],seen=new Set();
+   for(const item of result){if(!item||typeof item!=='object'||Array.isArray(item))throw fault('BackendResponse','Invalid query response.');if(!item.document)continue;const doc=item.document,prefix='projects/'+projectId+'/databases/(default)/documents/'+args[0]+'/';if(typeof doc.name!=='string'||!doc.name.startsWith(prefix)||!/^[A-Za-z0-9_-]{1,128}$/.test(doc.name.slice(prefix.length)))throw fault('BackendResponse','Query document identity differs.');const id=doc.name.slice(prefix.length),value=copy(data(fields(doc.fields||{})));if(seen.has(id))throw fault('BackendResponse','Duplicate query document identity.');seen.add(id);rows.push(name==='query.documents'?{id,path:args[0]+'/'+id,value}:value);}
+   if(rows.length>args[1].limit)throw fault('BackendResponse','Query exceeded its limit.');data(rows);return rows;
+  }
   const documentPath=path(args[0]);
   if(name==='document.set'){if(!args[1]||typeof args[1]!=='object'||Array.isArray(args[1]))throw fault('BackendInput','A document must be a Record.');data(args[1]);}
   const authToken=await token(context),url=firestoreOrigin+'/v1/projects/'+projectId+'/databases/(default)/documents/'+documentPath;
@@ -140,8 +158,8 @@ function create(options){
   await request(url,'DELETE',undefined,context,{token:authToken,write:true});return true;
  }
  async function execute(request,{signal}={}){
-  if(!request||typeof request!=='object'||Array.isArray(request)||Object.keys(request).some(k=>!['operation','args'].includes(k))||!OPS.includes(request.operation)||!Array.isArray(request.args))throw fault('BackendInput','Invalid backend request.');
-  const name=request.operation,args=request.args,arity=name==='document.set'?2:name.startsWith('document.')?1:0;
+  if(!request||typeof request!=='object'||Array.isArray(request)||Object.keys(request).some(k=>!['operation','args'].includes(k))||!(OPS.includes(request.operation)||['firebase.development/2','firebase.development/3'].includes(version)&&['query.list','document.add'].includes(request.operation)||version==='firebase.development/3'&&request.operation==='query.documents')||!Array.isArray(request.args))throw fault('BackendInput','Invalid backend request.');
+  const name=request.operation,args=request.args,arity=['document.set','document.add','query.list','query.documents'].includes(name)?2:name.startsWith('document.')?1:0;
   if(args.length!==arity)throw fault('BackendInput','Wrong backend operation argument count.');
   if(closed)throw fault('BackendClosed','Backend adapter is closed.');
   if(signal?.aborted)throw fault('BackendCancelled','Backend operation was cancelled.');
@@ -158,7 +176,7 @@ function create(options){
   let timer;const deadline=ms=>{clearTimeout(timer);timer=setTimeout(()=>{context.timedOut=true;controller.abort();},ms);};context.startNetwork=()=>deadline(timeoutMs);deadline(name==='auth.register'||name==='auth.signIn'?credentialTimeoutMs:timeoutMs);active.add(controller);
   try{return await operation(name,args,context);}catch(error){if(error instanceof AdapterError)throw error;ensure(context);throw fault('BackendFailure','Backend operation failed.');}finally{clearTimeout(timer);active.delete(controller);controller.signal.removeEventListener('abort',onAbort);signal?.removeEventListener('abort',abort);controller.abort();}
  }
- return Object.freeze({version:VERSION,execute,close(){if(!closed){closed=true;invalidate();}},publicStatus(){return {version:VERSION,application,development:true,authenticated:!!session,session:publicSession(),closed,subscriptions:false};}});
+ return Object.freeze({version,execute,close(){if(!closed){closed=true;invalidate();}},publicStatus(){return {version,application,development:true,authenticated:!!session,session:publicSession(),closed,subscriptions:false};}});
 }
-scope.CLEA7FirebaseDevelopment=Object.freeze({VERSION,operations:OPS,create});
+scope.CLEA7FirebaseDevelopment=Object.freeze({VERSION,versions:[VERSION,'firebase.development/2','firebase.development/3'],operations:OPS,query,create});
 })(globalThis);

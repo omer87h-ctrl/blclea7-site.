@@ -1,4 +1,4 @@
-# BL CLEA7 public developer SDK 0.7 BIL
+# BL CLEA7 public developer SDK 0.13 BIL
 
 Python 3.12+; Node.js 22+ for execution. Offline validation, packaging and real tests:
 
@@ -32,3 +32,14 @@ BIL application/6 opisuje ekrane, obrasce i tabele. Primjer: sdk/examples/bil/or
 ## SDK0.9 — development backend contracts
 
 Compile/validate/package application7 with the original BIL compiler. `--targets browser` is the portable development default. Execute remote events only in a configured Runtime with explicit grants and local demo-clea7 Firebase emulators. This curated SDK excludes the private native host and Android build sources. Existing local applications remain supported. See docs/BIL-ASYNC-REQUESTS.md and docs/PRINCIPAL-STORAGE.md. No production backend, chat, uploads or push service is supplied.
+
+## SDK 0.13
+
+The SDK preserves existing projects and adds native Android capability contracts. Compile and package the original native-media example offline:
+
+```sh
+python -m clea7 bil check sdk/examples/bil/native-media.bil
+python -m clea7 bil package sdk/examples/bil/native-media.bil --output Native.clea7
+```
+
+Install Native.clea7 in Android Runtime 0.13 or newer. These hardware capabilities run on Android, not in a browser. Native-only apps do not require a cloud account. Windows Studio can build an embedded APK using a configured Android toolchain. The curated SDK excludes private native host implementation, credentials and user data.
