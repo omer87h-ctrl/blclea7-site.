@@ -15,3 +15,7 @@ Connected BIL screens/forms/tables, original visual authoring, typed source/IR a
 ## Web/SDK0.9 candidate
 
 Browser source a3e267b15f3b7f41187c5a78577f7d9d67c70549. Current-source private/public CI must pass before deployment. Public native release remains0.7 with its own exact provenance; do not relabel existing binaries as0.9. Never publish private native host/full source SDK or link private expiring Actions artifacts as public downloads.
+
+## Public0.9 distribution
+
+Native binaries now use append-only public release clea7-0.9.0-a3e267b from verified source a3e267b, full run39002583413, native39002583409 and Firebase39002583422. SHA256, sizes and original terms are pinned in releases.json. Public browser/SDK and native delivery are verified separately; this release does not finish realtime chat/media/push/full community acceptance.

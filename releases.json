@@ -15,8 +15,8 @@
       "key": "preview",
       "name": "BLclea7-Studio-pregled.html",
       "url": "downloads/BLclea7-Studio-pregled.html",
-      "size_bytes": 606486,
-      "sha256": "7958fe21aa2bb25b073100cb2a80af903e5c7afb91d5485747543e18e6ef18d2"
+      "size_bytes": 708394,
+      "sha256": "c8092fbf0b77d6bfbad50a410fd1394e5cde40586b0efb1b51ffc4d88b9535a0"
     },
     {
       "key": "example",
@@ -64,31 +64,31 @@
   "native": {
     "state": "published",
     "repository": "omer87h-ctrl/blclea7-site.",
-    "tag": "clea7-0.7.0-e092cfe",
-    "release_url": "https://github.com/omer87h-ctrl/blclea7-site./releases/tag/clea7-0.7.0-e092cfe",
+    "tag": "clea7-0.9.0-a3e267b",
+    "version": "0.9.0",
+    "release_url": "https://github.com/omer87h-ctrl/blclea7-site./releases/tag/clea7-0.9.0-a3e267b",
     "assets": [
       {
-        "key": "studio",
-        "name": "BL-CLEA7-Studio-Windows-x64.zip",
-        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.7.0-e092cfe/BL-CLEA7-Studio-Windows-x64.zip",
-        "size_bytes": 357162060,
-        "sha256": "fc7724884e11b5780948173aca9bcc809195899f7611bd38807b8dd84b9c964a"
+        "key": "android",
+        "name": "BL-CLEA7-Runtime-Android-debug.apk",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.9.0-a3e267b/BL-CLEA7-Runtime-Android-debug.apk",
+        "size_bytes": 161866,
+        "sha256": "5e2a511b08868b9de927fc8b889e146427a221656e96c7fe400463da0df92906"
       },
       {
         "key": "runtime",
         "name": "BL-CLEA7-Runtime-Windows-x64.zip",
-        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.7.0-e092cfe/BL-CLEA7-Runtime-Windows-x64.zip",
-        "size_bytes": 338288691,
-        "sha256": "3fc4fd06cbb6f2ced00ec487d29ceec53b5fce99e2b1a3f065879c890eddd2c9"
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.9.0-a3e267b/BL-CLEA7-Runtime-Windows-x64.zip",
+        "size_bytes": 338321036,
+        "sha256": "ed86c4fb41b75b28eb0776a4cd19d660cd6976555072d698cfd16b576206461b"
       },
       {
-        "key": "android",
-        "name": "BL-CLEA7-Runtime-Android-debug.apk",
-        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.7.0-e092cfe/BL-CLEA7-Runtime-Android-debug.apk",
-        "size_bytes": 118821,
-        "sha256": "9937313872385fd7c171629aa86455e1e03356d71cd3830b83926280ae5cc076"
+        "key": "studio",
+        "name": "BL-CLEA7-Studio-Windows-x64.zip",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.9.0-a3e267b/BL-CLEA7-Studio-Windows-x64.zip",
+        "size_bytes": 357240516,
+        "sha256": "e6e2e07031b44890b51cb3134572df91a7d86975f8f65c84e8a25be09c290e64"
       }
-    ],
-    "version": "0.7.0"
+    ]
   }
 }
