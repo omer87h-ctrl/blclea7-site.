@@ -1,0 +1,57 @@
+# Original independent native-media application, by Brzo i Lokalno.
+# No network or cloud dependency. Android Runtime 0.13+.
+backend phone using "android.native/1"
+let photograph: NativeMedia? = null
+let location: NativeLocation? = null
+let receipt: NativeReceipt? = null
+let failure: RemoteFailure? = null
+let removed = false
+let localCount = 0
+let status = "Ready"
+let handle = ""
+on capture {
+    request phone.camera.capture() into photograph catch failure then captured else failed
+}
+on pick {
+    request phone.media.pick() into photograph catch failure then captured else failed
+}
+on captured(result: NativeMedia?, context: RemoteCompletion) {
+    if result != null { handle = result.handle }
+    status = "Photograph saved"
+}
+on inspect {
+    request phone.media.inspect(handle) into photograph catch failure
+}
+on remove {
+    request phone.media.remove(handle) into removed catch failure then deleted else failed
+}
+on deleted(result: Boolean, context: RemoteCompletion) {
+    photograph = null
+    handle = ""
+    status = "Photograph removed"
+}
+on locate {
+    request phone.location.current() into location catch failure
+}
+on notify {
+    request phone.notification.post(new NativeNotification { title: "My CLEA7 app", body: "Local notification", id: 17 }) into receipt catch failure
+}
+on failed(problem: RemoteFailure, context: RemoteCompletion) {
+    status = problem.code
+}
+on local { localCount = localCount + 1 }
+screen home "My native media app" {
+    text "Photographs remain on this device." key privacy
+    image photograph label "My photograph" key photograph
+    show status key status
+    show localCount key count
+    row {
+        button "Capture photograph" runs capture key capture
+        button "Choose photograph" runs pick key pick
+    } key actions
+    button "Inspect photograph" runs inspect key inspect
+    button "Remove photograph" runs remove key remove
+    button "Get location" runs locate key location
+    button "Local notification" runs notify key notify
+    button "Local action" runs local key local
+}

@@ -13,9 +13,13 @@ function publicError(error){
  const messages={Denied:'Backend operation was not authorized.',Unavailable:'The development backend is unavailable.',Cancelled:'The request was cancelled.',Timeout:'The backend request timed out.',Invalid:'The backend returned data outside the declared contract.',Authentication:'Authentication failed.',NotFound:'The requested resource was not found.',Conflict:'A conflicting request is already active.',Budget:'The remote operation budget was exceeded.',Persistence:'The remote result could not be stored locally.',Uncertain:'The remote write may have completed. Check the server before repeating it.'};
  return {code,message:messages[code],uncertain:error?.uncertain===true};
 }
-function registry(){const native=scope.CLEA7AndroidBackend?.available();return native||scope.CLEA7FirebaseDevelopment?{'firebase.development/1':{operations:OPS.slice(),targets:native?['android']:['browser']}}:{};}
+const OPS2=Object.freeze([...OPS,'document.add','query.list','observe.document.get','observe.query.list']);
+const OPS3=Object.freeze([...OPS2,'query.documents','observe.query.documents']);
+function registry(){const native=scope.CLEA7AndroidBackend?.profile(),versions=native?(native.adapters||[native.adapter]):scope.CLEA7FirebaseDevelopment?.versions|| (scope.CLEA7FirebaseDevelopment?['firebase.development/1']:[]);const entries=Object.fromEntries(versions.map(version=>[version,{operations:(version==='firebase.development/3'?OPS3:version==='firebase.development/2'?OPS2:OPS).slice(),targets:native?['android']:['browser']}]));if(scope.CLEA7DeviceClient?.profile().typed===true)entries['android.native/1']={operations:Object.keys(scope.CLEA7BIL.NATIVE_CONTRACTS),targets:['android']};return entries;}
+
 function validateBinding(binding){
- if(!binding||binding.adapter!=='firebase.development/1'||!/^demo-clea7-[a-z0-9][a-z0-9-]{0,35}$/.test(binding.projectId||''))throw new RemoteFault('Invalid','Only an isolated demo-clea7 Firebase project is supported.');
+ if(binding?.adapter==='android.native/1'){if(Object.keys(binding).join('|')!=='adapter')throw new RemoteFault('Invalid','Native binding cannot contain endpoints or credentials.');return {adapter:'android.native/1'};}
+ if(!binding||!['firebase.development/1','firebase.development/2','firebase.development/3'].includes(binding.adapter)||!/^demo-clea7-[a-z0-9][a-z0-9-]{0,35}$/.test(binding.projectId||''))throw new RemoteFault('Invalid','Only an isolated demo-clea7 Firebase project is supported.');
  const endpoints={authOrigin:9099,firestoreOrigin:8080};
  for(const [key,port]of Object.entries(endpoints)){
   let url;try{url=new URL(binding[key]);}catch{throw new RemoteFault('Invalid','Invalid emulator endpoint.');}
@@ -37,18 +41,18 @@ function create(project,{bindings={},grants={},credentials,adapterFactory=null}=
   if(binding.adapter!==contract.adapter)throw new RemoteFault('Denied','Backend adapter differs from the source contract.');
   const approved=grants[alias];
   if(!Array.isArray(approved)||new Set(approved).size!==approved.length||contract.operations.some(op=>!approved.includes(op))||approved.some(op=>!contract.operations.includes(op)))throw new RemoteFault('Denied','Approve exactly the backend operations declared by this application.');
-  const native=!adapterFactory&&scope.CLEA7AndroidBackend?.available(),factory=adapterFactory||(native?scope.CLEA7AndroidBackend.create:scope.CLEA7FirebaseDevelopment?.create);
+  const device=binding.adapter==='android.native/1',native=!adapterFactory&&scope.CLEA7AndroidBackend?.available(),factory=adapterFactory||(device?scope.CLEA7DeviceClient?.create: native?scope.CLEA7AndroidBackend.create:scope.CLEA7FirebaseDevelopment?.create);
   if(!factory)throw new RemoteFault('Unavailable','The requested development adapter is not installed.');
-  const {adapter:adapterName,...config}=binding;const adapter=factory(native?{application:project.id,backend:alias,operations:contract.operations.slice(),projectId:config.projectId}:{...config,application:project.id,credentials});
+  const {adapter:adapterName,...config}=binding;const adapter=factory(device?{application:project.id,backend:alias,operations:contract.operations.slice()}:native?{application:project.id,backend:alias,operations:contract.operations.slice(),projectId:config.projectId,...(contract.adapter!=='firebase.development/1'?{adapter:contract.adapter}:{})}:{...config,application:project.id,credentials,...(contract.adapter!=='firebase.development/1'?{adapter:contract.adapter}:{})});
   if(adapter.version!==contract.adapter||typeof adapter.execute!=='function')throw new RemoteFault('Invalid','Invalid backend adapter.');
-  adapters.set(alias,adapter);identities.set(alias,null);
+  adapters.set(alias,adapter);if(binding.adapter!=='android.native/1')identities.set(alias,null);
  }
  function authorize(requests){
   if(closed)throw new RemoteFault('Cancelled','Backend context is closed.');
   if(!Array.isArray(requests)||requests.length+active.size>8)throw new RemoteFault('Budget','At most eight remote requests can be active.');
   const seen=new Set();const changes=requests.filter(r=>['auth.register','auth.signIn','auth.signOut'].includes(r.operation));if(changes.length&&(changes.length!==1||requests.length!==1))throw new RemoteFault('Conflict','An authentication transition must be its own event.');
   for(const r of requests){
-   if(!declared[r.backend]?.operations.includes(r.operation)||!OPS.includes(r.operation)||!adapters.has(r.backend))throw new RemoteFault('Denied','Operation not declared by this application.');
+   if(!declared[r.backend]?.operations.includes(r.operation)||!(declared[r.backend]?.adapter==='android.native/1'?own(scope.CLEA7BIL.NATIVE_CONTRACTS,r.operation):OPS.includes(r.operation)||['firebase.development/2','firebase.development/3'].includes(declared[r.backend]?.adapter)&&['query.list','document.add'].includes(r.operation)||declared[r.backend]?.adapter==='firebase.development/3'&&r.operation==='query.documents')||!adapters.has(r.backend))throw new RemoteFault('Denied','Operation not declared by this application.');
    if(!changes.length&&[...active.values()].some(a=>a.authChange&&!a.controller.signal.aborted))throw new RemoteFault('Conflict','Authentication is changing.');
    if(typeof r.id!=='string'||!/^remote_[A-Za-z0-9_]{1,80}$/.test(r.id)||active.has(r.id)||seen.has(r.id))throw new RemoteFault('Invalid','Invalid remote request identity.');
    const target=r.resultTarget,authChange=['auth.register','auth.signIn','auth.signOut'].includes(r.operation),conflicting=[...active.values()].some(a=>!a.controller.signal.aborted&&!(authChange&&a.backend===r.backend)&&[a.target,a.errorTarget].some(slot=>slot===target||slot===r.errorTarget));if(typeof target!=='string'||conflicting||seen.has('target:'+target)||seen.has('target:'+r.errorTarget))throw new RemoteFault('Conflict','A request for this result is already active.');
@@ -69,11 +73,52 @@ function create(project,{bindings={},grants={},credentials,adapterFactory=null}=
    }
    return value;
   };
-  const task=Promise.resolve().then(()=>run({signal:controller.signal,execute}));
+  const release=()=>{active.delete(request.id);};const task=Promise.resolve().then(()=>run({signal:controller.signal,execute,release}));
   task.catch(()=>{}).finally(()=>{active.delete(request.id);});return task;
  }
 
- return Object.freeze({application:project.id,authorize,submit,principal,onPrincipal(listener){if(typeof listener!=='function')throw new RemoteFault('Invalid','Invalid identity listener.');listeners.add(listener);return ()=>listeners.delete(listener);},get pending(){return active.size;},get closed(){return closed;},close(){if(closed)return;closed=true;listeners.clear();for(const {controller}of active.values())controller.abort();for(const adapter of adapters.values())adapter.close?.();},status(){return {format:'clea7.remote-status/1',pending:active.size,closed,backends:Object.entries(declared).map(([alias,c])=>({alias,adapter:c.adapter,operations:c.operations.slice()}))};}});
+ return Object.freeze({application:project.id,authorize,submit,principal,onPrincipal(listener){if(typeof listener!=='function')throw new RemoteFault('Invalid','Invalid identity listener.');listeners.add(listener);return ()=>listeners.delete(listener);},cancel(id){active.get(id)?.controller.abort();},get pending(){return active.size;},get closed(){return closed;},close(){if(closed)return;closed=true;listeners.clear();for(const {controller}of active.values())controller.abort();for(const adapter of adapters.values())adapter.close?.();},status(){return {format:'clea7.remote-status/1',pending:active.size,closed,backends:Object.entries(declared).map(([alias,c])=>({alias,adapter:c.adapter,operations:c.operations.slice()}))};}});
+}
+class Observations {
+ constructor(engine){this.engine=engine;this.entries=new Map();this.closed=false;this.visibility=()=>{for(const entry of this.entries.values())if(!entry.running)this.schedule(entry,0);};scope.document?.addEventListener('visibilitychange',this.visibility);}
+ alive(entry){return !this.closed&&!this.engine.closed&&this.entries.get(entry.name)===entry&&entry.epoch===this.engine.principalEpoch&&entry.generation===this.engine.remoteGeneration;}
+ authorize(requests,actions){
+  const planned=new Map(this.entries),starts=[];
+  for(const action of actions){if(action.kind==='cancel'){planned.delete(action.name);continue;}const r=action.request,name=r.subscription.name,contract=this.engine.project.remote?.backends[r.backend];
+   if(this.engine.reality!=='LIVE'||!this.engine.remote||!['firebase.development/2','firebase.development/3'].includes(contract?.adapter)||!contract.operations.includes('observe.'+r.operation)||!['document.get','query.list','query.documents'].includes(r.operation)||planned.has(name)||planned.size>=4)throw new RemoteFault('Conflict','A subscription is already active or is outside the approved contract.');
+   for(const item of planned.values()){const x=item.request;if([x.resultTarget,x.errorTarget].some(k=>k===r.resultTarget||k===r.errorTarget))throw new RemoteFault('Conflict','Subscriptions require separate result and error values.');}
+   planned.set(name,{request:r});starts.push(r);
+  }
+  for(const r of requests)if(!['auth.register','auth.signIn','auth.signOut'].includes(r.operation))for(const {request:x}of planned.values())if([x.resultTarget,x.errorTarget].some(k=>k===r.resultTarget||k===r.errorTarget))throw new RemoteFault('Conflict','This result belongs to an active subscription. Cancel it first.');
+  if(requests.length||starts.length)this.engine.remote?.authorize([...requests,...starts]);
+ }
+ apply(actions){for(const action of actions){if(action.kind==='cancel')this.stop(action.name,'explicit',true);else this.start(action.request);}}
+ start(request){const entry={name:request.subscription.name,id:request.id,request,epoch:this.engine.principalEpoch,generation:this.engine.remoteGeneration,sequence:0,polls:0,updates:0,errors:0,delay:request.subscription.interval,running:false,timer:null,controller:null,last:null,lastError:null,hasValue:false,state:'starting'};this.entries.set(entry.name,entry);this.schedule(entry,0);this.trace(entry,'started');}
+ trace(entry,state,extra={}){this.engine.recordEvent({state:'subscription-'+state,mode:'LIVE',subscriptionId:entry.id,sourceId:entry.request.sourceId,location:entry.request.location,backend:entry.request.backend,operation:entry.request.operation,sequence:entry.sequence,transport:'bounded-polling',replayable:false,...extra});}
+ schedule(entry,delay){clearTimeout(entry.timer);entry.timer=null;if(!this.alive(entry))return;if(scope.document?.hidden===true){entry.state='paused';return;}entry.timer=setTimeout(()=>{entry.timer=null;this.tick(entry);},delay);}
+ async tick(entry){if(!this.alive(entry)||entry.running)return;entry.running=true;if(this.engine.guard){try{await this.engine.guard();}catch{this.stop(entry.name,'installation-changed',false);this.engine.notifySafe('Praćenje je zaustavljeno jer instalacija više nije aktivna.');return;}if(!this.alive(entry)){entry.running=false;return;}}entry.state='reading';entry.polls++;const request={...entry.request,id:scope.CLEA7Format.newId('remote')};delete request.subscription;let job;
+  try{job=(entry.pendingId=request.id,this.engine.remote.submit(request,async({signal,execute,release})=>{
+   let value,error;try{value=scope.CLEA7BILRuntime.validateRemoteResult(request,await execute());}catch(e){error=publicError(e);}
+   if(!this.alive(entry)||signal.aborted)return;
+   const changed=error?entry.lastError!==error.code:!entry.hasValue||entry.last!==scope.CLEA7.stable(value)||entry.lastError!==null;
+   if(changed){const kind=error?'error':entry.lastError?'recovered':'update',context={subscriptionId:entry.id,sourceId:request.sourceId,backend:request.backend,operation:request.operation,sequence:entry.sequence+1,kind};
+    await this.engine.enqueue(async()=>{if(!this.alive(entry)||signal.aborted)throw new RemoteFault('Cancelled','Subscription context changed.');release();await this.engine.completeRemote({...request,observationContext:context},value,error,entry.generation,()=>this.alive(entry)&&!signal.aborted);});
+    if(!this.alive(entry))return;entry.sequence++;if(error){entry.errors++;entry.lastError=error.code;}else{entry.updates++;entry.hasValue=true;entry.last=scope.CLEA7.stable(value);entry.lastError=null;}this.trace(entry,error?'error':'updated',{error:error?.code||null});
+   }
+   if(error){if(['Unavailable','Timeout','Budget','Conflict'].includes(error.code)){entry.delay=Math.min(30000,Math.max(entry.request.subscription.interval,entry.delay*2));entry.state='reconnecting';}else this.stop(entry.name,'terminal-error',false);}else{entry.delay=entry.request.subscription.interval;entry.state='waiting';}
+  }));}catch(error){entry.errors++;entry.state='reconnecting';entry.delay=Math.min(30000,entry.delay*2);this.trace(entry,'backpressure',{error:publicError(error).code});job=Promise.resolve();}
+  this.engine.remoteJobs.add(job);try{await job;}catch{if(this.alive(entry)){this.trace(entry,'delivery-failed',{error:'Persistence'});this.stop(entry.name,'delivery-failed',false);this.engine.notifySafe('Praćenje je zaustavljeno jer rezultat nije mogao biti potvrđen lokalno.');}}finally{this.engine.remoteJobs.delete(job);entry.running=false;if(this.alive(entry))this.schedule(entry,entry.delay);}
+ }
+ stop(name,reason='closed',notify=false){const entry=this.entries.get(name);if(!entry)return false;this.entries.delete(name);clearTimeout(entry.timer);entry.timer=null;entry.last=null;entry.lastError=null;entry.hasValue=false;entry.state='cancelled';this.trace(entry,'cancelled',{reason});
+  // Active read completion is invalidated by membership/epoch even if a host cannot abort transport.
+  if(entry.pendingId)this.engine.remote.cancel?.(entry.pendingId);
+  if(notify&&!this.engine.closed){const epoch=entry.epoch,generation=entry.generation,handler=entry.request.completion.stopped,context={subscriptionId:entry.id,sourceId:entry.request.sourceId,backend:entry.request.backend,operation:entry.request.operation,sequence:entry.sequence+1,kind:'cancelled'},valid=()=>!this.closed&&!this.engine.closed&&epoch===this.engine.principalEpoch&&generation===this.engine.remoteGeneration;
+   const job=this.engine.enqueue(()=>{if(!valid())throw new RemoteFault('Cancelled','Subscription context changed.');return this.engine.run('bil_'+handler,{}, {},{state:scope.CLEA7Format.clone(this.engine.state),valid,invocation:{handler,arguments:[true,context],depth:0}});});this.engine.remoteJobs.add(job);job.catch(()=>{}).finally(()=>this.engine.remoteJobs.delete(job));
+  }return true;
+ }
+ stopAll(reason){for(const name of [...this.entries.keys()])this.stop(name,reason,false);}
+ close(){this.stopAll('closed');this.closed=true;scope.document?.removeEventListener('visibilitychange',this.visibility);}
+ status(){return {format:'bil.observations/1',transport:'bounded-polling',active:this.entries.size,subscriptions:[...this.entries.values()].map(e=>({id:e.id,name:e.name,sourceId:e.request.sourceId,backend:e.request.backend,operation:e.request.operation,interval:e.request.subscription.interval,state:e.state,sequence:e.sequence,polls:e.polls,updates:e.updates,errors:e.errors,nextDelay:e.delay}))};}
 }
 function credentials(operation,{signal}={}){
  if(typeof document==='undefined')return Promise.reject(new RemoteFault('Unavailable','This host has no secure credential prompt.'));
@@ -92,5 +137,5 @@ function credentials(operation,{signal}={}){
   if(signal?.aborted){abort();return;}dialog.showModal();email.focus();
  });
 }
-scope.CLEA7Remote={create,registry,validateBinding,credentials,publicError,RemoteFault,OPS};
+scope.CLEA7Remote={create,registry,validateBinding,credentials,publicError,RemoteFault,OPS,OPS2,OPS3,Observations};
 })(globalThis);

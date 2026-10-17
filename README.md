@@ -1,21 +1,9 @@
-# BLclea7 public website — BIL 0.6
+# BLclea7 — public website and developer distribution
 
-Domain: https://clea7.brzoilokalno.com/
+Website: https://clea7.brzoilokalno.com/
 
-Browser target and curated SDK from tested source 72249d92e1d817fe2b5c726e4c18b6b0a83ed74b. The private native host, AI service, publisher identities and user data are excluded. Existing public launcher compatibility fixes are preserved. Original distribution terms in docs/USLOVI.txt and SDK LICENSE.txt are unchanged.
+This repository contains the consumer website, browser Studio/Runtime and the curated public application SDK. The private native host and owner keys are excluded. Existing downloads remain available; native release assets are append-only and identified by their source commit and SHA-256.
 
-BIL grammar, supported visual subset and limits are described at bil.html. Native public downloads are pinned to verified release clea7-0.6.0-72249d9. The optional BIL AI proposal API has no default model connection.
+The 0.13 development release adds original BIL Android capabilities, scoped local media and visual group workflows. Native-only apps do not need Firebase. Local notifications are distinct from remote push. Windows/Android packages are development distributions; owner release signing and complete general-platform acceptance are separate requirements.
 
-Checks: python scripts/check_public.py; python -m unittest discover -s tests -v. Real browser, independent SDK and anonymous live delivery checks run in Actions. No main Brzo i Lokalno app, PWA or TECH portal is part of this repository.
-
-## Studio 0.7
-
-Connected BIL screens/forms/tables, original visual authoring, typed source/IR and SDK examples. Private-source verification: e092cfeda4adb9a35d0e39749dfc99bd744b56bb / run 38919749947. Public binaries are append-only release assets pinned in releases.json. No licence terms changed and no native host source is included in the curated SDK.
-
-## Web/SDK0.9 candidate
-
-Browser source a3e267b15f3b7f41187c5a78577f7d9d67c70549. Current-source private/public CI must pass before deployment. Public native release remains0.7 with its own exact provenance; do not relabel existing binaries as0.9. Never publish private native host/full source SDK or link private expiring Actions artifacts as public downloads.
-
-## Public0.9 distribution
-
-Native binaries now use append-only public release clea7-0.9.0-a3e267b from verified source a3e267b, full run39002583413, native39002583409 and Firebase39002583422. SHA256, sizes and original terms are pinned in releases.json. Public browser/SDK and native delivery are verified separately; this release does not finish realtime chat/media/push/full community acceptance.
+Run python scripts/check_public.py and python -m unittest discover -s tests -v. GitHub Actions verifies actual browser authoring, isolated backend services, SDK execution and anonymous deployed downloads. Public promotion must use exact approved, tested binaries and retain original terms/licence notices.

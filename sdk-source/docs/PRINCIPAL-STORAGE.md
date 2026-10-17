@@ -51,9 +51,15 @@ ownership from an editable public session would disclose data.
 
 `tests/test_principal_isolation.cjs` tests A→logout→B→A, restart, forged public
 sessions, quarantine, stale replies, queued events, SHADOW and project separation.
-These tests explicitly inject a host adapter; they are not network evidence.
-Actual Firebase/browser/native account-switch cases have been added to the
-existing CI suites and must be reported with their exact successful source/run.
+These10groups explicitly inject a host adapter; they are not network evidence.
+Actual Firebase/browser/native account-switch cases passed at source
+a3e267b15f3b7f41187c5a78577f7d9d67c70549. Real Firebase run39002583422/job117308443005 passed
+8adapter+9BIL-workflow+9Chrome groups. Native run39002583409/job117308443021
+passed two distinct API30 AVDs plus separate Runtime install, including native
+account switching, local draft recovery and foreign-backup rejection. Full run
+39002583413 passed Linux verify117308618475,Windows117309114710 and
+Android117309114689.108Python cases (Linux107+1skip;Windows108pass),
+216Node groups and112Chrome groups passed. No physical-device proof is claimed.
 
 Same-origin/OS-profile owners can inspect IndexedDB and exported files. This is
 application/user separation in the closed interpreter, not OS process isolation,
