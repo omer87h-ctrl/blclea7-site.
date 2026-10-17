@@ -1,2 +1,1 @@
-BLclea7 0.7 BIL development release by Brzo i Lokalno.
-Distributed under the same owner-controlled terms in LICENSE.txt, retained verbatim from the preceding development release. Separate third-party and material licences remain applicable. No native host, AI service or private signing identity is included in this public SDK.
+BLclea7 SDK0.9 by Brzo i Lokalno. Public application compiler, checked Runtime and developer contracts only. Existing owner-controlled LICENSE.txt and separate third-party/material licences remain unchanged. No private native host, signing identity, user content or credentials are included.

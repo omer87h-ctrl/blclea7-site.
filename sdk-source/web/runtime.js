@@ -41,6 +41,27 @@ function installCLEA7(scope) {
    });
   }
  }
+
+function principalVault(base,application,principal){
+ class PrincipalFault extends Error{constructor(code,message){super(message);this.code=code;}}
+ if(!/^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(application)||principal?.format!=='clea7.principal/1'||principal.application!==application)throw new PrincipalFault('Invalid','Invalid authenticated storage principal.');
+ let revoked=false,prefix=null,scopeId=null;
+ const ready=Promise.resolve(base.ready).then(async()=>{scopeId=await scope.CLEA7.digest(scope.CLEA7.stable(principal));if(!scopeId)throw new PrincipalFault('Unavailable','Authenticated storage requires SHA-256 support.');prefix='principal1:'+application+':'+scopeId+':';});
+ const assertActive=()=>{if(revoked)throw new PrincipalFault('Cancelled','The authenticated storage view was revoked.');};
+ const key=k=>{assertActive();if(typeof k!=='string'||k.length>512)throw new PrincipalFault('Invalid','Invalid scoped storage key.');return prefix+k;};
+ const call=async fn=>{assertActive();await ready;assertActive();const result=await fn();assertActive();return result;};
+ const checks=xs=>xs.map(([k,v])=>[key(k),v]);
+ return Object.freeze({ready,get persistent(){return base.persistent;},get problem(){return base.problem;},assertActive,revoke(){revoked=true;},get scope(){assertActive();if(!scopeId)throw new PrincipalFault('Unavailable','Storage is not open.');return {format:'clea7.storage-scope/1',id:scopeId};},
+  get:k=>call(()=>base.get(key(k))),put:(k,v)=>call(()=>base.put(key(k),v)),remove:k=>call(()=>base.remove(key(k))),
+  putEffect:async(k,value)=>{await ready;if(typeof k!=='string'||!k.startsWith('effects2:'+application+':')||value?.format!=='bil.remote-effect/1'||Object.keys(value).some(k=>!['id','format','flow','backend','operation','sourceId','location','status','time','reason','error','finished','local'].includes(k))||JSON.stringify(value).length>8192)throw new PrincipalFault('Invalid','Invalid scoped effect journal.');return base.put(prefix+k,value);},
+  entries:p=>call(async()=>{const rows=await base.entries(key(p));return rows.map(r=>({key:r.key.slice(prefix.length),value:r.value}));}),
+  batch:(puts,removes=[])=>call(()=>base.batch(checks(puts),removes.map(key))),
+  batchConditional:(k,expected,puts,removes=[])=>call(()=>base.batchConditional(key(k),expected,checks(puts),removes.map(key))),
+  batchConditions:(conditions,puts,removes=[])=>call(()=>{if(typeof base.batchConditions!=='function')throw new PrincipalFault('Unavailable','Storage cannot validate multiple conditions.');return base.batchConditions(checks(conditions),checks(puts),removes.map(key));}),
+  readSnapshot:({keys=[],prefixes=[],conditions=[],...limits}={})=>call(async()=>{const r=await base.readSnapshot({...limits,keys:keys.map(key),prefixes:prefixes.map(key),conditions:checks(conditions)});return {values:r.values,groups:r.groups.map(rows=>rows.map(row=>({key:row.key.slice(prefix.length),value:row.value})))};})
+ });
+}
+
  async function digest(value){if(!scope.crypto?.subtle)return null;const bytes=new TextEncoder().encode(value),hash=await scope.crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('');}
  class Runtime {
   constructor({vault=new Vault(),budget=8*1024*1024,workers=2}={}){if(![1,2].includes(workers))throw Error('Dozvoljen je jedan ili dva radnika.');if(!Number.isFinite(budget)||budget<0||budget>8*1024*1024)throw Error('Cache budžet treba 0–8 MiB.');this.vault=vault;this.budget=budget;this.workerLimit=workers;this.eco=false;this.tasks=[];this.events=[];this.metrics={hits:0,misses:0,invalidated:0,evictions:0};this.active=new Map();this.waiting=[];this.closed=false;this.pending=0;this.engineProof=digest(operation.toString()+stable(OPERATIONS)+(scope.navigator?.userAgent||''));this.session=scope.crypto?.randomUUID?.()||String(Date.now())+Math.random();}
@@ -69,7 +90,7 @@ function installCLEA7(scope) {
   close(){this.closed=true;const waiting=this.waiting;this.waiting=[];for(const item of waiting){item.task.state='cancelled';item.reject(Error('Runtime zatvoren.'));}for(const item of [...this.active.values()])item.cancel();}
  }
  class MemoryVault extends Vault { async open(){this.persistent=false;this.problem='Izolovana memorijska izvedba; ne čuva live podatke.';} }
- scope.CLEA7={VERSION,Vault,MemoryVault,Runtime,operation,stable,digest,clone,PILLARS,OPERATIONS};
+ scope.CLEA7={VERSION,Vault,MemoryVault,Runtime,principalVault,operation,stable,digest,clone,PILLARS,OPERATIONS};
  scope.CLEA7_RUNTIME_SOURCE='('+installCLEA7.toString()+')(globalThis);';
 }
 installCLEA7(globalThis);
