@@ -1,0 +1,11 @@
+BLclea7 0.13 — Android mogućnosti
+
+U BIL panelu otvori Backend i asinhrone mogućnosti. Odaberi kameru, fotografije, lokaciju ili lokalnu obavijest. Studio dodaje tipizirani zahtjev i dugme. Dodaj image komponentu i poveži je s NativeMedia vrijednošću. Kompajliraj i primijeni projekt prije izvoza.
+
+Izvezi .clea7 paket za Android Runtime 0.13 ili izgradi APK u Windows Studiju uz Android SDK/JDK/Gradle. Native mogućnosti se izvršavaju na Android uređaju; web editor služi za njihovo projektovanje. Native-only aplikacije ne traže Firebase ni cloud račun.
+
+Fotografije se čuvaju lokalno, u prostoru aplikacije i korisnika. Koristi media.list za ranije fotografije, media.inspect za provjeru i media.remove za eksplicitno brisanje. Podržan je odabir JPEG/PNG/WebP slika i lokalno pretvaranje u JPEG. Limit je 5 MiB po fotografiji i 32 MiB po aplikaciji.
+
+Lokalna obavijest je poruka koju pokrene instalirana aplikacija. Udaljeni push zahtijeva zasebnu serversku integraciju. Ova verzija ga ne predstavlja kao lokalnu funkciju.
+
+Kopija aplikacijskog stanja čuva vrijednosti i identifikatore fotografija; same JPEG datoteke nisu uključene. Prije uklanjanja instalacije ili podataka uređaja sačuvaj važne fotografije. Razvojni Android APK ima debug potpis; Android može odbiti ažuriranje ako potpis nije isti. Ne uklanjaj postojeću instalaciju bez sigurnosne kopije.

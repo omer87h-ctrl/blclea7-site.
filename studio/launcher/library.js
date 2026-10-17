@@ -1,6 +1,6 @@
 'use strict';
 (async()=>{
-const $=id=>document.getElementById(id),P=CLEA7Package,windows=new Map(),vault=new CLEA7.Vault();await vault.ready;const library=new P.Library({vault,remoteAdapters:window.CLEA7Remote?.registry()||{}}),status=text=>$('status').textContent=text;
+const $=id=>document.getElementById(id),P=CLEA7Package,windows=new Map(),vault=new CLEA7.Vault();await vault.ready;const library=new P.Library({vault,permissions:window.CLEA7DeviceClient?.profile().typed?['camera','location','notifications']:[],remoteAdapters:window.CLEA7Remote?.registry()||{}}),status=text=>$('status').textContent=text;
 function target(){if(window.CLEA7Launcher?.platform?.()==='android')library.target='android';else if(window.pywebview?.api?.open_runtime_app)library.target='windows';$('platform').textContent='Izvršni cilj: '+library.target+' · Runtime '+P.VERSION;}
 addEventListener('pywebviewready',target);target();
 function element(tag,text){const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;}

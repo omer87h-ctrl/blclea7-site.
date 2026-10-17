@@ -1,0 +1,68 @@
+# Original BIL application: query identity is separate from developer-owned data.
+# Use only isolated development services with tests/firebase/firestore.rules.
+import collections
+backend community using "firebase.development/3"
+record Post { author: Text, body: Text, category: Text, ordinal: Number }
+record PostDocument { id: Text, path: Text, value: Post }
+let session: RemoteSession? = null
+let failure: RemoteFailure? = null
+let watchFailure: RemoteFailure? = null
+let created: RemoteDocument? = null
+let documents: List<PostDocument> = []
+let filters: List<RemoteFilter> = []
+let query = new RemoteQuery { where: filters, orderBy: "", descending: false, limit: 20, offset: 0 }
+let selection = -1
+let body = ""
+let category = "original"
+let done = false
+let status = "Sign in to your isolated development service"
+let updates = 0
+on register { request community.auth.register() into session catch failure }
+on sign_in { request community.auth.signIn() into session catch failure }
+on create {
+    if session != null {
+        request community.document.add("entries", new Post { author: session.uid, body: body, category: category, ordinal: 1 }) into created catch failure
+    }
+}
+on search { request community.query.documents("entries", query) into documents catch failure }
+on edit {
+    if selection >= 0 and selection < collections.length(documents) {
+        let selected = collections.at(documents, selection)
+        request community.document.set(selected.path, new Post { author: selected.value.author, body: body, category: selected.value.category, ordinal: selected.value.ordinal }) into done catch failure
+    }
+}
+on remove {
+    if selection >= 0 and selection < collections.length(documents) {
+        let selected = collections.at(documents, selection)
+        request community.document.delete(selected.path) into done catch failure
+    }
+}
+on follow {
+    subscribe records from community.query.documents("entries", query) into documents catch watchFailure every 1000 then changed else failed stopped stopped
+}
+on changed(result: List<PostDocument>, context: RemoteUpdate) { updates = updates + 1; status = context.kind }
+on failed(problem: RemoteFailure, context: RemoteUpdate) { status = problem.code }
+on stopped(result: Boolean, context: RemoteUpdate) { status = "Stopped" }
+on stop { cancel records }
+screen home "Original posts" {
+    heading "Write and manage your posts" key title
+    show status key status
+    row {
+        button "Register" runs register key register
+        button "Sign in" runs sign_in key signin
+    }
+    input body label "Post body" multiline key body
+    input category label "Category" key category
+    row {
+        button "Publish" runs create key create
+        button "Search" runs search key search
+        button "Follow" runs follow key follow
+        button "Stop" runs stop key stop
+    }
+    table documents columns [id: "Document ID", path: "Document path"] select selection key records
+    row {
+        button "Save selected" runs edit key edit
+        button "Delete selected" runs remove key remove
+    }
+}
+start home

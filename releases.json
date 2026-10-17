@@ -1,22 +1,22 @@
 {
   "format": "clea7.public-downloads/1",
-  "version": "0.9.0",
-  "source_commit": "a3e267b15f3b7f41187c5a78577f7d9d67c70549",
-  "verified_run": 39002583413,
+  "version": "0.13.0",
+  "source_commit": "04cca9091a331c4e1d2577391ff259ee9e340876",
+  "verified_run": null,
   "published": [
     {
       "key": "sdk",
-      "name": "BL-CLEA7-SDK-0.9.0.zip",
-      "url": "downloads/BL-CLEA7-SDK-0.9.0.zip",
-      "size_bytes": 168778,
-      "sha256": "6a01e703b8010d1d0b9024fbbbdfe43aed177d64f188a45e2f6ee8459358f627"
+      "name": "BL-CLEA7-SDK-0.13.0.zip",
+      "url": "downloads/BL-CLEA7-SDK-0.13.0.zip",
+      "size_bytes": 200860,
+      "sha256": "836efad2989b75ae48ce7eb37eceaea1319fcea74dc71849b4016591cc02657c"
     },
     {
       "key": "preview",
       "name": "BLclea7-Studio-pregled.html",
       "url": "downloads/BLclea7-Studio-pregled.html",
-      "size_bytes": 709264,
-      "sha256": "77be64b5dc5ea6978c48e06636da8488551feed3acfbec5db85e7a4e7d542b30"
+      "size_bytes": 784329,
+      "sha256": "1f5d9a97c166183cd64205d76ef11ed114cf28d25c78e8cb78cba1aa4f27efc8"
     },
     {
       "key": "example",
@@ -91,7 +91,5 @@
       }
     ],
     "source_commit": "a3e267b15f3b7f41187c5a78577f7d9d67c70549"
-  },
-  "web_patch_source_commit": "e3044bd90d1a668b252df80f263304fd531ae701",
-  "web_patch": "Studio account-state reset uses scoped Runtime restore; native binaries remain exact a3e267b builds."
+  }
 }

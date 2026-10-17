@@ -1,0 +1,120 @@
+# Original CLEA7 application source. Development services and rules: docs/LIVE-DATA.md.
+backend community using "firebase.development/2"
+record Group { owner: Text, title: Text }
+record Member { uid: Text, role: Text }
+record Post { author: Text, body: Text, category: Text, ordinal: Number }
+record Message { author: Text, body: Text, ordinal: Number }
+let session: RemoteSession? = null
+let failure: RemoteFailure? = null
+let feedFailure: RemoteFailure? = null
+let chatFailure: RemoteFailure? = null
+let created: RemoteDocument? = null
+let done = false
+let userId = ""
+let status = "Sign in to the isolated development service"
+let groupId = ""
+let groupTitle = ""
+let memberUid = ""
+let memberRole = "member"
+let postBody = ""
+let category = "community"
+let ordinal = 1
+let messageBody = ""
+let posts: List<Post> = []
+let messages: List<Message> = []
+let postSelection = -1
+let messageSelection = -1
+let filters: List<RemoteFilter> = []
+let feedQuery = new RemoteQuery { where: filters, orderBy: "ordinal", descending: false, limit: 20, offset: 0 }
+let chatQuery = new RemoteQuery { where: filters, orderBy: "ordinal", descending: false, limit: 20, offset: 0 }
+let feedUpdates = 0
+let chatUpdates = 0
+
+on register { request community.auth.register() into session catch failure then identity_ready else failed }
+on sign_in { request community.auth.signIn() into session catch failure then identity_ready else failed }
+on identity_ready(identity: RemoteSession?, context: RemoteCompletion) {
+    if identity != null { userId = identity.uid; status = "Signed in" }
+}
+on sign_out { request community.auth.signOut() into done catch failure then saved else failed }
+on create_group {
+    if session != null {
+        request community.document.set("groups/" + groupId, new Group { owner: session.uid, title: groupTitle }) into done catch failure then saved else failed
+    }
+}
+on add_member {
+    request community.document.set("groups/" + groupId + "/members/" + memberUid, new Member { uid: memberUid, role: memberRole }) into done catch failure then saved else failed
+}
+on publish {
+    if session != null {
+        request community.document.add("entries", new Post { author: session.uid, body: postBody, category: category, ordinal: ordinal }) into created catch failure then published else failed
+    }
+}
+on published(document: RemoteDocument?, context: RemoteCompletion) { postBody = ""; status = "Published" }
+on send_message {
+    if session != null {
+        request community.document.add("groups/" + groupId + "/messages", new Message { author: session.uid, body: messageBody, ordinal: ordinal }) into created catch failure then sent else failed
+    }
+}
+on sent(document: RemoteDocument?, context: RemoteCompletion) { messageBody = ""; status = "Sent" }
+on saved(result: Boolean, context: RemoteCompletion) { status = "Saved" }
+on failed(problem: RemoteFailure, context: RemoteCompletion) {
+    status = problem.code
+    if problem.uncertain { status = "Outcome uncertain: check server data before retrying" }
+}
+on follow_feed {
+    subscribe feed from community.query.list("entries", feedQuery) into posts catch feedFailure every 1000 then feed_changed else feed_failed stopped feed_stopped
+}
+on feed_changed(result: List<Post>, context: RemoteUpdate) { feedUpdates = feedUpdates + 1; status = context.kind }
+on feed_failed(problem: RemoteFailure, context: RemoteUpdate) { status = problem.code }
+on feed_stopped(result: Boolean, context: RemoteUpdate) { status = "Feed stopped" }
+on stop_feed { cancel feed }
+on follow_chat {
+    subscribe chat from community.query.list("groups/" + groupId + "/messages", chatQuery) into messages catch chatFailure every 1000 then chat_changed else chat_failed stopped chat_stopped
+}
+on chat_changed(result: List<Message>, context: RemoteUpdate) { chatUpdates = chatUpdates + 1; status = context.kind }
+on chat_failed(problem: RemoteFailure, context: RemoteUpdate) {
+    status = problem.code
+    if problem.code == "Denied" { messages = []; messageSelection = -1 }
+}
+on chat_stopped(result: Boolean, context: RemoteUpdate) { status = "Chat stopped" }
+on stop_chat { cancel chat }
+
+screen home "Community" {
+    heading "Your community" key title
+    show status key status
+    show userId key user_id
+    row {
+        button "Register" runs register key register
+        button "Sign in" runs sign_in key signin
+        button "Sign out" runs sign_out key signout
+    }
+    input postBody label "Post body" multiline key post_body
+    input category label "Category" key category
+    input ordinal label "Order" range [0, 1000000000] key ordinal
+    button "Publish" runs publish key publish
+    row {
+        button "Follow feed" runs follow_feed key follow_feed
+        button "Stop feed" runs stop_feed key stop_feed
+        button "Groups and chat" opens chat key open_chat
+    }
+    table posts columns [author: "Author", body: "Post", category: "Category"] select postSelection key feed
+}
+screen chat "Groups and chat" {
+    heading "Private group" key chat_title
+    show status key chat_status
+    input groupId label "Group ID" key group_id
+    input groupTitle label "Group title" key group_title
+    button "Create group" runs create_group key create_group
+    input memberUid label "Member UID" key member_uid
+    select memberRole label "Member role" options ["member", "reader"] key member_role
+    button "Add member" runs add_member key add_member
+    input messageBody label "Message" multiline key message_body
+    button "Send message" runs send_message key send_message
+    row {
+        button "Follow chat" runs follow_chat key follow_chat
+        button "Stop chat" runs stop_chat key stop_chat
+        button "Feed" opens home key open_feed
+    }
+    table messages columns [author: "Author", body: "Message"] select messageSelection key messages
+}
+start home
