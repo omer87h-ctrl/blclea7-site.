@@ -1,5 +1,29 @@
 {
   "format": "clea7.public-release-approval/1",
-  "approved": false,
-  "reason": "Exact source gates and binary hashes must pass review before approval."
+  "approved": true,
+  "version": "0.13.0",
+  "source_commit": "b62424ba703a5acd0224f45b240793dc87e283b1",
+  "verification_runs": {
+    "product": 39070935051,
+    "native_media": 39070935066,
+    "live_android": 39070935047,
+    "services": 39070421009
+  },
+  "assets": {
+    "studio": {
+      "name": "BL-CLEA7-Studio-Windows-x64.zip",
+      "size_bytes": 348400060,
+      "sha256": "a3c40fa4b9ca7de9f2bcb5e85fa1a52493dd49395815e8337fd1961742481dd3"
+    },
+    "runtime": {
+      "name": "BL-CLEA7-Runtime-Windows-x64.zip",
+      "size_bytes": 329846915,
+      "sha256": "8006cd5bb9f9f30db7ee6f99f3bfc7b38e98b07b80d9330fc8bf26a7cd498be1"
+    },
+    "android": {
+      "name": "BL-CLEA7-Runtime-Android-debug.apk",
+      "size_bytes": 194398,
+      "sha256": "74590c75977340cd34da14d0c825adc7ff88576daa4a63b0c2ce345dfd528be2"
+    }
+  }
 }
