@@ -4,7 +4,7 @@ import hashlib,json,time,urllib.request,urllib.error,urllib.parse
 ROOT=Path(__file__).resolve().parents[1]
 BASE='https://clea7.brzoilokalno.com/'
 REPO='omer87h-ctrl/blclea7-site.'
-TAG='clea7-0.9.0-a3e267b'
+TAG='clea7-0.13.0-b62424b'
 def native_checks(native):
  url='https://api.github.com/repos/'+REPO+'/releases/tags/'+TAG
  with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'BL-CLEA7-anonymous-download-check'}),timeout=30) as response:
@@ -43,7 +43,7 @@ def check():
  compiler=read('studio/workbench/bil-compiler.js');assert compiler==(ROOT/'studio/workbench/bil-compiler.js').read_bytes(),'Published BIL compiler differs.'
  engine=read('studio/workbench/engine.js');assert engine==(ROOT/'studio/workbench/engine.js').read_bytes(),'Published runtime differs from verified source.'
  assert b'CLEA7Library' in read('studio/launcher/library.js')
- catalog=json.loads(read('releases.json'));assert catalog['source_commit']=='04cca9091a331c4e1d2577391ff259ee9e340876'
+ catalog=json.loads(read('releases.json'));assert catalog['source_commit']=='b62424ba703a5acd0224f45b240793dc87e283b1'
  verified=[]
  for entry in catalog['published']:
   path=entry['url'];assert path.startswith('downloads/') and '..' not in path and ':' not in path

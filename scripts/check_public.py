@@ -33,11 +33,16 @@ assert 'ILDuA90WSVz2FTZdmWleQ0lzbGCLmFndZ6wlT5V74Ow' in (ROOT/'index.html').read
 assert not list(ROOT.rglob('session.json')) and not list(ROOT.rglob('identity.json'))
 for forbidden in ['main.py','runtime_main.py','clea7/desktop.py','clea7/host.py','clea7/cloud_ai.py','clea7/ai.py']:
  assert not (ROOT/'sdk-source'/forbidden).exists(),forbidden
-catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='04cca9091a331c4e1d2577391ff259ee9e340876'
+catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='b62424ba703a5acd0224f45b240793dc87e283b1'
+download_page=(ROOT/'preuzimanja.html').read_text()
+for page in ROOT.glob('*.html'):
+ assert 'BLclea7 '+catalog['version'].rsplit('.',1)[0]+' · razvojno izdanje' in page.read_text(),(page,'stale visible release version')
 for entry in catalog['published']:
  p=ROOT/entry['url'];data=p.read_bytes();assert p.is_relative_to(ROOT) and len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],p
+ if entry['key'] in ('sdk','preview'):
+  assert entry['url'] in download_page and entry['sha256'] in download_page,(p,'stale visible download metadata')
 if catalog['native']['state']=='published':
- native=catalog['native'];assert native['repository']=='omer87h-ctrl/blclea7-site.' and native['tag']=='clea7-0.9.0-a3e267b'
+ native=catalog['native'];assert native['repository']=='omer87h-ctrl/blclea7-site.' and native['tag']=='clea7-0.13.0-b62424b'
  assert len(native['assets'])==3 and {a['key'] for a in native['assets']}=={'studio','runtime','android'}
  page=(ROOT/'preuzimanja.html').read_text()
  for a in native['assets']:
