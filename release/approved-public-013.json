@@ -1,0 +1,5 @@
+{
+  "format": "clea7.public-release-approval/1",
+  "approved": false,
+  "reason": "Exact source gates and binary hashes must pass review before approval."
+}
