@@ -45,6 +45,7 @@ jobs:
           node tests/test_public_bil_studio.cjs
           node tests/test_public_bil_apps_ui.cjs
           node tests/test_public_native_studio.cjs
+          node tests/test_public_native_install.cjs
           cp downloads/BLclea7-Studio-pregled.html /tmp/BL-CLEA7-Studio-pregled-v2.html
           node tests/test_public_offline.cjs
       - uses: actions/upload-artifact@v4
