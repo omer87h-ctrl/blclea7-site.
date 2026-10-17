@@ -31,7 +31,11 @@ await check('mouse, emulated touch and keyboard moves change source without losi
  }
  async function reachTarget(move){
   await move(130,90);
-  await page.waitForFunction(selector=>{const r=document.querySelector(selector).getBoundingClientRect();return r.top>=75&&r.bottom<innerHeight-40;},selector,{timeout:10000});
+  await page.waitForFunction(selector=>{const r=document.querySelector(selector).getBoundingClientRect();return r.top>=160&&r.bottom<innerHeight-40;},selector,{timeout:10000});
+  // Leave the edge-scroll band, allow its last frame to finish, then target
+  // the current rectangle. A stale rectangle moves while the list is scrolling.
+  await move(130,160);
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   const b=await to.boundingBox();
   await move(b.x+b.width/2,b.y+b.height/2);
  }
