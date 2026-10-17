@@ -47,11 +47,12 @@ jobs:
           cp downloads/BLclea7-Studio-pregled.html /tmp/BL-CLEA7-Studio-pregled-v2.html
           node tests/test_public_offline.cjs
       - uses: actions/upload-artifact@v4
+        continue-on-error: true
         if: always()
         with:
           name: BL-CLEA7-public-browser-evidence
           path: test-evidence/
-          retention-days: 14
+          retention-days: 3
 
   backend-browser:
     runs-on: ubuntu-latest
@@ -81,8 +82,9 @@ jobs:
           trap 'kill "$server_pid" || true' EXIT
           /tmp/clea7-firebase/node_modules/.bin/firebase emulators:exec --config tests/firebase/firebase.json --project demo-clea7-runtime --only auth,firestore 'node tests/test_public_remote_studio.cjs'
       - uses: actions/upload-artifact@v4
+        continue-on-error: true
         if: always()
         with:
           name: BL-CLEA7-public-backend-evidence
           path: test-evidence/
-          retention-days: 14
+          retention-days: 3
