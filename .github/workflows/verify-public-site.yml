@@ -51,6 +51,7 @@ jobs:
           node tests/test_public_native_install.cjs
           cp downloads/BLclea7-Studio-pregled-0.14.html /tmp/BL-CLEA7-Studio-pregled-v2.html
           node tests/test_public_offline.cjs
+          node tests/test_prepared_offline015.cjs
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         if: always()
