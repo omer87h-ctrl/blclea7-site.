@@ -1,0 +1,52 @@
+import collections
+let selectedNote: Number = -1
+let notes: List<Note> = []
+let draftNote: Note = new Note { body: "", rating: 0 }
+let steps: List<Text> = []
+let active: Boolean = false
+let nickname: Text = ""
+let offset: Number = 0
+screen home "Početni ekran" {
+    heading "Moja aplikacija" key title
+    button "Otvori Orbitavo" opens play key added_mve29l7s_39me
+}
+start home
+
+screen play "Orbitavo" {
+    heading "Orbitavo" key heading_play
+    shape "circle" label "Svjetlosna putanja" key added_mve29ipk_3izk style {
+ x offset
+
+gradientFrom "#ffac77"
+gradientTo "#7957d5"
+} motion move 180 gestures {
+    swipeLeft runs advance
+}
+    button "Pomjeri svjetlo" runs advance key added_mve29jpf_2m3h
+    input nickname label "Tvoja poruka" key added_mve29k5z_e3ar
+    toggle active label "Uključi putanju" key added_mve29kd9_38h2
+    table notes columns [body: "body", rating: "rating"] select selectedNote key added_mve29kmz_ho9s
+    button "Sačuvaj bilješku" runs saveNote key added_mve29kwq_j5fu
+}
+
+record Note { body: Text, rating: Number }
+
+on advance {
+
+    if (offset < 96) {
+    
+    
+    offset = offset + 24
+} else {
+    
+    
+    offset = 0
+}
+}
+
+on saveNote {
+
+    draftNote = new Note { body: nickname, rating: offset }
+
+    notes = collections.append(notes, draftNote)
+}

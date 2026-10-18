@@ -1,6 +1,6 @@
 'use strict';
 (function(scope){
-const F=scope.CLEA7Format,C=scope.CLEA7,VERSION='0.14.0',FORMAT='clea7.package/1',MAX=2*1024*1024;
+const F=scope.CLEA7Format,C=scope.CLEA7,VERSION='0.15.0',FORMAT='clea7.package/1',MAX=2*1024*1024;
 const keys=(value,expected)=>value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).sort().join('|')===expected.slice().sort().join('|');
 const manifestKeys=['id','name','version','runtime','abi','targets','permissions','dependencies','sha256','publisher'];
 function encode64(bytes){let text='';for(let i=0;i<bytes.length;i+=8192)text+=String.fromCharCode(...bytes.slice(i,i+8192));return scope.btoa(text);}
@@ -41,3 +41,4 @@ class Library{
 }
 scope.CLEA7Package={VERSION,FORMAT,create,validate,compatible,ScopedVault,Library,checkRemote};
 })(globalThis);
+
