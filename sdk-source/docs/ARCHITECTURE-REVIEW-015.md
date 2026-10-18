@@ -9,11 +9,14 @@ The product direction is coherent: Studio authors one checked application model;
 | High | Legacy application/2 had flow blocks while BIL application/6–9 could select existing handlers but could not compose their ordinary logic visually. | `bil-authoring.js` adds typed values, user-defined record models, handlers, expression trees, conditions, branch insertion, bounded repeats, collection operations and source-preserving edits. |
 | High | Newly added BIL buttons could silently navigate to the first screen, appearing inert. | Require an explicit destination or handler; existing buttons expose action binding, empty-handler warnings and direct event editing. Legacy components can create and bind a flow in one operation. |
 | High | Run/save/export could use the previously applied project while a newer BIL draft remained in the editor. | Check and apply pending BIL source before all user-facing run/save/export paths; reject conflicts or compiler errors instead of exporting stale source. |
+| High | Adding a value after first execution made the saved BIL shape incompatible and blocked the next preview. | Add bounded initialization of only newly declared globals. Existing compatible cells are preserved; initializers read their saved values. Re-running old main statements, AI and external effects is excluded. Persistence uses the existing compare-and-swap transaction; incompatible or failed changes retain the old snapshot. |
 | Medium | Source undo was discarded when Apply reloaded the project. | Preserve source undo/redo across successful Apply while updating the project baseline. |
 | Medium | Copying decorated components inferred the key position from the end of the component, corrupting keys before style/motion clauses. | Locate top-level key tokens and replace their actual spans, including nested components. |
 | Medium | Shapes and gestures existed in the execution contract but needed code; a valid new gradient could not be created one property at a time. | Add shape selection, event/gesture controls and atomic gradient editing. |
 
 ## Boundaries
+
+The additive state extension is an Engine lifecycle operation, not a new package migration language. It does not make the standalone library accept otherwise incompatible package updates.
 
 This change introduces no new BIL opcode, application ABI, executable extension loader, native privilege or network service. Existing compiled source/IR verification remains authoritative. Edits compile before adoption. Unknown expressions and professional code are preserved; the visual editor does not silently regenerate the whole file. Closed operation lists are not unrestricted code execution.
 

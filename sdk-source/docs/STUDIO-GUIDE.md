@@ -34,6 +34,8 @@ Na podržanoj kartici, obliku ili tekstu možeš povezati dodir, pritisak ili po
 
 Pritisni **Provjeri i pokreni aplikaciju** ili gornje **Pokreni**. Izvor se provjerava i primjenjuje prije pokretanja. Dizajnerski pregled koristi odvojene probne podatke; glavni Runtime pregled čuva stvarne lokalne podatke aplikacije. Unesi vrijednost, pritisni svoja dugmad i provjeri rezultat i stvarne događaje u debuggeru. **Pokreni ponovo** treba sačuvati kompatibilno stanje. **Vrati početno stanje** namjerno briše stanje uz potvrdu.
 
+Nakon prve probe možeš dodati novu tipiziranu vrijednost: Runtime inicijalizuje samo novi podatak i čuva postojeće kompatibilne vrijednosti. Promjena tipa ili uklanjanje postojećeg podatka zahtijeva zasebnu provjerenu migraciju; greška ne briše spremljene podatke.
+
 **Sačuvaj** provjerava i uključuje trenutnu BIL skicu u lokalni projekt. Poništi kod / Vrati kod rade i preko primjene izvora. Brisanje podataka preglednika može ukloniti lokalne projekte i podatke; preuzmi odvojene kopije projekta i korisničkih podataka. Greška skladišta nije uspješno spremanje.
 
 ## 7. Izvezi odgovarajući rezultat
