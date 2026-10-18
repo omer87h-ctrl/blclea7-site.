@@ -1,4 +1,4 @@
-# BL CLEA7 public developer SDK 0.13 BIL
+# BL CLEA7 public developer SDK 0.14 BIL
 
 Python 3.12+; Node.js 22+ for execution. Offline validation, packaging and real tests:
 
@@ -43,3 +43,8 @@ python -m clea7 bil package sdk/examples/bil/native-media.bil --output Native.cl
 ```
 
 Install Native.clea7 in Android Runtime 0.13 or newer. These hardware capabilities run on Android, not in a browser. Native-only apps do not require a cloud account. Windows Studio can build an embedded APK using a configured Android toolchain. The curated SDK excludes private native host implementation, credentials and user data.
+
+
+## SDK 0.14 — visual presentation
+
+Typed colours, layout values, numeric visual bindings, original geometric shapes, bounded motion and declared gestures use the versioned bil.ui/2 representation. These packages require Runtime 0.14 or newer. Compile sdk/examples/bil/motion-scene.bil independently of Studio, then run or package it with the same SDK commands above. See docs/BIL-PRESENTATION.md. No arbitrary CSS, remote fonts, uploaded artwork or JavaScript eval is introduced.

@@ -27,6 +27,6 @@ jobs:
         run: |
           git config user.name 'Brzo i Lokalno build'
           git config user.email 'build@users.noreply.github.com'
-          git add downloads/BL-CLEA7-SDK-0.14.0.zip downloads/BLclea7-Studio-pregled-0.14.html release/prepared-local-014.json
+          git add downloads/BL-CLEA7-SDK-0.14.0.zip downloads/BLclea7-Studio-pregled-0.14.html release/prepared-local-014.json downloads/primjer-svjetlosna-putanja.clea7
           git commit -m 'build: record verified curated SDK and offline Studio 0.14 downloads'
           git push origin HEAD:work/prepare-local-downloads-014

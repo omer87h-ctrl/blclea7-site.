@@ -1,0 +1,36 @@
+# Original interactive scene — Brzo i Lokalno
+let offset = 0
+on advance {
+ if offset < 144 {
+  offset = offset + 24
+ } else {
+  offset = 0
+ }
+}
+on reset { offset = 0 }
+screen home "Svjetlosna putanja" {
+ heading "Tvoj ritam. Tvoja putanja." key title
+ text "Pomjeri svjetlo dugmetom ili lijevom strelicom na sceni." key help
+ card "Interaktivna scena" {
+  shape "circle" label "Svjetlo" style {
+   x offset
+   width 64
+   height 64
+   background "#ffac77"
+  } motion move 180 key light
+  show offset key position
+ } style {
+  padding 24
+  radius 24
+  gradientFrom "#182238"
+  gradientTo "#101722"
+  gradientAngle 135
+ } gestures {
+  swipeLeft runs advance
+  tap runs advance
+ } key scene
+ row {
+  button "Pomjeri svjetlo" runs advance key advance
+  button "Vrati na početak" runs reset key reset
+ } key actions
+}
