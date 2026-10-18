@@ -1,0 +1,46 @@
+'use strict';
+const {createRequire}=require('node:module'),{chromium}=createRequire('/tmp/clea7-qa/package.json')('playwright'),assert=require('node:assert/strict');
+(async()=>{
+ const browser=await chromium.launch({executablePath:process.env.CLEA7_CHROME||'/usr/bin/google-chrome',args:['--no-sandbox']});
+ try{
+  const context=await browser.newContext({viewport:{width:1280,height:900}}),page=await context.newPage(),errors=[];
+  page.on('pageerror',error=>errors.push(error.message));page.on('dialog',dialog=>dialog.accept());
+  await page.goto('http://127.0.0.1:4173/studio/workbench/');await page.waitForFunction(()=>globalThis.CLEA7Workbench);
+  await page.locator('[data-panel=bil]').click();await page.locator('#bil-example').click();
+  const source='# Preserve original source\nlet offset = 0\non advance { offset = offset + 12 }\nscreen home "Motion laboratory" {\n text "Original artwork" key title\n card "Interactive scene" {\n  show offset key value\n  shape "circle" label "Light" style {\n   x offset\n   width 72\n   height 72\n   background "#ffac77"\n  } motion move 180 key light\n } gestures {\n  tap runs advance\n  swipeLeft runs advance\n } key scene\n}\n';
+  await page.locator('#bil-source').fill(source);await page.locator('#bil-check').click();
+  const row=page.locator('[data-bil-design="bilui_title"]'),details=()=>row.locator('.bil-appearance-controls');
+  await details().locator('summary').click();
+  await row.getByLabel('Vizuelna osobina bilui_title',{exact:true}).selectOption('color');
+  await row.getByLabel('Vrijednost osobine bilui_title',{exact:true}).fill('#ffac77');
+  await row.getByRole('button',{name:'Primijeni izgled',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('#bil-source').value.includes('color "#ffac77"'));
+  assert((await page.locator('#bil-source').inputValue()).startsWith('# Preserve original source\nlet offset = 0\non advance { offset = offset + 12 }'));
+  await page.waitForFunction(()=>{const n=document.querySelector('.bil-design-preview [data-bil-node="bilui_title"]');return n&&getComputedStyle(n).color==='rgb(255, 172, 119)';});
+  console.log('PASS appearance browser visual style changes actual preview and preserves BIL logic/comments');
+  await details().locator('summary').click();
+  await row.getByLabel('Animacija bilui_title',{exact:true}).selectOption('fade');
+  await row.getByLabel('Trajanje animacije u milisekundama bilui_title',{exact:true}).fill('0');
+  await row.getByRole('button',{name:'Primijeni animaciju',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('#bil-source').value.includes('motion fade 0'));
+  await page.locator('#bil-undo').click();assert(!(await page.locator('#bil-source').inputValue()).includes('motion fade 0'));
+  await page.locator('#bil-redo').click();assert((await page.locator('#bil-source').inputValue()).includes('motion fade 0'));
+  console.log('PASS appearance browser visual source edits support real undo and redo');
+  await page.locator('#bil-apply').click();await page.locator('#bil-run').click();
+  await page.waitForFunction(()=>CLEA7Workbench.engine?.state.bilValues.offset===0);
+  await page.locator('#player').getByRole('button',{name:'Aktiviraj',exact:true}).click();
+  await page.waitForFunction(()=>CLEA7Workbench.engine.state.bilValues.offset===12);
+  const scene=page.locator('#player [data-bil-node="bilui_scene"]');await scene.focus();await scene.press('ArrowLeft');
+  await page.waitForFunction(()=>CLEA7Workbench.engine.state.bilValues.offset===24);
+  assert.equal(await page.locator('#player [data-bil-node="bilui_title"]').evaluate(n=>getComputedStyle(n).color),'rgb(255, 172, 119)');
+  await page.locator('#restart').click();await page.waitForFunction(()=>CLEA7Workbench.engine.state.bilValues.offset===24);
+  console.log('PASS appearance browser visible and keyboard gestures execute BIL and state survives Runtime restart');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.locator('#player').getByRole('button',{name:'Aktiviraj',exact:true}).click();
+  await page.waitForFunction(()=>CLEA7Workbench.engine.state.bilValues.offset===36);
+  assert.equal(await page.locator('#player').evaluate(n=>n.getAnimations({subtree:true}).filter(a=>a.playState==='running').length),0);
+  assert.deepEqual(errors,[]);
+  console.log('BIL_APPEARANCE_BROWSER_CHECKS actual Studio controls, live styles, undo/redo, checked gestures, restart and reduced-motion passed');
+  await context.close();
+ }finally{await browser.close();}
+})().catch(error=>{console.error(error);process.exit(1);});

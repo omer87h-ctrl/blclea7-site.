@@ -1,0 +1,32 @@
+name: Prepare curated 0.14 local downloads for owner review
+on:
+  push:
+    branches: [work/prepare-local-downloads-014]
+permissions:
+  contents: write
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/prepare-local-downloads-014
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python scripts/prepare_local014.py
+      - run: npm install --prefix /tmp/clea7-qa --no-audit --no-fund playwright@1.56.1
+      - run: node tests/test_prepared_offline014.cjs
+        env:
+          CLEA7_CHROME: /usr/bin/google-chrome
+      - name: Preserve generated review files without merging or publishing
+        run: |
+          git config user.name 'Brzo i Lokalno build'
+          git config user.email 'build@users.noreply.github.com'
+          git add downloads/BL-CLEA7-SDK-0.14.0.zip downloads/BLclea7-Studio-pregled-0.14.html release/prepared-local-014.json downloads/primjer-svjetlosna-putanja.clea7
+          git commit -m 'build: record verified curated SDK and offline Studio 0.14 downloads'
+          git push origin HEAD:work/prepare-local-downloads-014

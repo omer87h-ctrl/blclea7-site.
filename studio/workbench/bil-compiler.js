@@ -7,6 +7,35 @@ const own=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
 const copy=x=>JSON.parse(JSON.stringify(x));
 const safe=k=>typeof k==='string'&&/^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(k)&&!['constructor','prototype','__proto__'].includes(k);
 const hash=s=>{let n=2166136261;for(let i=0;i<s.length;i++)n=Math.imul(n^s.charCodeAt(i),16777619);return (n>>>0).toString(16);};
+
+const PRESENTATION=Object.freeze({
+ background:{kind:'color'},color:{kind:'color'},borderColor:{kind:'color'},gradientFrom:{kind:'color'},gradientTo:{kind:'color'},
+ width:{kind:'size',min:0,max:4096},height:{kind:'size',min:0,max:4096},minWidth:{kind:'number',min:0,max:4096},maxWidth:{kind:'number',min:0,max:4096},
+ padding:{kind:'number',min:0,max:128},gap:{kind:'number',min:0,max:128},radius:{kind:'number',min:0,max:256},borderWidth:{kind:'number',min:0,max:16},
+ fontSize:{kind:'number',min:8,max:120},fontWeight:{kind:'number',min:100,max:900},opacity:{kind:'number',min:0,max:1},
+ x:{kind:'number',min:-4096,max:4096},y:{kind:'number',min:-4096,max:4096},rotate:{kind:'number',min:-3600,max:3600},scale:{kind:'number',min:0,max:8},gradientAngle:{kind:'number',min:0,max:360},
+ direction:{kind:'enum',values:['row','column']},align:{kind:'enum',values:['start','center','end','stretch']},justify:{kind:'enum',values:['start','center','end','space-between','space-around']},wrap:{kind:'enum',values:['wrap','nowrap']},
+ position:{kind:'enum',values:['relative','absolute']},textAlign:{kind:'enum',values:['left','center','right']},font:{kind:'enum',values:['system','mono','serif']},shadow:{kind:'enum',values:['none','soft','lifted']}
+});
+const SHAPES=Object.freeze(['circle','square','diamond','triangle','ring']);
+const GESTURES=Object.freeze(['tap','swipeLeft','swipeRight','press']);
+const MOTIONS=Object.freeze(['none','fade','slide','move','scale']);
+function checkAppearance(n,globals,handlers){
+ if(n.style){for(const [key,value]of Object.entries(n.style)){
+  const spec=PRESENTATION[key],at=n.styleLocs[key];if(!spec)fail('BIL_STYLE','Unknown visual property '+key+'.',at);
+  if(value&&typeof value==='object'){
+   if(Object.keys(value).join()!=='bind'||!['number','size'].includes(spec.kind)||globals.get(value.bind)?.type!=='Number')fail('BIL_STYLE','A numeric visual binding needs a declared Number.',at);
+  }else if(spec.kind==='color'){if(typeof value!=='string'||!(/^(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6})$/.test(value)||['transparent','inherit'].includes(value)))fail('BIL_STYLE','Use a hexadecimal colour, transparent or inherit.',at);}
+  else if(spec.kind==='enum'){if(!spec.values.includes(value))fail('BIL_STYLE','Unsupported '+key+' value.',at);}
+  else if(spec.kind==='size'&&['fill','auto'].includes(value)){}
+  else if(typeof value!=='number'||!Number.isFinite(value)||value<spec.min||value>spec.max)fail('BIL_STYLE',key+' must be within '+spec.min+' and '+spec.max+'.',at);
+ }if(own(n.style,'gradientFrom')!==own(n.style,'gradientTo'))fail('BIL_STYLE','A gradient requires both colours.',n.styleLoc);}
+ if(n.motion&&(!MOTIONS.includes(n.motion.preset)||!Number.isInteger(n.motion.duration)||n.motion.duration<0||n.motion.duration>2000))fail('BIL_MOTION','Use a supported motion and a duration from 0 to 2000 milliseconds.',n.motionLoc);
+ if(n.gestures){if(!['ui_card','ui_row','ui_heading','ui_text','ui_shape'].includes(n.kind))fail('BIL_GESTURE','Gestures belong to non-input visual elements.',n.loc);
+  for(const [name,handler]of Object.entries(n.gestures)){if(!GESTURES.includes(name)||!handlers.has(handler)||handlers.get(handler).params)fail('BIL_GESTURE','A gesture needs an existing ordinary event handler.',n.gestureLocs[name]);}
+ }
+}
+
 class Diagnostic extends Error{
  constructor(code,message,at={line:1,column:1,start:0,end:0}){super(message);this.name='BILDiagnostic';this.code=code;this.location={line:at.line,column:at.column,start:at.start,end:at.end};}
 }
@@ -46,17 +75,35 @@ class Parser{
  end(){if(this.peek().kind==='nl'){this.skip();return;}if(!this.is('}')&&this.peek().kind!=='eof')fail('BIL_PARSE','Separate statements with a newline or semicolon.',this.peek());}
  program(){this.skip();const body=[];while(this.peek().kind!=='eof'){body.push(this.statement());this.end();}return {kind:'program',format:VERSION,body};}
  textToken(){const t=this.take();if(t.kind!=='string'||!t.value.trim()||t.value.length>200)fail('BIL_UI','Expected a nonempty label of at most 200 characters.',t);return t;}
+ decorations(n){
+ const used=new Set();
+ while(['key','style','motion','gestures'].includes(this.peek().value)){
+  const clause=this.take();if(used.has(clause.value))fail('BIL_UI','Duplicate visual clause.',clause);used.add(clause.value);
+  if(clause.value==='key'){const key=this.name();if(key.value.length>48)fail('BIL_UI','A component key is limited to 48 characters.',key);n.key=key.value;n.id='bilui_'+key.value;}
+  else if(clause.value==='style'){n.style={};n.styleLocs={};this.take('{');this.skip();while(!this.is('}')){const property=this.name();if(own(n.style,property.value))fail('BIL_STYLE','Duplicate visual property.',property);const negative=this.accept('-'),value=this.peek();let result;
+    if(value.kind==='number'){this.take();result=negative?-value.value:value.value;}
+    else if(negative)fail('BIL_STYLE','Only a Number can be negative.',value);
+    else if(value.kind==='string'){this.take();result=value.value;}
+    else result={bind:this.name().value};
+    n.style[property.value]=result;n.styleLocs[property.value]={line:property.line,column:property.column,start:property.start,end:this.tokens[this.at-1].end};this.end();
+   }this.take('}');n.styleLoc={line:clause.line,column:clause.column,start:clause.start,end:this.tokens[this.at-1].end};}
+  else if(clause.value==='motion'){const preset=this.take(),duration=this.take();if(preset.kind!=='id'||duration.kind!=='number')fail('BIL_MOTION','Expected a motion name and milliseconds.',preset);n.motion={preset:preset.value,duration:duration.value};n.motionLoc={line:clause.line,column:clause.column,start:clause.start,end:duration.end};}
+  else{n.gestures={};n.gestureLocs={};this.take('{');this.skip();while(!this.is('}')){const name=this.name();this.take('runs');const handler=this.name();if(own(n.gestures,name.value))fail('BIL_GESTURE','Duplicate gesture.',name);n.gestures[name.value]=handler.value;n.gestureLocs[name.value]={line:name.line,column:name.column,start:name.start,end:handler.end};this.end();}this.take('}');}
+  n.loc.end=this.tokens[this.at-1].end;
+ }return n;
+ }
  uiBlock(path,depth=0){if(depth>8)fail('BIL_LIMIT','Screen layout nesting exceeds eight.',this.peek());this.take('{');const previous=this.path;this.path=path;this.skip();const body=[];while(!this.is('}')){const t=this.peek();let n;
   if(['heading','text'].includes(t.value)){const kind=this.take().value,label=this.textToken();n=this.statementNode('ui_'+kind,t,{label:label.value,labelLoc:label});}
   else if(['row','card'].includes(t.value)){const kind=this.take().value;let label=null;if(this.peek().kind==='string')label=this.textToken();const children=this.uiBlock(path+'/'+kind,depth+1);n=this.statementNode('ui_'+kind,t,{label:label?.value||'',labelLoc:label,children,childrenEnd:this.tokens[this.at-1].start});}
   else if(['input','select','toggle'].includes(t.value)){const kind=this.take().value,name=this.name().value;this.take('label');const label=this.textToken();n={name,label:label.value,labelLoc:label,required:false,multiline:false,range:null,options:null};const seen=new Set();while(['required','multiline','range','options'].includes(this.peek().value)){const clause=this.take().value;if(seen.has(clause))fail('BIL_UI','Duplicate field clause.',this.peek());seen.add(clause);if(clause==='required'||clause==='multiline')n[clause]=true;else{this.take('[');const values=[];if(!this.is(']'))do{const negative=this.accept('-'),value=this.take();if(value.kind!=='number'&&value.kind!=='string'||negative&&value.kind!=='number')fail('BIL_UI','Field options and bounds must be literal values.',value);values.push(negative?-value.value:value.value);}while(this.accept(','));this.take(']');n[clause]=values;}}n=this.statementNode('ui_'+kind,t,n);}
+  else if(this.accept('shape')){const geometry=this.textToken();this.take('label');const label=this.textToken();n=this.statementNode('ui_shape',t,{geometry:geometry.value,label:label.value,labelLoc:label});}
   else if(this.accept('image')){const name=this.name().value;this.take('label');const label=this.textToken();n=this.statementNode('ui_image',t,{name,label:label.value,labelLoc:label});}
   else if(this.accept('table')){const name=this.name().value;this.take('columns');this.take('[');const columns=[];if(!this.is(']'))do{const field=this.name().value;let label=field;if(this.accept(':'))label=this.textToken().value;columns.push({field,label});}while(this.accept(','));this.take(']');this.take('select');n=this.statementNode('ui_table',t,{name,columns,selection:this.name().value});}
   else if(this.accept('button')){const label=this.textToken();let handler=null,target=null;if(this.accept('runs'))handler=this.name().value;else{this.take('opens');target=this.name().value;}const validate=this.accept('validate');n=this.statementNode('ui_button',t,{label:label.value,labelLoc:label,handler,target,validate});}
   else if(this.is('show')||this.is('visualize')){n=this.statement();}
   else fail('BIL_UI','Expected a screen component (heading, text, row, card, input, select, toggle, table, button, show or visualize).',t);
-  if(this.accept('key')){const key=this.name();if(key.value.length>48)fail('BIL_UI','A component key is limited to 48 characters.',key);n.key=key.value;n.id='bilui_'+key.value;n.loc.end=key.end;}
-  body.push(n);this.end();if(body.length>128)fail('BIL_LIMIT','A screen exceeds 128 components.',t);
+  this.decorations(n);
+  body.push(n);this.end();if(body.length>256)fail('BIL_LIMIT','A screen exceeds 256 components.',t);
  }this.take('}');this.path=previous;return body;}
  statement(){const t=this.peek();
   // New effect words remain contextual so old bil/1 identifiers stay legal.
@@ -132,7 +179,9 @@ function check(ast){const stack=[[ast,0]];while(stack.length){const [value,depth
  if([...backends.values()].some(b=>b.adapter===NATIVE_ADAPTER))for(const type of [nativeMediaType,nativeLocationType,nativeNotificationType,nativeReceiptType])records.set(type.name,copy(type.record));
  if(ast.remote){records.set('RemoteSession',copy(remoteSessionType.record));records.set('RemoteFailure',copy(remoteFailureType.record));if(ast.async||ast.live)records.set('RemoteCompletion',copy(remoteCompletionType.record));if(ast.live){records.set('RemoteUpdate',copy(remoteUpdateType.record));records.set('RemoteDocument',copy(remoteDocumentType.record));records.set('RemoteFilter',copy(remoteFilterType.record));records.set('RemoteQuery',copy(remoteQueryType.record));}}
  for(const n of ast.body)if(n.kind==='screen'){if(screens.has(n.name))fail('BIL_UI','Duplicate screen identity.',n.loc);screens.set(n.name,n);ast.extended=true;}
- if(screens.size>32)fail('BIL_LIMIT','At most 32 BIL screens are supported.');
+ let elementCount=0,decorated=false;const inspectAppearance=items=>{for(const n of items){elementCount++;if(n.style||n.motion||n.gestures||n.kind==='ui_shape')decorated=true;if(n.children)inspectAppearance(n.children);}};for(const page of screens.values())inspectAppearance(page.children);
+ const advancedUI=ast.extended&&(decorated||elementCount>128||screens.size>32);
+ if(screens.size>64)fail('BIL_LIMIT','At most 64 BIL screens are supported.');
  const guardType=t=>{let nodes=0;const walk=(v,d=0)=>{if(++nodes>2048||d>16)fail('BIL_LIMIT','Expanded type exceeds its structural budget.');if(v&&typeof v==='object')for(const [k,x]of Object.entries(v)){if(k==='record')for(const f of Object.values(x))walk(f,d+1);else if(k!=='name')walk(x,d+1);}};walk(t);typeBudget+=nodes;if(typeBudget>131072)fail('BIL_LIMIT','Compiler type expansion budget exceeded.');return t;};
 
  const resolve=(t,at=null)=>{if(typeof t==='string')return t==='Error'?copy(errorType):t;if(t?.list)return {list:resolve(t.list,at)};if(t?.nullable){const inner=resolve(t.nullable,at);if(inner==='Void')fail('BIL_TYPE','Void cannot be nullable.');return {nullable:inner};}if(t?.named){if(!records.has(t.named))fail('BIL_TYPE','Unknown record type '+t.named+'.',at||undefined);guardType({record:records.get(t.named)});return {record:copy(records.get(t.named)),name:t.named};}fail('BIL_TYPE','Invalid type.');};
@@ -202,7 +251,7 @@ function check(ast){const stack=[[ast,0]];while(stack.length){const [value,depth
  for(const n of cancellations)if(!watches.has(n.subscription))fail('BIL_SUBSCRIPTION','Cancellation names an undeclared subscription.',n.loc);
  const starts=ast.body.filter(n=>n.kind==='start');if(starts.length>1||starts.length&&!screens.has(starts[0].name))fail('BIL_UI','start must identify one declared screen.',starts[0]?.loc);if(starts.length&&!screens.size)fail('BIL_UI','start requires screens.');
  let uiCount=0;const uiIds=new Set();const field=(name,n)=>{const symbol=globals.get(name);if(!symbol)fail('BIL_UI','Component binds an undeclared application value '+name+'.',n.loc);return symbol;};
- function ui(nodes,depth=0){if(depth>8)fail('BIL_LIMIT','UI nesting exceeds eight.');for(const n of nodes){if(++uiCount>128||uiIds.has(n.id))fail('BIL_LIMIT','UI exceeds 128 unique components.',n.loc);uiIds.add(n.id);
+ function ui(nodes,depth=0){if(depth>8)fail('BIL_LIMIT','UI nesting exceeds eight.');for(const n of nodes){if(++uiCount>(advancedUI?1024:128)||uiIds.has(n.id))fail('BIL_LIMIT','UI exceeds its unique component budget.',n.loc);uiIds.add(n.id);checkAppearance(n,globals,handlers);
   if(n.kind==='intent'){statements([n],global);continue;}
   if(['ui_input','ui_select','ui_toggle'].includes(n.kind)){const symbol=field(n.name,n),type=symbol.type;if(!symbol.mutable||!['Number','Text','Boolean'].includes(type))fail('BIL_UI','An input must bind a mutable primitive value.',n.loc);n.inputType=type;
    if(n.kind==='ui_toggle'&&type!=='Boolean'||n.kind==='ui_select'&&type!=='Text'||n.kind==='ui_input'&&!['Text','Number'].includes(type))fail('BIL_UI','Field component and value type disagree.',n.loc);
@@ -212,6 +261,7 @@ function check(ast){const stack=[[ast,0]];while(stack.length){const [value,depth
   }else if(n.kind==='ui_image'){const t=field(n.name,n).type;if(![...backends.values()].some(b=>b.adapter===NATIVE_ADAPTER))fail('BIL_UI','Native images require a declared Android native adapter.',n.loc);if(!same(t,nativeMediaType)&&!same(t,{nullable:nativeMediaType}))fail('BIL_UI','An image binds NativeMedia or NativeMedia?.',n.loc);}
   else if(n.kind==='ui_table'){const type=field(n.name,n).type,selection=field(n.selection,n);if(!type?.list?.record||selection.type!=='Number'||!selection.mutable)fail('BIL_UI','Table needs List<Record> and a mutable Number selection.',n.loc);if(!n.columns.length||n.columns.length>16||new Set(n.columns.map(c=>c.field)).size!==n.columns.length||n.columns.some(c=>!['Text','Number','Boolean'].includes(type.list.record[c.field])))fail('BIL_UI','Table columns must name 1–16 distinct primitive record fields.',n.loc);
   }else if(n.kind==='ui_button'){if(n.handler&&!handlers.has(n.handler)||n.target&&!screens.has(n.target))fail('BIL_UI','Button target is not declared.',n.loc);if(n.handler&&handlers.get(n.handler).params)fail('BIL_UI','Completion handlers cannot be invoked by a UI button.',n.loc);if(n.validate&&!n.handler)fail('BIL_UI','Validation belongs to a handler button.',n.loc);}
+  else if(n.kind==='ui_shape'){if(!SHAPES.includes(n.geometry))fail('BIL_UI','Unsupported original geometric shape.',n.loc);}
   else if(!['ui_heading','ui_text','ui_card','ui_row'].includes(n.kind))fail('BIL_UI','Unsupported UI node.',n.loc);
   if(n.children)ui(n.children,depth+1);
  }}for(const screen of screens.values())ui(screen.children);
@@ -219,7 +269,7 @@ function check(ast){const stack=[[ast,0]];while(stack.length){const [value,depth
  ast.format=ast.live?'bil/5':ast.async?'bil/4':ast.remote?'bil/3':ast.extended?'bil/2':VERSION;
  if(ast.remote)for(const [name,b]of backends){if(imports.has(name)||functions.has(name)||handlers.has(name)||globals.has(name))fail('BIL_NAME','Backend alias conflicts with an application symbol.');b.operations.sort();}
 
- if(globals.size>64||functions.size>64||handlers.size>64||[...functions.values()].some(f=>f.params.length>16))fail('BIL_LIMIT','BIL symbol or parameter budget exceeded.');return {globals:Object.fromEntries(globals),records:Object.fromEntries(records),imports:[...imports].sort(),functions,handlers,screens,start:starts[0]?.name||[...screens.keys()][0]||'',...(ast.remote?{remote:{format:'bil.remote/1',backends:Object.fromEntries(backends)}}:{})};
+ if(globals.size>(advancedUI?128:64)||functions.size>(advancedUI?128:64)||handlers.size>(advancedUI?128:64)||[...functions.values()].some(f=>f.params.length>16))fail('BIL_LIMIT','BIL symbol or parameter budget exceeded.');return {advancedUI,globals:Object.fromEntries(globals),records:Object.fromEntries(records),imports:[...imports].sort(),functions,handlers,screens,start:starts[0]?.name||[...screens.keys()][0]||'',...(ast.remote?{remote:{format:'bil.remote/1',backends:Object.fromEntries(backends)}}:{})};
 }
 function lower(ast,checked){
  const sourceMap=[];
@@ -228,7 +278,14 @@ function lower(ast,checked){
  const functions={};for(const [name,f]of checked.functions)functions[name]={params:f.params.map(p=>({name:p.name,type:p.type})),result:f.result,body:block(f.body)};
  const handlers={};for(const [name,h]of checked.handlers)handlers[name]=block(h.body);
  const main=block(ast.body);let ui=null;
- if(ast.extended){const compileUI=(nodes,screen)=>nodes.map(n=>{if(n.kind==='intent'){const instruction=block([n])[0];main.push(instruction);return {id:n.id,type:'view',loc:copy(n.loc),target:n.value.name};}const x={id:n.id,type:n.kind.slice(3),loc:copy(n.loc)};for(const k of ['label','name','required','multiline','range','options','inputType','columns','selection','handler','target','validate'])if(own(n,k))x[k]=copy(n[k]);if(n.children)x.children=compileUI(n.children,screen);if(['input','select','toggle','table','button'].includes(x.type)){const name='ui_'+n.id;handlers[name]=[{op:'UI_EVENT',id:n.id,loc:copy(n.loc),screen,control:n.id}];sourceMap.push({id:n.id,op:'UI_EVENT',...copy(n.loc)});x.entry=name;}return x;});ui={format:'bil.ui/1',start:checked.start,screens:[...checked.screens.values()].map(n=>({id:n.name,label:n.label,loc:copy(n.loc),children:compileUI(n.children,n.name)}))};}
+ if(ast.extended){const compileUI=(nodes,screen)=>nodes.map(n=>{let x;
+  if(n.kind==='intent'){const instruction=block([n])[0];main.push(instruction);x={id:n.id,type:'view',loc:copy(n.loc),target:n.value.name};}
+  else{x={id:n.id,type:n.kind.slice(3),loc:copy(n.loc)};for(const k of ['label','name','required','multiline','range','options','inputType','columns','selection','handler','target','validate'])if(own(n,k))x[k]=copy(n[k]);}
+  if(n.children)x.children=compileUI(n.children,screen);
+  if(['input','select','toggle','table','button'].includes(x.type)){const name='ui_'+n.id;handlers[name]=[{op:'UI_EVENT',id:n.id,loc:copy(n.loc),screen,control:n.id}];sourceMap.push({id:n.id,op:'UI_EVENT',...copy(n.loc)});x.entry=name;}
+  for(const key of ['style','motion','geometry'])if(own(n,key))x[key]=copy(n[key]);
+  if(n.gestures){x.gestures={};let i=0;for(const [gesture,handler]of Object.entries(n.gestures)){const id=n.id+'_g'+i++,entry='ui_'+id,loc=copy(n.gestureLocs[gesture]);x.gestures[gesture]={handler,entry};handlers[entry]=[{op:'UI_EVENT',id,loc,screen,control:n.id,gesture}];sourceMap.push({id,op:'UI_EVENT',...loc});}}
+  return x;});ui={format:checked.advancedUI?'bil.ui/2':'bil.ui/1',start:checked.start,screens:[...checked.screens.values()].map(n=>({id:n.name,label:n.label,loc:copy(n.loc),children:compileUI(n.children,n.name)}))};}
  if(new Set(sourceMap.map(x=>x.id)).size!==sourceMap.length)fail('BIL_ID','Source identifiers collided; rename a value or handler.');const controls=ast.body.filter(n=>n.kind==='button').map(n=>({id:n.id,label:n.label,handler:n.name}));
  return {format:ast.live?'bil.ir/5':ast.async?'bil.ir/4':ast.remote?'bil.ir/3':ast.extended?'bil.ir/2':IR,language:ast.format,globals:copy(checked.globals),records:copy(checked.records),imports:checked.imports,functions,handlers,main,controls,sourceMap,...(ast.extended?{ui}:{}),...(ast.remote?{remote:copy(checked.remote)}:{}),...((ast.async||ast.live)?{events:{format:'bil.events/1',handlers:Object.fromEntries([...checked.handlers].filter(([,h])=>h.params).map(([name,h])=>[name,h.params.map(p=>({name:p.name,type:copy(p.type)}))]))}}:{})};
 }
@@ -240,5 +297,5 @@ function validateApplication(p){const ir=validateBundle(p.bil),expected=applicat
 function validateBundle(bundle){if(!bundle||Object.keys(bundle).sort().join('|')!=='format|ir|source'||!['bil.program/1','bil.program/2','bil.program/3','bil.program/4','bil.program/5'].includes(bundle.format)||typeof bundle.source!=='string')fail('BIL_BUNDLE','Invalid BIL source/IR envelope.');const result=compile(bundle.source);const stable=scope.CLEA7?.stable||JSON.stringify;if(bundle.format!==(result.ir.format==='bil.ir/5'?'bil.program/5':result.ir.format==='bil.ir/4'?'bil.program/4':result.ir.format==='bil.ir/3'?'bil.program/3':result.ir.format==='bil.ir/2'?'bil.program/2':'bil.program/1')||stable(bundle.ir)!==stable(result.ir))fail('BIL_INTEGRITY','BIL IR does not match the statically checked source.');return result.ir;}
 function visual(source){const result=compile(source);return {source,ir:result.ir,nodes:result.ast.body.map(n=>({id:n.id,kind:n.kind,name:n.name||n.value?.name||'',location:n.loc,editable:(n.kind==='declare'||n.kind==='assign'&&n.declaration)&&n.value.kind==='literal',value:n.value?.kind==='literal'?n.value.value:undefined,valueLocation:n.value?.loc||null})),diagnostics:[]};}
 function editLiteral(source,id,value){const model=visual(source),node=model.nodes.find(n=>n.id===id);if(!node?.editable)fail('BIL_VISUAL','This construct is preserved; edit it in BIL code.');if(value!==null&&!['number','string','boolean'].includes(typeof value)||typeof value==='number'&&!Number.isFinite(value))fail('BIL_VISUAL','Expected a finite literal.');const out=source.slice(0,node.valueLocation.start)+JSON.stringify(value)+source.slice(node.valueLocation.end);compile(out);return out;}
-scope.CLEA7BIL={VERSION,IR,NATIVE_ADAPTER,NATIVE_CONTRACTS,nativeMediaType:copy(nativeMediaType),nativeLocationType:copy(nativeLocationType),nativeNotificationType:copy(nativeNotificationType),nativeReceiptType:copy(nativeReceiptType),REMOTE_CONTRACTS,remoteSessionType:copy(remoteSessionType),remoteFailureType:copy(remoteFailureType),remoteCompletionType:copy(remoteCompletionType),remoteUpdateType:copy(remoteUpdateType),remoteQueryType:copy(remoteQueryType),remoteDocumentType:copy(remoteDocumentType),Diagnostic,lex,parse:source=>new Parser(source).program(),check,compile,validateBundle,validateApplication,defaultValue,visual,editLiteral,safe,copy};
+scope.CLEA7BIL={PRESENTATION,SHAPES,GESTURES,MOTIONS,VERSION,IR,NATIVE_ADAPTER,NATIVE_CONTRACTS,nativeMediaType:copy(nativeMediaType),nativeLocationType:copy(nativeLocationType),nativeNotificationType:copy(nativeNotificationType),nativeReceiptType:copy(nativeReceiptType),REMOTE_CONTRACTS,remoteSessionType:copy(remoteSessionType),remoteFailureType:copy(remoteFailureType),remoteCompletionType:copy(remoteCompletionType),remoteUpdateType:copy(remoteUpdateType),remoteQueryType:copy(remoteQueryType),remoteDocumentType:copy(remoteDocumentType),Diagnostic,lex,parse:source=>new Parser(source).program(),check,compile,validateBundle,validateApplication,defaultValue,visual,editLiteral,safe,copy};
 })(globalThis);

@@ -1,7 +1,7 @@
 name: Verify public BL CLEA7 website and applications
 on:
   push:
-    branches: [main, work/complete-public-downloads, work/bil-public-0-6, work/studio-applications-07, work/verified-web-backend-09, release/verified-downloads-09, work/native-media-013, work/approve-release-014]
+    branches: [main, work/complete-public-downloads, work/bil-public-0-6, work/studio-applications-07, work/verified-web-backend-09, release/verified-downloads-09, work/native-media-013, work/managed-release-014, work/approve-release-014]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -40,13 +40,14 @@ jobs:
           server_pid=$!
           trap 'kill "$server_pid" || true' EXIT
           export CLEA7_CHROME="$(command -v google-chrome)"
+          node tests/test_public_appearance_ui.cjs
           node tests/test_public_site.cjs
           node tests/test_public_acceptance.cjs
           node tests/test_public_bil_studio.cjs
           node tests/test_public_bil_apps_ui.cjs
           node tests/test_public_native_studio.cjs
           node tests/test_public_native_install.cjs
-          cp downloads/BLclea7-Studio-pregled.html /tmp/BL-CLEA7-Studio-pregled-v2.html
+          cp downloads/BLclea7-Studio-pregled-0.14.html /tmp/BL-CLEA7-Studio-pregled-v2.html
           node tests/test_public_offline.cjs
       - uses: actions/upload-artifact@v4
         continue-on-error: true

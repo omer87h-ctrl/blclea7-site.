@@ -1,0 +1,1 @@
+'use strict';const continueStudio=document.getElementById('continue-studio');if(continueStudio)continueStudio.href='index.html'+location.hash;

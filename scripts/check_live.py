@@ -4,13 +4,13 @@ import hashlib,json,time,urllib.request,urllib.error,urllib.parse
 ROOT=Path(__file__).resolve().parents[1]
 BASE='https://clea7.brzoilokalno.com/'
 REPO='omer87h-ctrl/blclea7-site.'
-TAG='clea7-0.13.0-b62424b'
+TAG='clea7-0.14.0-7484805'
 def native_checks(native):
  url='https://api.github.com/repos/'+REPO+'/releases/tags/'+TAG
  with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'BL-CLEA7-anonymous-download-check'}),timeout=30) as response:
   release=json.load(response)
  assert not release.get('draft') and release['tag_name']==TAG
- assert len(native['assets'])==3 and {a['key'] for a in native['assets']}=={'studio','runtime','android'}
+ assert len(native['assets'])==4 and {a['key'] for a in native['assets']}=={'studio','runtime','android','installer'}
  verified=[]
  for item in native['assets']:
   asset=next(a for a in release['assets'] if a['name']==item['name'])
@@ -24,7 +24,7 @@ def native_checks(native):
    assert response.status in (200,206)
    if response.status==206:assert response.headers['Content-Range'].startswith('bytes 0-') and response.headers['Content-Range'].endswith('/'+str(item['size_bytes']))
    else:assert int(response.headers['Content-Length'])==item['size_bytes']
-   head=response.read(4096);assert head.startswith(b'PK\x03\x04')
+   head=response.read(4096);assert head.startswith(b'MZ' if item['key']=='installer' else b'PK\x03\x04')
   verified.append({'key':item['key'],'bytes':item['size_bytes'],'sha256':item['sha256'],'anonymousDownloadProbeBytes':len(head),'releaseDigestMatches':True})
  return verified
 def read(path):
@@ -43,7 +43,7 @@ def check():
  compiler=read('studio/workbench/bil-compiler.js');assert compiler==(ROOT/'studio/workbench/bil-compiler.js').read_bytes(),'Published BIL compiler differs.'
  engine=read('studio/workbench/engine.js');assert engine==(ROOT/'studio/workbench/engine.js').read_bytes(),'Published runtime differs from verified source.'
  assert b'CLEA7Library' in read('studio/launcher/library.js')
- catalog=json.loads(read('releases.json'));assert catalog['source_commit']=='b62424ba703a5acd0224f45b240793dc87e283b1'
+ catalog=json.loads(read('releases.json'));assert catalog['source_commit']=='7484805dd18089855b72caebdc8be400dd6f53ed'
  verified=[]
  for entry in catalog['published']:
   path=entry['url'];assert path.startswith('downloads/') and '..' not in path and ':' not in path

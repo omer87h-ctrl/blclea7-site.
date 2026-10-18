@@ -1,0 +1,29 @@
+{
+  "format": "clea7.prepared-public-downloads/1",
+  "version": "0.14.0",
+  "source_commit": "7484805dd18089855b72caebdc8be400dd6f53ed",
+  "published": false,
+  "files": [
+    {
+      "key": "sdk",
+      "name": "BL-CLEA7-SDK-0.14.0.zip",
+      "url": "downloads/BL-CLEA7-SDK-0.14.0.zip",
+      "size_bytes": 208744,
+      "sha256": "6074d62fe8518c9669f53b59a770d1bc3acc434b4fb86d56a43237be1b172c2c"
+    },
+    {
+      "key": "preview",
+      "name": "BLclea7-Studio-pregled-0.14.html",
+      "url": "downloads/BLclea7-Studio-pregled-0.14.html",
+      "size_bytes": 826547,
+      "sha256": "4d72a9993e90c23717e57d9688a5c4f89325c2851560bd2f2a93b8c04a62489e"
+    },
+    {
+      "key": "visual-example",
+      "name": "primjer-svjetlosna-putanja.clea7",
+      "url": "downloads/primjer-svjetlosna-putanja.clea7",
+      "size_bytes": 9806,
+      "sha256": "edff7b9bc0329d018792a1ebc6866db512926f85512b20c5fd2bb75f13da5f83"
+    }
+  ]
+}
