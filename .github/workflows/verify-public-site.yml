@@ -1,7 +1,7 @@
 name: Verify public BL CLEA7 website and applications
 on:
   push:
-    branches: [main, work/complete-public-downloads, work/bil-public-0-6, work/studio-applications-07, work/verified-web-backend-09, release/verified-downloads-09, work/native-media-013]
+    branches: [main, work/complete-public-downloads, work/bil-public-0-6, work/studio-applications-07, work/verified-web-backend-09, release/verified-downloads-09, work/native-media-013, work/managed-release-014]
   pull_request:
   workflow_dispatch:
 permissions:
