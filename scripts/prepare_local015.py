@@ -2,7 +2,7 @@
 import hashlib,json,subprocess,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-SOURCE='6f04cd5d102850900579f33e319aacc4c1bdb950'
+SOURCE='052921fb5d2611906171dd97d78a4d9821222891'
 def main():
  source=ROOT/'sdk-source'
  subprocess.run(['python','-m','clea7','bil','package','sdk/examples/bil/orbitavo.bil','--output',str(ROOT/'downloads/primjer-orbitavo.clea7'),'--id','orbitavo'],cwd=source,check=True)
