@@ -1,22 +1,22 @@
 {
   "format": "clea7.prepared-public-downloads/1",
   "version": "0.15.0",
-  "source_commit": "68b8be726c8a8a6b7239ee5ee95b2e56456d5ef1",
+  "source_commit": "052921fb5d2611906171dd97d78a4d9821222891",
   "published": false,
   "files": [
     {
       "key": "sdk",
       "name": "BL-CLEA7-SDK-0.15.0.zip",
       "url": "downloads/BL-CLEA7-SDK-0.15.0.zip",
-      "size_bytes": 214401,
-      "sha256": "d3a39c4424aa9ba0812e8d40eb6121bd7d0f04eddd797973c08ee4719abf23cf"
+      "size_bytes": 214402,
+      "sha256": "5176effad7a8bd5d56d3087a7473213620492d62d9689462178fd4a459404d47"
     },
     {
       "key": "preview",
       "name": "BLclea7-Studio-pregled-0.15.html",
       "url": "downloads/BLclea7-Studio-pregled-0.15.html",
-      "size_bytes": 865469,
-      "sha256": "12ad8efcae14ecfb01be6f33697462b02eeb1d6114a859906f0d3db98646d7c5"
+      "size_bytes": 865761,
+      "sha256": "925f7e5cfa5e69d62da7da7f1a45ecd9008009f2b2e01a31edc09e635598664c"
     },
     {
       "key": "visual-example",
