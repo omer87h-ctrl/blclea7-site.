@@ -39,7 +39,7 @@ def sign_package(project,key,publisher='',targets=None):
     if not isinstance(key,ec.EllipticCurvePrivateKey) or key.curve.name!='secp256r1':raise UserError('Potreban je ECDSA P-256 ključ.')
     if targets is None and any(b['adapter']=='android.native/1' for b in project.get('remote',{}).get('backends',{}).values()):targets=('android',)
     if targets is None:targets=('browser',) if project.get('format') in ('clea7.application/7','clea7.application/8','clea7.application/9') else ('browser','windows','android')
-    value=json.loads(encode(project,targets,publisher));value['format']='clea7.package/2';value['publisherKey']=public_jwk(key);value['manifest']['runtime']='0.13.0' if any(b['adapter']=='android.native/1' for b in project.get('remote',{}).get('backends',{}).values()) else '0.12.0' if any(b['adapter']=='firebase.development/3' for b in project.get('remote',{}).get('backends',{}).values()) else '0.11.0' if project['format']=='clea7.application/9' else '0.10.0' if project['format']=='clea7.application/8' else ('0.9.0' if 'android' in targets else '0.8.0') if project['format']=='clea7.application/7' else '0.7.0' if project['format']=='clea7.application/6' else '0.6.0' if project['format']=='clea7.application/5' else '0.5.0'
+    value=json.loads(encode(project,targets,publisher));value['format']='clea7.package/2';value['publisherKey']=public_jwk(key);value['manifest']['runtime']='0.14.0' if project.get('bil',{}).get('ir',{}).get('ui',{}).get('format')=='bil.ui/2' else '0.13.0' if any(b['adapter']=='android.native/1' for b in project.get('remote',{}).get('backends',{}).values()) else '0.12.0' if any(b['adapter']=='firebase.development/3' for b in project.get('remote',{}).get('backends',{}).values()) else '0.11.0' if project['format']=='clea7.application/9' else '0.10.0' if project['format']=='clea7.application/8' else ('0.9.0' if 'android' in targets else '0.8.0') if project['format']=='clea7.application/7' else '0.7.0' if project['format']=='clea7.application/6' else '0.6.0' if project['format']=='clea7.application/5' else '0.5.0'
     der=key.sign(transcript(value),ec.ECDSA(hashes.SHA256()));r,s=utils.decode_dss_signature(der)
     value['signature']=encode64(r.to_bytes(32,'big')+s.to_bytes(32,'big'))
     return json.dumps(value,ensure_ascii=False,separators=(',',':')).encode()
@@ -48,7 +48,7 @@ def verify_package(value,target=None):
     from .package import decode,MAX_PACKAGE
     hashes,serialization,ec,utils=crypto()
     if not isinstance(value,dict) or set(value)!={'format','manifest','payload','publisherKey','signature'} or value['format']!='clea7.package/2':raise UserError('Neispravna potpisana omotnica.')
-    if value.get('manifest',{}).get('runtime') not in ('0.5.0','0.6.0','0.7.0','0.8.0','0.9.0','0.10.0','0.11.0','0.12.0','0.13.0'):raise UserError('Potpisani paket zahtijeva Runtime 0.5.0 ugovor.')
+    if value.get('manifest',{}).get('runtime') not in ('0.5.0','0.6.0','0.7.0','0.8.0','0.9.0','0.10.0','0.11.0','0.12.0','0.13.0','0.14.0'):raise UserError('Potpisani paket zahtijeva Runtime 0.5.0 ugovor.')
     jwk=value['publisherKey']
     if not isinstance(jwk,dict) or set(jwk)!={'kty','crv','x','y'} or jwk.get('kty')!='EC' or jwk.get('crv')!='P-256':raise UserError('Nepodržan javni ključ autora.')
     x=int.from_bytes(decode64(jwk['x'],32),'big');y=int.from_bytes(decode64(jwk['y'],32),'big');raw=decode64(value['signature'],64)

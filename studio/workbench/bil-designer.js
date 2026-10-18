@@ -26,6 +26,24 @@ function buildRecordApp(config){const name=String(config.name||'').trim(),fields
 }
 function screenModel(source){const ast=B.compile(source).ast;return {screens:ast.body.filter(n=>n.kind==='screen'),ast};}
 function findNode(source,id){const model=screenModel(source);let result=null;const walk=(nodes,parent)=>{for(const n of nodes){if(n.id===id)result={node:n,parent};if(n.children)walk(n.children,n);}};walk(model.screens,model.ast);if(!result)throw Error('Komponenta nije pronađena u provjerenom izvoru.');return result;}
+
+function editAppearance(source,id,kind,name,value){
+ const n=findNode(source,id).node;if(n.kind!=='intent'&&!n.kind.startsWith('ui_'))throw Error('Odaberi vizuelnu komponentu.');
+ let at,end,text;
+ if(kind==='style'){
+  if(!Object.prototype.hasOwnProperty.call(B.PRESENTATION,name))throw Error('Nepoznata vizuelna osobina.');
+  const span=n.styleLocs?.[name],literal=value&&typeof value==='object'&&Object.keys(value).join()==='bind'?value.bind:quote(value);
+  if(span){at=span.start;end=span.end;text=value===undefined?'':name+' '+literal;}
+  else if(value===undefined)return source;
+  else if(n.styleLoc){at=n.styleLoc.end-1;end=at;text='\n '+name+' '+literal+'\n';}
+  else{at=n.loc.end;end=at;text=' style {\n '+name+' '+literal+'\n}';}
+ }else if(kind==='motion'){
+  if(!B.MOTIONS.includes(name)||!Number.isInteger(value)||value<0||value>2000)throw Error('Animacija traje od 0 do 2000 ms.');
+  at=n.motionLoc?.start??n.loc.end;end=n.motionLoc?.end??at;text='motion '+name+' '+value;if(!n.motionLoc)text=' '+text;
+ }else throw Error('Nepoznata izmjena.');
+ const next=source.slice(0,at)+text+source.slice(end);B.compile(next);return next;
+}
+
 function changeLabel(source,id,label){const {node}=findNode(source,id);if(!node.labelLoc)throw Error('Ova konstrukcija nema statični naziv.');label=String(label).trim();if(!label||label.length>200)throw Error('Naziv treba 1–200 znakova.');const next=source.slice(0,node.labelLoc.start)+quote(label)+source.slice(node.labelLoc.end);B.compile(next);return next;}
 function move(source,id,direction){const {node,parent}=findNode(source,id),siblings=parent.children||parent.body,index=siblings.indexOf(node),other=siblings[index+direction];if(!other||!['intent'].includes(node.kind)&&!node.kind.startsWith('ui_')||!['intent'].includes(other.kind)&&!other.kind.startsWith('ui_'))throw Error('Komponentu pomjeri unutar njenog rasporeda.');const a=direction<0?other:node,b=direction<0?node:other;const next=source.slice(0,a.loc.start)+source.slice(b.loc.start,b.loc.end)+source.slice(a.loc.end,b.loc.start)+source.slice(a.loc.start,a.loc.end)+source.slice(b.loc.end);B.compile(next);return next;}
 function remove(source,id){const {node}=findNode(source,id);if(node.kind!=='intent'&&!node.kind.startsWith('ui_'))throw Error('Brisanje logike ili ekrana obavi u kodu.');const next=source.slice(0,node.loc.start)+source.slice(node.loc.end);B.compile(next);return next;}
@@ -62,12 +80,27 @@ function attach(api){const d=document,root=d.createElement('section');root.id='b
   handle.onpointerup=e=>{if(!gesture||gesture.pointer!==e.pointerId)return;e.preventDefault();e.stopPropagation();const target=targetAt(e)||gesture.target,moved=gesture.moved;clear();try{if(handle.hasPointerCapture(e.pointerId))handle.releasePointerCapture(e.pointerId);if(!moved||!target||target===id)return;root.dataset.lastDrop=id+' -> '+target;api.setSource(placeBefore(api.source(),id,target));setTimeout(()=>{try{api.inspect();}catch(error){api.error(error);}},0);}catch(error){api.error(error);}};
   handle.onpointercancel=clear;handle.onlostpointercapture=clear;handle.onkeydown=e=>{if(!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();try{api.setSource(move(api.source(),id,e.key==='ArrowUp'?-1:1));api.inspect();}catch(error){api.error(error);}};
  }}
+
+ function appearanceControls(row,n){
+  if(n.kind!=='intent'&&!n.kind.startsWith('ui_'))return;
+  const details=el('details');details.className='bil-appearance-controls';details.append(el('summary','Izgled i animacija'));
+  const form=el('form'),property=el('select');property.setAttribute('aria-label','Vizuelna osobina '+n.id);
+  for(const key of Object.keys(B.PRESENTATION)){const option=el('option',key);option.value=key;property.append(option);}
+  const value=el('input');value.setAttribute('aria-label','Vrijednost osobine '+n.id);const hint=el('small');
+  const read=()=>{const spec=B.PRESENTATION[property.value],v=n.style?.[property.value];value.value=v===undefined?'':typeof v==='object'?'@'+v.bind:String(v);hint.textContent=spec.kind==='enum'?spec.values.join(', '):spec.kind==='color'?'#RRGGBB ili transparent':String(spec.min)+' – '+String(spec.max)+'; @ime za Number vezu';};property.onchange=read;read();
+  const apply=el('button','Primijeni izgled');apply.type='submit';form.append(property,value,hint,apply);
+  form.onsubmit=e=>{e.preventDefault();try{const key=property.value,spec=B.PRESENTATION[key],raw=value.value.trim();let v;if(raw==='')v=undefined;else if(raw.startsWith('@'))v={bind:raw.slice(1)};else if(['number','size'].includes(spec.kind)&&!['fill','auto'].includes(raw))v=Number(raw);else v=raw;api.setSource(editAppearance(api.source(),n.id,'style',key,v));api.inspect();}catch(error){api.error(error);}};
+  const motion=el('select');motion.setAttribute('aria-label','Animacija '+n.id);for(const preset of B.MOTIONS){const option=el('option',preset);option.value=preset;motion.append(option);}motion.value=n.motion?.preset||'none';
+  const duration=el('input');duration.type='number';duration.min='0';duration.max='2000';duration.value=String(n.motion?.duration??180);duration.setAttribute('aria-label','Trajanje animacije u milisekundama '+n.id);
+  details.append(form,motion,duration,button('Primijeni animaciju',()=>{api.setSource(editAppearance(api.source(),n.id,'motion',motion.value,Number(duration.value)));api.inspect();}));row.append(details);
+ }
+
  function refresh(){for(const control of design.querySelectorAll('input,select'))control.onchange=null;while(design.firstChild)design.removeChild(design.firstChild);let screens;try{screens=screenModel(api.source()).screens;}catch{design.append(el('p','Ispravi dijagnostiku u kodu za vizuelno uređivanje.'));return;}if(!screens.length){design.append(el('p','Kreiraj aplikaciju iznad ili dodaj screen blok u BIL kodu.'));return;}
   if(!screens.some(s=>s.name===chosen))chosen=screens[0].name;const fill=(select,entries,blank=false)=>{const value=select.value;select.textContent='';if(blank){const o=el('option','Navigacija bez događaja');o.value='';select.append(o);}for(const [key,label]of entries){const o=el('option',label);o.value=key;select.append(o);}if([...select.options].some(o=>o.value===value))select.value=value;};fill(picker,screens.map(s=>[s.name,s.label]));picker.value=chosen;const ir=B.compile(api.source()).ir;fill(binding,Object.entries(ir.globals).map(([k,v])=>[k,k+' · '+(typeof v.type==='string'?v.type:'kolekcija / zapis')]));fill(selection,Object.entries(ir.globals).filter(([,v])=>v.type==='Number'&&v.mutable).map(([k])=>[k,k]));fill(handler,Object.keys(ir.handlers).filter(k=>!k.startsWith('ui_')).map(k=>[k,k]),true);fill(target,screens.map(s=>[s.name,s.label]));const groups=[];const walkGroups=nodes=>{for(const n of nodes){if(['ui_row','ui_card'].includes(n.kind)){groups.push([n.id,n.label||n.key||n.id]);walkGroups(n.children);}}};walkGroups(screens.find(s=>s.name===chosen).children);fill(container,[['','Na kraju ekrana'],...groups]);showPreview(api.source());
   const edit=(fn)=>{api.setSource(fn(api.source()));api.inspect();};const walk=(nodes,parent)=>{for(const n of nodes){const row=el('div');row.className='bil-design-node';row.dataset.bilDesign=n.id;row.append(el('small',n.kind==='screen'?'Ekran · '+n.name:n.kind.replace('ui_','')));if(n.labelLoc){const label=el('input');label.setAttribute('aria-label','Naziv komponente '+(n.name||n.id));label.value=n.label;label.onchange=()=>{try{edit(s=>changeLabel(s,n.id,label.value));}catch(e){api.error(e);}};row.append(label);}else row.append(el('strong',n.value?.name||n.name||n.kind));row.append(button('Prikaži kod',()=>api.select(n.loc)));if(n.kind==='intent'||n.kind.startsWith('ui_')){row.append(button('Dupliciraj grupu ili komponentu',()=>edit(s=>duplicate(s,n.id))));const destination=el('select');destination.setAttribute('aria-label','Odredište komponente '+n.id);const blank=el('option','Premjesti u raspored…');blank.value='';destination.append(blank);const choices=[];for(const page of screens){choices.push([page.id,page.label]);const groups=items=>{for(const x of items)if(x.children){if(x.loc.start<n.loc.start||x.loc.end>n.loc.end)choices.push([x.id,page.label+' / '+(x.label||x.key||x.id)]);groups(x.children);}};groups(page.children);}for(const [key,label]of choices){if(key===n.id)continue;const option=el('option',label);option.value=key;destination.append(option);}destination.onchange=()=>{if(destination.value)try{edit(s=>reparent(s,n.id,destination.value));}catch(error){api.error(error);}};row.append(destination);}
-   if(n.kind==='intent'||n.kind.startsWith('ui_'))row.append(button('↑',()=>edit(s=>move(s,n.id,-1))),button('↓',()=>edit(s=>move(s,n.id,1))),button('Ukloni komponentu',()=>edit(s=>remove(s,n.id))));if(n.children){const children=el('div');children.className='bil-design-children';walk(n.children,children);row.append(children);}if(n.kind==='screen')row.append(button('Dodaj tekst',()=>edit(s=>addText(s,n.name,'Novi tekst'))));parent.append(row);}};walk(screens.filter(s=>s.name===chosen),design);enableDragging(design);
+   if(n.kind==='intent'||n.kind.startsWith('ui_'))row.append(button('↑',()=>edit(s=>move(s,n.id,-1))),button('↓',()=>edit(s=>move(s,n.id,1))),button('Ukloni komponentu',()=>edit(s=>remove(s,n.id))));appearanceControls(row,n);if(n.children){const children=el('div');children.className='bil-design-children';walk(n.children,children);row.append(children);}if(n.kind==='screen')row.append(button('Dodaj tekst',()=>edit(s=>addText(s,n.name,'Novi tekst'))));parent.append(row);}};walk(screens.filter(s=>s.name===chosen),design);enableDragging(design);
  }
  return {refresh};
 }
-scope.CLEA7BILDesigner={PRESETS,buildRecordApp,screenModel,changeLabel,move,remove,addText,addScreen,addComponent,placeBefore,reparent,duplicate,attach};
+scope.CLEA7BILDesigner={editAppearance,PRESETS,buildRecordApp,screenModel,changeLabel,move,remove,addText,addScreen,addComponent,placeBefore,reparent,duplicate,attach};
 })(globalThis);

@@ -7,7 +7,7 @@ from .application import validate
 from .schema import UserError
 
 FORMAT='clea7.package/1'
-RUNTIME='0.13.0'
+RUNTIME='0.14.0'
 MAX_PACKAGE=2*1024*1024
 MAX_APPLICATION=1024*1024
 TARGETS={'browser','windows','android'}
@@ -19,7 +19,7 @@ def encode(project,targets=None,publisher=''):
     if targets is None:targets=('browser',) if app['format'] in ('clea7.application/7','clea7.application/8','clea7.application/9') else ('browser','windows')
     payload=json.dumps(app,ensure_ascii=False,allow_nan=False,separators=(',',':')).encode()
     if len(payload)>MAX_APPLICATION:raise UserError('Aplikacija prelazi 1 MiB.')
-    manifest={'id':app['id'],'name':app['name'],'version':app['version'],'runtime':'0.13.0' if any(b['adapter']=='android.native/1' for b in app.get('remote',{}).get('backends',{}).values()) else '0.12.0' if any(b['adapter']=='firebase.development/3' for b in app.get('remote',{}).get('backends',{}).values()) else '0.11.0' if app['format']=='clea7.application/9' else '0.10.0' if app['format']=='clea7.application/8' else ('0.9.0' if 'android' in targets else '0.8.0') if app['format'] in ('clea7.application/7','clea7.application/8','clea7.application/9') else '0.7.0' if app['format']=='clea7.application/6' else '0.6.0' if app['format']=='clea7.application/5' else '0.5.0' if app['format']=='clea7.application/4' else '0.4.0' if app['format']=='clea7.application/3' else '0.3.0',
+    manifest={'id':app['id'],'name':app['name'],'version':app['version'],'runtime':'0.14.0' if app.get('bil',{}).get('ir',{}).get('ui',{}).get('format')=='bil.ui/2' else '0.13.0' if any(b['adapter']=='android.native/1' for b in app.get('remote',{}).get('backends',{}).values()) else '0.12.0' if any(b['adapter']=='firebase.development/3' for b in app.get('remote',{}).get('backends',{}).values()) else '0.11.0' if app['format']=='clea7.application/9' else '0.10.0' if app['format']=='clea7.application/8' else ('0.9.0' if 'android' in targets else '0.8.0') if app['format'] in ('clea7.application/7','clea7.application/8','clea7.application/9') else '0.7.0' if app['format']=='clea7.application/6' else '0.6.0' if app['format']=='clea7.application/5' else '0.5.0' if app['format']=='clea7.application/4' else '0.4.0' if app['format']=='clea7.application/3' else '0.3.0',
               'abi':app['format'],'targets':list(targets),'permissions':sorted(set(app['permissions'])),
               'dependencies':[],'sha256':hashlib.sha256(payload).hexdigest(),'publisher':publisher}
     if app['format'] in ('clea7.application/7','clea7.application/8','clea7.application/9'):manifest['remote']=app['remote']
@@ -51,6 +51,7 @@ def decode(raw,target=None):
         payload=base64.b64decode(value['payload'],validate=True)
         if len(payload)>MAX_APPLICATION or hashlib.sha256(payload).hexdigest()!=manifest['sha256']:raise UserError('Integritet aplikacije nije potvrđen.')
         app=validate(json.loads(payload))
+        if app.get('bil',{}).get('ir',{}).get('ui',{}).get('format')=='bil.ui/2' and tuple(map(int,manifest['runtime'].split('.'))) < (0,14,0):raise UserError('Napredni BIL prikaz zahtijeva Runtime 0.14.0.')
         if any(b['adapter']=='android.native/1' for b in app.get('remote',{}).get('backends',{}).values()) and (tuple(map(int,manifest['runtime'].split('.'))) < (0,13,0) or manifest['targets']!=['android']):raise UserError('Native BIL zahtijeva Android Runtime 0.13.0.')
         if any(b['adapter']=='firebase.development/3' for b in app.get('remote',{}).get('backends',{}).values()) and tuple(map(int,manifest['runtime'].split('.'))) < (0,12,0):raise UserError('Identiteti upita zahtijevaju Runtime 0.12.0.')
         if app['format']=='clea7.application/9' and tuple(map(int,manifest['runtime'].split('.'))) < (0,11,0):raise UserError('Praćenje i udaljeni upiti zahtijevaju Runtime 0.11.0.')

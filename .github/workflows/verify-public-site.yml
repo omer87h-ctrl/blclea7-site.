@@ -40,6 +40,7 @@ jobs:
           server_pid=$!
           trap 'kill "$server_pid" || true' EXIT
           export CLEA7_CHROME="$(command -v google-chrome)"
+          node tests/test_public_appearance_ui.cjs
           node tests/test_public_site.cjs
           node tests/test_public_acceptance.cjs
           node tests/test_public_bil_studio.cjs

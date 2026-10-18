@@ -28,6 +28,37 @@ def validate_remote(value):
         if not isinstance(operations,list) or any(not isinstance(op,str) or (op not in (NATIVE_OPS if backend['adapter']=='android.native/1' else REMOTE_OPS) or op in ('query.documents','observe.query.documents') and backend['adapter']!='firebase.development/3' or backend['adapter']=='firebase.development/1' and (op in ('query.list','query.documents','document.add') or op.startswith('observe.'))) for op in operations) or operations!=sorted(set(operations)):raise UserError('Neispravne udaljene operacije.')
     return value
 
+
+STYLE_NUMBERS={'width':(0,4096),'height':(0,4096),'minWidth':(0,4096),'maxWidth':(0,4096),'padding':(0,128),'gap':(0,128),'radius':(0,256),'borderWidth':(0,16),'fontSize':(8,120),'fontWeight':(100,900),'opacity':(0,1),'x':(-4096,4096),'y':(-4096,4096),'rotate':(-3600,3600),'scale':(0,8),'gradientAngle':(0,360)}
+STYLE_COLOURS={'background','color','borderColor','gradientFrom','gradientTo'}
+STYLE_ENUMS={'direction':['row','column'],'align':['start','center','end','stretch'],'justify':['start','center','end','space-between','space-around'],'wrap':['wrap','nowrap'],'position':['relative','absolute'],'textAlign':['left','center','right'],'font':['system','mono','serif'],'shadow':['none','soft','lifted']}
+SHAPES={'circle','square','diamond','triangle','ring'}
+GESTURES={'tap','swipeLeft','swipeRight','press'}
+def validate_presentation_node(node,ir):
+    style=node.get('style',{})
+    if not isinstance(style,dict) or not set(style)<=set(STYLE_NUMBERS)|STYLE_COLOURS|set(STYLE_ENUMS):raise UserError('Nepodržana vizuelna svojstva.')
+    for key,value in style.items():
+        if isinstance(value,dict):
+            if set(value)!={'bind'} or key not in STYLE_NUMBERS or not isinstance(value['bind'],str) or ir['globals'].get(value['bind'],{}).get('type')!='Number':raise UserError('Vizuelna veza zahtijeva deklarisani Number.')
+        elif key in STYLE_COLOURS:
+            if not isinstance(value,str) or not (re.fullmatch(r'#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?',value) or value in ('transparent','inherit')):raise UserError('Nedozvoljena vizuelna boja.')
+        elif key in STYLE_ENUMS:
+            if value not in STYLE_ENUMS[key]:raise UserError('Nepodržan vizuelni izbor.')
+        elif key in ('width','height') and value in ('fill','auto'):pass
+        elif type(value) not in (int,float) or not STYLE_NUMBERS[key][0]<=value<=STYLE_NUMBERS[key][1]:raise UserError('Vizuelna vrijednost prelazi dozvoljeni raspon.')
+    if ('gradientFrom' in style)!=('gradientTo' in style):raise UserError('Gradijent zahtijeva obje boje.')
+    if node['type']=='shape' and (not isinstance(node.get('geometry'),str) or node.get('geometry') not in SHAPES):raise UserError('Nepodržan geometrijski element.')
+    if 'motion' in node:
+        motion=node['motion']
+        if not isinstance(motion,dict) or set(motion)!={'preset','duration'} or motion['preset'] not in ('none','fade','slide','move','scale') or type(motion['duration']) is not int or not 0<=motion['duration']<=2000:raise UserError('Neispravan ugovor animacije.')
+    if 'gestures' in node:
+        gestures=node['gestures']
+        if node['type'] not in ('row','card','heading','text','shape') or not isinstance(gestures,dict) or not set(gestures)<=GESTURES:raise UserError('Neispravan ugovor gesti.')
+        for key,event in gestures.items():
+            if not isinstance(event,dict) or set(event)!={'handler','entry'} or not safe(event['handler']) or not safe(event['entry']) or event['handler'] not in ir['handlers'] or event['entry'] not in ir['handlers'] or event['handler'] in ir.get('events',{}).get('handlers',{}):raise UserError('Gesta treba postojeću običnu radnju.')
+            code=ir['handlers'][event['entry']]
+            if len(code)!=1 or code[0].get('op')!='UI_EVENT' or code[0].get('control')!=node['id'] or code[0].get('gesture')!=key:raise UserError('Izvršni ugovor geste ne odgovara komponenti.')
+
 def validate_program(project):
     live=project.get('format')=='clea7.application/9'
     asynchronous=live or project.get('format')=='clea7.application/8'
@@ -38,8 +69,9 @@ def validate_program(project):
     if not isinstance(bundle,dict) or set(bundle)!={'format','source','ir'} or bundle['format']!='bil.program/'+str(version):raise UserError('Neispravna BIL omotnica.')
     source=bundle['source'];ir=bundle['ir']
     if not isinstance(source,str) or len(source)>131072 or not isinstance(ir,dict) or set(ir)!=({'format','language','globals','records','imports','functions','handlers','main','controls','sourceMap'}|({'ui'} if extended else set())|({'remote'} if remote else set())|({'events'} if asynchronous else set())) or ir['format']!='bil.ir/'+str(version) or ir['language']!='bil/'+str(version):raise UserError('Nepodržan BIL ugovor.')
+    rich_ui=isinstance(ir.get('ui'),dict) and ir['ui'].get('format')=='bil.ui/2'
     for key in ('globals','records','functions','handlers'):
-        if not isinstance(ir[key],dict) or len(ir[key])>(192 if extended and key=='handlers' else 64) or any(not safe(k) for k in ir[key]):raise UserError('Neispravni BIL simboli.')
+        if not isinstance(ir[key],dict) or len(ir[key])>(4224 if rich_ui and key=='handlers' else 128 if rich_ui and key in ('globals','functions') else 192 if extended and key=='handlers' else 64) or any(not safe(k) for k in ir[key]):raise UserError('Neispravni BIL simboli.')
     if not isinstance(ir['imports'],list) or len(ir['imports'])>3 or any(x not in ('math','text','collections') for x in ir['imports']):raise UserError('Nedozvoljen BIL modul.')
     if not isinstance(ir['main'],list) or not isinstance(ir['sourceMap'],list) or len(ir['sourceMap'])>8000 or not isinstance(ir['controls'],list) or len(ir['controls'])>64:raise UserError('Neispravan BIL plan.')
     count=0
@@ -142,14 +174,16 @@ def validate_program(project):
     expected_state={'bilValues':initial,'bilViews':[],'bilMotion':[]}
     if extended:
         ui=ir['ui']
-        if not isinstance(ui,dict) or set(ui)!={'format','start','screens'} or ui['format']!='bil.ui/1' or not isinstance(ui['screens'],list) or len(ui['screens'])>32:raise UserError('Neispravan BIL UI ugovor.')
+        if not isinstance(ui,dict) or set(ui)!={'format','start','screens'} or ui['format'] not in ('bil.ui/1','bil.ui/2') or not isinstance(ui['screens'],list) or len(ui['screens'])>(64 if rich_ui else 32):raise UserError('Neispravan BIL UI ugovor.')
         screens=set();node_ids=set()
         def nodes(items,depth=0):
             if not isinstance(items,list) or depth>8:raise UserError('Neispravan BIL raspored.')
             for n in items:
-                if not isinstance(n,dict) or not safe(n.get('id')) or n['id'] in node_ids or n.get('type') not in ('row','card','heading','text','input','select','toggle','table','view','button','image'):raise UserError('Neispravna BIL komponenta.')
+                if not isinstance(n,dict) or not safe(n.get('id')) or n['id'] in node_ids or n.get('type') not in (('row','card','heading','text','input','select','toggle','table','view','button','image','shape') if rich_ui else ('row','card','heading','text','input','select','toggle','table','view','button','image')):raise UserError('Neispravna BIL komponenta.')
+                if rich_ui:validate_presentation_node(n,ir)
+                elif any(key in n for key in ('style','motion','geometry','gestures')):raise UserError('Napredni prikaz zahtijeva bil.ui/2.')
                 node_ids.add(n['id'])
-                if len(node_ids)>128:raise UserError('Previše BIL komponenti.')
+                if len(node_ids)>(1024 if rich_ui else 128):raise UserError('Previše BIL komponenti.')
                 if n.get('name') is not None and n['name'] not in ir['globals']:raise UserError('BIL komponenta koristi nepoznato stanje.')
                 if n.get('entry') is not None and n['entry'] not in ir['handlers']:raise UserError('BIL komponenta koristi nepoznat događaj.')
                 if 'children' in n:nodes(n['children'],depth+1)
