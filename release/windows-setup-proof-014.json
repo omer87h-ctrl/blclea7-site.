@@ -1,0 +1,63 @@
+{
+  "format": "clea7.windows-setup-proof/1",
+  "source_commit": "7484805dd18089855b72caebdc8be400dd6f53ed",
+  "passed": true,
+  "installer_bytes": 248283748,
+  "installer_sha256": "bfe835b568789bb74f3633b62b72ac2d8569fb424c7cb2866c8f282456a50f61",
+  "managed_components": [
+    {
+      "key": "android-platform",
+      "version": "2.0.0"
+    },
+    {
+      "key": "android-build-tools",
+      "version": "35.0.0"
+    },
+    {
+      "key": "android-platform-tools",
+      "version": "37.0.1"
+    },
+    {
+      "key": "android-commandline",
+      "version": "23.0.0"
+    },
+    {
+      "key": "jdk",
+      "version": "jdk-21.0.12.1+1"
+    },
+    {
+      "key": "gradle",
+      "version": "8.10.2"
+    },
+    {
+      "key": "node",
+      "version": "v22.23.3"
+    }
+  ],
+  "node_version": "v22.23.3",
+  "sdkmanager_version": "1.0.16625370 (Android CLI)",
+  "apk_build": {
+    "format": "clea7.toolchain-build-check/1",
+    "lock_sha256": "fe8ee04d0b34e20e3eda30131bad35ca8f175d7e58a1508000dc4fa5ea019f35",
+    "passed": true,
+    "language": "BIL",
+    "application_format": "clea7.application/9",
+    "apk_bytes": 204696,
+    "apk_sha256": "12e7794f8cec8303bf27a05d46bfddfc5d8f78d38b11fb151aa1afd24f180aca",
+    "input_sha256": "bd74729fd150a7f3a6d5c33e06e98cc9f7e1ad23792a840ea19934963ca93176",
+    "checks": [
+      "managed Node compiled actual BIL source",
+      "managed JDK/Gradle/Android SDK built APK",
+      "APK manifest/dex/CRC validated"
+    ]
+  },
+  "sdk_compilation_without_system_node": {
+    "valid": true,
+    "output": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\CLEA7 setup proof 4tq6dps5\\independent-application.json",
+    "format": "clea7.application/5"
+  },
+  "actual_setup_gui": true,
+  "uninstall_preserved_user_project": true,
+  "physical_device": false,
+  "release_signed": false
+}
