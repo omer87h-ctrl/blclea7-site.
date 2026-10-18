@@ -1,22 +1,22 @@
 {
   "format": "clea7.public-downloads/1",
-  "version": "0.13.0",
-  "source_commit": "b62424ba703a5acd0224f45b240793dc87e283b1",
-  "verified_run": 39070935051,
+  "version": "0.14.0",
+  "source_commit": "7484805dd18089855b72caebdc8be400dd6f53ed",
+  "verified_run": 39137088521,
   "published": [
     {
       "key": "sdk",
-      "name": "BL-CLEA7-SDK-0.13.0.zip",
-      "url": "downloads/BL-CLEA7-SDK-0.13.0.zip",
-      "size_bytes": 200860,
-      "sha256": "836efad2989b75ae48ce7eb37eceaea1319fcea74dc71849b4016591cc02657c"
+      "name": "BL-CLEA7-SDK-0.14.0.zip",
+      "url": "downloads/BL-CLEA7-SDK-0.14.0.zip",
+      "size_bytes": 208744,
+      "sha256": "6074d62fe8518c9669f53b59a770d1bc3acc434b4fb86d56a43237be1b172c2c"
     },
     {
       "key": "preview",
-      "name": "BLclea7-Studio-pregled.html",
-      "url": "downloads/BLclea7-Studio-pregled.html",
-      "size_bytes": 784348,
-      "sha256": "8f0d0b34989b9022a6b21b5c4f989a728e96091be205a9d295b0bc5588cc0228"
+      "name": "BLclea7-Studio-pregled-0.14.html",
+      "url": "downloads/BLclea7-Studio-pregled-0.14.html",
+      "size_bytes": 826547,
+      "sha256": "4d72a9993e90c23717e57d9688a5c4f89325c2851560bd2f2a93b8c04a62489e"
     },
     {
       "key": "example",
@@ -59,52 +59,103 @@
       "url": "downloads/primjer-ponuda.bil",
       "size_bytes": 246,
       "sha256": "c98374503315c5356014b86c92e3575ecefeb74bf586ad4d0bb5ac43ee823a2e"
+    },
+    {
+      "key": "visual-example",
+      "name": "primjer-svjetlosna-putanja.clea7",
+      "url": "downloads/primjer-svjetlosna-putanja.clea7",
+      "size_bytes": 9806,
+      "sha256": "edff7b9bc0329d018792a1ebc6866db512926f85512b20c5fd2bb75f13da5f83"
     }
   ],
   "native": {
     "state": "published",
-    "version": "0.13.0",
-    "source_commit": "b62424ba703a5acd0224f45b240793dc87e283b1",
+    "version": "0.14.0",
+    "source_commit": "7484805dd18089855b72caebdc8be400dd6f53ed",
     "repository": "omer87h-ctrl/blclea7-site.",
-    "tag": "clea7-0.13.0-b62424b",
+    "tag": "clea7-0.14.0-7484805",
     "assets": [
+      {
+        "key": "installer",
+        "name": "BLclea7-Setup-Windows-x64.exe",
+        "size_bytes": 248283748,
+        "sha256": "bfe835b568789bb74f3633b62b72ac2d8569fb424c7cb2866c8f282456a50f61",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.14.0-7484805/BLclea7-Setup-Windows-x64.exe"
+      },
       {
         "key": "studio",
         "name": "BL-CLEA7-Studio-Windows-x64.zip",
-        "size_bytes": 348400060,
-        "sha256": "a3c40fa4b9ca7de9f2bcb5e85fa1a52493dd49395815e8337fd1961742481dd3",
-        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.13.0-b62424b/BL-CLEA7-Studio-Windows-x64.zip"
+        "size_bytes": 348545231,
+        "sha256": "ab123e427f06818c2763818fa4ddecd02b9095cd388d69aa70e13a93f69c005c",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.14.0-7484805/BL-CLEA7-Studio-Windows-x64.zip"
       },
       {
         "key": "runtime",
         "name": "BL-CLEA7-Runtime-Windows-x64.zip",
-        "size_bytes": 329846915,
-        "sha256": "8006cd5bb9f9f30db7ee6f99f3bfc7b38e98b07b80d9330fc8bf26a7cd498be1",
-        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.13.0-b62424b/BL-CLEA7-Runtime-Windows-x64.zip"
+        "size_bytes": 329891392,
+        "sha256": "098e81bb83e172d62ca72fc75897acb69615ec2cab6f690b2dd2b5bbe2b4e262",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.14.0-7484805/BL-CLEA7-Runtime-Windows-x64.zip"
       },
       {
         "key": "android",
         "name": "BL-CLEA7-Runtime-Android-debug.apk",
-        "size_bytes": 194398,
-        "sha256": "74590c75977340cd34da14d0c825adc7ff88576daa4a63b0c2ce345dfd528be2",
-        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.13.0-b62424b/BL-CLEA7-Runtime-Android-debug.apk"
+        "size_bytes": 199678,
+        "sha256": "760f850c8958c9b07fa577c189673942944ab7680dee3cc609b4e171898cd692",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.14.0-7484805/BL-CLEA7-Runtime-Android-debug.apk"
       }
     ],
-    "release_url": "https://github.com/omer87h-ctrl/blclea7-site./releases/tag/clea7-0.13.0-b62424b",
+    "release_url": "https://github.com/omer87h-ctrl/blclea7-site./releases/tag/clea7-0.14.0-7484805",
     "verification_runs": {
-      "product": 39070935051,
-      "native_media": 39070935066,
-      "live_android": 39070935047,
-      "services": 39070421009
+      "product": 39137088521,
+      "native_media": 39137088440,
+      "live_android": 39137088510,
+      "services": 39137088478
     }
   },
   "verification_runs": {
-    "product": 39070935051,
-    "native_media": 39070935066,
-    "live_android": 39070935047,
-    "services": 39070421009
+    "product": 39137088521,
+    "native_media": 39137088440,
+    "live_android": 39137088510,
+    "services": 39137088478
   },
   "native_history": [
+    {
+      "state": "published",
+      "version": "0.13.0",
+      "source_commit": "b62424ba703a5acd0224f45b240793dc87e283b1",
+      "repository": "omer87h-ctrl/blclea7-site.",
+      "tag": "clea7-0.13.0-b62424b",
+      "assets": [
+        {
+          "key": "studio",
+          "name": "BL-CLEA7-Studio-Windows-x64.zip",
+          "size_bytes": 348400060,
+          "sha256": "a3c40fa4b9ca7de9f2bcb5e85fa1a52493dd49395815e8337fd1961742481dd3",
+          "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.13.0-b62424b/BL-CLEA7-Studio-Windows-x64.zip"
+        },
+        {
+          "key": "runtime",
+          "name": "BL-CLEA7-Runtime-Windows-x64.zip",
+          "size_bytes": 329846915,
+          "sha256": "8006cd5bb9f9f30db7ee6f99f3bfc7b38e98b07b80d9330fc8bf26a7cd498be1",
+          "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.13.0-b62424b/BL-CLEA7-Runtime-Windows-x64.zip"
+        },
+        {
+          "key": "android",
+          "name": "BL-CLEA7-Runtime-Android-debug.apk",
+          "size_bytes": 194398,
+          "sha256": "74590c75977340cd34da14d0c825adc7ff88576daa4a63b0c2ce345dfd528be2",
+          "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.13.0-b62424b/BL-CLEA7-Runtime-Android-debug.apk"
+        }
+      ],
+      "release_url": "https://github.com/omer87h-ctrl/blclea7-site./releases/tag/clea7-0.13.0-b62424b",
+      "verification_runs": {
+        "product": 39070935051,
+        "native_media": 39070935066,
+        "live_android": 39070935047,
+        "services": 39070421009
+      }
+    },
     {
       "state": "published",
       "repository": "omer87h-ctrl/blclea7-site.",
@@ -135,6 +186,70 @@
         }
       ],
       "source_commit": "a3e267b15f3b7f41187c5a78577f7d9d67c70549"
+    }
+  ],
+  "published_history": [
+    {
+      "version": "0.13.0",
+      "source_commit": "b62424ba703a5acd0224f45b240793dc87e283b1",
+      "files": [
+        {
+          "key": "sdk",
+          "name": "BL-CLEA7-SDK-0.13.0.zip",
+          "url": "downloads/BL-CLEA7-SDK-0.13.0.zip",
+          "size_bytes": 200860,
+          "sha256": "836efad2989b75ae48ce7eb37eceaea1319fcea74dc71849b4016591cc02657c"
+        },
+        {
+          "key": "preview",
+          "name": "BLclea7-Studio-pregled.html",
+          "url": "downloads/BLclea7-Studio-pregled.html",
+          "size_bytes": 784348,
+          "sha256": "8f0d0b34989b9022a6b21b5c4f989a728e96091be205a9d295b0bc5588cc0228"
+        },
+        {
+          "key": "example",
+          "name": "primjer-pretvarac.clea7",
+          "url": "downloads/primjer-pretvarac.clea7",
+          "size_bytes": 1521,
+          "sha256": "b1db193ebbee9b2be5b9bcbbf609809bcfd335d7d36f05f35ba354bb0ef92c7c"
+        },
+        {
+          "key": "bil-example",
+          "name": "primjer-bil.clea7",
+          "url": "downloads/primjer-bil.clea7",
+          "size_bytes": 6296,
+          "sha256": "b41278fcc3cc6d8757114f0e6296db226b7f8d7e884277cd2b4d22288c7e4466"
+        },
+        {
+          "key": "bil-source",
+          "name": "primjer-bil.bil",
+          "url": "downloads/primjer-bil.bil",
+          "size_bytes": 462,
+          "sha256": "add72a6f576205b85282e297ac2782e889c66bb479cc4299220ade73c990251d"
+        },
+        {
+          "key": "business-example",
+          "name": "primjer-radni-nalozi.clea7",
+          "url": "downloads/primjer-radni-nalozi.clea7",
+          "size_bytes": 53349,
+          "sha256": "9250665f1380e906cfd0352796b4b866a22f5b62297dca063f611c446ffa04b4"
+        },
+        {
+          "key": "business-source",
+          "name": "primjer-radni-nalozi.bil",
+          "url": "downloads/primjer-radni-nalozi.bil",
+          "size_bytes": 3754,
+          "sha256": "e379342b646c7768510a18c69d82fede2f6d714a2d2067d93a8561ef07820054"
+        },
+        {
+          "key": "bil-quote-source",
+          "name": "primjer-ponuda.bil",
+          "url": "downloads/primjer-ponuda.bil",
+          "size_bytes": 246,
+          "sha256": "c98374503315c5356014b86c92e3575ecefeb74bf586ad4d0bb5ac43ee823a2e"
+        }
+      ]
     }
   ]
 }
