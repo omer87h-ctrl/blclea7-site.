@@ -1,14 +1,17 @@
-BLclea7 0.14 — provjereno razvojno izdanje
+BLclea7 0.15 — provjereno razvojno izdanje
 
-Implementacija: 7484805dd18089855b72caebdc8be400dd6f53ed
-Paketi: https://github.com/omer87h-ctrl/blclea7-site./releases/tag/clea7-0.14.0-7484805
+Implementacija: 5baaace802746bd64d972568e034abf252b8db73
+Paketi: https://github.com/omer87h-ctrl/blclea7-site./releases/tag/clea7-0.15.0-5baaace
 
-Na istom izvornom kodu prošli su: Linux/Python i stvarni Chrome Studio/Runtime testovi; zamrznuti Windows GUI, samostalni Runtime i čuvanje stanja; stvarna instalacija Windows paketa, priprema sedam provjerenih razvojnih komponenti, BIL → APK, SDK bez sistemskog Nodea, setup saglasnost i deinstalacija uz očuvanje projekta; Android build/WebView; native API 30 i 35; dva Android emulatora s prijavom, privatnim porukama, pravilima pristupa i ponovnim povezivanjem; izolovani Firebase/browser testovi.
+Na istom izvornom kodu prošli su Linux/Python i stvarni Chrome Studio/Runtime testovi; zamrznuti Windows Studio i zasebni Runtime; čuvanje stanja nakon ponovnog pokretanja; instalacija Windows paketa, priprema provjerenih razvojnih alata uz saglasnost, BIL → APK, SDK bez sistemskog Nodea i deinstalacija uz očuvanje projekta; Android build/WebView; native API 30 i 35; dva istovremena Android emulatora s prijavom, privatnim porukama, pravilima pristupa i ponovnim povezivanjem; izolovani Firebase/browser testovi.
 
-Izvorni gateovi: {"product":39137088521,"native_media":39137088440,"live_android":39137088510,"services":39137088478}
-Javna objava i provjera identiteta četiri paketa: 39140435859.
-Windows dokaz: ../release/windows-setup-proof-014.json
+Nove provjere: 20 grupa testova modela i izvršnog jezgra, 13 stvarnih browser grupa izrade od praznog projekta do izvoza, odvojene instalacije i trajnog stanja te 8 postojećih BIL browser grupa. Python: 180 testova na Windowsu; 179 je prošlo na Linuxu, uz preskok jednog testa koji zahtijeva Windows. Obrada parametara adaptera provjerena je tipovima i model testom; to nije tvrdnja da je svaki izvor uređaja fizički provjeren.
 
-SDK i HTML pregled kreirani su iz izdvojenih javnih datoteka. Izvorni interaktivni SDK primjer je kompajliran, validiran i izvršen te kroz javni Chrome test instaliran i pokrenut u nezavisnom Runtimeu, uz gestu, stvarni pomak i trajno stanje.
+Izvorni gateovi: {"product":39158356189,"native_media":39158356233,"live_android":39158356265,"services":39158356303}
+Windows dokaz: ../release/windows-setup-proof-015.json
 
-Granice: fizički uređaji nisu testirani ovim provjerama; Windows nije produkcijski potpisan, Android koristi razvojni potpis. Lokalna Android obavijest nije udaljeni push servis. Ovo nije potvrda kompletne Android Studio funkcionalnosti, neprobojnosti ili prednosti u potrošnji baterije. Produkcijski backend, potpuni društveni benchmark i dodatne platforme zahtijevaju vlastite acceptance provjere.
+Originalni Orbitavo nastao je kroz vizuelne kontrole Studija. Test uređuje podatke, vlastite zapise, uslove, dugmad, gest i oblik s animacijom; izvozi paket; instalira ga u zasebni Runtime i provjerava podatke nakon ponovnog pokretanja. Zamrznuti Windows Studio izvršava izvor nastao tim postupkom i provjerava trajnost zapisa i dodavanje podatka nakon prve probe. SDK i offline HTML pregled izrađeni su iz izdvojenih javnih datoteka i provjereni zasebno.
+
+Ispravke korisničkog teksta iz PR34 prošle su javni HTTPS run 39159538495: 9 stranica, 9 lokalnih kontrolnih otisaka i provjere metapodataka i dostupnosti prva 4 KiB četiri native paketa. Ovo je zasebna provjera ranijeg objavljenog izdanja; identitet paketa 0.15 naveden je u katalogu i release provenance.json.
+
+Granice: fizički uređaji nisu testirani ovim provjerama; Windows nema produkcijski potpis, Android koristi razvojni potpis. Lokalna Android obavijest nije udaljeni push servis. Širi produkcijski backend/media/push i potpuni društveni benchmark nisu potvrđeni ovim izdanjem. Rezultati ne predstavljaju potvrdu neprobojnosti, prednosti u potrošnji baterije ili svih mogućnosti Android Studija.

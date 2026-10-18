@@ -4,7 +4,7 @@ import hashlib,json,time,urllib.request,urllib.error,urllib.parse
 ROOT=Path(__file__).resolve().parents[1]
 BASE='https://clea7.brzoilokalno.com/'
 REPO='omer87h-ctrl/blclea7-site.'
-TAG='clea7-0.14.0-7484805'
+TAG='clea7-0.15.0-5baaace'
 def fetch_release_metadata():
  url='https://api.github.com/repos/'+REPO+'/releases/tags/'+TAG
  try:
@@ -68,8 +68,10 @@ def check():
  assert b'BIL' in read('bil.html')
  compiler=read('studio/workbench/bil-compiler.js');assert compiler==(ROOT/'studio/workbench/bil-compiler.js').read_bytes(),'Published BIL compiler differs.'
  engine=read('studio/workbench/engine.js');assert engine==(ROOT/'studio/workbench/engine.js').read_bytes(),'Published runtime differs from verified source.'
+ for path in ['studio/workbench/bil-authoring.js','studio/workbench/bil-studio.js','studio/workbench/bil-designer.js','studio/workbench/bil-runtime.js','studio/workbench/index.html']:
+  assert read(path)==(ROOT/path).read_bytes(),'Published Studio differs: '+path
  assert b'CLEA7Library' in read('studio/launcher/library.js')
- catalog=json.loads(read('releases.json'));assert catalog['source_commit']=='7484805dd18089855b72caebdc8be400dd6f53ed'
+ catalog=json.loads(read('releases.json'));assert catalog['source_commit']=='5baaace802746bd64d972568e034abf252b8db73'
  verified=[]
  for entry in catalog['published']:
   path=entry['url'];assert path.startswith('downloads/') and '..' not in path and ':' not in path

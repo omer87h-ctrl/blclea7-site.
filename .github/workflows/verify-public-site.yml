@@ -1,7 +1,7 @@
 name: Verify public BL CLEA7 website and applications
 on:
   push:
-    branches: [main, work/complete-public-downloads, work/bil-public-0-6, work/studio-applications-07, work/verified-web-backend-09, release/verified-downloads-09, work/native-media-013, work/managed-release-014, work/approve-release-014]
+    branches: [main, work/complete-public-downloads, work/bil-public-0-6, work/studio-applications-07, work/verified-web-backend-09, release/verified-downloads-09, work/native-media-013, work/managed-release-014, work/approve-release-014, work/guided-studio-015]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -21,6 +21,7 @@ jobs:
       - run: python scripts/check_public.py
       - run: python -m unittest discover -s tests -v
       - run: node tests/test_public_bil_apps.cjs
+      - run: node tests/test_bil_guided_authoring.cjs
       - name: Independently execute curated public SDK
         working-directory: sdk-source
         run: |
@@ -38,6 +39,7 @@ jobs:
           ln -s /tmp/clea7-public-qa/node_modules /tmp/clea7-qa/node_modules
           python -m http.server 4173 --bind 127.0.0.1 > /tmp/clea7-public-http.log 2>&1 &
           server_pid=$!
+          CLEA7_CHROME="$(command -v google-chrome)" node tests/test_bil_guided_ui.cjs
           trap 'kill "$server_pid" || true' EXIT
           export CLEA7_CHROME="$(command -v google-chrome)"
           node tests/test_public_appearance_ui.cjs
@@ -49,6 +51,7 @@ jobs:
           node tests/test_public_native_install.cjs
           cp downloads/BLclea7-Studio-pregled-0.14.html /tmp/BL-CLEA7-Studio-pregled-v2.html
           node tests/test_public_offline.cjs
+          node tests/test_prepared_offline015.cjs
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         if: always()
@@ -91,3 +94,4 @@ jobs:
           name: BL-CLEA7-public-backend-evidence
           path: test-evidence/
           retention-days: 3
+

@@ -1,0 +1,29 @@
+{
+  "format": "clea7.prepared-public-downloads/1",
+  "version": "0.15.0",
+  "source_commit": "5baaace802746bd64d972568e034abf252b8db73",
+  "published": false,
+  "files": [
+    {
+      "key": "sdk",
+      "name": "BL-CLEA7-SDK-0.15.0.zip",
+      "url": "downloads/BL-CLEA7-SDK-0.15.0.zip",
+      "size_bytes": 215802,
+      "sha256": "d5a780f2dd9bd3a669f796d0b82d2e571c3e8bb0f0014b034dff85efbe902218"
+    },
+    {
+      "key": "preview",
+      "name": "BLclea7-Studio-pregled-0.15.html",
+      "url": "downloads/BLclea7-Studio-pregled-0.15.html",
+      "size_bytes": 873824,
+      "sha256": "16825415bb6454859071cd73494a8d4f98d135790bc6138950f993701350f90b"
+    },
+    {
+      "key": "visual-example",
+      "name": "primjer-orbitavo.clea7",
+      "url": "downloads/primjer-orbitavo.clea7",
+      "size_bytes": 18586,
+      "sha256": "7f0195e96d2bbc7bec66e8aa692743c6793864ee042e1c43743762a69a0ccd0e"
+    }
+  ]
+}

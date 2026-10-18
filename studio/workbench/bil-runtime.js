@@ -213,8 +213,25 @@ function renderUI(root,engine){for(const dispose of engine.bilGestureCleanup||[]
   }else throw new Fault('Capability','Host does not support this UI component.',node.loc);element.dataset.bilNode=node.id;parent.append(element);attachPresentation(element,node,engine);attachGestures(element,node,engine);
  };for(const node of page.children)draw(node,root);const placed=new Set(ir.ui.screens.flatMap(s=>uiNodes(s.children)).filter(n=>n.type==='view').map(n=>n.id));for(const view of engine.state.bilViews)if(!placed.has(view.id))draw({id:view.id,type:'view',target:view.target},root);engine.kernel.event('bil-view','Holo Interaction','Prikazan ekran '+page.id+' sa '+uiNodes(page.children).length+' provjerenih komponenti.');
 }
+async function reconcileAddedValues(ir,state,initial,options={}){
+ const stored=state?.bilValues;if(!stored||typeof stored!=='object'||Array.isArray(stored))return null;
+ const added=Object.keys(ir.globals).filter(k=>!own(stored,k));if(!added.length)return null;
+ bounded(stored);
+ for(const [key,value]of Object.entries(stored))if(!own(ir.globals,key)||!isType(value,ir.globals[key].type))throw new Fault('MigrationRequired','Podatkovni model nije kompatibilan. Sačuvani podaci nisu promijenjeni; potrebna je izričita migracija.');
+ const missing=new Set(added),instructions=ir.main.filter(n=>n.op==='STORE_NEW'&&n.global&&missing.has(n.name));
+ if(instructions.length!==added.length||new Set(instructions.map(n=>n.name)).size!==added.length)throw new Fault('MigrationRequired','Novi podatak treba provjereni početni izraz.');
+ // Seed existing cells from LIVE data, then evaluate only new declarations.
+ // Pure functions and the existing Runner budgets apply. Never rerun main,
+ // old assignments, handlers, AI decisions, network or native operations.
+ const next={...copy(state),bilValues:{...copy(initial.bilValues),...copy(stored)}};
+ const runner=new Runner(ir,next,{...options,ai:null,consent:false,reality:'SHADOW'}),result=await runner.run('main',instructions);
+ if(result.requests?.length||result.observationActions?.length)throw new Fault('MigrationRequired','Početni izraz ne smije zahtijevati vanjsku radnju.');
+ for(const [key,value]of Object.entries(stored))if(stable(result.state.bilValues[key])!==stable(value))throw new Fault('MigrationRequired','Postojeći podatak ne smije biti promijenjen dodavanjem novog polja.');
+ return {...result,state:{...next,...result.state},added};
+}
 async function reconcileUI(ir,state,options={}){if(!['bil.ir/2','bil.ir/3','bil.ir/4','bil.ir/5'].includes(ir.format)||!ir.ui.screens.length)return null;stateCheck(ir,state.bilValues);const ids=new Set(ir.ui.screens.flatMap(s=>uiNodes(s.children)).filter(n=>n.type==='view').map(n=>n.id)),definitions=intents(ir),next=copy(state);next.bilViews=next.bilViews.filter(v=>!ids.has(v.id)&&definitions.has(v.id));next.bilScreen=ir.ui.screens.some(s=>s.id===next.bilScreen)?next.bilScreen:ir.ui.start;const runner=new Runner(ir,next,{...options,ai:null,consent:false,reality:'SHADOW'}),instructions=ir.main.filter(n=>n.op==='INTENT'&&ids.has(n.id)||n.op==='MOTION');return runner.run('presentation',instructions);}
 function refreshUI(engine){engine.bilPresentation=[];for(const update of engine.bilValueRefresh||[])update();}
 function render(root,engine){if(engine.project.bil.ir.ui?.screens.length)renderUI(root,engine);else renderLegacy(root,engine);}
-scope.CLEA7BILRuntime={REGISTRY,REMOTE_CONTRACTS,remotePath,collectionPath,querySpec,validateRemoteResult,Fault,bounded,isType,stateCheck,validateState,profile,resolve,execute,render,refreshUI,reconcileUI,uiNodes,latestDecision};
+scope.CLEA7BILRuntime={REGISTRY,REMOTE_CONTRACTS,remotePath,collectionPath,querySpec,validateRemoteResult,Fault,bounded,isType,stateCheck,validateState,profile,resolve,execute,render,refreshUI,reconcileUI,reconcileAddedValues,uiNodes,latestDecision};
 })(globalThis);
+
