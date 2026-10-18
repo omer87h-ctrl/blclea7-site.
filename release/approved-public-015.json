@@ -1,8 +1,34 @@
 {
   "format": "clea7.public-release-approval/1",
-  "approved": false,
+  "approved": true,
   "version": "0.15.0",
-  "source_commit": "6f04cd5d102850900579f33e319aacc4c1bdb950",
-  "verification_runs": {},
-  "assets": {}
+  "source_commit": "5baaace802746bd64d972568e034abf252b8db73",
+  "verification_runs": {
+    "product": 39158356189,
+    "native_media": 39158356233,
+    "live_android": 39158356265,
+    "services": 39158356303
+  },
+  "assets": {
+    "installer": {
+      "name": "BLclea7-Setup-Windows-x64.exe",
+      "size_bytes": 248327896,
+      "sha256": "ae4f08caca05535f4d24e604fadfa3ab7a00d8fce32d2cb7f7b44589415f3b18"
+    },
+    "studio": {
+      "name": "BL-CLEA7-Studio-Windows-x64.zip",
+      "size_bytes": 348565880,
+      "sha256": "10ab13137a1563718ed9d2614d3faa614042e8ea91820c23a71e50fbb2953464"
+    },
+    "runtime": {
+      "name": "BL-CLEA7-Runtime-Windows-x64.zip",
+      "size_bytes": 329894995,
+      "sha256": "b325fadb58d4ce6f99c342d77b6f1c6d0a87d31706aebc99f9ca198b788f6354"
+    },
+    "android": {
+      "name": "BL-CLEA7-Runtime-Android-debug.apk",
+      "size_bytes": 200854,
+      "sha256": "0a610eb748be1cf92f9d30f6bedbbf0886dbe6364d0180cea043e56e1150c9c9"
+    }
+  }
 }
