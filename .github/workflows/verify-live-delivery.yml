@@ -2,9 +2,9 @@ name: Verify deployed CLEA7 HTTPS and anonymous downloads
 on:
   workflow_dispatch:
   push:
-    branches: [work/complete-public-downloads]
+    branches: [work/complete-public-downloads, work/verify-deployed-014]
   workflow_run:
-    workflows: ['pages build and deployment']
+    workflows: ['Verify public BL CLEA7 website and applications']
     branches: [main]
     types: [completed]
 permissions:
