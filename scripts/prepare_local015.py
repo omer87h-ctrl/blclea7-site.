@@ -1,13 +1,17 @@
 """Prepare curated public downloads on a review branch; never publish a release."""
-import hashlib,json,subprocess,zipfile
+import hashlib,json,subprocess,zipfile,tempfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 SOURCE='052921fb5d2611906171dd97d78a4d9821222891'
 def main():
  source=ROOT/'sdk-source'
- subprocess.run(['python','-m','clea7','bil','package','sdk/examples/bil/orbitavo.bil','--output',str(ROOT/'downloads/primjer-orbitavo.clea7'),'--id','orbitavo'],cwd=source,check=True)
- subprocess.run(['python','-m','clea7','validate',str(ROOT/'downloads/primjer-orbitavo.clea7')],cwd=source,check=True)
- subprocess.run(['python','-m','clea7','test',str(ROOT/'downloads/primjer-orbitavo.clea7'),'--flow','bil_advance'],cwd=source,check=True)
+ # Build to a fresh temporary path; do not delete or overwrite a prior reviewed output on failure.
+ with tempfile.TemporaryDirectory(prefix='clea7-public-example-') as folder:
+  built=Path(folder)/'orbitavo.clea7'
+  subprocess.run(['python','-m','clea7','bil','package','sdk/examples/bil/orbitavo.bil','--output',str(built),'--id','orbitavo'],cwd=source,check=True)
+  subprocess.run(['python','-m','clea7','validate',str(built)],cwd=source,check=True)
+  subprocess.run(['python','-m','clea7','test',str(built),'--flow','bil_advance'],cwd=source,check=True)
+  (ROOT/'downloads/primjer-orbitavo.clea7').write_bytes(built.read_bytes())
  target=ROOT/'downloads/BL-CLEA7-SDK-0.15.0.zip'
  forbidden={'host.py','desktop.py','cloud_ai.py','ai.py','main.py','runtime_main.py','toolchain.py','identity.json','session.json'}
  files=[p for p in sorted(source.rglob('*')) if p.is_file() and '__pycache__' not in p.parts]
