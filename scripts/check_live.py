@@ -5,18 +5,44 @@ ROOT=Path(__file__).resolve().parents[1]
 BASE='https://clea7.brzoilokalno.com/'
 REPO='omer87h-ctrl/blclea7-site.'
 TAG='clea7-0.14.0-7484805'
-def native_checks(native):
+def fetch_release_metadata():
  url='https://api.github.com/repos/'+REPO+'/releases/tags/'+TAG
- with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'BL-CLEA7-anonymous-download-check'}),timeout=30) as response:
-  release=json.load(response)
- assert not release.get('draft') and release['tag_name']==TAG
+ try:
+  with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'BL-CLEA7-anonymous-download-check'}),timeout=30) as response:
+   return json.load(response)
+ except urllib.error.HTTPError as error:
+  limited=error.code==429 or error.code==403 and (error.headers.get('X-RateLimit-Remaining')=='0' or b'rate limit' in error.read(4096).lower())
+  if not limited:raise
+  return None
+
+def anonymous_full_download(item,expected):
+ request=urllib.request.Request(expected,headers={'User-Agent':'BL-CLEA7-anonymous-download-check'})
+ digest=hashlib.sha256();size=0;head=b''
+ with urllib.request.urlopen(request,timeout=60) as response:
+  final=urllib.parse.urlsplit(response.url)
+  assert final.scheme=='https' and final.hostname and (final.hostname=='github.com' or final.hostname.endswith('.githubusercontent.com'))
+  assert response.status==200
+  while True:
+   chunk=response.read(min(1024*1024,item['size_bytes']-size+1))
+   if not chunk:break
+   if not head:head=chunk[:4096]
+   size+=len(chunk);assert size<=item['size_bytes'];digest.update(chunk)
+ assert size==item['size_bytes'] and digest.hexdigest()==item['sha256'],'Anonymous binary hash differs: '+item['key']
+ assert head.startswith(b'MZ' if item['key']=='installer' else b'PK\x03\x04')
+ return {'key':item['key'],'bytes':size,'sha256':digest.hexdigest(),'anonymousDownloadProbeBytes':len(head),'releaseDigestMatches':None,'anonymousDownloadSha256Verified':True,'metadataStatus':'github-api-rate-limited'}
+
+def native_checks(native):
+ release=fetch_release_metadata()
+ if release is not None:assert not release.get('draft') and release['tag_name']==TAG
  assert len(native['assets'])==4 and {a['key'] for a in native['assets']}=={'studio','runtime','android','installer'}
  verified=[]
  for item in native['assets']:
-  asset=next(a for a in release['assets'] if a['name']==item['name'])
-  assert asset['digest']=='sha256:'+item['sha256'] and asset['size']==item['size_bytes']
   expected='https://github.com/'+REPO+'/releases/download/'+TAG+'/'+item['name']
-  assert asset['browser_download_url']==item['url']==expected
+  assert item['url']==expected
+  if release is None:
+   verified.append(anonymous_full_download(item,expected));continue
+  asset=next(a for a in release['assets'] if a['name']==item['name'])
+  assert asset['digest']=='sha256:'+item['sha256'] and asset['size']==item['size_bytes'] and asset['browser_download_url']==expected
   request=urllib.request.Request(expected,headers={'User-Agent':'BL-CLEA7-anonymous-download-check','Range':'bytes=0-4095'})
   with urllib.request.urlopen(request,timeout=30) as response:
    final=urllib.parse.urlsplit(response.url)
@@ -25,7 +51,7 @@ def native_checks(native):
    if response.status==206:assert response.headers['Content-Range'].startswith('bytes 0-') and response.headers['Content-Range'].endswith('/'+str(item['size_bytes']))
    else:assert int(response.headers['Content-Length'])==item['size_bytes']
    head=response.read(4096);assert head.startswith(b'MZ' if item['key']=='installer' else b'PK\x03\x04')
-  verified.append({'key':item['key'],'bytes':item['size_bytes'],'sha256':item['sha256'],'anonymousDownloadProbeBytes':len(head),'releaseDigestMatches':True})
+  verified.append({'key':item['key'],'bytes':item['size_bytes'],'sha256':item['sha256'],'anonymousDownloadProbeBytes':len(head),'releaseDigestMatches':True,'metadataStatus':'verified'})
  return verified
 def read(path):
  request=urllib.request.Request(BASE+path,headers={'User-Agent':'BL-CLEA7-public-delivery-check','Cache-Control':'no-cache'})
