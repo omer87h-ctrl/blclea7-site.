@@ -2,7 +2,7 @@
 import hashlib,json,subprocess,zipfile,tempfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-SOURCE='9ec4417a150be15e76739cb2e529db6093a83971'
+SOURCE='5baaace802746bd64d972568e034abf252b8db73'
 def main():
  source=ROOT/'sdk-source'
  # Build to a fresh temporary path; do not delete or overwrite a prior reviewed output on failure.
