@@ -50,3 +50,9 @@ Nakon prve probe možeš dodati novu tipiziranu vrijednost: Runtime inicijalizuj
 BIL izvor ostaje dostupan i autoritativan. Funkcije, asinhroni adapteri i ostali podržani napredni kod se ne brišu zato što ih jednostavniji vizuelni prikaz ne može urediti. Adapteri provjeravaju mogućnosti platforme i dozvole. Konfiguracija razvoja s udaljenim servisima odvojena je od lokalnih aplikacija; postojanje vizuelnog editora samo po sebi ne postavlja produkcijski server, privatna pristupna pravila ili udaljene push obavijesti.
 
 Originalni `sdk/examples/bil/orbitavo.bil` nastao je kroz stvarne kontrole Studija u automatizovanoj provjeri. Pokazuje ekrane, vlastiti model, kolekciju, unos, tabelu, uslove, dugmad, gest i animirani oblik. Test provjerava njegovo izvršavanje, izvoz, zasebnu instalaciju i trajnost podataka; sam primjer ne predstavlja cijeli opseg general-purpose platforme.
+
+### Čitanje zapisa i odgovora adaptera
+
+Za podatak kao što je `notes[0].body` odaberi **Polje iz zapisa**, zatim za zapis **Stavka iz liste**, izaberi listu, indeks i polje. Compiler provjerava tipove; nepostojeće polje odbija se prije pokretanja, a izlazak iz granica liste prekida lokalnu transakciju bez djelimičnog upisa. Možeš koristiti i registrovanu operaciju `collections.at`.
+
+Događaji označeni **odgovor adaptera** prikazuju svoje tipizirane parametre u izboru podataka. Njihove radnje uređuju se istim kontrolama. Parametri su samo za čitanje. Nullable odgovor najprije provjeri uslovom `rezultat != null`; dodaj čitanje njegovog polja u tačnu granu. Ovi događaji primaju samo provjeren odgovor zahtjeva ili pretplate; ne mogu biti obična radnja dugmeta ili gesta. Konfiguracija stvarnog adaptera ostaje potrebna.
