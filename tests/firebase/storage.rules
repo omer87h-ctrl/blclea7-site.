@@ -1,0 +1,22 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /apps/{application}/{visibility}/{owner}/{image} {
+      function signedIn() { return request.auth != null; }
+      function validPath() {
+        return application.matches('[A-Za-z][A-Za-z0-9_]{0,63}')
+          && visibility in ['private', 'shared']
+          && image.matches('[0-9a-f]{32}[.]jpg');
+      }
+      allow get: if validPath() && signedIn()
+        && (request.auth.uid == owner || visibility == 'shared');
+      allow list: if false;
+      allow create: if resource == null && validPath() && signedIn() && request.auth.uid == owner
+        && request.resource.size > 0 && request.resource.size <= 5242880
+        && request.resource.contentType == 'image/jpeg'
+        && request.resource.metadata.keys().hasOnly([]);
+      allow update: if false;
+      allow delete: if validPath() && signedIn() && request.auth.uid == owner;
+    }
+  }
+}

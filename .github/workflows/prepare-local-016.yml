@@ -1,0 +1,33 @@
+name: Prepare browser-verified 0.16 downloads for owner review
+on:
+  push:
+    branches: [work/shared-images-016]
+permissions:
+  contents: write
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python scripts/prepare_local016.py
+      - run: python scripts/check_public.py
+      - run: python -m unittest discover -s tests -v
+      - run: npm install --prefix /tmp/clea7-qa --no-audit --no-fund playwright@1.56.1
+      - run: node tests/test_prepared_offline016.cjs
+        env:
+          CLEA7_CHROME: /usr/bin/google-chrome
+      - name: Preserve reviewed web downloads without deploying
+        run: |
+          git config user.name 'Brzo i Lokalno build'
+          git config user.email 'build@users.noreply.github.com'
+          git add downloads/BL-CLEA7-SDK-0.16.0.zip downloads/BLclea7-Studio-pregled-0.16.html release/prepared-local-016.json releases.json '*.html'
+          git diff --cached --quiet && exit 0
+          git commit -m 'build: record checked browser SDK and offline Studio 0.16'
+          git push origin HEAD:work/shared-images-016

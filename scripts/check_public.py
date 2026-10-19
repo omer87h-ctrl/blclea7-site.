@@ -33,23 +33,23 @@ assert 'ILDuA90WSVz2FTZdmWleQ0lzbGCLmFndZ6wlT5V74Ow' in (ROOT/'index.html').read
 assert not list(ROOT.rglob('session.json')) and not list(ROOT.rglob('identity.json'))
 for forbidden in ['main.py','runtime_main.py','clea7/desktop.py','clea7/host.py','clea7/cloud_ai.py','clea7/ai.py']:
  assert not (ROOT/'sdk-source'/forbidden).exists(),forbidden
-catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='5baaace802746bd64d972568e034abf252b8db73'
+catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='1f90074e1ea212bd0b34c116eac1a0380f7c2142'
 download_page=(ROOT/'preuzimanja.html').read_text()
 for page in ROOT.glob('*.html'):
- assert 'BLclea7 '+catalog['version'].rsplit('.',1)[0]+' · razvojno izdanje' in page.read_text(),(page,'stale visible release version')
+ assert 'Web Studio 0.16 · Windows i Android 0.15 · razvojno izdanje' in page.read_text(),(page,'stale visible release version')
 for entry in catalog['published']:
  p=ROOT/entry['url'];data=p.read_bytes();assert p.is_relative_to(ROOT) and len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],p
  if entry['key'] in ('sdk','preview'):
   assert entry['url'] in download_page and entry['sha256'] in download_page,(p,'stale visible download metadata')
 if catalog['native']['state']=='published':
  native=catalog['native'];assert native['repository']=='omer87h-ctrl/blclea7-site.' and native['tag']=='clea7-0.15.0-5baaace'
- assert native['source_commit']==catalog['source_commit'] and native['version']==catalog['version']
+ assert native['source_commit']=='5baaace802746bd64d972568e034abf252b8db73' and native['version']=='0.15.0'
  assert len(native['assets'])==4 and {a['key'] for a in native['assets']}=={'studio','runtime','android','installer'}
  page=(ROOT/'preuzimanja.html').read_text()
  for a in native['assets']:
   assert a['url']=='https://github.com/'+native['repository']+'/releases/download/'+native['tag']+'/'+a['name']
   assert len(a['sha256'])==64 and a['size_bytes']>0 and a['url'] in page and a['sha256'] in page
-with zipfile.ZipFile(ROOT/'downloads/BL-CLEA7-SDK-0.15.0.zip') as archive:
+with zipfile.ZipFile(ROOT/next(a['url'] for a in catalog['published'] if a['key']=='sdk')) as archive:
  assert archive.testzip() is None
  assert 'clea7/__main__.py' in archive.namelist() and 'web/workbench/diagnostics.js' in archive.namelist()
  assert not any('/__pycache__/' in n or n in ('main.py','runtime_main.py') for n in archive.namelist())

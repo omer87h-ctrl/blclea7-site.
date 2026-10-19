@@ -4,6 +4,8 @@ Website: https://clea7.brzoilokalno.com/
 
 This repository contains the customer website, browser Studio/Runtime and curated public application SDK. The private native host and owner keys are excluded. Existing downloads remain available; native release assets are append-only and identified by source commit and SHA-256.
 
+Browser/SDK development release 0.16 retains everything in 0.15 and adds a typed, authenticated local-development image lifecycle: choose, normalize, store, upload, read, discard and delete. Actual Studio controls create these operations from a blank BIL project; installed browser Runtime apps use the same checked contract. See sdk-source/docs/SHARED-IMAGES.md. Windows and Android downloads remain the separately verified 0.15 release; the new adapter is not advertised as available in those binaries.
+
 Development release 0.15 adds checked visual BIL authoring from a blank project: typed values and custom records, event actions, conditions, list/record expressions, button/gesture binding, original shapes and animation. Compatible added values preserve existing local data after the first execution. Web and Windows use the same application model. See the practical guide at sdk-source/docs/STUDIO-GUIDE.md.
 
 The public website is maintained here. Customer copy should explain actions in natural Bosnian, match the visible code and current download contracts, and link to detailed developer/security documentation. Native-only apps do not require Firebase. Local notifications are distinct from remote push. Windows/Android distributions remain development packages; physical-device coverage, owner release signing and broad general-platform acceptance require their own evidence.

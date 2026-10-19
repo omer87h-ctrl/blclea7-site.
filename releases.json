@@ -1,22 +1,22 @@
 {
   "format": "clea7.public-downloads/1",
-  "version": "0.15.0",
-  "source_commit": "5baaace802746bd64d972568e034abf252b8db73",
-  "verified_run": 39158356189,
+  "version": "0.16.0",
+  "source_commit": "1f90074e1ea212bd0b34c116eac1a0380f7c2142",
+  "verified_run": null,
   "published": [
     {
       "key": "sdk",
-      "name": "BL-CLEA7-SDK-0.15.0.zip",
-      "url": "downloads/BL-CLEA7-SDK-0.15.0.zip",
-      "size_bytes": 215802,
-      "sha256": "d5a780f2dd9bd3a669f796d0b82d2e571c3e8bb0f0014b034dff85efbe902218"
+      "name": "BL-CLEA7-SDK-0.16.0.zip",
+      "url": "downloads/BL-CLEA7-SDK-0.16.0.zip",
+      "size_bytes": 232748,
+      "sha256": "9dbc27b4c6cc0d3b50ddb7f8c394450b3db0835fe09897eb1c81ed5a9a18d94e"
     },
     {
       "key": "preview",
-      "name": "BLclea7-Studio-pregled-0.15.html",
-      "url": "downloads/BLclea7-Studio-pregled-0.15.html",
-      "size_bytes": 873824,
-      "sha256": "16825415bb6454859071cd73494a8d4f98d135790bc6138950f993701350f90b"
+      "name": "BLclea7-Studio-pregled-0.16.html",
+      "url": "downloads/BLclea7-Studio-pregled-0.16.html",
+      "size_bytes": 898710,
+      "sha256": "6ed62b274dd102d15be8cb9f90caf23af6650cf2d96b70a15e19b8611dae722d"
     },
     {
       "key": "example",
@@ -364,5 +364,17 @@
         }
       ]
     }
-  ]
+  ],
+  "web": {
+    "version": "0.16.0",
+    "source_commit": "1f90074e1ea212bd0b34c116eac1a0380f7c2142",
+    "verified_scope": "browser_studio_runtime_sdk_and_isolated_services",
+    "verification": {
+      "node_suites": 25,
+      "product_browser_suites": 17,
+      "isolated_service_browser_suites": 7,
+      "result": "passed"
+    },
+    "native_verification": false
+  }
 }
