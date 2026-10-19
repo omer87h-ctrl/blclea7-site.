@@ -69,11 +69,12 @@ function query(collection,q){
  return {parent:parts.slice(0,-1).join('/'),structuredQuery};
 }
 function create(options){
- if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(k=>!['application','projectId','authOrigin','firestoreOrigin','credentials','fetch','adapter','timeoutMs','credentialTimeoutMs'].includes(k)))throw fault('BackendConfiguration','Unsupported emulator adapter configuration.');
+ if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(k=>!['application','projectId','authOrigin','firestoreOrigin','storageOrigin','credentials','fetch','adapter','imageStore','timeoutMs','credentialTimeoutMs'].includes(k)))throw fault('BackendConfiguration','Unsupported emulator adapter configuration.');
  const {application,projectId,credentials}=options;
- const version=options.adapter||VERSION;if(![VERSION,'firebase.development/2','firebase.development/3'].includes(version))throw fault('BackendConfiguration','Unsupported adapter version.');
+ const version=options.adapter||VERSION;if(![VERSION,'firebase.development/2','firebase.development/3','firebase.development/4'].includes(version))throw fault('BackendConfiguration','Unsupported adapter version.');
  if(!SAFE.test(application)||BAD.has(application)||typeof projectId!=='string'||!/^demo-clea7-[a-z0-9][a-z0-9-]{0,35}$/.test(projectId))throw fault('BackendConfiguration','A CLEA7 application and demo-clea7-* emulator project are required.');
- const authOrigin=origin(options.authOrigin),firestoreOrigin=origin(options.firestoreOrigin);
+ const authOrigin=origin(options.authOrigin),firestoreOrigin=origin(options.firestoreOrigin),storageOrigin=version==='firebase.development/4'?origin(options.storageOrigin):null;
+ if(version!=='firebase.development/4'&&options.storageOrigin!==undefined)throw fault('BackendConfiguration','Storage requires adapter4.');
  if(typeof credentials!=='function')throw fault('BackendConfiguration','A trusted credential callback is required.');
  const transport=options.fetch||scope.fetch?.bind(scope);
  if(typeof transport!=='function')throw fault('BackendConfiguration','The host has no network transport.');
@@ -83,8 +84,10 @@ function create(options){
  if(!Number.isInteger(credentialTimeoutMs)||credentialTimeoutMs<100||credentialTimeoutMs>120000)throw fault('BackendConfiguration','Credential deadline must be 100–120000 ms.');
  let session=null,epoch=0,closed=false;
  const active=new Set();
+ const images=version==='firebase.development/4'?(options.imageStore||scope.CLEA7ImageStore?.create({application,projectId,principal:()=>session?.uid})):null;
+ if(version==='firebase.development/4'&&!images)throw fault('BackendConfiguration','The trusted image host is unavailable.');
  const publicSession=()=>session?{uid:session.uid,email:session.email}:null;
- function invalidate(){epoch++;session=null;for(const controller of active)controller.abort();}
+ function invalidate(){epoch++;images?.invalidate();session=null;for(const controller of active)controller.abort();}
  function ensure(context,write=false){if(closed)throw fault('BackendClosed','Backend adapter is closed.',write);if(context.epoch!==epoch)throw fault('BackendSessionChanged','Authentication changed during the operation.',write);if(context.controller.signal.aborted)throw fault(context.timedOut?'BackendTimeout':'BackendCancelled',context.timedOut?'Backend operation exceeded its deadline.':'Backend operation was cancelled.',write);}
  async function readBody(response,context,write){
   const length=Number(response.headers?.get?.('content-length'));
@@ -96,23 +99,24 @@ function create(options){
   }else{text=await Promise.race([response.text(),context.cancelled]);if(text.length>524288)throw fault('BackendResponse','Remote response exceeds 512 KiB.',write);}
   ensure(context,write);try{return text?JSON.parse(text):{};}catch{throw fault('BackendResponse','Remote response is not valid JSON.',write);}
  }
- async function request(url,method,body,context,{write=false,token=null,missing=false,form=false}={}){
+ async function request(url,method,body,context,{write=false,token=null,missing=false,form=false,raw=false,contentType=null,bytes=false,upload=false}={}){
   ensure(context);let sent=false;
   try{
-   const headers={'Content-Type':form?'application/x-www-form-urlencoded':'application/json'};if(token)headers.Authorization='Bearer '+token;
+   const headers={'Content-Type':contentType||(form?'application/x-www-form-urlencoded':'application/json')};if(token)headers.Authorization='Bearer '+token;if(upload)headers['X-Goog-Upload-Protocol']='multipart';
    sent=true;
-   const response=await Promise.race([transport(url,{method,headers,body:body===undefined?undefined:form?body:JSON.stringify(body),signal:context.controller.signal,redirect:'error',credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer'}),context.cancelled]);
+   const response=await Promise.race([transport(url,{method,headers,body:body===undefined?undefined:raw||form?body:JSON.stringify(body),signal:context.controller.signal,redirect:'error',credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer'}),context.cancelled]);
    ensure(context,write);
    if(missing&&response.status===404)return null;
    if(!response.ok){
     // Never expose Firebase error bodies: Auth errors may contain private inputs.
     if(response.status===401)throw fault('BackendUnauthenticated','Authentication was rejected.');
     if(response.status===403)throw fault('BackendPermissionDenied','The server denied this operation.');
+    if(response.status===404)throw fault('NotFound','The remote resource was not found.');
     if(response.status===400)throw fault('BackendRejected','The emulator rejected the operation.');
     if(response.status===429)throw fault('BackendRateLimited','The emulator rate limit was reached.');
     throw fault('BackendUnavailable','The emulator did not complete the operation.',write&&response.status>=500);
    }
-   return await readBody(response,context,write);
+   if(bytes){if((response.headers?.get('content-type')||'').split(';')[0]!=='image/jpeg')throw fault('BackendResponse','Remote image MIME type differs.');const length=Number(response.headers?.get('content-length'));if(length>5242880)throw fault('BackendResponse','Remote image exceeds 5 MiB.');const chunks=[];let count=0;if(!response.body?.getReader)throw fault('BackendResponse','A bounded binary stream is required.');const reader=response.body.getReader();try{while(true){const part=await Promise.race([reader.read(),context.cancelled]);ensure(context);if(part.done)break;count+=part.value.byteLength;if(count>5242880)throw fault('BackendResponse','Remote image exceeds 5 MiB.');chunks.push(part.value);}}finally{try{Promise.resolve(reader.cancel()).catch(()=>{});}catch{}}if(!count)throw fault('BackendResponse','Remote image is empty.');const out=new Uint8Array(count);let at=0;for(const part of chunks){out.set(part,at);at+=part.length;}return out.buffer;}return await readBody(response,context,write);
   }catch(error){
    if(error instanceof AdapterError){if(context.controller.signal.aborted)ensure(context,write&&sent);throw error;}
    if(context.controller.signal.aborted){ensure(context,write&&sent);}
@@ -126,7 +130,24 @@ function create(options){
   ensure(context);if(typeof result.access_token!=='string'||typeof result.refresh_token!=='string'||result.user_id!==session.uid)throw fault('BackendResponse','Invalid emulator session refresh.');
   session={...session,token:result.access_token,refresh:result.refresh_token,expiresAt:Date.now()+Math.min(3600,Math.max(1,Number(result.expires_in)||1))*1000};return session.token;
  }
+ function imagePath(value){if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).join(',')!=='path'||typeof value.path!=='string'||!new RegExp('^apps/'+application+'/(shared|private)/[A-Za-z0-9_-]{1,128}/[0-9a-f]{32}[.]jpg$').test(value.path))throw fault('BackendInput','Invalid application image identity.');return value.path;}
+ async function imageOperation(name,args,context){
+  context.startNetwork();const authToken=await token(context);ensure(context);
+  if(name==='image.choose'){context.startHuman();const result=await images.choose(context.controller.signal);ensure(context);context.startNetwork();return result;}
+  if(name==='image.discard'){const result=await images.remove(args[0]?.handle);ensure(context);return result;}
+  const bucket=projectId+'.appspot.com',base=storageOrigin+'/v0/b/'+bucket+'/o';
+  if(name==='image.upload'){
+   if(typeof args[1]!=='boolean')throw fault('BackendInput','Image sharing requires an explicit Boolean.');const bytes=await images.read(args[0]?.handle);ensure(context);if(!(bytes instanceof ArrayBuffer)||bytes.byteLength<1||bytes.byteLength>5242880)throw fault('BackendInput','Invalid host image bytes.');
+   const object='apps/'+application+'/'+(args[1]?'shared':'private')+'/'+session.uid+'/'+scope.crypto.randomUUID().replace(/-/g,'')+'.jpg',boundary='clea7_'+scope.crypto.randomUUID().replace(/-/g,''),metadata={name:object,contentType:'image/jpeg',metadata:{firebaseStorageDownloadTokens:''}},start=new TextEncoder().encode('--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(metadata)+'\r\n--'+boundary+'\r\nContent-Type: image/jpeg\r\n\r\n'),end=new TextEncoder().encode('\r\n--'+boundary+'--\r\n'),body=new Uint8Array(start.length+bytes.byteLength+end.length);body.set(start);body.set(new Uint8Array(bytes),start.length);body.set(end,start.length+bytes.byteLength);
+   const result=await request(base+'?name='+encodeURIComponent(object),'POST',body,context,{token:authToken,write:true,raw:true,upload:true,contentType:'multipart/related; boundary='+boundary});if(result.name!==object||result.contentType!=='image/jpeg'||Number(result.size)!==bytes.byteLength)throw fault('BackendResponse','Uploaded image identity differs.',true);return {path:object};
+  }
+  const object=imagePath(args[0]),url=base+'/'+encodeURIComponent(object);
+  if(name==='image.load'){const bytes=await request(url+'?alt=media','GET',undefined,context,{token:authToken,bytes:true});ensure(context);const value=await images.save(bytes,context.controller.signal);ensure(context);return value;}
+  if(name==='image.remove'){await request(url,'DELETE',undefined,context,{token:authToken,write:true});return true;}
+  throw fault('BackendInput','Unsupported image operation.');
+ }
  async function operation(name,args,context){
+  if(name.startsWith('image.'))return imageOperation(name,args,context);
   if(name==='auth.register'||name==='auth.signIn'){
    const supplied=await Promise.race([Promise.resolve().then(()=>credentials(name,{signal:context.controller.signal,application})),context.cancelled]);
    ensure(context);
@@ -137,10 +158,10 @@ function create(options){
    if(typeof result.localId!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(result.localId)||typeof result.email!=='string'||typeof result.idToken!=='string'||typeof result.refreshToken!=='string')throw fault('BackendResponse','The emulator returned an invalid session.',name==='auth.register');
    session={uid:result.localId,email:result.email,token:result.idToken,refresh:result.refreshToken,expiresAt:Date.now()+Math.min(3600,Math.max(1,Number(result.expiresIn)||1))*1000};return publicSession();
   }
-  if(name==='document.add'){if(!['firebase.development/2','firebase.development/3'].includes(version))throw fault('BackendInput','Creation requires adapter2.');query(args[0],{where:[],orderBy:'',descending:false,limit:1,offset:0});if(!args[1]||typeof args[1]!=='object'||Array.isArray(args[1]))throw fault('BackendInput','A document must be a Record.');data(args[1]);const authToken=await token(context),response=await request(firestoreOrigin+'/v1/projects/'+projectId+'/databases/(default)/documents/'+args[0],'POST',{fields:encode(args[1]).mapValue.fields},context,{token:authToken,write:true}),prefix='projects/'+projectId+'/databases/(default)/documents/'+args[0]+'/';if(typeof response.name!=='string'||!response.name.startsWith(prefix)||!/^[A-Za-z0-9_-]{1,128}$/.test(response.name.slice(prefix.length)))throw fault('BackendResponse','Invalid created document identity.',true);return {id:response.name.slice(prefix.length),path:response.name.slice(('projects/'+projectId+'/databases/(default)/documents/').length)};}
+  if(name==='document.add'){if(!['firebase.development/2','firebase.development/3','firebase.development/4'].includes(version))throw fault('BackendInput','Creation requires adapter2.');query(args[0],{where:[],orderBy:'',descending:false,limit:1,offset:0});if(!args[1]||typeof args[1]!=='object'||Array.isArray(args[1]))throw fault('BackendInput','A document must be a Record.');data(args[1]);const authToken=await token(context),response=await request(firestoreOrigin+'/v1/projects/'+projectId+'/databases/(default)/documents/'+args[0],'POST',{fields:encode(args[1]).mapValue.fields},context,{token:authToken,write:true}),prefix='projects/'+projectId+'/databases/(default)/documents/'+args[0]+'/';if(typeof response.name!=='string'||!response.name.startsWith(prefix)||!/^[A-Za-z0-9_-]{1,128}$/.test(response.name.slice(prefix.length)))throw fault('BackendResponse','Invalid created document identity.',true);return {id:response.name.slice(prefix.length),path:response.name.slice(('projects/'+projectId+'/databases/(default)/documents/').length)};}
   if(name==='query.list'||name==='query.documents'){
-   if(name==='query.documents'&&version!=='firebase.development/3')throw fault('BackendInput','Document identities require adapter3.');
-   if(!['firebase.development/2','firebase.development/3'].includes(version))throw fault('BackendInput','Queries require adapter2.');
+   if(name==='query.documents'&&!['firebase.development/3','firebase.development/4'].includes(version))throw fault('BackendInput','Document identities require adapter3.');
+   if(!['firebase.development/2','firebase.development/3','firebase.development/4'].includes(version))throw fault('BackendInput','Queries require adapter2.');
    const compiled=query(args[0],args[1]),authToken=await token(context),parent=compiled.parent?'/'+compiled.parent:'';
    const result=await request(firestoreOrigin+'/v1/projects/'+projectId+'/databases/(default)/documents'+parent+':runQuery','POST',{structuredQuery:compiled.structuredQuery},context,{token:authToken});
    if(!Array.isArray(result)||result.length>args[1].limit+1)throw fault('BackendResponse','Query response exceeds its declared bound.');const rows=[],seen=new Set();
@@ -158,8 +179,8 @@ function create(options){
   await request(url,'DELETE',undefined,context,{token:authToken,write:true});return true;
  }
  async function execute(request,{signal}={}){
-  if(!request||typeof request!=='object'||Array.isArray(request)||Object.keys(request).some(k=>!['operation','args'].includes(k))||!(OPS.includes(request.operation)||['firebase.development/2','firebase.development/3'].includes(version)&&['query.list','document.add'].includes(request.operation)||version==='firebase.development/3'&&request.operation==='query.documents')||!Array.isArray(request.args))throw fault('BackendInput','Invalid backend request.');
-  const name=request.operation,args=request.args,arity=['document.set','document.add','query.list','query.documents'].includes(name)?2:name.startsWith('document.')?1:0;
+  if(!request||typeof request!=='object'||Array.isArray(request)||Object.keys(request).some(k=>!['operation','args'].includes(k))||!(OPS.includes(request.operation)||['firebase.development/2','firebase.development/3','firebase.development/4'].includes(version)&&['query.list','document.add'].includes(request.operation)||['firebase.development/3','firebase.development/4'].includes(version)&&request.operation==='query.documents'||version==='firebase.development/4'&&['image.choose','image.upload','image.load','image.remove','image.discard'].includes(request.operation))||!Array.isArray(request.args))throw fault('BackendInput','Invalid backend request.');
+  const name=request.operation,args=request.args,arity=request.operation==='image.upload'?2:['image.load','image.remove','image.discard'].includes(request.operation)?1:['document.set','document.add','query.list','query.documents'].includes(name)?2:name.startsWith('document.')?1:0;
   if(args.length!==arity)throw fault('BackendInput','Wrong backend operation argument count.');
   if(closed)throw fault('BackendClosed','Backend adapter is closed.');
   if(signal?.aborted)throw fault('BackendCancelled','Backend operation was cancelled.');
@@ -173,10 +194,11 @@ function create(options){
   context.cancelled.catch(()=>{});
   const abort=()=>controller.abort(),onAbort=()=>rejectCancel(fault(context.timedOut?'BackendTimeout':'BackendCancelled',context.timedOut?'Backend operation exceeded its deadline.':'Backend operation was cancelled.'));
   controller.signal.addEventListener('abort',onAbort,{once:true});signal?.addEventListener('abort',abort,{once:true});
-  let timer;const deadline=ms=>{clearTimeout(timer);timer=setTimeout(()=>{context.timedOut=true;controller.abort();},ms);};context.startNetwork=()=>deadline(timeoutMs);deadline(name==='auth.register'||name==='auth.signIn'?credentialTimeoutMs:timeoutMs);active.add(controller);
-  try{return await operation(name,args,context);}catch(error){if(error instanceof AdapterError)throw error;ensure(context);throw fault('BackendFailure','Backend operation failed.');}finally{clearTimeout(timer);active.delete(controller);controller.signal.removeEventListener('abort',onAbort);signal?.removeEventListener('abort',abort);controller.abort();}
+  let timer;const deadline=ms=>{clearTimeout(timer);timer=setTimeout(()=>{context.timedOut=true;controller.abort();},ms);};context.startNetwork=()=>deadline(timeoutMs);context.startHuman=()=>deadline(credentialTimeoutMs);deadline(name==='auth.register'||name==='auth.signIn'||name==='image.choose'?credentialTimeoutMs:timeoutMs);active.add(controller);
+  try{return await operation(name,args,context);}catch(error){if(error instanceof AdapterError)throw error;ensure(context);if(name.startsWith('image.')&&scope.CLEA7ImageStore?.isError?.(error)===true)throw fault(error.code,'The trusted image operation did not complete.');throw fault('BackendFailure','Backend operation failed.');}finally{clearTimeout(timer);active.delete(controller);controller.signal.removeEventListener('abort',onAbort);signal?.removeEventListener('abort',abort);controller.abort();}
  }
- return Object.freeze({version,execute,close(){if(!closed){closed=true;invalidate();}},publicStatus(){return {version,application,development:true,authenticated:!!session,session:publicSession(),closed,subscriptions:false};}});
+ return Object.freeze({version,execute,mediaUrl:handle=>images?.url(handle)||Promise.resolve(null),close(){if(!closed){closed=true;invalidate();images?.close();}},publicStatus(){return {version,application,development:true,authenticated:!!session,session:publicSession(),closed,subscriptions:false};}});
 }
-scope.CLEA7FirebaseDevelopment=Object.freeze({VERSION,versions:[VERSION,'firebase.development/2','firebase.development/3'],operations:OPS,query,create});
+scope.CLEA7FirebaseDevelopment=Object.freeze({VERSION,versions:[VERSION,'firebase.development/2','firebase.development/3','firebase.development/4'],operations:OPS,query,create});
 })(globalThis);
+

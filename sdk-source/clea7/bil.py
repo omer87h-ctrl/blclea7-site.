@@ -18,14 +18,16 @@ def safe(value):
 
 NATIVE_TYPES={'NativeMedia':{'handle':'Text','mime':'Text','width':'Number','height':'Number','bytes':'Number'},'NativeLocation':{'latitude':'Number','longitude':'Number','accuracy':'Number','timestamp':'Number'},'NativeReceipt':{'posted':'Boolean','id':'Number'}}
 NATIVE_OPS={'camera.capture':(0,'NativeMedia'),'media.pick':(0,'NativeMedia'),'media.list':(0,'NativeMediaList'),'media.inspect':(1,'NativeMedia'),'media.remove':(1,'Boolean'),'location.current':(0,'NativeLocation'),'notification.post':(1,'NativeReceipt')}
+IMAGE_OPS={'image.choose':(0,'NativeMedia'),'image.upload':(2,'RemoteImage'),'image.load':(1,'NativeMedia'),'image.remove':(1,'Boolean'),'image.discard':(1,'Boolean')}
+IMAGE_TYPES={**NATIVE_TYPES,'RemoteImage':{'path':'Text'}}
 REMOTE_OPS=frozenset(('auth.register','auth.session','auth.signIn','auth.signOut','document.delete','document.get','document.set','document.add','query.list','query.documents','observe.query.documents','observe.document.get','observe.query.list'))
 
 def validate_remote(value):
     if not isinstance(value,dict) or set(value)!={'format','backends'} or value['format']!='bil.remote/1' or not isinstance(value['backends'],dict) or not 1<=len(value['backends'])<=4:raise UserError('Neispravan BIL remote ugovor.')
     for name,backend in value['backends'].items():
-        if not safe(name) or not isinstance(backend,dict) or set(backend)!={'adapter','operations'} or backend['adapter'] not in ('firebase.development/1','firebase.development/2','firebase.development/3','android.native/1'):raise UserError('Nepodržan udaljeni adapter.')
+        if not safe(name) or not isinstance(backend,dict) or set(backend)!={'adapter','operations'} or backend['adapter'] not in ('firebase.development/1','firebase.development/2','firebase.development/3','firebase.development/4','android.native/1'):raise UserError('Nepodržan udaljeni adapter.')
         operations=backend['operations']
-        if not isinstance(operations,list) or any(not isinstance(op,str) or (op not in (NATIVE_OPS if backend['adapter']=='android.native/1' else REMOTE_OPS) or op in ('query.documents','observe.query.documents') and backend['adapter']!='firebase.development/3' or backend['adapter']=='firebase.development/1' and (op in ('query.list','query.documents','document.add') or op.startswith('observe.'))) for op in operations) or operations!=sorted(set(operations)):raise UserError('Neispravne udaljene operacije.')
+        if not isinstance(operations,list) or any(not isinstance(op,str) or (op not in (NATIVE_OPS if backend['adapter']=='android.native/1' else REMOTE_OPS|IMAGE_OPS.keys() if backend['adapter']=='firebase.development/4' else REMOTE_OPS) or op in ('query.documents','observe.query.documents') and backend['adapter'] not in ('firebase.development/3','firebase.development/4') or backend['adapter']=='firebase.development/1' and (op in ('query.list','query.documents','document.add') or op.startswith('observe.'))) for op in operations) or operations!=sorted(set(operations)):raise UserError('Neispravne udaljene operacije.')
     return value
 
 
@@ -102,7 +104,7 @@ def validate_program(project):
     used_events=set();watches=set();cancellations=set()
     if remote:
         validate_remote(project.get('remote'));validate_remote(ir.get('remote'))
-        if not live and any(b['adapter'] in ('firebase.development/3','android.native/1') for b in ir['remote']['backends'].values()):raise UserError('Adapter3 zahtijeva BIL5 aplikacijski ugovor.')
+        if not live and any(b['adapter'] in ('firebase.development/3','firebase.development/4','android.native/1') for b in ir['remote']['backends'].values()):raise UserError('Adapter3 zahtijeva BIL5 aplikacijski ugovor.')
         if project['remote']!=ir['remote']:raise UserError('Udaljene mogućnosti ne odgovaraju BIL izvoru.')
         actual={name:set() for name in ir['remote']['backends']}
         def requests(value):
@@ -110,19 +112,24 @@ def validate_program(project):
                 for entry in value:requests(entry)
             elif isinstance(value,dict):
                 if value.get('op') in ('REQUEST','WATCH'):
-                    if set(value)!=({'op','id','loc','backend','operation','args','target','error','resultType'}|({'completion'} if asynchronous and 'completion' in value else set())|({'subscription','interval'} if live and value.get('op')=='WATCH' else set())) or not isinstance(value.get('backend'),str) or value['backend'] not in actual or not isinstance(value.get('operation'),str) or value['operation'] not in (NATIVE_OPS if ir['remote']['backends'][value['backend']]['adapter']=='android.native/1' else REMOTE_OPS) or not isinstance(value.get('args'),list) or not safe(value.get('target')) or not safe(value.get('error')) or value['target'] not in ir['globals'] or value['error'] not in ir['globals']:raise UserError('Neispravan udaljeni BIL zahtjev.')
+                    if set(value)!=({'op','id','loc','backend','operation','args','target','error','resultType'}|({'completion'} if asynchronous and 'completion' in value else set())|({'subscription','interval'} if live and value.get('op')=='WATCH' else set())) or not isinstance(value.get('backend'),str) or value['backend'] not in actual or not isinstance(value.get('operation'),str) or value['operation'] not in (NATIVE_OPS if ir['remote']['backends'][value['backend']]['adapter']=='android.native/1' else REMOTE_OPS|IMAGE_OPS.keys() if ir['remote']['backends'][value['backend']]['adapter']=='firebase.development/4' else REMOTE_OPS) or not isinstance(value.get('args'),list) or not safe(value.get('target')) or not safe(value.get('error')) or value['target'] not in ir['globals'] or value['error'] not in ir['globals']:raise UserError('Neispravan udaljeni BIL zahtjev.')
                     target=ir['globals'][value['target']];error=ir['globals'][value['error']]
                     if not isinstance(target,dict) or target.get('mutable') is not True or value['resultType']!=target.get('type'):raise UserError('Tip udaljenog rezultata ne odgovara stanju.')
                     failure_type=error.get('type',{}) if isinstance(error,dict) else {}
                     failure=failure_type.get('nullable',{}) if isinstance(failure_type,dict) else {}
                     if not isinstance(error,dict) or error.get('mutable') is not True or not isinstance(failure,dict) or failure.get('record')!={'code':'Text','message':'Text','uncertain':'Boolean'} or value['target']==value['error']:raise UserError('Udaljeni zahtjev treba odvojeni promjenjivi nullable RemoteFailure rezultat.')
-                    if value['operation'].startswith('observe.') or (value['operation'] in ('query.list','query.documents','document.add') or value['op']=='WATCH') and ir['remote']['backends'][value['backend']]['adapter'] not in ('firebase.development/2','firebase.development/3') or value['operation']=='query.documents' and ir['remote']['backends'][value['backend']]['adapter']!='firebase.development/3':raise UserError('Neispravan adapter za upit ili pretplatu.')
+                    if value['operation'].startswith('observe.') or (value['operation'] in ('query.list','query.documents','document.add') or value['op']=='WATCH') and ir['remote']['backends'][value['backend']]['adapter'] not in ('firebase.development/2','firebase.development/3','firebase.development/4') or value['operation']=='query.documents' and ir['remote']['backends'][value['backend']]['adapter'] not in ('firebase.development/3','firebase.development/4'):raise UserError('Neispravan adapter za upit ili pretplatu.')
                     result=value['resultType'];nullable=isinstance(result,dict) and 'nullable' in result
                     result_type=result['nullable'] if nullable else result
                     if ir['remote']['backends'][value['backend']]['adapter']=='android.native/1':
                         native_result=NATIVE_OPS[value['operation']][1]
                         expected={'list':{'record':NATIVE_TYPES['NativeMedia'],'name':'NativeMedia'}} if native_result=='NativeMediaList' else 'Boolean' if native_result=='Boolean' else {'record':NATIVE_TYPES[native_result],'name':native_result}
                         if result_type!=expected:raise UserError('Native rezultat ne odgovara registrovanom tipu.')
+                    elif value['operation'] in IMAGE_OPS:
+                        if ir['remote']['backends'][value['backend']]['adapter']!='firebase.development/4':raise UserError('Slike zahtijevaju adapter4.')
+                        image_result=IMAGE_OPS[value['operation']][1]
+                        expected='Boolean' if image_result=='Boolean' else {'record':IMAGE_TYPES[image_result],'name':image_result}
+                        if result_type!=expected:raise UserError('Slika treba registrovani rezultat.')
                     elif value['operation'].startswith('auth.') and value['operation']!='auth.signOut':
                         if not isinstance(result_type,dict) or result_type.get('record')!={'uid':'Text','email':'Text'} or value['operation']=='auth.session' and not nullable:raise UserError('Autentifikacija treba provjeren RemoteSession rezultat.')
                     elif value['operation']=='document.get':
@@ -135,7 +142,7 @@ def validate_program(project):
                             fields=result['list']['record']
                             if set(fields)!={'id','path','value'} or fields['id']!='Text' or fields['path']!='Text' or not isinstance(fields['value'],dict) or not isinstance(fields['value'].get('record'),dict):raise UserError('Identificirani upit treba id, path i tipizirani value Record.')
                     elif result!='Boolean':raise UserError('Udaljena izmjena treba Boolean rezultat.')
-                    expected_args=(NATIVE_OPS[value['operation']][0] if value['operation'] in NATIVE_OPS else {'auth.session':0,'auth.register':0,'auth.signIn':0,'auth.signOut':0,'document.get':1,'document.set':2,'document.delete':1,'query.list':2,'query.documents':2,'document.add':2}[value['operation']])
+                    expected_args=(NATIVE_OPS[value['operation']][0] if value['operation'] in NATIVE_OPS else IMAGE_OPS[value['operation']][0] if value['operation'] in IMAGE_OPS else {'auth.session':0,'auth.register':0,'auth.signIn':0,'auth.signOut':0,'document.get':1,'document.set':2,'document.delete':1,'query.list':2,'query.documents':2,'document.add':2}[value['operation']])
                     if len(value['args'])!=expected_args:raise UserError('Udaljeni zahtjev ima neispravan broj argumenata.')
                     if 'completion' in value:
                         completion=value['completion']
@@ -216,3 +223,4 @@ def request(payload):
     if result.returncode or not result.stdout:raise UserError(result.stderr[-2000:] or 'BIL provjera nije prošla.')
     try:return json.loads(result.stdout)
     except ValueError:raise UserError('BIL SDK vratio je neispravan odgovor.') from None
+

@@ -1,0 +1,55 @@
+# Original independently authorable CLEA7 application. Isolated development services only.
+backend community using "firebase.development/4"
+let session: RemoteSession? = null
+let photograph: NativeMedia? = null
+let remoteImage: RemoteImage? = null
+let failure: RemoteFailure? = null
+let shared = false
+let remotePath = ""
+let done = false
+let status = "Prijavi se i odaberi fotografiju."
+on register { request community.auth.register() into session catch failure }
+on login { request community.auth.signIn() into session catch failure }
+on logout { request community.auth.signOut() into done catch failure }
+on choose { request community.image.choose() into photograph catch failure }
+on upload {
+    if photograph != null {
+        request community.image.upload(photograph, shared) into remoteImage catch failure then uploaded else failed
+    } else { status = "Prvo odaberi fotografiju." }
+}
+on uploaded(result: RemoteImage?, context: RemoteCompletion) {
+    if result != null { remotePath = result.path }
+    status = "Fotografija je spremljena na backend."
+}
+on load {
+    request community.image.load(new RemoteImage { path: remotePath }) into photograph catch failure
+}
+on remove {
+    request community.image.remove(new RemoteImage { path: remotePath }) into done catch failure then removed else failed
+}
+on removed(result: Boolean, context: RemoteCompletion) {
+    remoteImage = null
+    status = "Fotografija je obrisana s backenda. Lokalna kopija se briše odvojeno."
+}
+on discard {
+    if photograph != null {
+        request community.image.discard(photograph) into done catch failure then discarded else failed
+    }
+}
+on discarded(result: Boolean, context: RemoteCompletion) { photograph = null }
+on failed(problem: RemoteFailure, context: RemoteCompletion) { status = problem.code }
+screen home "Fotografije između korisnika" {
+    text "Dijeljene fotografije mogu čitati prijavljeni korisnici istog testnog projekta. Privatne fotografije čita samo vlasnik." key privacy
+    button "Registracija" runs register key register
+    button "Prijava" runs login key login
+    button "Odjava" runs logout key logout
+    image photograph label "Odabrana fotografija" key photograph
+    button "Odaberi fotografiju" runs choose key choose
+    toggle shared label "Podijeli s prijavljenim korisnicima" key shared
+    button "Pošalji fotografiju" runs upload key upload
+    input remotePath label "Identitet fotografije na backendu" key remote_path
+    button "Učitaj fotografiju" runs load key load
+    button "Obriši s backenda" runs remove key remove
+    button "Obriši lokalnu kopiju" runs discard key discard
+    show status key status
+}

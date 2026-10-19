@@ -10,23 +10,24 @@ function publicError(error){
  const allowed=['Denied','Unavailable','Cancelled','Timeout','Invalid','Authentication','NotFound','Conflict','Budget','Persistence','Uncertain'];
  const mapped={BackendPermissionDenied:'Denied',BackendUnauthenticated:'Authentication',BackendCredentials:'Authentication',BackendRejected:'Invalid',BackendConfiguration:'Invalid',BackendInput:'Invalid',BackendResponse:'Invalid',BackendClosed:'Cancelled',BackendSessionChanged:'Cancelled',BackendCancelled:'Cancelled',BackendTimeout:'Timeout',BackendBusy:'Budget',BackendRateLimited:'Budget',RemoteType:'Invalid',RemoteContract:'Invalid'}[error?.code]||error?.code;const code=allowed.includes(mapped)?mapped:'Unavailable';
  // Arbitrary transport/provider messages can contain URLs, credentials or private data.
- const messages={Denied:'Backend operation was not authorized.',Unavailable:'The development backend is unavailable.',Cancelled:'The request was cancelled.',Timeout:'The backend request timed out.',Invalid:'The backend returned data outside the declared contract.',Authentication:'Authentication failed.',NotFound:'The requested resource was not found.',Conflict:'A conflicting request is already active.',Budget:'The remote operation budget was exceeded.',Persistence:'The remote result could not be stored locally.',Uncertain:'The remote write may have completed. Check the server before repeating it.'};
+ const messages={Denied:'Backend operation was not authorized.',Unavailable:'The development backend is unavailable.',Cancelled:'The request was cancelled.',Timeout:'The backend request timed out.',Invalid:'The backend returned data outside the declared contract.',Authentication:'Authentication failed.',NotFound:'The requested resource was not found.',Conflict:'A conflicting request is already active.',Budget:'The remote operation budget was exceeded.',Persistence:'Local data could not be read or stored safely.',Uncertain:'The remote write may have completed. Check the server before repeating it.'};
  return {code,message:messages[code],uncertain:error?.uncertain===true};
 }
 const OPS2=Object.freeze([...OPS,'document.add','query.list','observe.document.get','observe.query.list']);
 const OPS3=Object.freeze([...OPS2,'query.documents','observe.query.documents']);
-function registry(){const native=scope.CLEA7AndroidBackend?.profile(),versions=native?(native.adapters||[native.adapter]):scope.CLEA7FirebaseDevelopment?.versions|| (scope.CLEA7FirebaseDevelopment?['firebase.development/1']:[]);const entries=Object.fromEntries(versions.map(version=>[version,{operations:(version==='firebase.development/3'?OPS3:version==='firebase.development/2'?OPS2:OPS).slice(),targets:native?['android']:['browser']}]));if(scope.CLEA7DeviceClient?.profile().typed===true)entries['android.native/1']={operations:Object.keys(scope.CLEA7BIL.NATIVE_CONTRACTS),targets:['android']};return entries;}
+const OPS4=Object.freeze([...OPS3,'image.choose','image.upload','image.load','image.remove','image.discard']);
+function registry(){const native=scope.CLEA7AndroidBackend?.profile(),versions=native?(native.adapters||[native.adapter]):scope.CLEA7FirebaseDevelopment?.versions|| (scope.CLEA7FirebaseDevelopment?['firebase.development/1']:[]);const entries=Object.fromEntries(versions.map(version=>[version,{operations:(version==='firebase.development/4'?OPS4:version==='firebase.development/3'?OPS3:version==='firebase.development/2'?OPS2:OPS).slice(),targets:native?['android']:['browser']}]));if(scope.CLEA7DeviceClient?.profile().typed===true)entries['android.native/1']={operations:Object.keys(scope.CLEA7BIL.NATIVE_CONTRACTS),targets:['android']};return entries;}
 
 function validateBinding(binding){
  if(binding?.adapter==='android.native/1'){if(Object.keys(binding).join('|')!=='adapter')throw new RemoteFault('Invalid','Native binding cannot contain endpoints or credentials.');return {adapter:'android.native/1'};}
- if(!binding||!['firebase.development/1','firebase.development/2','firebase.development/3'].includes(binding.adapter)||!/^demo-clea7-[a-z0-9][a-z0-9-]{0,35}$/.test(binding.projectId||''))throw new RemoteFault('Invalid','Only an isolated demo-clea7 Firebase project is supported.');
- const endpoints={authOrigin:9099,firestoreOrigin:8080};
+ if(!binding||!['firebase.development/1','firebase.development/2','firebase.development/3','firebase.development/4'].includes(binding.adapter)||!/^demo-clea7-[a-z0-9][a-z0-9-]{0,35}$/.test(binding.projectId||''))throw new RemoteFault('Invalid','Only an isolated demo-clea7 Firebase project is supported.');
+ const endpoints={authOrigin:9099,firestoreOrigin:8080,...(binding.adapter==='firebase.development/4'?{storageOrigin:9199}:{})};
  for(const [key,port]of Object.entries(endpoints)){
   let url;try{url=new URL(binding[key]);}catch{throw new RemoteFault('Invalid','Invalid emulator endpoint.');}
   if(url.protocol!=='http:'||!['localhost','127.0.0.1'].includes(url.hostname)||Number(url.port)!==port||url.username||url.password||url.pathname!=='/'||url.search||url.hash)throw new RemoteFault('Denied','Only the documented loopback emulator ports are supported.');
  }
- const keys=Object.keys(binding).sort().join(',');if(keys!=='adapter,authOrigin,firestoreOrigin,projectId')throw new RemoteFault('Invalid','Unknown backend configuration field.');
- return {adapter:binding.adapter,projectId:binding.projectId,authOrigin:new URL(binding.authOrigin).origin,firestoreOrigin:new URL(binding.firestoreOrigin).origin};
+ const keys=Object.keys(binding).sort().join(',');if(keys!== (binding.adapter==='firebase.development/4'?'adapter,authOrigin,firestoreOrigin,projectId,storageOrigin':'adapter,authOrigin,firestoreOrigin,projectId'))throw new RemoteFault('Invalid','Unknown backend configuration field.');
+ return {adapter:binding.adapter,projectId:binding.projectId,authOrigin:new URL(binding.authOrigin).origin,firestoreOrigin:new URL(binding.firestoreOrigin).origin,...(binding.adapter==='firebase.development/4'?{storageOrigin:new URL(binding.storageOrigin).origin}:{})};
 }
 function create(project,{bindings={},grants={},credentials,adapterFactory=null}={}){
  const declared=project.remote?.backends;if(!declared)throw new RemoteFault('Invalid','This application has no remote contract.');
@@ -52,7 +53,7 @@ function create(project,{bindings={},grants={},credentials,adapterFactory=null}=
   if(!Array.isArray(requests)||requests.length+active.size>8)throw new RemoteFault('Budget','At most eight remote requests can be active.');
   const seen=new Set();const changes=requests.filter(r=>['auth.register','auth.signIn','auth.signOut'].includes(r.operation));if(changes.length&&(changes.length!==1||requests.length!==1))throw new RemoteFault('Conflict','An authentication transition must be its own event.');
   for(const r of requests){
-   if(!declared[r.backend]?.operations.includes(r.operation)||!(declared[r.backend]?.adapter==='android.native/1'?own(scope.CLEA7BIL.NATIVE_CONTRACTS,r.operation):OPS.includes(r.operation)||['firebase.development/2','firebase.development/3'].includes(declared[r.backend]?.adapter)&&['query.list','document.add'].includes(r.operation)||declared[r.backend]?.adapter==='firebase.development/3'&&r.operation==='query.documents')||!adapters.has(r.backend))throw new RemoteFault('Denied','Operation not declared by this application.');
+   if(!declared[r.backend]?.operations.includes(r.operation)||!(declared[r.backend]?.adapter==='android.native/1'?own(scope.CLEA7BIL.NATIVE_CONTRACTS,r.operation):OPS.includes(r.operation)||['firebase.development/2','firebase.development/3','firebase.development/4'].includes(declared[r.backend]?.adapter)&&['query.list','document.add'].includes(r.operation)||['firebase.development/3','firebase.development/4'].includes(declared[r.backend]?.adapter)&&r.operation==='query.documents'||declared[r.backend]?.adapter==='firebase.development/4'&&Object.prototype.hasOwnProperty.call(scope.CLEA7BIL.IMAGE_CONTRACTS,r.operation))||!adapters.has(r.backend))throw new RemoteFault('Denied','Operation not declared by this application.');
    if(!changes.length&&[...active.values()].some(a=>a.authChange&&!a.controller.signal.aborted))throw new RemoteFault('Conflict','Authentication is changing.');
    if(typeof r.id!=='string'||!/^remote_[A-Za-z0-9_]{1,80}$/.test(r.id)||active.has(r.id)||seen.has(r.id))throw new RemoteFault('Invalid','Invalid remote request identity.');
    const target=r.resultTarget,authChange=['auth.register','auth.signIn','auth.signOut'].includes(r.operation),conflicting=[...active.values()].some(a=>!a.controller.signal.aborted&&!(authChange&&a.backend===r.backend)&&[a.target,a.errorTarget].some(slot=>slot===target||slot===r.errorTarget));if(typeof target!=='string'||conflicting||seen.has('target:'+target)||seen.has('target:'+r.errorTarget))throw new RemoteFault('Conflict','A request for this result is already active.');
@@ -77,7 +78,7 @@ function create(project,{bindings={},grants={},credentials,adapterFactory=null}=
   task.catch(()=>{}).finally(()=>{active.delete(request.id);});return task;
  }
 
- return Object.freeze({application:project.id,authorize,submit,principal,onPrincipal(listener){if(typeof listener!=='function')throw new RemoteFault('Invalid','Invalid identity listener.');listeners.add(listener);return ()=>listeners.delete(listener);},cancel(id){active.get(id)?.controller.abort();},get pending(){return active.size;},get closed(){return closed;},close(){if(closed)return;closed=true;listeners.clear();for(const {controller}of active.values())controller.abort();for(const adapter of adapters.values())adapter.close?.();},status(){return {format:'clea7.remote-status/1',pending:active.size,closed,backends:Object.entries(declared).map(([alias,c])=>({alias,adapter:c.adapter,operations:c.operations.slice()}))};}});
+ return Object.freeze({application:project.id,authorize,submit,async mediaUrl(handle){if(closed)return null;const current=epoch;for(const [alias,adapter]of adapters){if(!declared[alias].operations.some(op=>['image.choose','image.load'].includes(op)))continue;const url=await adapter.mediaUrl?.(handle);if(closed||epoch!==current)return null;if(url)return url;}return null;},principal,onPrincipal(listener){if(typeof listener!=='function')throw new RemoteFault('Invalid','Invalid identity listener.');listeners.add(listener);return ()=>listeners.delete(listener);},cancel(id){active.get(id)?.controller.abort();},get pending(){return active.size;},get closed(){return closed;},close(){if(closed)return;closed=true;listeners.clear();for(const {controller}of active.values())controller.abort();for(const adapter of adapters.values())adapter.close?.();},status(){return {format:'clea7.remote-status/1',pending:active.size,closed,backends:Object.entries(declared).map(([alias,c])=>({alias,adapter:c.adapter,operations:c.operations.slice()}))};}});
 }
 class Observations {
  constructor(engine){this.engine=engine;this.entries=new Map();this.closed=false;this.visibility=()=>{for(const entry of this.entries.values())if(!entry.running)this.schedule(entry,0);};scope.document?.addEventListener('visibilitychange',this.visibility);}
@@ -85,7 +86,7 @@ class Observations {
  authorize(requests,actions){
   const planned=new Map(this.entries),starts=[];
   for(const action of actions){if(action.kind==='cancel'){planned.delete(action.name);continue;}const r=action.request,name=r.subscription.name,contract=this.engine.project.remote?.backends[r.backend];
-   if(this.engine.reality!=='LIVE'||!this.engine.remote||!['firebase.development/2','firebase.development/3'].includes(contract?.adapter)||!contract.operations.includes('observe.'+r.operation)||!['document.get','query.list','query.documents'].includes(r.operation)||planned.has(name)||planned.size>=4)throw new RemoteFault('Conflict','A subscription is already active or is outside the approved contract.');
+   if(this.engine.reality!=='LIVE'||!this.engine.remote||!['firebase.development/2','firebase.development/3','firebase.development/4'].includes(contract?.adapter)||!contract.operations.includes('observe.'+r.operation)||!['document.get','query.list','query.documents'].includes(r.operation)||planned.has(name)||planned.size>=4)throw new RemoteFault('Conflict','A subscription is already active or is outside the approved contract.');
    for(const item of planned.values()){const x=item.request;if([x.resultTarget,x.errorTarget].some(k=>k===r.resultTarget||k===r.errorTarget))throw new RemoteFault('Conflict','Subscriptions require separate result and error values.');}
    planned.set(name,{request:r});starts.push(r);
   }
@@ -137,5 +138,6 @@ function credentials(operation,{signal}={}){
   if(signal?.aborted){abort();return;}dialog.showModal();email.focus();
  });
 }
-scope.CLEA7Remote={create,registry,validateBinding,credentials,publicError,RemoteFault,OPS,OPS2,OPS3,Observations};
+scope.CLEA7Remote={create,registry,validateBinding,credentials,publicError,RemoteFault,OPS,OPS2,OPS3,OPS4,Observations};
 })(globalThis);
+

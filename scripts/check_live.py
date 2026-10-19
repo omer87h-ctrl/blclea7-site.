@@ -71,7 +71,7 @@ def check():
  for path in ['studio/workbench/bil-authoring.js','studio/workbench/bil-studio.js','studio/workbench/bil-designer.js','studio/workbench/bil-runtime.js','studio/workbench/index.html']:
   assert read(path)==(ROOT/path).read_bytes(),'Published Studio differs: '+path
  assert b'CLEA7Library' in read('studio/launcher/library.js')
- catalog=json.loads(read('releases.json'));assert catalog['source_commit']=='5baaace802746bd64d972568e034abf252b8db73'
+ catalog=json.loads(read('releases.json'));assert catalog['source_commit']=='1f90074e1ea212bd0b34c116eac1a0380f7c2142'
  verified=[]
  for entry in catalog['published']:
   path=entry['url'];assert path.startswith('downloads/') and '..' not in path and ':' not in path
