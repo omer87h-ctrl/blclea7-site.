@@ -1,0 +1,1 @@
+{"name": "BL CLEA Sense 7 — testna verzija", "short_name": "CLEA Sense", "lang": "bs", "start_url": "./", "scope": "./", "display": "standalone", "background_color": "#111d29", "theme_color": "#111d29", "icons": [{"src": "icon.svg", "sizes": "any", "type": "image/svg+xml"}]}
