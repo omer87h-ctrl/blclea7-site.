@@ -1,3 +1,7 @@
+# Web 0.18-test and curated SDK
+
+The 0.18 web Studio and standalone browser Runtime use the shared Core and BIL Core3. SDK0.18 is independently executable; native downloads retain0.15. Sense is unchanged.
+
 # BLclea7 — public website and developer distribution
 
 Website: https://clea7.brzoilokalno.com/

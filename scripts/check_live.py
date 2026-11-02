@@ -68,10 +68,10 @@ def check():
  assert b'BIL' in read('bil.html')
  compiler=read('studio/workbench/bil-compiler.js');assert compiler==(ROOT/'studio/workbench/bil-compiler.js').read_bytes(),'Published BIL compiler differs.'
  engine=read('studio/workbench/engine.js');assert engine==(ROOT/'studio/workbench/engine.js').read_bytes(),'Published runtime differs from verified source.'
- for path in ['studio/workbench/bil-authoring.js','studio/workbench/bil-studio.js','studio/workbench/bil-designer.js','studio/workbench/bil-runtime.js','studio/workbench/index.html']:
+ for path in ['studio/workbench/working-cache.js','studio/workbench/clea-core.js','studio/launcher/player.html','studio/launcher/player.js','studio/workbench/bil-authoring.js','studio/workbench/bil-studio.js','studio/workbench/bil-designer.js','studio/workbench/bil-runtime.js','studio/workbench/index.html']:
   assert read(path)==(ROOT/path).read_bytes(),'Published Studio differs: '+path
  assert b'CLEA7Library' in read('studio/launcher/library.js')
- catalog=json.loads(read('releases.json'));assert catalog['source_commit']=='1f90074e1ea212bd0b34c116eac1a0380f7c2142'
+ catalog=json.loads(read('releases.json'));assert catalog['source_commit']=='a679e6585d0f77366cff74a5ed182ebc9f32ce9a'
  verified=[]
  for entry in catalog['published']:
   path=entry['url'];assert path.startswith('downloads/') and '..' not in path and ':' not in path

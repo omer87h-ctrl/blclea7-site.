@@ -18,6 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: python -m pip install playwright==1.62.0
       - run: python scripts/check_public.py
       - run: python -m unittest discover -s tests -v
       - run: node tests/test_public_bil_apps.cjs
@@ -43,6 +44,7 @@ jobs:
           trap 'kill "$server_pid" || true' EXIT
           export CLEA7_CHROME="$(command -v google-chrome)"
           node tests/test_public_appearance_ui.cjs
+          python tests/test_universal018_browser.py --output test-evidence/universal018-browser
           node tests/test_public_site.cjs
           node tests/test_public_acceptance.cjs
           node tests/test_public_bil_studio.cjs

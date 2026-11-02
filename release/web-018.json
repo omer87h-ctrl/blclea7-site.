@@ -1,0 +1,57 @@
+{
+  "format": "clea7.public-web-source/1",
+  "version": "0.18.0-test",
+  "source_commit": "a679e6585d0f77366cff74a5ed182ebc9f32ce9a",
+  "files": [
+    {
+      "path": "studio/workbench/bil-compiler.js",
+      "bytes": 73634,
+      "sha256": "626b3c71d592fa320c5168e7d882f33b0504ed24b1d026ae672772f38159f346"
+    },
+    {
+      "path": "studio/workbench/bil-runtime.js",
+      "bytes": 72699,
+      "sha256": "45f85c0074d805e66265d36b5deb7efb2d1f6e44ac856c119da38e3cebe05089"
+    },
+    {
+      "path": "studio/workbench/working-cache.js",
+      "bytes": 13568,
+      "sha256": "3cc36cc7794f62c771bc1ed662158547b17032b5bc9d6d31454fe77383166f08"
+    },
+    {
+      "path": "studio/workbench/clea-core.js",
+      "bytes": 8438,
+      "sha256": "f0f6b98e2033032fd753563b51a5aa7e72d762c56dee2e0a6016a7638dba4c4a"
+    },
+    {
+      "path": "studio/workbench/engine.js",
+      "bytes": 55886,
+      "sha256": "c0cd09230e9bac178911a45f9a2d84cac75a693fbad5c145570f63f4bd2fcd82"
+    },
+    {
+      "path": "studio/workbench/package.js",
+      "bytes": 16802,
+      "sha256": "bb44e6d6c876623da11153bf673d9fe695c1c279d6727c0eaa23bde54128df26"
+    },
+    {
+      "path": "studio/workbench/index.html",
+      "bytes": 14542,
+      "sha256": "3e2c899fad378e3dafa3c9705ec773ea45fdbaf3025bb19f261fa37c8f390e74"
+    },
+    {
+      "path": "studio/launcher/index.html",
+      "bytes": 2649,
+      "sha256": "08eb04a00e5f1501939306b34b9f6a82947b82650e84100c58a1c74924cbf3a6"
+    },
+    {
+      "path": "studio/launcher/player.html",
+      "bytes": 3125,
+      "sha256": "57a85021693c115b4f9e873b00c6b1ff11fa6492716d67ac98b33673f916cc37"
+    },
+    {
+      "path": "studio/launcher/player.js",
+      "bytes": 7237,
+      "sha256": "261542456cc0c6a042e73bda1693e7d8bdf1dd25553f6d464312958c0fd3ab91"
+    }
+  ]
+}

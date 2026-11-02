@@ -1,0 +1,14 @@
+# Original reactive quote project; requires CLEA Core 0.18.
+let quantity = 2
+let price = 20
+derive total = quantity * price
+
+screen quote "Moja ponuda" {
+    input quantity label "Količina"
+    input price label "Cijena"
+    button "Dodaj količinu" runs increase
+    show total
+}
+on increase {
+    quantity = quantity + 1
+}

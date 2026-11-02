@@ -1,15 +1,15 @@
 {
   "format": "clea7.public-downloads/1",
-  "version": "0.16.0",
-  "source_commit": "1f90074e1ea212bd0b34c116eac1a0380f7c2142",
+  "version": "0.18.0",
+  "source_commit": "a679e6585d0f77366cff74a5ed182ebc9f32ce9a",
   "verified_run": null,
   "published": [
     {
       "key": "sdk",
-      "name": "BL-CLEA7-SDK-0.16.0.zip",
-      "url": "downloads/BL-CLEA7-SDK-0.16.0.zip",
-      "size_bytes": 232748,
-      "sha256": "9dbc27b4c6cc0d3b50ddb7f8c394450b3db0835fe09897eb1c81ed5a9a18d94e"
+      "name": "BL-CLEA7-SDK-0.18.0-test.zip",
+      "url": "downloads/BL-CLEA7-SDK-0.18.0-test.zip",
+      "size_bytes": 292042,
+      "sha256": "76224a697db6fc79c710d2c2d33b7a624b1f342217f649ddbbbaccfc7e74d41b"
     },
     {
       "key": "preview",
@@ -66,6 +66,20 @@
       "url": "downloads/primjer-orbitavo.clea7",
       "size_bytes": 18586,
       "sha256": "7f0195e96d2bbc7bec66e8aa692743c6793864ee042e1c43743762a69a0ccd0e"
+    },
+    {
+      "key": "universal-source",
+      "name": "primjer-universal-018.bil",
+      "url": "downloads/primjer-universal-018.bil",
+      "size_bytes": 326,
+      "sha256": "0a34da0d1447615ebb351174fdcbc067d62edc0674f9dc3ec2435a3e2f3eca90"
+    },
+    {
+      "key": "universal-example",
+      "name": "primjer-universal-018.clea7",
+      "url": "downloads/primjer-universal-018.clea7",
+      "size_bytes": 7317,
+      "sha256": "e97f88da5d2725eb592680763008a6d130422ed5faedcef8622a48258046ea43"
     }
   ],
   "native": {
@@ -234,6 +248,75 @@
   ],
   "published_history": [
     {
+      "version": "0.16.0",
+      "source_commit": "1f90074e1ea212bd0b34c116eac1a0380f7c2142",
+      "files": [
+        {
+          "key": "sdk",
+          "name": "BL-CLEA7-SDK-0.16.0.zip",
+          "url": "downloads/BL-CLEA7-SDK-0.16.0.zip",
+          "size_bytes": 232748,
+          "sha256": "9dbc27b4c6cc0d3b50ddb7f8c394450b3db0835fe09897eb1c81ed5a9a18d94e"
+        },
+        {
+          "key": "preview",
+          "name": "BLclea7-Studio-pregled-0.16.html",
+          "url": "downloads/BLclea7-Studio-pregled-0.16.html",
+          "size_bytes": 898710,
+          "sha256": "6ed62b274dd102d15be8cb9f90caf23af6650cf2d96b70a15e19b8611dae722d"
+        },
+        {
+          "key": "example",
+          "name": "primjer-pretvarac.clea7",
+          "url": "downloads/primjer-pretvarac.clea7",
+          "size_bytes": 1521,
+          "sha256": "b1db193ebbee9b2be5b9bcbbf609809bcfd335d7d36f05f35ba354bb0ef92c7c"
+        },
+        {
+          "key": "bil-example",
+          "name": "primjer-bil.clea7",
+          "url": "downloads/primjer-bil.clea7",
+          "size_bytes": 6296,
+          "sha256": "b41278fcc3cc6d8757114f0e6296db226b7f8d7e884277cd2b4d22288c7e4466"
+        },
+        {
+          "key": "bil-source",
+          "name": "primjer-bil.bil",
+          "url": "downloads/primjer-bil.bil",
+          "size_bytes": 462,
+          "sha256": "add72a6f576205b85282e297ac2782e889c66bb479cc4299220ade73c990251d"
+        },
+        {
+          "key": "business-example",
+          "name": "primjer-radni-nalozi.clea7",
+          "url": "downloads/primjer-radni-nalozi.clea7",
+          "size_bytes": 53349,
+          "sha256": "9250665f1380e906cfd0352796b4b866a22f5b62297dca063f611c446ffa04b4"
+        },
+        {
+          "key": "business-source",
+          "name": "primjer-radni-nalozi.bil",
+          "url": "downloads/primjer-radni-nalozi.bil",
+          "size_bytes": 3754,
+          "sha256": "e379342b646c7768510a18c69d82fede2f6d714a2d2067d93a8561ef07820054"
+        },
+        {
+          "key": "bil-quote-source",
+          "name": "primjer-ponuda.bil",
+          "url": "downloads/primjer-ponuda.bil",
+          "size_bytes": 246,
+          "sha256": "c98374503315c5356014b86c92e3575ecefeb74bf586ad4d0bb5ac43ee823a2e"
+        },
+        {
+          "key": "visual-example",
+          "name": "primjer-orbitavo.clea7",
+          "url": "downloads/primjer-orbitavo.clea7",
+          "size_bytes": 18586,
+          "sha256": "7f0195e96d2bbc7bec66e8aa692743c6793864ee042e1c43743762a69a0ccd0e"
+        }
+      ]
+    },
+    {
       "version": "0.14.0",
       "source_commit": "7484805dd18089855b72caebdc8be400dd6f53ed",
       "files": [
@@ -366,14 +449,17 @@
     }
   ],
   "web": {
-    "version": "0.16.0",
-    "source_commit": "1f90074e1ea212bd0b34c116eac1a0380f7c2142",
-    "verified_scope": "browser_studio_runtime_sdk_and_isolated_services",
+    "version": "0.18.0",
+    "status": "test",
+    "source_commit": "a679e6585d0f77366cff74a5ed182ebc9f32ce9a",
+    "verified_scope": "shared_core_browser_studio_runtime_and_independent_sdk",
     "verification": {
-      "node_suites": 25,
-      "product_browser_suites": 17,
-      "isolated_service_browser_suites": 7,
-      "result": "passed"
+      "node_checks": 92,
+      "python_tests_passed": 248,
+      "python_tests_skipped": 1,
+      "browser_scenarios": 13,
+      "result": "passed",
+      "environment": "Local Node/Python and Chromium; actual extracted distribution tested"
     },
     "native_verification": false
   }
