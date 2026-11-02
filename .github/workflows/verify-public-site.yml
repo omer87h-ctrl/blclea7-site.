@@ -45,16 +45,18 @@ jobs:
           export CLEA7_CHROME="$(command -v google-chrome)"
           node tests/test_public_appearance_ui.cjs
           python tests/test_universal018_browser.py --output test-evidence/universal018-browser
-          node tests/test_public_site.cjs
-          node tests/test_public_acceptance.cjs
-          node tests/test_public_bil_studio.cjs
-          node tests/test_public_bil_apps_ui.cjs
-          node tests/test_public_native_studio.cjs
-          node tests/test_public_native_install.cjs
+          browser_failed=0
+          node tests/test_public_site.cjs || browser_failed=1
+          node tests/test_public_acceptance.cjs || browser_failed=1
+          node tests/test_public_bil_studio.cjs || browser_failed=1
+          node tests/test_public_bil_apps_ui.cjs || browser_failed=1
+          node tests/test_public_native_studio.cjs || browser_failed=1
+          node tests/test_public_native_install.cjs || browser_failed=1
           cp downloads/BLclea7-Studio-pregled-0.14.html /tmp/BL-CLEA7-Studio-pregled-v2.html
-          node tests/test_public_offline.cjs
-          node tests/test_prepared_offline015.cjs
-          node tests/test_prepared_offline016.cjs
+          node tests/test_public_offline.cjs || browser_failed=1
+          node tests/test_prepared_offline015.cjs || browser_failed=1
+          node tests/test_prepared_offline016.cjs || browser_failed=1
+          exit "$browser_failed"
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         if: always()
