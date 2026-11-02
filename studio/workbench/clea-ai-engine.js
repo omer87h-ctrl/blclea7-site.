@@ -44,6 +44,12 @@ function checkedIndex(project){
  const ir=project.bil.ir;
  return {format:'clea7.ai.project-index/1',language:'bil',screens:(ir.ui?.screens||[]).map(p=>({id:p.id,label:p.label,location:p.loc,components:uiNodes(p.children).map(n=>({id:n.id,type:n.type,name:n.name||n.target||n.handler||'',location:n.loc}))})),globals:Object.entries(ir.globals).map(([name,g])=>({name,type:g.type,mutable:g.mutable})),handlers:Object.keys(ir.handlers).filter(n=>!n.startsWith('ui_'))};
 }
+function validIndex(value,project){
+ // Cache content is regenerable, never an authority over the project's plan.
+ // Compare bounded derived metadata against the already-validated IR. This
+ // still costs validation work; cache reuse does not bypass that boundary.
+ try{return scope.CLEA7.stable(value)===scope.CLEA7.stable(checkedIndex(project));}catch{return false;}
+}
 function resetPlan(project){
  if(!project.bil?.ir.ui?.screens?.length)throw fault('Project','Za dodavanje reset dugmeta otvori podržanu BIL aplikaciju.');
  const ir=project.bil.ir,page=ir.ui.screens[0],nodes=uiNodes(page.children);
@@ -99,7 +105,7 @@ function create({cache,router=scope.CLEA7LocalIntentModel}={}){
   if(router?.predict)try{const prediction=router.predict(request);model={kind:'trained-local',version:prediction.version,confidence:prediction.confidence,label:prediction.label,abstained:prediction.abstain===true||prediction.label!==kind,reason:prediction.reason,modelFingerprint:prediction.modelFingerprint};record('Lokalni model',model.abstained?'abstained':'matched','Rezultat malog klasifikatora provjeren je prema zatvorenoj gramatici; ne izvršava kod.');}catch{model={kind:'rules',abstained:true,reason:'model-unavailable'};}
   await checkpoint(signal);
   const analysisStarted=now(),key={version:VERSION,compiler:scope.CLEA7BIL.CORE_FEATURES,baseFingerprint};let index=null;
-  if(cacheEnabled)try{const saved=await storage.get('project-index',key);if(saved.hit&&saved.value?.format==='clea7.ai.project-index/1'){index=saved.value;metrics.cacheHits++;record('Projektna memorija','hit','Ponovo korišten indeks istog provjerenog projekta.');}}catch{record('Projektna memorija','bypass','Indeks nije dostupan; struktura se ponovo analizira.');}
+  if(cacheEnabled)try{const saved=await storage.get('project-index',key);if(saved.hit&&saved.value?.format==='clea7.ai.project-index/1'&&validIndex(saved.value,checked)){index=saved.value;metrics.cacheHits++;record('Projektna memorija','hit','Ponovo korišten indeks istog provjerenog projekta.');}}catch{record('Projektna memorija','bypass','Indeks nije dostupan; struktura se ponovo analizira.');}
   if(!index){index=checkedIndex(checked);metrics.bytesIndexed=bytes(checked.bil?.source||checked);if(cacheEnabled)try{await storage.put('project-index',key,index);}catch{}record('Projektna memorija','computed','Izveden indeks provjerenih ekrana, komponenti, tipova i događaja.');}
   metrics.analysisMs=Math.max(0,now()-analysisStarted);await checkpoint(signal);
   const generateStarted=now();let candidateSource,identity=null,changes,changed=true,reset=null;

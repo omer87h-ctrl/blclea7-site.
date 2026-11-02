@@ -20,6 +20,7 @@ jobs:
       - run: node tests/test_caci.cjs
       - run: node tests/test_clea_intent_model.cjs
       - run: node tests/test_clea_ai.cjs
+      - run: node tests/test_clea_ai_adversarial.cjs
       - run: npm install --prefix /tmp/clea7-qa --no-audit --no-fund playwright@1.56.1
       - name: Verify real Studio, actual calculator events, reset, review, undo, IndexedDB, package and independent Runtime
         shell: bash
