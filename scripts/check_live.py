@@ -71,6 +71,9 @@ def check():
  for path in ['studio/workbench/working-cache.js','studio/workbench/clea-core.js','studio/launcher/player.html','studio/launcher/player.js','studio/workbench/bil-authoring.js','studio/workbench/bil-studio.js','studio/workbench/bil-designer.js','studio/workbench/bil-runtime.js','studio/workbench/index.html']:
   assert read(path)==(ROOT/path).read_bytes(),'Published Studio differs: '+path
  assert b'CLEA7Library' in read('studio/launcher/library.js')
+ ai=json.loads(read('release/ai-020.json'));assert ai==json.loads((ROOT/'release/ai-020.json').read_text()),'AI manifest is not current.'
+ for item in ai['files']:
+  data=read(item['path']);assert len(data)==item['bytes'] and hashlib.sha256(data).hexdigest()==item['sha256'],'AI source is not current: '+item['path']
  catalog=json.loads(read('releases.json'));assert catalog['source_commit']=='a679e6585d0f77366cff74a5ed182ebc9f32ce9a'
  verified=[]
  for entry in catalog['published']:

@@ -1,0 +1,1739 @@
+{
+  "format": "clea.conversation.knowledge-contract/1",
+  "version": "0.1.0",
+  "corpusSha256": "79a398107f6e42d204f572b2407b94cd6a24212386b6deb13667d562f243682a",
+  "role": "Explicit original factual guard and disclosed lexical routing; not learned neural weights.",
+  "heldoutPromptsIncluded": false,
+  "topics": [
+    {
+      "id": "greeting",
+      "answers": {
+        "bs": "Zdravo. Ja sam CLEA razgovorni eksperiment. Mogu pomoći oko provjerenih CLEA tema i objasniti svoja ograničenja.",
+        "en": "Hello. I am the CLEA conversation experiment. I can help with verified CLEA topics and explain my limits."
+      },
+      "sources": [
+        "docs/CLEA-AI-EXPERIMENT.md"
+      ],
+      "aliases": [
+        "zdravo",
+        "pozdrav",
+        "ćao",
+        "predstavi",
+        "ime",
+        "zoveš",
+        "hello",
+        "hi",
+        "introduce",
+        "name"
+      ],
+      "related": [
+        "scope",
+        "studio"
+      ],
+      "routingExamples": [
+        {
+          "text": "Zdravo, ko si ti?",
+          "language": "bs"
+        },
+        {
+          "text": "Pozdrav, predstavi se.",
+          "language": "bs"
+        },
+        {
+          "text": "Ćao, šta si ti?",
+          "language": "bs"
+        },
+        {
+          "text": "Dobar dan, ko razgovara sa mnom?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako se zoveš?",
+          "language": "bs"
+        },
+        {
+          "text": "Reci mi nešto o sebi.",
+          "language": "bs"
+        },
+        {
+          "text": "Možeš li se predstaviti?",
+          "language": "bs"
+        },
+        {
+          "text": "Hvala, ko mi ovdje pomaže?",
+          "language": "bs"
+        },
+        {
+          "text": "Hello, who are you?",
+          "language": "en"
+        },
+        {
+          "text": "Hi, introduce yourself.",
+          "language": "en"
+        },
+        {
+          "text": "What is your name?",
+          "language": "en"
+        },
+        {
+          "text": "Tell me about yourself.",
+          "language": "en"
+        },
+        {
+          "text": "Good morning, who am I talking to?",
+          "language": "en"
+        },
+        {
+          "text": "Can you introduce yourself?",
+          "language": "en"
+        },
+        {
+          "text": "Thanks, who is helping me here?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "scope",
+      "answers": {
+        "bs": "Moje znanje je ograničeno na provjerene CLEA teme. Nisam opći ekspert i nemam potvrđene odgovore za svako pitanje.",
+        "en": "My knowledge is limited to verified CLEA topics. I am not a general expert and cannot answer every question reliably."
+      },
+      "sources": [
+        "docs/CLEA-AI-EXPERIMENT.md"
+      ],
+      "aliases": [
+        "znanje",
+        "sve",
+        "ograničenja",
+        "granice",
+        "ekspert",
+        "world",
+        "knowledge",
+        "everything",
+        "limits",
+        "expert"
+      ],
+      "related": [
+        "bil_language",
+        "offline_privacy"
+      ],
+      "routingExamples": [
+        {
+          "text": "Da li znaš sve?",
+          "language": "bs"
+        },
+        {
+          "text": "Možeš li odgovoriti na svako pitanje?",
+          "language": "bs"
+        },
+        {
+          "text": "Koliko je široko tvoje znanje?",
+          "language": "bs"
+        },
+        {
+          "text": "Jesi li opći ekspert?",
+          "language": "bs"
+        },
+        {
+          "text": "Možeš li zamijeniti svaki veliki model?",
+          "language": "bs"
+        },
+        {
+          "text": "Znaš li sve o svijetu?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li je svaki tvoj odgovor tačan?",
+          "language": "bs"
+        },
+        {
+          "text": "Šta ne znaš?",
+          "language": "bs"
+        },
+        {
+          "text": "Do you know everything?",
+          "language": "en"
+        },
+        {
+          "text": "Can you answer every question?",
+          "language": "en"
+        },
+        {
+          "text": "How broad is your knowledge?",
+          "language": "en"
+        },
+        {
+          "text": "Are you a general expert?",
+          "language": "en"
+        },
+        {
+          "text": "Can you replace every large model?",
+          "language": "en"
+        },
+        {
+          "text": "Do you know everything about the world?",
+          "language": "en"
+        },
+        {
+          "text": "Is every answer correct?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "core_ai_manager",
+      "answers": {
+        "bs": "Core AI Manager koordinira zadatke, rokove i granice resursa. Opcionalni model ne dobija pravo da zaobiđe provjere.",
+        "en": "Core AI Manager coordinates tasks, deadlines and resource limits. An optional model does not gain permission to bypass checks."
+      },
+      "sources": [
+        "docs/CLEA-CORE.md",
+        "docs/CLEA-AI-EXPERIMENT.md"
+      ],
+      "aliases": [
+        "core ai manager",
+        "zadaci",
+        "rokovi",
+        "resursi",
+        "tasks",
+        "deadlines",
+        "resources"
+      ],
+      "related": [
+        "fallback_executor",
+        "vision_q"
+      ],
+      "routingExamples": [
+        {
+          "text": "Šta radi Core AI Manager?",
+          "language": "bs"
+        },
+        {
+          "text": "Objasni stub Core AI Manager.",
+          "language": "bs"
+        },
+        {
+          "text": "Ko upravlja zadacima i rokovima?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako Core AI Manager kontroliše resurse?",
+          "language": "bs"
+        },
+        {
+          "text": "Koji je posao Core AI Managera?",
+          "language": "bs"
+        },
+        {
+          "text": "Zašto postoji Core AI Manager?",
+          "language": "bs"
+        },
+        {
+          "text": "Ko koordinira AI zadatke?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li Core AI Manager zaobilazi provjere?",
+          "language": "bs"
+        },
+        {
+          "text": "What does Core AI Manager do?",
+          "language": "en"
+        },
+        {
+          "text": "Explain the Core AI Manager pillar.",
+          "language": "en"
+        },
+        {
+          "text": "Who coordinates tasks and deadlines?",
+          "language": "en"
+        },
+        {
+          "text": "How does Core AI Manager control resources?",
+          "language": "en"
+        },
+        {
+          "text": "What is the role of Core AI Manager?",
+          "language": "en"
+        },
+        {
+          "text": "Why is Core AI Manager needed?",
+          "language": "en"
+        },
+        {
+          "text": "Can Core AI Manager bypass checks?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "link_bridge_elite",
+      "answers": {
+        "bs": "Link Bridge Elite povezuje kompajler, Core i host preko provjerenih ugovora. Svaka tražena mogućnost mora biti dostupna i dozvoljena.",
+        "en": "Link Bridge Elite connects the compiler, Core and host through checked contracts. Every requested capability must be available and permitted."
+      },
+      "sources": [
+        "docs/CLEA-CORE.md",
+        "docs/CLEA-AI-EXPERIMENT.md"
+      ],
+      "aliases": [
+        "link bridge elite",
+        "povezivanje",
+        "ugovori",
+        "komponente",
+        "contracts",
+        "connects",
+        "bridge"
+      ],
+      "related": [
+        "clea_core",
+        "permissions"
+      ],
+      "routingExamples": [
+        {
+          "text": "Šta radi Link Bridge Elite?",
+          "language": "bs"
+        },
+        {
+          "text": "Objasni stub Link Bridge Elite.",
+          "language": "bs"
+        },
+        {
+          "text": "Ko povezuje kompajler i host?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako Link Bridge Elite povezuje komponente?",
+          "language": "bs"
+        },
+        {
+          "text": "Koji je posao Link Bridge Elite?",
+          "language": "bs"
+        },
+        {
+          "text": "Zašto postoji Link Bridge Elite?",
+          "language": "bs"
+        },
+        {
+          "text": "Ko provjerava ugovore između komponenti?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li Link Bridge Elite daje sve dozvole?",
+          "language": "bs"
+        },
+        {
+          "text": "What does Link Bridge Elite do?",
+          "language": "en"
+        },
+        {
+          "text": "Explain the Link Bridge Elite pillar.",
+          "language": "en"
+        },
+        {
+          "text": "Who connects the compiler and host?",
+          "language": "en"
+        },
+        {
+          "text": "How does Link Bridge Elite connect components?",
+          "language": "en"
+        },
+        {
+          "text": "What is the role of Link Bridge Elite?",
+          "language": "en"
+        },
+        {
+          "text": "Why is Link Bridge Elite needed?",
+          "language": "en"
+        },
+        {
+          "text": "Does Link Bridge Elite grant every permission?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "expansion_q",
+      "answers": {
+        "bs": "Expansion Q održava verzionisane registre podržanih operacija i prikaza. Proširenje mora poštovati provjereni ugovor i sigurnosne granice.",
+        "en": "Expansion Q maintains versioned registries of supported operations and views. Extensions must respect checked contracts and security boundaries."
+      },
+      "sources": [
+        "docs/CLEA-CORE.md",
+        "docs/CLEA-AI-EXPERIMENT.md"
+      ],
+      "aliases": [
+        "expansion q",
+        "proširenja",
+        "registar",
+        "operacije",
+        "extensions",
+        "registry",
+        "operations"
+      ],
+      "related": [
+        "permissions",
+        "link_bridge_elite"
+      ],
+      "routingExamples": [
+        {
+          "text": "Šta radi Expansion Q?",
+          "language": "bs"
+        },
+        {
+          "text": "Objasni stub Expansion Q.",
+          "language": "bs"
+        },
+        {
+          "text": "Ko održava registar operacija?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako Expansion Q upravlja proširenjima?",
+          "language": "bs"
+        },
+        {
+          "text": "Koji je posao Expansion Q?",
+          "language": "bs"
+        },
+        {
+          "text": "Zašto postoji Expansion Q?",
+          "language": "bs"
+        },
+        {
+          "text": "Ko održava verzije podržanih prikaza?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li Expansion Q dozvoljava proizvoljan kod?",
+          "language": "bs"
+        },
+        {
+          "text": "What does Expansion Q do?",
+          "language": "en"
+        },
+        {
+          "text": "Explain the Expansion Q pillar.",
+          "language": "en"
+        },
+        {
+          "text": "Who maintains operation registries?",
+          "language": "en"
+        },
+        {
+          "text": "How does Expansion Q manage extensions?",
+          "language": "en"
+        },
+        {
+          "text": "What is the role of Expansion Q?",
+          "language": "en"
+        },
+        {
+          "text": "Why is Expansion Q needed?",
+          "language": "en"
+        },
+        {
+          "text": "Does Expansion Q allow arbitrary code?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "adaptive_recovery",
+      "answers": {
+        "bs": "Adaptive Recovery štiti lokalne transakcije i vraća stanje poslije greške. Neizvjesne vanjske radnje ne ponavlja automatski.",
+        "en": "Adaptive Recovery protects local transactions and restores state after failure. It does not automatically repeat uncertain external actions."
+      },
+      "sources": [
+        "docs/CLEA-CORE.md",
+        "docs/APPLICATION-2.md"
+      ],
+      "aliases": [
+        "adaptive recovery",
+        "oporavak",
+        "transakcije",
+        "greške",
+        "rollback",
+        "failure",
+        "transactions"
+      ],
+      "related": [
+        "shadow_replay",
+        "fallback_executor"
+      ],
+      "routingExamples": [
+        {
+          "text": "Šta radi Adaptive Recovery?",
+          "language": "bs"
+        },
+        {
+          "text": "Objasni stub Adaptive Recovery.",
+          "language": "bs"
+        },
+        {
+          "text": "Ko vraća stanje poslije greške?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako Adaptive Recovery štiti transakcije?",
+          "language": "bs"
+        },
+        {
+          "text": "Koji je posao Adaptive Recovery?",
+          "language": "bs"
+        },
+        {
+          "text": "Zašto postoji Adaptive Recovery?",
+          "language": "bs"
+        },
+        {
+          "text": "Ko obrađuje neizvjesne vanjske radnje?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li Adaptive Recovery automatski ponavlja vanjske radnje?",
+          "language": "bs"
+        },
+        {
+          "text": "What does Adaptive Recovery do?",
+          "language": "en"
+        },
+        {
+          "text": "Explain the Adaptive Recovery pillar.",
+          "language": "en"
+        },
+        {
+          "text": "Who restores state after failure?",
+          "language": "en"
+        },
+        {
+          "text": "How does Adaptive Recovery protect transactions?",
+          "language": "en"
+        },
+        {
+          "text": "What is the role of Adaptive Recovery?",
+          "language": "en"
+        },
+        {
+          "text": "Why is Adaptive Recovery needed?",
+          "language": "en"
+        },
+        {
+          "text": "Does Adaptive Recovery repeat uncertain external actions?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "holo_interaction",
+      "answers": {
+        "bs": "Holo Interaction prikazuje interfejs i povezuje korisničke događaje sa stanjem. Animacije poštuju podržane postavke smanjenog kretanja.",
+        "en": "Holo Interaction renders the interface and connects user events to state. Animations respect supported reduced motion preferences."
+      },
+      "sources": [
+        "docs/CLEA-CORE.md",
+        "docs/CLEA-AI-EXPERIMENT.md"
+      ],
+      "aliases": [
+        "holo interaction",
+        "interfejs",
+        "prikaz",
+        "animacije",
+        "interface",
+        "render",
+        "animations"
+      ],
+      "related": [
+        "studio",
+        "bil_language"
+      ],
+      "routingExamples": [
+        {
+          "text": "Šta radi Holo Interaction?",
+          "language": "bs"
+        },
+        {
+          "text": "Objasni stub Holo Interaction.",
+          "language": "bs"
+        },
+        {
+          "text": "Ko prikazuje interfejs aplikacije?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako Holo Interaction povezuje događaje?",
+          "language": "bs"
+        },
+        {
+          "text": "Koji je posao Holo Interaction?",
+          "language": "bs"
+        },
+        {
+          "text": "Zašto postoji Holo Interaction?",
+          "language": "bs"
+        },
+        {
+          "text": "Ko poštuje smanjeno kretanje animacija?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li Holo Interaction znači fizičku holografiju?",
+          "language": "bs"
+        },
+        {
+          "text": "What does Holo Interaction do?",
+          "language": "en"
+        },
+        {
+          "text": "Explain the Holo Interaction pillar.",
+          "language": "en"
+        },
+        {
+          "text": "Who renders the application interface?",
+          "language": "en"
+        },
+        {
+          "text": "How does Holo Interaction connect events?",
+          "language": "en"
+        },
+        {
+          "text": "What is the role of Holo Interaction?",
+          "language": "en"
+        },
+        {
+          "text": "Why is Holo Interaction needed?",
+          "language": "en"
+        },
+        {
+          "text": "Does Holo Interaction mean physical holography?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "fallback_executor",
+      "answers": {
+        "bs": "Fallback Executor koristi unaprijed dozvoljenu alternativu. Kada cache nije dostupan, podržani proračun može se ponovo stvarno izvršiti.",
+        "en": "Fallback Executor uses an explicitly permitted alternative. When cache is unavailable, a supported calculation can actually execute again."
+      },
+      "sources": [
+        "docs/CLEA-CORE.md",
+        "docs/CLEA-AI-EXPERIMENT.md"
+      ],
+      "aliases": [
+        "fallback executor",
+        "alternativa",
+        "rezervni",
+        "alternative",
+        "fallback"
+      ],
+      "related": [
+        "working_cache",
+        "adaptive_recovery"
+      ],
+      "routingExamples": [
+        {
+          "text": "Šta radi Fallback Executor?",
+          "language": "bs"
+        },
+        {
+          "text": "Objasni stub Fallback Executor.",
+          "language": "bs"
+        },
+        {
+          "text": "Ko koristi dozvoljenu alternativu?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako Fallback Executor bira rezervni postupak?",
+          "language": "bs"
+        },
+        {
+          "text": "Koji je posao Fallback Executor?",
+          "language": "bs"
+        },
+        {
+          "text": "Zašto postoji Fallback Executor?",
+          "language": "bs"
+        },
+        {
+          "text": "Šta radi Fallback Executor kad cache zakaže?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li Fallback Executor izmišlja rezultat?",
+          "language": "bs"
+        },
+        {
+          "text": "What does Fallback Executor do?",
+          "language": "en"
+        },
+        {
+          "text": "Explain the Fallback Executor pillar.",
+          "language": "en"
+        },
+        {
+          "text": "Who uses a permitted alternative?",
+          "language": "en"
+        },
+        {
+          "text": "How does Fallback Executor choose an alternative?",
+          "language": "en"
+        },
+        {
+          "text": "What is the role of Fallback Executor?",
+          "language": "en"
+        },
+        {
+          "text": "Why is Fallback Executor needed?",
+          "language": "en"
+        },
+        {
+          "text": "What happens when cache is unavailable?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "vision_q",
+      "answers": {
+        "bs": "Vision Q prikazuje stvarne tragove izvršavanja, greške i izmjerene brojače. Objašnjenja moraju odgovarati zabilježenim događajima.",
+        "en": "Vision Q exposes real execution traces, errors and measured counters. Explanations must correspond to recorded events."
+      },
+      "sources": [
+        "docs/CLEA-CORE.md",
+        "docs/CLEA-AI-EXPERIMENT.md"
+      ],
+      "aliases": [
+        "vision q",
+        "dijagnostika",
+        "tragovi",
+        "brojači",
+        "diagnostics",
+        "traces",
+        "counters"
+      ],
+      "related": [
+        "shadow_replay",
+        "clea_core"
+      ],
+      "routingExamples": [
+        {
+          "text": "Šta radi Vision Q?",
+          "language": "bs"
+        },
+        {
+          "text": "Objasni stub Vision Q.",
+          "language": "bs"
+        },
+        {
+          "text": "Ko prikazuje stvarne tragove izvršavanja?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako Vision Q objašnjava događaje?",
+          "language": "bs"
+        },
+        {
+          "text": "Koji je posao Vision Q?",
+          "language": "bs"
+        },
+        {
+          "text": "Zašto postoji Vision Q?",
+          "language": "bs"
+        },
+        {
+          "text": "Ko prikazuje izmjerene brojače i greške?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li Vision Q izmišlja dijagnostiku?",
+          "language": "bs"
+        },
+        {
+          "text": "What does Vision Q do?",
+          "language": "en"
+        },
+        {
+          "text": "Explain the Vision Q pillar.",
+          "language": "en"
+        },
+        {
+          "text": "Who exposes real execution traces?",
+          "language": "en"
+        },
+        {
+          "text": "How does Vision Q explain events?",
+          "language": "en"
+        },
+        {
+          "text": "What is the role of Vision Q?",
+          "language": "en"
+        },
+        {
+          "text": "Why is Vision Q needed?",
+          "language": "en"
+        },
+        {
+          "text": "Does Vision Q invent diagnostics?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "bil_language",
+      "answers": {
+        "bs": "BIL je tipizirani CLEA jezik za stanje, funkcije, događaje i interfejs. Provjera tipova prethodi izvršavanju podržanog programa.",
+        "en": "BIL is the typed CLEA language for state, functions, events and interfaces. Type checking precedes supported program execution."
+      },
+      "sources": [
+        "docs/BIL-CORE.md",
+        "docs/BIL-DERIVE.md"
+      ],
+      "aliases": [
+        "bil",
+        "programski jezik",
+        "tipovi",
+        "language",
+        "types",
+        "programming"
+      ],
+      "related": [
+        "compiler",
+        "studio"
+      ],
+      "routingExamples": [
+        {
+          "text": "Šta je BIL?",
+          "language": "bs"
+        },
+        {
+          "text": "Objasni CLEA programski jezik.",
+          "language": "bs"
+        },
+        {
+          "text": "Čemu služi BIL jezik?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li BIL provjerava tipove?",
+          "language": "bs"
+        },
+        {
+          "text": "Može li BIL opisati događaje i stanje?",
+          "language": "bs"
+        },
+        {
+          "text": "Šta programer piše u BIL jeziku?",
+          "language": "bs"
+        },
+        {
+          "text": "Koji je jezik CLEA aplikacija?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako BIL povezuje funkcije i interfejs?",
+          "language": "bs"
+        },
+        {
+          "text": "What is BIL?",
+          "language": "en"
+        },
+        {
+          "text": "Explain the CLEA programming language.",
+          "language": "en"
+        },
+        {
+          "text": "What is BIL used for?",
+          "language": "en"
+        },
+        {
+          "text": "Does BIL check types?",
+          "language": "en"
+        },
+        {
+          "text": "Can BIL describe events and state?",
+          "language": "en"
+        },
+        {
+          "text": "Which language describes CLEA applications?",
+          "language": "en"
+        },
+        {
+          "text": "How does BIL connect functions and interfaces?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "compiler",
+      "answers": {
+        "bs": "Kompajler pretvara BIL izvor u provjereni međukod. Koristi tokenizaciju, parser, provjeru tipova i izvorne lokacije grešaka.",
+        "en": "The compiler turns BIL source into checked intermediate code. It uses tokenization, parsing, type checking and source error locations."
+      },
+      "sources": [
+        "docs/CLEA-CORE.md",
+        "web/workbench/bil-compiler.js"
+      ],
+      "aliases": [
+        "kompajler",
+        "kompajliranje",
+        "parser",
+        "sintaksa",
+        "međukod",
+        "compiler",
+        "compilation",
+        "syntax",
+        "ir"
+      ],
+      "related": [
+        "bil_language",
+        "clea_core"
+      ],
+      "routingExamples": [
+        {
+          "text": "Šta radi BIL kompajler?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako BIL izvor postaje međukod?",
+          "language": "bs"
+        },
+        {
+          "text": "Objasni kompajliranje BIL programa.",
+          "language": "bs"
+        },
+        {
+          "text": "Ko provjerava sintaksu BIL koda?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako kompajler pronalazi grešku u izvoru?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li kompajler koristi parser?",
+          "language": "bs"
+        },
+        {
+          "text": "Čemu služi BIL međukod?",
+          "language": "bs"
+        },
+        {
+          "text": "Ko pretvara izvorni kod u IR?",
+          "language": "bs"
+        },
+        {
+          "text": "What does the BIL compiler do?",
+          "language": "en"
+        },
+        {
+          "text": "How does BIL source become intermediate code?",
+          "language": "en"
+        },
+        {
+          "text": "Explain BIL compilation.",
+          "language": "en"
+        },
+        {
+          "text": "Who checks BIL syntax?",
+          "language": "en"
+        },
+        {
+          "text": "How does the compiler locate source errors?",
+          "language": "en"
+        },
+        {
+          "text": "Does the compiler use a parser?",
+          "language": "en"
+        },
+        {
+          "text": "Who turns source code into IR?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "clea_core",
+      "answers": {
+        "bs": "CLEA Core dijeli provjereni kompajler i izvršnu semantiku između hostova. Sam ne dodjeljuje mrežni, sistemski ili hardverski pristup.",
+        "en": "CLEA Core shares the checked compiler and execution semantics across hosts. It does not grant network, system or hardware access itself."
+      },
+      "sources": [
+        "docs/CLEA-CORE.md",
+        "web/workbench/clea-core.js"
+      ],
+      "aliases": [
+        "clea core",
+        "jezgro",
+        "host",
+        "semantika",
+        "core",
+        "semantics"
+      ],
+      "related": [
+        "runtime_package",
+        "permissions"
+      ],
+      "routingExamples": [
+        {
+          "text": "Šta je CLEA Core?",
+          "language": "bs"
+        },
+        {
+          "text": "Objasni zajedničko CLEA jezgro.",
+          "language": "bs"
+        },
+        {
+          "text": "Čemu služi Core izvršno jezgro?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li Core direktno pristupa hardveru?",
+          "language": "bs"
+        },
+        {
+          "text": "Ko dijeli izvršnu semantiku između hostova?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako CLEA Core povezuje izvršavanje?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li Core sam daje mrežni pristup?",
+          "language": "bs"
+        },
+        {
+          "text": "Zašto Studio i Runtime koriste isti Core?",
+          "language": "bs"
+        },
+        {
+          "text": "What is CLEA Core?",
+          "language": "en"
+        },
+        {
+          "text": "Explain the shared CLEA execution core.",
+          "language": "en"
+        },
+        {
+          "text": "What is the execution core used for?",
+          "language": "en"
+        },
+        {
+          "text": "Does Core access hardware directly?",
+          "language": "en"
+        },
+        {
+          "text": "Who shares execution semantics across hosts?",
+          "language": "en"
+        },
+        {
+          "text": "Does Core grant network access itself?",
+          "language": "en"
+        },
+        {
+          "text": "Why do Studio and Runtime share Core?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "studio",
+      "answers": {
+        "bs": "CLEA Studio uređuje projekt, BIL kod i podržane vizuelne elemente. Prikaz i pokretanje koriste postojeći provjereni Core i Runtime.",
+        "en": "CLEA Studio edits projects, BIL code and supported visual elements. Preview and execution use the existing checked Core and Runtime."
+      },
+      "sources": [
+        "docs/CLEA-AI-EXPERIMENT.md",
+        "web/workbench/studio.js"
+      ],
+      "aliases": [
+        "studio",
+        "uređivanje",
+        "editor",
+        "vizuelni",
+        "edit",
+        "preview",
+        "visual"
+      ],
+      "related": [
+        "sdk",
+        "bil_language"
+      ],
+      "routingExamples": [
+        {
+          "text": "Šta je CLEA Studio?",
+          "language": "bs"
+        },
+        {
+          "text": "Čemu služi Studio?",
+          "language": "bs"
+        },
+        {
+          "text": "Gdje uređujem BIL aplikaciju?",
+          "language": "bs"
+        },
+        {
+          "text": "Mogu li uređivati kod u Studiju?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako Studio prikazuje aplikaciju?",
+          "language": "bs"
+        },
+        {
+          "text": "Ko uređuje vizuelne elemente projekta?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li Studio koristi stvarni Runtime?",
+          "language": "bs"
+        },
+        {
+          "text": "Gdje povezujem kod i vizuelni prikaz?",
+          "language": "bs"
+        },
+        {
+          "text": "What is CLEA Studio?",
+          "language": "en"
+        },
+        {
+          "text": "What is Studio used for?",
+          "language": "en"
+        },
+        {
+          "text": "Where can I edit a BIL application?",
+          "language": "en"
+        },
+        {
+          "text": "Can I edit code in Studio?",
+          "language": "en"
+        },
+        {
+          "text": "How does Studio preview an application?",
+          "language": "en"
+        },
+        {
+          "text": "Who edits visual project elements?",
+          "language": "en"
+        },
+        {
+          "text": "Does Studio use the real Runtime?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "runtime_package",
+      "answers": {
+        "bs": "Kompatibilni Runtime provjerava i pokreće CLEA paket. Datoteka clea7 sadrži aplikacijski ugovor i zahtijeva podržani host.",
+        "en": "A compatible Runtime validates and runs a CLEA package. A clea7 file contains the application contract and requires a supported host."
+      },
+      "sources": [
+        "docs/CLEA-CORE.md",
+        "docs/CLEA-AI-EXPERIMENT.md",
+        "web/workbench/package.js"
+      ],
+      "aliases": [
+        "runtime",
+        "paket",
+        "clea7",
+        "kompatibilnost",
+        "package",
+        "compatible"
+      ],
+      "related": [
+        "sdk",
+        "permissions"
+      ],
+      "routingExamples": [
+        {
+          "text": "Kako pokrećem clea7 paket?",
+          "language": "bs"
+        },
+        {
+          "text": "Šta radi CLEA Runtime?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li clea7 datoteka treba Runtime?",
+          "language": "bs"
+        },
+        {
+          "text": "Može li svaka platforma sama otvoriti CLEA paket?",
+          "language": "bs"
+        },
+        {
+          "text": "Ko provjerava paket prije pokretanja?",
+          "language": "bs"
+        },
+        {
+          "text": "Šta sadrži clea7 datoteka?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li je CLEA paket univerzalni OS program?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako Runtime koristi kompatibilni host?",
+          "language": "bs"
+        },
+        {
+          "text": "How do I run a clea7 package?",
+          "language": "en"
+        },
+        {
+          "text": "What does CLEA Runtime do?",
+          "language": "en"
+        },
+        {
+          "text": "Does a clea7 file require Runtime?",
+          "language": "en"
+        },
+        {
+          "text": "Can every platform directly open a CLEA package?",
+          "language": "en"
+        },
+        {
+          "text": "Who checks a package before execution?",
+          "language": "en"
+        },
+        {
+          "text": "What does a clea7 file contain?",
+          "language": "en"
+        },
+        {
+          "text": "Is a CLEA package a universal operating system executable?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "sdk",
+      "answers": {
+        "bs": "CLEA SDK može kreirati, provjeriti, testirati i zapakovati podržani projekt. Koristi isti BIL kompajler i ugovore kompatibilnosti.",
+        "en": "The CLEA SDK can create, check, test and package supported projects. It uses the same BIL compiler and compatibility contracts."
+      },
+      "sources": [
+        "README.md",
+        "docs/CLEA-CORE.md",
+        "clea7/__main__.py"
+      ],
+      "aliases": [
+        "sdk",
+        "razvojni alat",
+        "testirati",
+        "zapakovati",
+        "development",
+        "project",
+        "package"
+      ],
+      "related": [
+        "studio",
+        "runtime_package"
+      ],
+      "routingExamples": [
+        {
+          "text": "Šta radi CLEA SDK?",
+          "language": "bs"
+        },
+        {
+          "text": "Čemu služi razvojni SDK?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako provjerim projekt kroz SDK?",
+          "language": "bs"
+        },
+        {
+          "text": "Može li SDK testirati projekt?",
+          "language": "bs"
+        },
+        {
+          "text": "Ko zapakuje podržani CLEA projekt?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li SDK koristi isti kompajler?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako SDK pomaže programeru?",
+          "language": "bs"
+        },
+        {
+          "text": "Koji alat kreira i provjerava projekt?",
+          "language": "bs"
+        },
+        {
+          "text": "What does CLEA SDK do?",
+          "language": "en"
+        },
+        {
+          "text": "What is the development SDK used for?",
+          "language": "en"
+        },
+        {
+          "text": "How can SDK check a project?",
+          "language": "en"
+        },
+        {
+          "text": "Can SDK test a project?",
+          "language": "en"
+        },
+        {
+          "text": "Who packages supported CLEA projects?",
+          "language": "en"
+        },
+        {
+          "text": "Does SDK use the same compiler?",
+          "language": "en"
+        },
+        {
+          "text": "How does SDK help a developer?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "working_cache",
+      "answers": {
+        "bs": "Radni cache čuva ograničene rezultate čistih proračuna uz tačne zavisnosti. Ne zamjenjuje korisničko stanje i ne stvara dodatni RAM.",
+        "en": "The working cache retains bounded pure calculation results with exact dependencies. It does not replace user state or create extra RAM."
+      },
+      "sources": [
+        "docs/WORKING-CACHE.md",
+        "web/workbench/working-cache.js"
+      ],
+      "aliases": [
+        "radni cache",
+        "čisti proračun",
+        "ram",
+        "memorija",
+        "zavisnosti",
+        "working cache",
+        "pure",
+        "dependencies"
+      ],
+      "related": [
+        "caci",
+        "adaptive_recovery"
+      ],
+      "routingExamples": [
+        {
+          "text": "Šta radi radni cache?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako CLEA koristi radni cache?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li cache stvara dodatni RAM?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li cache vraća staro stanje korisnika?",
+          "language": "bs"
+        },
+        {
+          "text": "Šta čuva cache čistih proračuna?",
+          "language": "bs"
+        },
+        {
+          "text": "Zašto cache provjerava zavisnosti?",
+          "language": "bs"
+        },
+        {
+          "text": "Može li radni cache biti neograničen?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li cache garantuje ubrzanje svakog zadatka?",
+          "language": "bs"
+        },
+        {
+          "text": "What does the working cache do?",
+          "language": "en"
+        },
+        {
+          "text": "How does CLEA use working cache?",
+          "language": "en"
+        },
+        {
+          "text": "Does cache create extra RAM?",
+          "language": "en"
+        },
+        {
+          "text": "Does cache replace current user state?",
+          "language": "en"
+        },
+        {
+          "text": "What does the pure calculation cache retain?",
+          "language": "en"
+        },
+        {
+          "text": "Why does cache check dependencies?",
+          "language": "en"
+        },
+        {
+          "text": "Does cache guarantee faster execution for every task?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "caci",
+      "answers": {
+        "bs": "CACI odvaja RAM cache i opcionalni lokalni cache od projekata. Provjerava integritet i verziju, a kvar vraća ponovno računanje.",
+        "en": "CACI separates RAM cache and optional local cache from projects. It checks integrity and version, and failures trigger recomputation."
+      },
+      "sources": [
+        "docs/CLEA-AI-EXPERIMENT.md",
+        "web/workbench/caci.js"
+      ],
+      "aliases": [
+        "caci",
+        "projektni cache",
+        "integritet",
+        "verzija",
+        "indexeddb",
+        "integrity",
+        "version"
+      ],
+      "related": [
+        "working_cache",
+        "offline_privacy"
+      ],
+      "routingExamples": [
+        {
+          "text": "Šta je CACI?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako CACI čuva projektni cache?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li CACI odvaja cache od projekata?",
+          "language": "bs"
+        },
+        {
+          "text": "Šta radi CACI kada cache nije dostupan?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li CACI provjerava integritet?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako CACI koristi lokalnu pohranu?",
+          "language": "bs"
+        },
+        {
+          "text": "Zašto CACI prati verziju podataka?",
+          "language": "bs"
+        },
+        {
+          "text": "Briše li čišćenje CACI cachea moje projekte?",
+          "language": "bs"
+        },
+        {
+          "text": "What is CACI?",
+          "language": "en"
+        },
+        {
+          "text": "How does CACI retain project cache?",
+          "language": "en"
+        },
+        {
+          "text": "Does CACI separate cache from projects?",
+          "language": "en"
+        },
+        {
+          "text": "What happens when CACI cache is unavailable?",
+          "language": "en"
+        },
+        {
+          "text": "Does CACI check integrity?",
+          "language": "en"
+        },
+        {
+          "text": "How does CACI use local storage?",
+          "language": "en"
+        },
+        {
+          "text": "Does clearing CACI cache delete my projects?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "offline_privacy",
+      "answers": {
+        "bs": "Podržani lokalni CLEA zadaci ne trebaju vanjski AI API. Trajno čuvanje razgovora treba biti jasno, opcionalno i pod kontrolom korisnika.",
+        "en": "Supported local CLEA tasks need no external AI API. Persistent conversation storage must be clear, optional and controlled by the user."
+      },
+      "sources": [
+        "docs/CLEA-AI-EXPERIMENT.md",
+        "PRIVACY.md"
+      ],
+      "aliases": [
+        "privatnost",
+        "lokalno",
+        "razgovor",
+        "offline",
+        "privacy",
+        "conversation",
+        "api"
+      ],
+      "related": [
+        "permissions",
+        "caci"
+      ],
+      "routingExamples": [
+        {
+          "text": "Treba li lokalni CLEA AI vanjski API?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako CLEA štiti privatnost razgovora?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li razgovor mora ići na server?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li je trajno čuvanje razgovora obavezno?",
+          "language": "bs"
+        },
+        {
+          "text": "Ko kontroliše lokalne razgovore?",
+          "language": "bs"
+        },
+        {
+          "text": "Može li podržani CLEA zadatak raditi lokalno?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li trebam API ključ za lokalni eksperiment?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako se upravlja čuvanjem razgovora?",
+          "language": "bs"
+        },
+        {
+          "text": "Does local CLEA AI require an external API?",
+          "language": "en"
+        },
+        {
+          "text": "How should CLEA protect conversation privacy?",
+          "language": "en"
+        },
+        {
+          "text": "Must the conversation go to a server?",
+          "language": "en"
+        },
+        {
+          "text": "Is persistent conversation storage mandatory?",
+          "language": "en"
+        },
+        {
+          "text": "Who controls local conversations?",
+          "language": "en"
+        },
+        {
+          "text": "Can supported CLEA tasks run locally?",
+          "language": "en"
+        },
+        {
+          "text": "Do I need an API key for the local experiment?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "permissions",
+      "answers": {
+        "bs": "Mogućnost nije automatska dozvola. Runtime provjerava podršku i odobrenje; AI ne smije sam sebi dodijeliti pristup datotekama, mreži ili senzorima.",
+        "en": "A capability is not automatic permission. Runtime checks support and consent; AI cannot grant itself file, network or sensor access."
+      },
+      "sources": [
+        "docs/CLEA-CORE.md",
+        "docs/CLEA-AI-EXPERIMENT.md"
+      ],
+      "aliases": [
+        "dozvole",
+        "odobrenje",
+        "senzori",
+        "pristup",
+        "permission",
+        "consent",
+        "sensor",
+        "access"
+      ],
+      "related": [
+        "link_bridge_elite",
+        "runtime_package"
+      ],
+      "routingExamples": [
+        {
+          "text": "Kako CLEA provjerava dozvole?",
+          "language": "bs"
+        },
+        {
+          "text": "Može li AI sam sebi dati dozvolu?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li postojanje kamere daje aplikaciji pristup?",
+          "language": "bs"
+        },
+        {
+          "text": "Ko provjerava pristup senzorima?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li mrežni pristup traži odobrenje?",
+          "language": "bs"
+        },
+        {
+          "text": "Je li mogućnost isto što i dozvola?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako Runtime kontroliše pristup datotekama?",
+          "language": "bs"
+        },
+        {
+          "text": "Može li AI zaobići sigurnosne granice?",
+          "language": "bs"
+        },
+        {
+          "text": "How does CLEA check permissions?",
+          "language": "en"
+        },
+        {
+          "text": "Can AI grant itself permission?",
+          "language": "en"
+        },
+        {
+          "text": "Does having a camera grant application access?",
+          "language": "en"
+        },
+        {
+          "text": "Who checks sensor access?",
+          "language": "en"
+        },
+        {
+          "text": "Does network access require consent?",
+          "language": "en"
+        },
+        {
+          "text": "Is a capability the same as permission?",
+          "language": "en"
+        },
+        {
+          "text": "Can AI bypass security boundaries?",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "id": "shadow_replay",
+      "answers": {
+        "bs": "SHADOW ispituje alternativu u odvojenom stanju. REPLAY ponavlja podržane zabilježene događaje; neizvjesni vanjski efekti nisu proizvoljno ponovljivi.",
+        "en": "SHADOW tests an alternative in separate state. REPLAY repeats supported recorded events; uncertain external effects are not freely replayable."
+      },
+      "sources": [
+        "docs/CLEA-CORE.md",
+        "docs/WORKING-CACHE.md"
+      ],
+      "aliases": [
+        "shadow",
+        "replay",
+        "živo stanje",
+        "zabilježeni događaj",
+        "live state",
+        "recorded event"
+      ],
+      "related": [
+        "vision_q",
+        "adaptive_recovery"
+      ],
+      "routingExamples": [
+        {
+          "text": "Šta rade SHADOW i REPLAY?",
+          "language": "bs"
+        },
+        {
+          "text": "Kako SHADOW ispituje alternativu?",
+          "language": "bs"
+        },
+        {
+          "text": "Može li REPLAY ponoviti svaki vanjski efekat?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li SHADOW mijenja žive podatke?",
+          "language": "bs"
+        },
+        {
+          "text": "Čemu služi ponavljanje zabilježenog događaja?",
+          "language": "bs"
+        },
+        {
+          "text": "Objasni razliku između SHADOW i REPLAY.",
+          "language": "bs"
+        },
+        {
+          "text": "Kako testiram alternativu bez promjene živog stanja?",
+          "language": "bs"
+        },
+        {
+          "text": "Da li su neizvjesne vanjske radnje ponovljive?",
+          "language": "bs"
+        },
+        {
+          "text": "What do SHADOW and REPLAY do?",
+          "language": "en"
+        },
+        {
+          "text": "How does SHADOW test an alternative?",
+          "language": "en"
+        },
+        {
+          "text": "Can REPLAY repeat every external effect?",
+          "language": "en"
+        },
+        {
+          "text": "Does SHADOW change live data?",
+          "language": "en"
+        },
+        {
+          "text": "What is recorded event replay used for?",
+          "language": "en"
+        },
+        {
+          "text": "Explain the difference between SHADOW and REPLAY.",
+          "language": "en"
+        },
+        {
+          "text": "How can I test an alternative without changing live state?",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "safety": {
+    "allowAutomaticHostActions": false,
+    "allowClaimingGeneralKnowledge": false,
+    "markFallbackAsNeural": false,
+    "note": "When generated text is rejected, any canonical fallback must be labelled as a grounded fallback, not successful neural generation."
+  }
+}

@@ -58,3 +58,13 @@ assert manifest['version']=='0.18.0-test'
 for item in manifest['files']:
  data=(ROOT/item['path']).read_bytes();assert len(data)==item['bytes'] and hashlib.sha256(data).hexdigest()==item['sha256'],item['path']
 print('PUBLIC_SITE_STATIC',count,'local references; canonical/domain/verification; downloads hashed; private-host exclusion verified')
+
+ai=json.loads((ROOT/'release/ai-020.json').read_text())
+assert ai['version']=='0.20.0-test' and ai['coreVersion']=='0.18.0'
+assert ai['modelFingerprint']=='4a2ecae4216ae50ccbf0d2280331ea1f59bfe2a691aa22bcddd2bfa211e15e76'
+for item in ai['files']:
+ data=(ROOT/item['path']).read_bytes();assert len(data)==item['bytes'] and hashlib.sha256(data).hexdigest()==item['sha256'],item['path']
+model=json.loads((ROOT/'studio/workbench/chat/model.json').read_text())
+assert model['training']['externalWeights'] is False and model['training']['parameterCount']==135349
+assert 'workspace=clea-chat' in (ROOT/'ai.html').read_text()
+print('PUBLIC_ORIGINAL_CHAT model, Studio overlay and exact source hashes verified')

@@ -35,8 +35,8 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 14542,
-      "sha256": "3e2c899fad378e3dafa3c9705ec773ea45fdbaf3025bb19f261fa37c8f390e74"
+      "bytes": 15276,
+      "sha256": "2d0dd020720e65346a659bc01007eee4bcbc1f7ea980876b353c8b1b1c3cb7d2"
     },
     {
       "path": "studio/launcher/index.html",
@@ -53,5 +53,8 @@
       "bytes": 7237,
       "sha256": "261542456cc0c6a042e73bda1693e7d8bdf1dd25553f6d464312958c0fd3ab91"
     }
+  ],
+  "overlays": [
+    "release/ai-020.json"
   ]
 }

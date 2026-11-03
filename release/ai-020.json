@@ -1,0 +1,90 @@
+{
+  "format": "clea7.public-ai-overlay/1",
+  "version": "0.20.0-test",
+  "coreVersion": "0.18.0",
+  "implementationBase": "3772a396c461ec8cb72869f2c511d3e0c3f972bc",
+  "modelFingerprint": "4a2ecae4216ae50ccbf0d2280331ea1f59bfe2a691aa22bcddd2bfa211e15e76",
+  "modelScope": "20 original CLEA topics; not general knowledge",
+  "files": [
+    {
+      "path": "studio/workbench/index.html",
+      "bytes": 15276,
+      "sha256": "2d0dd020720e65346a659bc01007eee4bcbc1f7ea980876b353c8b1b1c3cb7d2"
+    },
+    {
+      "path": "studio/workbench/studio.js",
+      "bytes": 52463,
+      "sha256": "78d576e882b9126b6c70c26bf08dbd0861115b3c6a7ff419171747d390f752a6"
+    },
+    {
+      "path": "studio/workbench/studio.css",
+      "bytes": 32127,
+      "sha256": "1b2fdc4cb1cf9a3799b2554fd501365ca98a38149f5dfe705fc007ee64a76c13"
+    },
+    {
+      "path": "studio/workbench/caci.js",
+      "bytes": 21780,
+      "sha256": "eb07689817070b401bd23365f0e0bc1899b35a5485f470f40e5c8e1c6d818ae4"
+    },
+    {
+      "path": "studio/workbench/clea-intent-model.js",
+      "bytes": 20853,
+      "sha256": "0062aa8f4526be132e8b9bf2a9beea474484a1d16b04a6b9459167081889c696"
+    },
+    {
+      "path": "studio/workbench/clea-ai-engine.js",
+      "bytes": 16474,
+      "sha256": "bb0d757d2d1aaee8c17e0d7887b0b007db69243e85a133aa6803827e3056238e"
+    },
+    {
+      "path": "studio/workbench/clea-ai-studio.js",
+      "bytes": 18431,
+      "sha256": "34a459dbf2c9c67164bfb65b2cfb5d094a803adc9f3754cbd008f553a15ffeeb"
+    },
+    {
+      "path": "studio/workbench/chat/assets.js",
+      "bytes": 3803,
+      "sha256": "862c4f0e0a7b53b07bcb7aa02d146f620e2e99a7f1959bbe467ae8e9c1d2d503"
+    },
+    {
+      "path": "studio/workbench/chat/chat.css",
+      "bytes": 4316,
+      "sha256": "12ea9a4891473457734f6b4fdf267110fd76ab44836a6d832a871e9b8caf12f8"
+    },
+    {
+      "path": "studio/workbench/chat/knowledge.json",
+      "bytes": 46566,
+      "sha256": "5129c44271eb6531b00c3d0f3fa6863d1c7abfeb3cb7833f50e8ab335f0e3c73"
+    },
+    {
+      "path": "studio/workbench/chat/manifest.json",
+      "bytes": 963,
+      "sha256": "c05264c53c9a59856d49c733537179619b74e56c8aa41cb17aac984562cc9b4f"
+    },
+    {
+      "path": "studio/workbench/chat/model.json",
+      "bytes": 732175,
+      "sha256": "e5f7c43f824d692af2b55f525ba4264c5ebec676d257885b275112781609401a"
+    },
+    {
+      "path": "studio/workbench/chat/neural.js",
+      "bytes": 9772,
+      "sha256": "ae2c419f9569911d83ba634cf76e9e0784c3d1e08eb6af4fda0d8f5860a518f1"
+    },
+    {
+      "path": "studio/workbench/chat/runtime.js",
+      "bytes": 20224,
+      "sha256": "cd4864ab5d3942e9393355b17d7dfdde9eef6813c5134252ae375acaa74e3649"
+    },
+    {
+      "path": "studio/workbench/chat/ui.js",
+      "bytes": 10643,
+      "sha256": "438d5ccaa21386c7994a5be8a3e9f47a8bcc69408a4b88a41d565bcfd08a7820"
+    },
+    {
+      "path": "studio/workbench/chat/worker.js",
+      "bytes": 2122,
+      "sha256": "d09d9f99cec0725c2e1ca2f3a6b6e464e8aa7b86b96b5d2d9a0fdc140ece28c1"
+    }
+  ]
+}
