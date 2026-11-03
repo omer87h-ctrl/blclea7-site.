@@ -48,8 +48,8 @@
     },
     {
       "path": "studio/workbench/chat/chat.css",
-      "bytes": 4316,
-      "sha256": "12ea9a4891473457734f6b4fdf267110fd76ab44836a6d832a871e9b8caf12f8"
+      "bytes": 4504,
+      "sha256": "c714365bc981d818297aa58ad55337f91e573953788fd043a68eb0566914036a"
     },
     {
       "path": "studio/workbench/chat/knowledge.json",
