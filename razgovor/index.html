@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="bs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#0b1019">
+  <meta name="description" content="Isprobaj vlastiti CLEA testni model za 20 CLEA tema. Odgovori se obrađuju lokalno na uređaju, bez AI API ključa.">
+  <title>Razgovaraj s CLEA — BLclea7</title>
+  <link rel="canonical" href="https://clea7.brzoilokalno.com/razgovor/">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../studio/workbench/chat/chat.css">
+  <link rel="stylesheet" href="standalone.css">
+  <script src="boot.js"></script>
+  <script src="../studio/runtime.js" defer></script>
+  <script src="../studio/workbench/living.js" defer></script>
+  <script src="../studio/workbench/bil-compiler.js" defer></script>
+  <script src="../studio/workbench/bil-runtime.js" defer></script>
+  <script src="../studio/workbench/working-cache.js" defer></script>
+  <script src="../studio/workbench/clea-core.js" defer></script>
+  <script src="../studio/workbench/format.js" defer></script>
+  <script src="../studio/workbench/review.js" defer></script>
+  <script src="../studio/workbench/caci.js" defer></script>
+  <script src="../studio/workbench/chat/assets.js" defer></script>
+  <script src="../studio/workbench/chat/neural.js" defer></script>
+  <script src="../studio/workbench/chat/runtime.js" defer></script>
+  <script src="../studio/workbench/chat/ui.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#clea-chat">Preskoči na razgovor</a>
+  <header class="page-header">
+    <a class="brand" href="../" aria-label="BLclea7 — početna stranica">
+      <img src="../favicon.svg" width="44" height="44" alt="">
+      <span><strong>BLclea7</strong><small>by Brzo i Lokalno</small></span>
+    </a>
+    <a class="back-link" href="../">Početna <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <div class="page-intro">
+    <div class="intro-line"><span class="test-badge">JAVNA TESTNA VERZIJA</span><span class="local-note">Obrada na tvom uređaju</span></div>
+    <p id="conversation-scope" role="note"><strong>Početno znanje: 20 CLEA tema.</strong> Ovo nije opći razgovorni model. Isprobaj pitanja o BIL-u, Studiju, Runtimeu, SDK-u i sedam stubova; širi razgovor i izrada aplikacija kroz ovaj razgovor još nisu dostupni.</p>
+  </div>
+
+  <div id="conversation-load-error" class="page-error" role="alert" hidden></div>
+  <main id="clea-chat" tabindex="-1" aria-label="Razgovor s CLEA">
+    <div class="initial-loading"><h1>Razgovaraj s CLEA</h1><p>Pripremamo lokalni razgovor…</p></div>
+  </main>
+
+  <footer class="page-footer">
+    <p>Bez AI API ključa. Poruke se ne šalju serveru za obradu i ne koriste se za automatsko treniranje. Razgovor se briše zatvaranjem ili ponovnim učitavanjem stranice.</p>
+    <p>Nakon uspješnog učitavanja model obrađuje pitanja bez interneta u otvorenoj sesiji. Novo otvaranje stranice može zahtijevati internet. Čitanje naglas radi samo ako je dostupan odgovarajući lokalni glas uređaja.</p>
+    <a href="../privatnost.html">Privatnost BLclea7</a>
+  </footer>
+  <noscript><p class="no-script">Za lokalno izvršavanje CLEA modela uključi JavaScript u pregledniku. Ova stranica ne koristi AI server za odgovore.</p></noscript>
+</body>
+</html>
