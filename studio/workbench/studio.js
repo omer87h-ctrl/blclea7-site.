@@ -105,6 +105,6 @@ const localAI=CLEA7AIStudio.attach({root:$('clea-ai'),project:aiSnapshot,
 draw();panel('design');status(vault.persistent?'CLEA7 Studio je spreman · dizajn, logika, kod i lokalni Runtime.':'Trajno skladište nije dostupno; preuzimaj kopije.');globalThis.CLEA7Workbench={get project(){return project;},get engine(){return engine;},save:saveProject,open:p=>{project=F.validate(p);screen=project.start;selected=null;saved=null;bilStudio?.loadProject();draw();},run:startPlayer};
 // Only fixed Studio workspaces may be selected by a public link.
 const linkedWorkspace=new URLSearchParams(location.search).get('workspace');
-if(['clea-chat','clea-ai'].includes(linkedWorkspace))document.querySelector('[data-panel="'+linkedWorkspace+'"]').click();
+if(['clea-chat','clea-ai','clea-ai-web'].includes(linkedWorkspace))document.querySelector('[data-panel="'+linkedWorkspace+'"]').click();
 })();
 
