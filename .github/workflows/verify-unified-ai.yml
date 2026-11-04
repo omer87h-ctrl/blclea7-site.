@@ -1,0 +1,30 @@
+name: Verify unified CLEA AI workspace
+on:
+  pull_request:
+    paths:
+      - 'studio/workbench/chat/ui.js'
+      - 'tests/test_unified_ai_browser.cjs'
+      - '.github/workflows/verify-unified-ai.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unified-ai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/clea7-qa --no-audit --no-fund playwright@1.56.1
+      - name: Report source integrity
+        run: |
+          node --check studio/workbench/chat/ui.js
+          python3 -c "import hashlib,pathlib; p=pathlib.Path('studio/workbench/chat/ui.js'); b=p.read_bytes(); print('UNIFIED_CLEA_SHA256',hashlib.sha256(b).hexdigest(),'BYTES',len(b))"
+      - name: Real Chrome CLEA AI functional checks
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/clea-unified-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" || true' EXIT
+          CLEA7_CHROME="$(command -v google-chrome)" node tests/test_unified_ai_browser.cjs
