@@ -59,6 +59,7 @@ jobs:
           browser_failed=0
           CLEA7_WEB_PATH=/studio node tests/test_clea_ai_browser.cjs || browser_failed=1
           CLEA7_WEB_PATH=/studio node tests/test_clea_chat_browser.cjs || browser_failed=1
+          node tests/test_clea_lab_browser.cjs || browser_failed=1
           node tests/test_public_site.cjs || browser_failed=1
           node tests/test_public_acceptance.cjs || browser_failed=1
           node tests/test_public_bil_studio.cjs || browser_failed=1

@@ -1,0 +1,43 @@
+'use strict';
+const assert=require('node:assert/strict');
+const{createRequire}=require('node:module');
+const{chromium}=createRequire('/tmp/clea7-qa/package.json')('playwright');
+(async()=>{
+ const browser=await chromium.launch({executablePath:process.env.CLEA7_CHROME||'/usr/bin/google-chrome',args:['--no-sandbox']});
+ const context=await browser.newContext({viewport:{width:1365,height:900},acceptDownloads:true});
+ const page=await context.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ page.on('dialog',d=>d.accept());
+ try{
+  await page.goto('http://127.0.0.1:4173/studio/clea-ai-lab.html');
+  await page.waitForFunction(()=>document.getElementById('studio-frame')?.contentWindow?.CLEA7Workbench);
+  assert(await page.getByRole('heading',{name:/Reci CLEA/}).isVisible());
+  await page.locator('#request').fill('Napravi aplikaciju za skladiste i radne naloge.');
+  await page.locator('#company').fill('CLEA Test');
+  await page.locator('#prepare').click();
+  await page.waitForFunction(()=>!document.getElementById('apply').disabled);
+  assert((await page.locator('#result-summary').innerText()).includes('CLEA Test'));
+  assert((await page.locator('#result-modules').innerText()).includes('Zalihe'));
+  assert((await page.locator('#result-modules').innerText()).includes('Radni nalozi'));
+  assert((await page.locator('#result-source').textContent()).length>500);
+  console.log('PASS CLEA LAB - business app proposal and checked project');
+  await page.locator('#apply').click();
+  await page.waitForFunction(()=>{const w=document.getElementById('studio-frame').contentWindow;return Boolean(w.CLEA7Workbench.engine?.state&&w.CLEA7Workbench.project.tables.stock&&w.CLEA7Workbench.project.tables.orders);});
+  assert((await page.locator('#pillar-log').innerText()).includes('Stvarni CLEA Runtime'));
+  console.log('PASS CLEA LAB - application executed through real Studio Runtime');
+  await page.locator('#request').fill('Napravi aplikaciju za online placanje i klijente.');
+  await page.locator('#prepare').click();
+  assert(await page.locator('#apply').isDisabled());
+  assert((await page.locator('#status').innerText()).includes('lokalne'));
+  console.log('PASS CLEA LAB - rejected unsupported network/payment request');
+  await page.locator('#request').fill('Napravi kalkulator');
+  await page.locator('#prepare').click();
+  await page.waitForFunction(()=>document.getElementById('studio-frame').contentWindow.document.getElementById('clea-ai-request')?.value.includes('Create a simple calculator'));
+  console.log('PASS CLEA LAB - wired to existing typed BIL generator');
+  await page.locator('#show-chat').click();
+  assert((await page.locator('#chat-frame').getAttribute('src'))==='../razgovor/');
+  console.log('PASS CLEA LAB - original local conversation route');
+  assert.deepEqual(errors,[]);
+  console.log('CLEA LAB browser smoke SUCCESS');
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});
