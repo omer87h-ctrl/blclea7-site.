@@ -37,6 +37,10 @@ const {chromium}=createRequire('/tmp/clea7-qa/package.json')('playwright');
   await page.getByRole('button',{name:'Pregledao sam — primijeni u Studiom'}).waitFor({timeout:25000});
   assert((await page.locator('#chat-log').innerText()).includes('BIL kalkulator'));
   console.log('PASS ONE CLEA AI TOOL: verified BIL calculator proposal inside chat');
+  await page.getByRole('button',{name:'Pregledao sam — primijeni u Studiom'}).click();
+  await page.waitForFunction(()=>Boolean(CLEA7Workbench.project.bil?.ir && CLEA7Workbench.engine?.state?.bilValues),null,{timeout:25000});
+  console.log('PASS ONE CLEA AI TOOL: reviewed BIL app executed in real Runtime');
+  await page.locator('[data-panel="clea-chat"]').click();
 
   await page.locator('#chat-question').fill('Šta je BIL?');
   await page.locator('#chat-send').click();
