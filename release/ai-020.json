@@ -8,8 +8,8 @@
   "files": [
     {
       "path": "studio/workbench/index.html",
-      "bytes": 15276,
-      "sha256": "2d0dd020720e65346a659bc01007eee4bcbc1f7ea980876b353c8b1b1c3cb7d2"
+      "bytes": 15298,
+      "sha256": "34a8eccd22ce04d5f4becd22092e72e957a703083f52d71ee454957bad58ef59"
     },
     {
       "path": "studio/workbench/studio.js",
@@ -78,8 +78,8 @@
     },
     {
       "path": "studio/workbench/chat/ui.js",
-      "bytes": 20567,
-      "sha256": "e8c2e37eac0d6da37f1ba65316d46ab4c521f68252ce8f4bab34cc8850c70b87"
+      "bytes": 25289,
+      "sha256": "a1d346ba3e739f18a40e5658451aa3e5c57714fb3378f81e0a661cf8f378037d"
     },
     {
       "path": "studio/workbench/chat/worker.js",
