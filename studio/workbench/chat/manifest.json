@@ -1,0 +1,33 @@
+{
+  "format": "clea7.chat.manifest/1",
+  "version": "0.20.0-test",
+  "modelVersion": "0.1.0",
+  "architecture": "conditional-tanh-rnn/1",
+  "modelFingerprint": "4a2ecae4216ae50ccbf0d2280331ea1f59bfe2a691aa22bcddd2bfa211e15e76",
+  "model": {
+    "path": "model.json",
+    "bytes": 732175,
+    "sha256": "e5f7c43f824d692af2b55f525ba4264c5ebec676d257885b275112781609401a"
+  },
+  "knowledge": {
+    "path": "knowledge.json",
+    "bytes": 46566,
+    "sha256": "5129c44271eb6531b00c3d0f3fa6863d1c7abfeb3cb7833f50e8ab335f0e3c73"
+  },
+  "owner": "Brzo i Lokalno",
+  "originalWeights": true,
+  "externalWeights": false,
+  "inferenceServer": false,
+  "training": {
+    "examples": 300,
+    "heldoutExamples": 60,
+    "heldoutExact": 51,
+    "parameterCount": 135349,
+    "scope": "Fixed known CLEA facts and unseen question paraphrases; not general intelligence"
+  },
+  "limits": {
+    "maxInputCharacters": 1200,
+    "maxOutputTokens": 48,
+    "maxHistoryTurns": 12
+  }
+}

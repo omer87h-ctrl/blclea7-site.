@@ -1,0 +1,189 @@
+# CLEA AI: local experiment 0.19
+
+This is an implemented first vertical slice inside the existing Studio, on Core
+0.18. It is not a general conversational model, a frontier-model replacement or
+an automatic generator of arbitrary applications. It introduces no new BIL ABI.
+Existing `.bil` and `.clea7` contracts are unchanged.
+
+## Try it
+
+Serve `web/` through a trusted localhost/HTTPS static host, open `workbench/`,
+then **CLEA AI · lokalno**. No inference server, API key, model download, GPU,
+account or external AI service is required. A static host is still needed for
+reliable browser scripts/Web Crypto/storage; a ChatGPT attachment viewer is not
+the Runtime.
+
+1. Enter `Create a simple calculator application.` and prepare the proposal.
+2. Inspect the plan, typed BIL, actual isolated Runtime results and exact changes.
+   Selecting a screen selects its corresponding source span.
+3. Mark the review checkbox, then apply and run. Use the real numeric inputs and
+   arithmetic buttons. Division by zero is handled by BIL `try/catch`.
+4. Return to CLEA AI and enter `Add a reset button.`. The planner inserts one
+   button at the compiler's actual screen span and appends a collision-safe
+   handler; it does not regenerate existing functions, comments or component IDs.
+5. Review/apply, try Reset, and use AI undo or Studio undo/redo.
+6. Export the real `.clea7` through the existing export panel and install it in
+   the separate Runtime. The resulting app needs neither the AI controller nor
+   its classifier/cache.
+
+The first planner supports the checked basic arithmetic app and reset of a
+compatible first screen with exactly two mutable numeric inputs and one numeric
+result, with literal defaults. Unsupported requested features are refused;
+they are not silently dropped. This is a structural generator with a small
+learned intent hint, not free-form learned code generation. No automatic repair
+of arbitrary programs is implemented.
+
+## What is actually learned
+
+`scripts/train_clea_intent.cjs` implements original full-batch softmax
+cross-entropy gradient descent with L2. Its original synthetic corpus is
+`sdk/examples/clea-ai/intent-corpus.json`: 96 training examples and 36 fixed
+heldout examples across create/reset/unsupported. Heldout text does not select
+vocabulary or update weights. Seed 71019 and 700 epochs reproduce the bundled
+model byte-for-byte. No third-party weights, scraped articles, private user data
+or automatically collected inputs are used.
+
+The classifier has 873 parameters and 290 features. On this small fixed synthetic
+heldout set it improves from 10/36 to 29/36 correct (80.56%). That is not real-world
+language accuracy, code-generation accuracy or a safety guarantee. It is not an
+LLM. Its confidence is a classifier score, not a probability that a task is safe
+or correct. The checked planner, BIL compiler and Runtime remain authoritative;
+model abstention/unavailability does not grant new operations.
+
+```sh
+node scripts/train_clea_intent.cjs --check
+node tests/test_clea_intent_model.cjs
+```
+
+Model fingerprint:
+`db904f21ffae1509e65d2b9eabad8fd10f496be7ebfe38149313bef55c720e98`.
+Corpus SHA256:
+`dc70881b809e05564bc9639dd3ff80289a1a8340a29620f0c044820825d72237`.
+Check `describe()` and the training receipt for the exact facts.
+
+## CACI and execution boundaries
+
+`caci.js` is a bounded, versioned data cache. RAM retention defaults to 256 KiB
+of conservative serialized accounting. Optional persistent retention is 2 MiB
+in its own IndexedDB `clea7-caci`, separate from project/user-data storage.
+Studio persistence is off until the user selects it. Disk metadata is scanned
+without decoding every payload; payloads are read selectively, hash-checked and
+admitted under bounds. Atomic transactions bound concurrent-tab admission.
+
+There are separate project-index, compiled-application and verified-result
+categories. Keys bind exact project/source, metadata, schema and implementation
+rules version. A changed project cannot match an older approval fingerprint.
+The cached semantic plan metadata is compared with already validated IR; cached
+source positions are never used to edit code. Cached executable models undergo
+the existing Core's authoritative source/IR validation. Actual Runtime probes
+execute again on every proposal; a stored validation receipt never substitutes
+for execution. Corrupt/unavailable cache falls back to recomputation. Clearing
+cache deletes regenerable data only. No online model learning occurs.
+
+The cache is not knowledge, not extra physical RAM, and not an OS memory cap.
+The existing validator still reads/validates the complete small application;
+this slice does not implement a full incremental compiler or selective
+multi-file semantic retrieval. Inspector reports the reindexed source bytes,
+not a claim that no other bytes were read. Heap counters, when exposed, belong
+to the whole process/page. Quota denial, browser data eviction and deletion
+remain possible. Persistent cache is local plaintext and can contain source;
+do not put secrets in source. Clear browser/site data to remove all local data
+only after exporting important projects.
+
+## Seven existing responsibilities
+
+| Responsibility | Executable integration in this slice |
+|---|---|
+| Core AI Manager | Bounded requests, task stages, cancellation checkpoints; no model network wait. |
+| Link Bridge Elite | Validated Studio snapshot → planner → existing typed compiler/Core/Engine APIs. |
+| Expansion Q | Versioned closed create/reset operations, model contract and CACI namespaces. |
+| Adaptive Recovery | Isolated MemoryVault validation, stale-approval rejection, existing Studio undo. |
+| Holo Interaction | Existing BIL UI renders and dispatches actual calculator/reset events. |
+| Fallback Executor | Checked rules work without the classifier; cache denial recomputes safely. |
+| Vision Q | Real compiler/Runtime checks, decisions, byte accounting and measured timings. |
+
+These are integrations with existing responsibilities, not seven newly trained
+models or evidence that every earlier architectural ambition is complete.
+
+## Security and privacy
+
+Requests are bounded to 1200 characters and a closed supported vocabulary.
+Unsupported extra features, arbitrary scripts/shell commands and unrelated
+conversation are refused. The classifier supplies data, never executable code.
+The generator emits original typed BIL; no `eval`, shell or downloaded native
+code executes. Runtime validation uses a separate volatile vault, disabled
+working cache and no native modules. External operations without an adapter
+cannot acquire privileges. There is no AI network path or automatic model/data
+download. Ordinary generated app execution uses the existing permission model.
+
+Review occurs before live application changes. Source/metadata changes after
+review invalidate approval. Unsaved BIL drafts are checked before use; invalid
+drafts survive. Application identity changes participate in undo and saved-base
+tracking. Source/request content is inserted with text APIs; the panel's single
+HTML template is a fixed owner-authored literal.
+
+Threat tests cover poisoned source/IR, forged project memory, cache denial,
+unsupported features, handler-name collisions, nonliteral defaults and
+cancellation. Same-origin malicious scripts/device owners remain outside this
+cache integrity boundary: hashes are not signatures or confidentiality. No
+claim of unbreakable security is made.
+
+## Measurements and proof
+
+Run `node scripts/benchmark_clea_ai.cjs --output /tmp/clea-ai.json`. It compares
+actual cold/warm/cache-off creation and reset, asserts identical source/model,
+counts real Runtime checks and records elapsed time, encoded bytes and process
+heap observations. One local run measured 123.07 ms cold, 82.59 ms repeated and
+41.07 ms with cache off. The warm path reused two entries and reindexed zero
+source bytes, but was slower than cache-off on this tiny workload. Startup/JIT,
+hashing, source verification and fresh Runtime probes affect this ordering.
+No general speed, memory or battery advantage is established.
+
+Real hosted Chrome acceptance: 10 scenarios, run
+https://github.com/omer87h-ctrl/blclea7-site./actions/runs/41530172595
+at frontend commit `e6925861e0b94c5a4cd842506c6baf4c1cc15349`.
+It checks review/apply, real arithmetic, minimal reset, undo/redo, stale/invalid
+draft protection, actual IndexedDB, cache clearing without project deletion,
+package export/install/restart in a separate Runtime, 390px layout and zero
+external requests. Hardening and all 10 browser scenarios passed again at commit
+`465aa1b42104462f32740a89e1ed17b4679f84f0`, run
+https://github.com/omer87h-ctrl/blclea7-site./actions/runs/41530590203.
+Exact source hashes and environment limitations are in
+[the acceptance receipt](acceptance/clea-ai-019.json).
+
+Native Windows build includes all Studio web assets and now verifies module
+presence before freezing. No new Windows binary, Android APK, physical-device
+test or native GUI verification is claimed by this experiment. Generated basic
+BIL apps use existing contracts; platform labels alone do not verify hosts.
+
+## Broad-model knowledge: research, not a delivered capability
+
+General conversation and broad knowledge require a trained representation,
+retrievable knowledge, or both. This classifier has neither those capabilities
+nor that corpus. A cache only retains work already computed. Quantization,
+retrieval and disk offloading trade storage, compute, quality and latency; none
+proves that an ordinary phone can match frontier models at all tasks.
+
+Relevant primary prior art includes [RAG](https://arxiv.org/abs/2005.11401),
+[kNN-LM](https://arxiv.org/abs/1911.00172),
+[distillation](https://research.google/pubs/distilling-the-knowledge-in-a-neural-network/),
+[TinyStories](https://arxiv.org/abs/2305.07759) and
+[KV cache documentation](https://huggingface.co/docs/transformers/main/en/kv_cache).
+These support studying hybrid memory; they do not establish worldwide novelty
+or broad-model equivalence. No implementation/text was copied from these works.
+
+Next research gates: versioned original/licensed local BIL KnowledgePacks with
+source-linked retrieval; a real larger learned planner with independent heldout
+tasks; a bounded conversational decoder and measured quality/hardware budgets;
+privacy-reviewed opt-in adaptation. None is implemented or represented as
+present. Video/Sense integration and arbitrary app repair are also unfinished.
+Do not download a large hidden model or substitute a paid API to hide this gap.
+
+## Ownership and dependencies
+
+New planner, cache, controller, training algorithm/corpus, weights and tests
+were authored for Brzo i Lokalno. Existing notices and distribution terms remain
+unchanged. No new runtime dependency is required. Node/Python are development
+tools; Playwright/Chrome are test dependencies under their existing terms.
+Free access does not itself choose an open-source licence. No patent, trademark
+clearance, absolute non-infringement or worldwide-first claim is made.

@@ -21,6 +21,17 @@ jobs:
       - run: python -m pip install playwright==1.62.0
       - run: python scripts/check_public.py
       - run: python -m unittest discover -s tests -v
+      - name: Actual original local model and shared conversation Runtime
+        env:
+          CLEA7_SOURCE_WEB: studio
+        run: |
+          node tests/test_caci.cjs
+          node tests/test_clea_intent_model.cjs
+          node tests/test_clea_ai.cjs
+          node tests/test_clea_ai_adversarial.cjs
+          node tests/test_clea_chat.cjs
+          node neural/test_decoder.cjs
+          node neural/runtime-audit.cjs
       - run: node tests/test_public_bil_apps.cjs
       - run: node tests/test_bil_guided_authoring.cjs
       - name: Independently execute curated public SDK
@@ -46,6 +57,8 @@ jobs:
           node tests/test_public_appearance_ui.cjs
           python tests/test_universal018_browser.py --output test-evidence/universal018-browser
           browser_failed=0
+          CLEA7_WEB_PATH=/studio node tests/test_clea_ai_browser.cjs || browser_failed=1
+          CLEA7_WEB_PATH=/studio node tests/test_clea_chat_browser.cjs || browser_failed=1
           node tests/test_public_site.cjs || browser_failed=1
           node tests/test_public_acceptance.cjs || browser_failed=1
           node tests/test_public_bil_studio.cjs || browser_failed=1

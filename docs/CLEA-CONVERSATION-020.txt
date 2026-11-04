@@ -1,0 +1,438 @@
+# CLEA razgovorni model 0.20 — vlastite težine, zajednički Runtime
+
+**Status:** stvarno implementiran lokalni razgovorni eksperiment za ograničenu
+oblast CLEA platforme. Ovo je nadogradnja postojećeg projekta, a ne zamjena
+Studija, BIL kompajlera, SDK-a ili Runtimea. Jezgro ostaje Core 0.18; razgovorni
+modul ima oznaku `0.20.0-test`, a neuralni model verziju `0.1.0`.
+
+Model zaista generiše tokene iz vlastitih treniranih parametara. Nije preuzeti
+tuđi model niti samo prethodni klasifikator sa novim nazivom. Njegovo sadašnje
+znanje, međutim, obuhvata **20 provjerenih CLEA tema**, a ne opće internetsko
+znanje. Ne predstavlja zamjenu za velike razgovorne modele niti dokaz da CLEA
+može izvršavati svaki zamislivi zadatak.
+
+## Šta korisnik sada može uraditi
+
+U Studiju odaberi **CLEA razgovor · 7**. Direktna putanja na hostu koji sadrži ovu
+verziju jeste `workbench/?workspace=clea-chat`; javni host može imati dodatni
+prefiks poput `studio/`. Sama putanja nije dokaz da je izdanje objavljeno.
+
+1. Otvori razgovor i sačekaj provjeru vlastitog modela uključenog u aplikaciju.
+2. Pitaj, naprimjer, `Šta je BIL?`, `Šta radi Core AI Manager?` ili
+   `Kako radi CACI?`.
+3. Odaberi bosanski ili engleski jezik odgovora. Model je treniran na oba jezika.
+4. U dijelu **Kako je dobijen ovaj odgovor** pregledaj način rada, izvor,
+   fingerprint, stvarne korake dekodera i broj obračunatih matematičkih operacija.
+5. Pitaj `Koliko je 23 * 4?`. Taj odgovor daje stvarni BIL kompajler/Core, pa je
+   označen kao proračun, a ne kao rezultat jezičkog modela.
+6. Za pitanje o sedam stubova Runtime može pročitati svoj stvarni registar.
+7. `više` ili `continue` koristi izričitu vezu s narednom podržanom temom. To je
+   ograničen kontekst teme, a ne neograničeno razumijevanje cijelog razgovora.
+
+Moguće je zaustaviti obradu, očistiti samo razgovorni cache ili obrisati razgovor
+i njegov cache. Ti postupci ne brišu Studio projekte ili podatke drugih
+aplikacija. Ovaj razgovorni modul ne kreira proizvoljne aplikacije niti sam
+primjenjuje izmjene projekta. Postojeći CLEA AI Inspector ostaje zaseban
+provjereni tok za podržano stvaranje aplikacije i pregled izmjena.
+
+## Šta tačno čini vlastiti model
+
+Arhitektura je `conditional-tanh-rnn/1`, originalno implementiran mali uslovni
+autoregresivni model. Treniranje koristi Python/NumPy i vlastitu implementaciju
+propagacije unaprijed, BPTT gradijenata, Adam optimizatora i ograničenja norme
+gradijenta. Inference koristi vlastitu JavaScript implementaciju iste matematike.
+Nisu preuzete prethodno istrenirane težine, kompajler, interpreter ili tuđa
+implementacija modela.
+
+| Svojstvo | Stvarna vrijednost |
+|---|---|
+| Naučeni parametri | 135.349 |
+| Vokabular | 725 tokena, izdvojenih isključivo iz trening podataka uz posebne tokene |
+| Embedding dimenzija | 32 |
+| Recurrent hidden dimenzija | 96 |
+| Izvorne trening poruke | 300 |
+| Izdvojena pitanja za provjeru | 60 |
+| Tematske cjeline | 20 |
+| Jezici | bosanski i engleski |
+| Model JSON | 732.175 bajtova |
+| Dekodirane float32 težine | 541.396 bajtova |
+| Najviše sadržajnih tokena pitanja | 47, uz poseban token jezika |
+| Najviše izlaznih tokena | 48, uključujući završni EOS |
+| Najviše znakova pitanja | 1.200 |
+
+Pitanje se tokenizuje pomoću Unicode riječi i interpunkcije poslije NFKC
+normalizacije i pretvaranja u mala slova. Nepoznate riječi postaju označeni UNK
+tokeni i posebno se broje. Posebni tokeni su PAD, BOS, EOS, UNK te oznake jezika.
+
+Prosjek naučenih embeddinga pitanja daje uslovni vektor `c`. Početno stanje je
+`h0 = tanh(c Wq + bq)`. Svaki sljedeći korak računa približno:
+
+```text
+h(t) = tanh(E(previous) Wx + h(t-1) Wh + c Wc + bh)
+logits(t) = h(t) Wo + bo
+next = deterministički najviši dozvoljeni logit
+```
+
+Treniranje optimizuje naredni token uz poznati prethodni trening token, dok
+stvarno generisanje koristi prethodni **vlastito generisani** token. Dekoder ne
+čita korpus ili tabelu referentnih odgovora tokom tih koraka. Izlaz završava na
+EOS-u ili na stvarnom token limitu. PAD/BOS/UNK/oznake jezika nisu dozvoljeni kao
+generisani odgovor.
+
+Važno ograničenje arhitekture: prosjek embeddinga ne čuva puni redoslijed riječi
+u pitanju. Ovo nije transformer sa širokim kontekstom. Standardni matematički
+principi RNN-a, BPTT-a i Adama nisu predstavljeni kao CLEA izum. Originalni su
+ovdje napisani kod, naučeni parametri, pripremljeni korpus i njihova provjerena
+integracija s CLEA ugovorima.
+
+## Podaci, treniranje i značenje rezultata
+
+`data/clea-conversation-v1.json` sadrži originalno pripremljena kratka pitanja i
+sažetke provjerenih činjenica iz vlasnikovog projekta. Obuhvata sedam pojedinačnih
+stubova, BIL, kompajler, Core, Studio, Runtime/pakete, SDK, radni cache, CACI,
+privatnost/dozvole, SHADOW/REPLAY te predstavljanje i granice znanja.
+
+Nisu uključeni privatni korisnički razgovori, preuzeti članci, tuđi model izlazi,
+scraping ili osjetljivi lični podaci. Svaka tematska činjenica ima vlasnikov
+izvorni dokument ili datoteku. Referenca na dokument ne znači da je generisani
+odgovor sam po sebi pouzdan: Runtime zato provjerava sadržaj odgovora odvojeno.
+
+Svaka tema ima 15 trening i tri izdvojena pitanja. Pitanja se ne ponavljaju
+između skupova. Trening ne koristi izdvojeni tekst za izbor vokabulara ili
+promjenu težina. **Činjenice i ciljni odgovori već postoje u trening skupu**:
+ova provjera mjeri generisanje poznatog odgovora na drugačije pitanje, a ne
+otkrivanje nepoznatih činjenica ili opću inteligenciju.
+
+Treniranje je izvršeno od slučajne inicijalizacije sa seed vrijednošću `7020`,
+1.600 koraka i batch veličinom 24. Početno izmjereno CPU izvršavanje trajalo je
+oko 14,7 sekundi u tadašnjem okruženju s tri CPU jezgre i NumPy 2.3.5. To nije
+obećanje istog trajanja na drugom uređaju. Treniranje i numerički izvještaji
+nalaze se u `neural/training-report.json` i `neural/training.log`.
+
+| Provjera | Stvarno izmjereni rezultat | Šta ne dokazuje |
+|---|---|---|
+| Raw dekoder prije treniranja | 0/60 tačnih token sekvenci | Opću kvalitetu slučajne inicijalizacije |
+| Raw dekoder na trening skupu | 300/300 tačnih sekvenci | Generalizaciju na proizvoljne razgovore |
+| Raw dekoder na fiksnom izdvojenom skupu | 51/60, odnosno 85% tačnih sekvenci | Opću factual accuracy, novu oblast znanja ili frontier sposobnosti |
+| Runtime provjera 60 izdvojenih pitanja | 50 prihvaćenih neuralnih odgovora, osam jasno označenih rezervnih odgovora i dva suzdržavanja | 58 ili 60 uspješnih neuralnih odgovora |
+| Cache u tom Runtime benchmarku | nula pogodaka | Ubrzanje ponovljenog razgovora |
+
+Na devet pitanja raw model je izabrao pogrešan odgovor ili temu, ponekad uz visok
+model score. Vjerovatnoća tokena nije vjerovatnoća istinitosti odgovora. U
+Runtime benchmarku usmjeravanje je prihvatilo 58 tačnih tema i odbilo dvije;
+50 neuralnih kandidata prošlo je provjeru sadržaja, a osam nije. Nije dozvoljeno
+rezervne odgovore uračunati kao ispravne neuralne generacije.
+
+## Tok kroz postojeću CLEA tehnologiju
+
+```text
+Studio poruka / SDK ask
+          ↓
+postojeći Kernel.attachAI → Kernel.runAI
+          ↓
+stvarno kompajlirani i izvršeni BIL ugovor ulaza
+          ↓
+provjerena mogućnost: registar stubova / BIL računanje / razgovorna tema
+          ↓
+tačan provjereni cache ili vlastiti Worker dekoder
+          ↓
+provjera tipiziranog Worker rezultata i dozvoljene činjenice
+          ↓
+neuralni odgovor / jasno označen rezervni odgovor / suzdržavanje
+          ↓
+potvrda lokalne historije i stvarna dijagnostika
+```
+
+`web/runtime.js` već nudi `attachAI` i `runAI`. Razgovorni provider se priključuje
+na taj postojeći put. `CLEA7Core.compile/execute` izvršava stvarni BIL program
+`POLICY`: provjerava neprazan ulaz, granicu znakova, broj kontekstnih razmjena i
+izlazni budžet. Aritmetički zahtjev prolazi isti stvarni kompajler i VM, bez
+JavaScript `eval` ili AI procjene rezultata.
+
+Nije uveden drugi BIL evaluator niti nova tvrdnja da BIL VM ima univerzalne tensor
+instrukcije. Fiksnu neuralnu matematiku izvršava originalni JS modul; BIL/Core i
+Runtime upravljaju ugovorom i povezanim operacijama. Postojeći `.bil` i `.clea7`
+formati nisu zamijenjeni niti automatski podignuti na novi ABI zbog razgovora.
+
+### Sedam stubova sa stvarnim ponašanjem
+
+| Stub | Izvršena odgovornost u razgovoru | Provjerljiv trag |
+|---|---|---|
+| Core AI Manager | Jedan aktivan zahtjev, BIL provjera granica, rokovi i prekid | Kernel `ai.chat` zadatak, stvarni policy instrukcijski broj, prekid |
+| Link Bridge Elite | Veza s tipiziranim model rezultatom, registrima i BIL proračunom | Odabrana podržana tema, provjera ugovora ili stvarni Core rezultat |
+| Expansion Q | Verzionisani registar modela i podržanih mogućnosti | Provjeren fingerprint, dimenzije i parametarski metadata podaci |
+| Adaptive Recovery | Odbijanje neispravnog kandidata, zaštita prethodne historije i prekid | Kandidat odbijen, greška ili otkazivanje bez djelimične potvrde |
+| Holo Interaction | Prikaz potvrđene poruke i odabranog jezika, pristupačni tekstualni statusi | Historija, vidljivi izlaz i stvarni završen događaj |
+| Fallback Executor | Provjerena izvorna alternativa ili suzdržavanje | Odvojeni `grounded-fallback` i `abstained` načini |
+| Vision Q | Stvarni koraci, trajanje, cache odluke i matematički brojači | Token count, operacijski obračun i događaji tog izvršavanja |
+
+Sedam stubova su **sedam odgovornosti**, ne sedam AI modela. Kartice u interfejsu
+odražavaju zabilježene događaje; naziv stuba nije dokaz nove mogućnosti hardvera,
+sigurnosti ili inteligencije. Za upit o stubovima odgovor čita stvarni
+`CLEA7.PILLARS` registar i zato je označen kao Runtime ugovor.
+
+## Neuralno generisanje, provjerena baza i cache nisu isto
+
+Odvojeni `knowledge.json` je originalni izvorno povezani ugovor činjenica.
+Usmjeravanje koristi izričito opisane alias nazive i termine iz trening pitanja;
+ne koristi izdvojena test pitanja kao retrieval primjere. To usmjeravanje je
+leksički postupak, a ne dodatni skriveni neuronski model.
+
+Host prihvata neuralni kandidat samo kada njegov završeni normalizovani sadržaj
+odgovara kanonskom dozvoljenom odgovoru odabrane teme i jezika. Ovo je namjerno
+uska provjera: trenutno ne potvrđuje proizvoljno novo objašnjenje ili parafrazu.
+Ako generisanje pogriješi, provjerena baza može dati izričito označen rezervni
+tekst. Ako nije pronađena dovoljno podržana tema, sistem kaže da nema provjereno
+znanje. Prikaz odbijenog, još neprovjerenog neuralnog teksta nije korišten kao
+odgovor korisniku; status može pokazati napredak tokena bez objave tog sadržaja.
+
+| Način u rezultatu | Šta se dogodilo |
+|---|---|
+| `neural` | Vlastiti model je zaista generisao tokene i kandidat je prošao usku provjeru poznate činjenice. |
+| `grounded-fallback` | Model je bio pozvan, ali kandidat nije prihvaćen; prikazan je posebno označen tekst iz provjerene baze. |
+| `abstained` | Nema dovoljno podržanog znanja; ne tvrdi se da je model odgovorio. |
+| `cache` | Ponovo je korišten tačan ranije provjeren odgovor; `originalMode` čuva njegov raniji način. Nema nove neuralne generacije. |
+| `bil` | Izvršena je stvarna BIL aritmetika; ne pripisuje se modelu. |
+| `runtime-contract` | Pročitan je stvarni registar sedam Runtime stubova. |
+
+Razgovorni CACI koristi zaseban nasumični session scope i samo RAM, sa obračunskim
+budžetom od 65.536 bajtova; persistent storage je isključen. Ključ uključuje
+verziju modula, fingerprint modela, SHA256 baze, stvarno pitanje, jezik i kontekst
+teme kada je primjenjiv. Pogodak se ponovo provjerava prema temi i dozvoljenom
+odgovoru. Čišćenje cachea ne briše historiju ili Studio projekte.
+
+Cache ne uči nove činjenice, ne stvara dodatni fizički RAM i nije dump cijelog
+korisničkog stanja. Budžet zadržanih serijalizovanih podataka nije ukupna RAM
+potrošnja. Model, JSON parsing, float polja, Worker, DOM, povremene kopije i
+preglednik koriste dodatnu memoriju. Operacijski brojač također nije izmjerena
+ušteda vremena, CPU ciklus ili dokaz manje potrošnje baterije.
+
+## Izvršni ugovori, rokovi i integritet
+
+Manifest je `clea7.chat.manifest/1`; neuralni model `clea7.neural-chat/1`;
+poruke radnika `clea7.chat.worker/1`. Host provjerava fingerprint, arhitekturu,
+dozvoljene dimenzije, broj parametara i njihov obračun. Trenutni dekoder koristi
+725 tokena, embedding 32 i hidden 96; ugovor odbija nedozvoljene veličine.
+
+Radnik dobija samo fiksnu operaciju i pitanje, ne putanju skripte ili naredbu.
+Rezultat mora imati ispravan ID zadatka, 1–48 dozvoljenih token ID-eva, EOS samo
+na kraju, usklađenu oznaku završetka, isti fingerprint i provjerljive numeričke
+metapodatke. Nezavršen izlaz mora doseći token budžet. Broj koraka mora odgovarati
+broju tokena. Očekivani obračun multiply-add operacija je:
+
+```text
+D*H + steps*(2*D*H + H*H + H*V)
+```
+
+`D`, `H` i `V` su deklarisane dimenzije. Taj brojač opisuje implementirane
+matrične petlje; ne uključuje svaki trošak tokenizacije, hashiranja, aktivacija,
+parsinga, rasporeda ili DOM-a i nije mjerenje ukupnih hardverskih instrukcija.
+
+Učitavanje statičnih podataka ima vremenske i veličinske granice, bez praćenja
+preusmjerenja. Model payload je ograničen na 2 MiB, baza na 128 KiB, manifest na
+16 KiB. Provjeravaju se stvarni pročitani bajtovi, ne samo `Content-Length`.
+Pojedinačni asset read ima rok do 15 sekundi; inicijalizacija i zahtjev prema
+radniku imaju zasebne rokove od 20 sekundi. Zaustavljanje prekida aktivni Worker.
+Zakašnjeli odgovor ili ranija generacija ne smiju potvrditi historiju.
+
+Prije generisanja provjeravaju se SHA256 svakog parametarskog bloka i kanonski
+fingerprint cijelog modela. Manifest provjerava veličinu i SHA256 model datoteke
+i baze. Objavljeni fingerprint modela:
+
+```text
+4a2ecae4216ae50ccbf0d2280331ea1f59bfe2a691aa22bcddd2bfa211e15e76
+```
+
+SHA256 tačne model JSON datoteke od 732.175 bajtova:
+
+```text
+e5f7c43f824d692af2b55f525ba4264c5ebec676d257885b275112781609401a
+```
+
+Fingerprint strukture i SHA256 datoteke imaju različite namjene i nisu isti
+sažetak. Isto tako, trening izvještaj koristi kanonski JSON sažetak korpusa,
+koji se može razlikovati od SHA256 formatirane JSON datoteke korpusa.
+Hash potvrđuje podudaranje sadržaja; nije potpis izdavača niti potvrda da je
+model tačan ili bez greške.
+
+## Privatnost, govor i offline ponašanje
+
+Razgovor ne koristi eksterni AI API, API ključ, komercijalnu pretplatu,
+automatsko treniranje na korisničkim porukama, mikrofon, kameru ili senzore.
+U browser hostu poruka se ne šalje serveru za inference. Ipak, otvaranje stranice
+uobičajeno preuzima njene statične datoteke, uključujući **vlastiti** model od
+oko 0,73 MB, bazu i kod. Server stranice može vidjeti obične mrežne zahtjeve za
+te datoteke; to nije tvrdnja da mrežna komunikacija ne postoji.
+
+Korisnik ne bira niti ručno instalira tuđe težine. Učitavanje vlastitog malog
+modela iz aplikacijskog paketa i prikaz veličine nisu skrivena instalacija
+velikog modela. Nema vanjskog model discoveryja ili proizvoljnog izvora težina.
+
+Aktivna historija i vidljivi transkript zadržavaju najnovijih 12 razmjena,
+odnosno do 24 korisničke/asistentske poruke, u RAM-u te sesije. Za podržani
+kratki nastavak koristi se ID prethodne teme i njegova izričita veza s narednom
+temom. Model ne trenira na tom razgovoru niti čita neograničenu historiju.
+Kernel također drži ograničene dijagnostičke zadatke i događaje u memoriji.
+`Obriši ovaj razgovor` uklanja kontekst, zadatke i njegov cache; nema automatske
+trajne pohrane razgovora. Ovaj RAM kontekst nije enkriptovani trezor ili zaštita
+od vlasnika uređaja, ekstenzija ili skripti istog porijekla.
+
+**Govor:** dugme za čitanje koristi postojeći `SpeechSynthesis` samo ako uređaj
+izloži glas sa `localService === true` i podržanim jezikom. Za bosanski izlaz
+trenutno se prihvata lokalni bosanski, hrvatski ili srpski glas; za engleski
+lokalni engleski glas. Dostupnost se ponovo provjerava pri promjeni inventara
+glasova. Kada takvog glasa nema, dugme je onemogućeno, a tekst je dostupan.
+Ne uvodi se obavezni cloud TTS, STT ili dozvola mikrofona. Postojanje glasa nije
+dokaz razumljivog ili zaista čujnog izlaza na fizičkom uređaju; takva provjera
+još nije potvrđena. Ovo nije certificirano pomagalo pristupačnosti.
+
+**Offline:** već učitani i aktivni vlastiti model može generisati odgovore bez
+mreže. Ako Worker bude prekinut ili se stranica ponovo učita, datoteke mogu
+ponovo zahtijevati host. Ova isporuka sama po sebi ne dodaje service worker,
+PWA instalaciju ili garantovan offline reload. Za lokalni SDK sve potrebne
+datoteke su lokalne; Node koristi datotečni sistem, ne inference server.
+
+## SDK koji zaista koristi isti model i Core
+
+Iz korijena projekta, s instaliranim podržanim Node.js:
+
+```sh
+node sdk/clea-chat.cjs info
+node sdk/clea-chat.cjs validate
+node sdk/clea-chat.cjs ask 'Šta je BIL?' --language bs --no-cache
+node sdk/clea-chat.cjs ask 'What is BIL?' --language en
+node sdk/clea-chat.cjs ask '23 * 4' --language bs
+```
+
+Komande su implementirane i vraćaju JSON. `validate` provjerava stvarne lokalne
+asset bajtove i izvršava BIL policy probu; nije samo provjera postojanja modula.
+`ask` koristi isti model, bazu i razgovorni Runtime bez Studio interfejsa.
+
+`createLocal()` nudi `ask`, `validate`, `info`, `cancel`, `clear`, `clearCache`
+i `close`, uz čitanje ograničene historije i dijagnostike. Novi upit poslije
+zatvaranja se odbija. CLI podržava samo dokumentovane komande i opcije; ne
+prima shell radnje, API ključ ili proizvoljan model URL.
+
+SDK učitava 12 fiksnih pregledanih Core/Runtime modula u Node `vm` kontekst sa
+isključenim string/WASM generisanjem koda. Model, manifest i baza imaju dodatne
+provjere putanje, veličine i integriteta. **Node `vm` nije OS sigurnosni sandbox**
+za proizvoljan zlonamjerni JavaScript. Ovdje se takav kod ne prihvata: pitanja
+ostaju ograničeni podaci, a učitani platformskih moduli pripadaju pouzdanom
+paketu. Browser Worker također nije univerzalni sandbox za proizvoljan native
+kod.
+
+## Threat model
+
+| Prijetnja | Ugrađena granica / stvarna provjera | Preostala granica |
+|---|---|---|
+| Prevelik ili neispravan ulaz | Tip, znakovi, tokeni, jezik, BIL policy i jedan aktivan zadatak | Nije ukupni OS heap limit |
+| Pokvaren model ili baza | Bajtni limit, putanja, SHA256, fingerprint i numeričke provjere | Kompromitovani host može promijeniti i pouzdani kod/manifest; hash nije digitalni potpis |
+| Neispravan ili zakašnjeli Worker odgovor | Format, ID, token/EOS/cost ugovor, rok, generacija i prekid | Pouzdani Worker kod je dio TCB-a, a metadata nisu kriptografski dokaz svake računice |
+| Pogrešan, ali uvjerljiv neuralni odgovor | Uska provjera poznate teme/odgovora, odvojeno označen fallback ili suzdržavanje | Sam model i leksičko usmjeravanje mogu pogriješiti; validacija nije univerzalni dokaz istine |
+| Prompt injection / zahtjev za izvršavanje koda | Pitanje ne bira skriptu, putanju, model ili dozvolu; nema `eval`/shell izvođenja | Nema tvrdnje da prepoznavanje svake zlonamjerne formulacije rješava sve buduće alate |
+| Brisanje ili prekid tokom rada | Prekid generacije, nema djelimične potvrde historije, izolovan cache scope | Podaci ostaju privremeni i mogu nestati zatvaranjem stranice |
+| Neodobren prijenos poruka ili učenje | Nema inference API-ja, STT-a, telemetrije ili automatskog user-input treniranja | Uobičajeni hosting zahtjevi i lokalne skripte/ekstenzije ostaju dio okruženja |
+| Izmišljene AI zasluge | Različiti `neural`, `bil`, `cache`, `grounded-fallback`, `abstained` i `runtime-contract` rezultati | Izvještaji moraju zadržati tu podjelu i ne sabirati fallback u neuralnu tačnost |
+
+Nema automatske primjene generisanog koda, pristupa datotekama korisnika,
+pokretanja host komandi, odobravanja senzorskih dozvola ili izvršavanja vanjskih
+radnji iz razgovora. To se ne smije naknadno uvoditi samo zato što model može
+napisati takav tekst. Budući alati zahtijevaju zasebne tipizirane ugovore,
+odgovarajuće dozvole i provjerljivo odobrenje osjetljivih radnji.
+
+## Izvršene provjere i acceptance matrica
+
+Sljedeći lokalni testovi su stvarno izvršeni. Kontrolisani failure transporti u
+sigurnosnim testovima testiraju granice i oporavak; nisu dokaz neuralne tačnosti.
+
+| Provjera | Rezultat u ovom checkpointu | Dokaz |
+|---|---|---|
+| Gradijenti, promjena parametara, ponovljivost i izolacija heldout skupa | Pet grupa prošlo; uključeno sedam nezavisnih finite-difference sondi | `python scripts/check_clea_chat_training.py` |
+| JS forward matematika i NumPy parity, autoregresivni tokeni, hash i ograničenja | Osam grupa prošlo | `node neural/test_decoder.cjs` |
+| Raw izdvojena generacija | 51/60 tačnih token sekvenci | `node scripts/evaluate_clea_chat.cjs`, `neural/js-evaluation.json` |
+| Razgovorni Runtime, stvarni Core, fallback, cache, dozvole/odbijanje i kontekst | 14 grupa prošlo | `node tests/test_clea_chat.cjs` |
+| Lifecycle: prekid, rok, kasni rezultat, observer i neispravan Worker ugovor | Sedam grupa prošlo | `node neural/runtime-audit.cjs` |
+| Nezavisni SDK, model/baza integritet, CLI, kopirani asset tree i zatvaranje | Devet grupa prošlo | `node tests/test_chat_sdk.cjs` |
+| Runtime benchmark svih 60 izdvojenih pitanja | 50 neuralnih, osam označenih fallbacka, dva suzdržavanja; nula cache pogodaka | `neural/runtime-audit.json` |
+| Stvarni browser Worker, Studio UI, offline poslije učitavanja i mobilni tok | Test implementiran sa 11 scenarija; izvršavanje / hosted dokaz još nije potvrđeno ovim tekstom | `tests/test_clea_chat_browser.cjs` |
+| Izgradnja novog Windows/Android instalatera i GUI na uređaju | Nije potvrđeno ovim inkrementom | Potreban poseban native build i test |
+| Fizički lokalni govor i asistivne tehnologije | Nije potvrđeno | Potreban stvarni uređaj/korisnički test |
+| Produkcijska objava na vlasnikovoj domeni | Nije dokaziva samom izradom koda | Potrebni Pages/deployment i stvarna HTTPS provjera |
+
+Browser test sadrži stvarne originalne težine, Worker i BIL Core; nema lažnog
+model servera. Provjerava prikaz stvarnog neuralnog odgovora, cache oznaku,
+poznatu pogrešku sa fallbackom, BIL računanje i grešku dijeljenja nulom, nastavak
+teme, suzdržavanje, oba jezika, zaustavljanje, offline generisanje nakon
+učitavanja, brisanje bez izmjene projekta, širinu 390 px i odsustvo prompt/API
+prijenosa. Dok nema stvarnog uspješnog izvršavanja, broj scenarija nije rezultat.
+Zaseban budući CI zapis treba navesti tačan commit, run ID, rezultat, artefakte
+i eventualne izostavljene platforme.
+
+## Ponovno treniranje bez skrivenih zavisnosti
+
+Za razvojno treniranje trebaju Python i kompatibilan NumPy; to nisu zavisnosti
+browser inferencea. Za ponavljanje prvog recepta u novu datoteku:
+
+```sh
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python scripts/train_clea_chat.py \
+  --output neural/another-model.json --report neural/another-report.json
+python scripts/train_clea_chat.py --check-gradients
+python scripts/check_clea_chat_training.py
+node neural/test_decoder.cjs
+node scripts/evaluate_clea_chat.cjs
+node tests/test_clea_chat.cjs
+node neural/runtime-audit.cjs
+node tests/test_chat_sdk.cjs
+```
+
+Treniranje ne prepisuje postojeći model bez izričitog `--replace`. Vlastiti
+novi model zahtijeva nove sažetke, manifest, test vektore i ponovljene provjere;
+ne smije samo zamijeniti datoteku pod starim fingerprintom. Za širenje znanja
+treba pripremiti nove legalne podatke i odvojene provjere, a ne povećati marketinške
+tvrdnje ili sakriti tuđi veliki model iza cachea.
+
+## Vlasništvo, porijeklo i poznata ograničenja
+
+Novi model kod, originalni sintetički korpus, trenirane težine i CLEA integracija
+napisani su za Brzo i Lokalno. Postojeće autorske obavijesti i projektni status
+licence ostaju na snazi; ovaj dokument ne dodjeljuje novu javnu licencu.
+Podaci i model nose vlastiti provenance zapis. NumPy, Node, preglednik i testni
+alati imaju svoje postojeće licence; originalna implementacija ne briše njihove
+uslove niti pretvara standardnu matematiku u isključivo vlasništvo.
+
+Besplatno korištenje nije automatski isto što i otvoreni kod. Isporuka modela u
+browseru također ne može tajno zadržati njegove bajtove od vlasnika uređaja.
+Autorsko pravo, ugovori/licence i moguća zaštita naziva su različiti od tehničkih
+sigurnosnih provjera. Nema tvrdnje o apsolutnoj pravnoj dopuštenosti, pravnoj
+jedinstvenosti, prvom takvom modelu na svijetu ili neprobojnoj zaštiti.
+
+Ova verzija posebno **ne** isporučuje: opće svjetsko/internetsko znanje,
+proizvoljno višekoračno rezonovanje, pretraživanje weba, automatsko učenje iz
+razgovora, generisanje svake aplikacije, slika ili videa, neograničenu memoriju,
+glasovni unos, certificiranu pristupačnost, novi native instalater ili
+garantovano izvršavanje na svakom uređaju. Jedan mali testni korpus ne može
+dokazati da je model brži, sigurniji ili sposobniji od svih drugih modela.
+
+## Tačan redoslijed nastavka
+
+1. Izvršiti i zabilježiti stvarni hosted browser test za tačan source commit;
+   popraviti greške i tek tada potvrditi browser isporuku i HTTPS link.
+2. Zadržati raw neuralnu tačnost, usmjeravanje, cache i fallback kao odvojene
+   metrike. Dodati neviđene teme/parafraze, adversarial pitanja i nove izvore
+   bez curenja testnog skupa u trening ili leksičke primjere.
+3. Proširivati originalni/legalno licencirani korpus po provjerljivim oblastima.
+   Ne uvoditi privatne razgovore u trening bez zasebnog jasnog korisničkog izbora.
+4. Istražiti bolji redoslijedno svjestan encoder i veći dekoder uz isti javni
+   ugovor, ali tražiti mjerenja kvaliteta, memorije i vremena prije tvrdnje o
+   napretku. Novi model nije kompatibilan samo zato što nosi isti naziv datoteke.
+5. Posebno provjeriti dugotrajni mobilni rad, stvarne lokalne glasove i asistivne
+   tehnologije. Potom potvrditi Windows/Android pakovanje i GUI, umjesto da se
+   dostupnost browser koda predstavlja kao native test.
+6. Zadržati sve ranije BIL/SDK/Runtime provjere i pravila odvojenosti aplikacijskih
+   podataka. Razgovor ne smije postati prečica oko dozvola, integriteta, pregleda
+   koda ili stvarnog izvršnog ugovora.
+
+**Zaključak checkpointa:** postoje vlastite naučene težine i stvarno generisanje
+razgovornih odgovora, sa mjerljivim ograničenjima i odvojeno označenim rezervnim
+putem. Široki opći razgovorni model ostaje dalji razvojni cilj, ne završen proizvod
+koji ovaj mali inkrement već dokazuje.

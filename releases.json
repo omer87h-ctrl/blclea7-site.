@@ -80,6 +80,15 @@
       "url": "downloads/primjer-universal-018.clea7",
       "size_bytes": 7317,
       "sha256": "e97f88da5d2725eb592680763008a6d130422ed5faedcef8622a48258046ea43"
+    },
+    {
+      "key": "conversation-sdk",
+      "name": "BL-CLEA-Conversation-SDK-0.20-test.zip",
+      "url": "downloads/BL-CLEA-Conversation-SDK-0.20-test.zip",
+      "size_bytes": 720941,
+      "sha256": "6fd676f2d0efad310efe9754bee996518c223383b4d0899956ea3c31d74cad07",
+      "version": "0.20.0-test",
+      "scope": "original domain neural model and offline Node SDK; no native binary"
     }
   ],
   "native": {
@@ -462,5 +471,10 @@
       "environment": "Local Node/Python and Chromium; actual extracted distribution tested"
     },
     "native_verification": false
+  },
+  "ai_overlay": {
+    "version": "0.20.0-test",
+    "manifest": "release/ai-020.json",
+    "scope": "original CLEA-domain conversation and checked application planner"
   }
 }
