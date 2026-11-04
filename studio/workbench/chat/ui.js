@@ -39,3 +39,151 @@ for(const b of root.querySelectorAll('[data-chat-question]'))b.onclick=()=>{$('c
 document.querySelector('[data-panel="clea-chat"]')?.addEventListener('click',()=>initialize());
 scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.speechSynthesis?.cancel?.();scope.speechSynthesis?.removeEventListener?.('voiceschanged',refreshVoices);voiceButtons.clear();},{once:true});
 })(globalThis);
+
+/* CLEA AI: one conversation entry, shared original CLEA tools.
+ * Historical Studio AI modules remain intact; no external service is invoked.
+ * This routes only explicitly supported app requests, never arbitrary source.
+ */
+(function(){
+ const $=id=>document.getElementById(id),nav=document.querySelector('[data-panel="clea-chat"]');
+ if(!nav||!$('chat-form'))return;
+ nav.textContent='CLEA AI';
+ for(const name of ['clea-ai','assistant']){
+  const button=document.querySelector('[data-panel="'+name+'"]');
+  if(button){button.hidden=true;button.setAttribute('aria-hidden','true');button.tabIndex=-1;}
+ }
+ const heading=document.querySelector('#clea-chat .clea-chat-heading h1');
+ if(heading)heading.textContent='CLEA AI';
+ const hint=document.querySelector('#clea-chat .chat-welcome p');
+ if(hint)hint.textContent='Jedan ulaz za razgovor i provjerenu izradu aplikacija. Trenutni neuronski model ima ograničeno znanje o CLEA platformi. Generator aplikacija je zaseban alat unutar istog CLEA sistema.';
+ const label=document.querySelector('label[for="chat-question"]');
+ if(label)label.textContent='Pitaj CLEA ili opiši aplikaciju';
+ const input=$('chat-question');
+ input.placeholder='Napravi aplikaciju za zalihe i radne naloge.';
+ const examples=document.querySelector('#clea-chat .chat-examples');
+ if(examples){
+  const sample=document.createElement('button');
+  sample.type='button';sample.textContent='Napravi aplikaciju za zalihe';
+  sample.onclick=()=>{input.value='Napravi aplikaciju za zalihe i radne naloge.';input.focus();};
+  examples.prepend(sample);
+ }
+ const form=$('chat-form'),log=$('chat-log');
+ const specs=[
+  ['stock',/^(zalihe|zaliha|zalih\w*|skladist\w*|magacin\w*|stock|inventory|warehouse)$/],
+  ['orders',/^(nalog\w*|naloz\w*|order\w*|radne|radnih)$/],
+  ['clients',/^(klijent\w*|kupac|kupc\w*|client\w*|customer\w*)$/],
+  ['expenses',/^(trosk\w*|rashod\w*|expense\w*|cost\w*)$/],
+  ['offers',/^(ponud\w*|predracun\w*|offer\w*|quote\w*)$/]
+ ];
+ const filler=new Set(['mi','aplikaciju','aplikacija','aplikacije','app','aplikaciju','za','sa','s','i','te','jednostavnu','jednostavnu','jednostavnu','lokalnu','lokalna','poslovnu','poslovna','evidenciju','evidencije','evidencija','radnih','radne','moju','moj','my','an','a','the','and','for','with','local','simple','business','application']);
+ const normalize=x=>String(x).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/đ/gi,'dj').toLowerCase();
+ function parse(value){
+  const valueNormalized=normalize(value),words=valueNormalized.match(/[a-z0-9]+/g)||[];
+  const verb=words[0]||'';
+  if(!/^(napravi|kreiraj|izradi|create|build|make|generate|dodaj|add)$/.test(verb))return null;
+  const calc=words.some(w=>/^(kalkulator\w*|calculator\w*)$/.test(w));
+  const moduleIds=[...new Set(words.flatMap(w=>specs.filter(([id,re])=>id!=='orders'||!/^radn/.test(w)||words.some(q=>/^nalog|^naloz|^order/.test(q))).filter(([,re])=>re.test(w)).map(([id])=>id)))];
+  if(!calc&&!moduleIds.length)return null;
+  const unknown=words.slice(1).filter(w=>!filler.has(w)&&!specs.some(([,re])=>re.test(w))&&!/^(kalkulator\w*|calculator\w*)$/.test(w));
+  if(unknown.length||calc&&moduleIds.length)return {kind:'unsupported',reason:'Zahtjev sadrži dodatne ili nepodržane funkcije: '+(unknown.join(', ')||'kombinacija kalkulatora i evidencija')+'. CLEA neće tiho preskočiti dio zahtjeva.'};
+  if(verb==='dodaj'||verb==='add')return {kind:'unsupported',reason:'Izmjena postojećeg projekta kroz razgovor još nije podržana. Trenutni projekt neće biti zamijenjen.'};
+  return calc?{kind:'calculator'}:{kind:'business',modules:moduleIds};
+ }
+ function node(tag,text){const n=document.createElement(tag);if(text!==undefined)n.textContent=String(text);return n;}
+ function message(author,content){
+  const article=node('article');article.className='chat-message '+(author==='Ti'?'user':'assistant');
+  article.append(node('p',author),node('div',content));log.append(article);
+  for(const row of [...log.querySelectorAll('.chat-message')].slice(0,-24))row.remove();
+  article.scrollIntoView({block:'nearest',behavior:'instant'});return article;
+ }
+ let toolBusy=false;
+ const status=x=>{$('chat-status').textContent=x;};
+ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+ function trace(label,detail){
+  const list=$('chat-events');if(!list)return;
+  const li=node('li');li.append(node('strong',label),node('span',detail));list.prepend(li);
+  while(list.children.length>40)list.lastElementChild.remove();
+ }
+ function saveJSON(project){
+  const blob=new Blob([JSON.stringify(project,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob),a=node('a');
+  a.href=url;a.download='clea-projekt.clea7';document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+ }
+ async function calculator(output){
+  if(!globalThis.CLEA7LocalAIWorkspace)throw Error('BIL provjereni generator nije učitan.');
+  const prompt=$('clea-ai-request');
+  prompt.value='Create a simple calculator application.';
+  prompt.dispatchEvent(new Event('input',{bubbles:true}));
+  $('clea-ai-generate').click();
+  for(let i=0;i<180;i++){
+   await sleep(100);
+   const w=globalThis.CLEA7LocalAIWorkspace;
+   if(!w.busy){
+    const proposal=w.proposal;
+    if(!proposal?.validation?.passed)throw Error($('clea-ai-status').textContent||'BIL prijedlog nije potvrđen.');
+    trace('Expansion Q','BIL izvor je generisan i provjeren kroz izvorni kompajler i Runtime.');
+    const note=node('p','BIL kalkulator je stvarno provjeren. Pregledaj izvor prije primjene.');
+    const details=node('details');details.append(node('summary','Izvor aplikacije'),node('pre',proposal.source));
+    const button=node('button','Pregledao sam — primijeni u Studiom');button.type='button';
+    button.onclick=async()=>{
+     if(!confirm('Primijeniti ovaj provjereni BIL prijedlog na trenutni Studio projekt?'))return;
+     const checked=$('clea-ai-reviewed');checked.checked=true;checked.dispatchEvent(new Event('change',{bubbles:true}));
+     if($('clea-ai-apply').disabled){status('Prijedlog više nije spreman; ponovi zahtjev.');return;}
+     $('clea-ai-apply').click();button.disabled=true;
+     for(let n=0;n<180&&globalThis.CLEA7LocalAIWorkspace.busy;n++)await sleep(100);
+     status($('clea-ai-status').textContent);
+    };
+    output.append(note,details,button);status('BIL prijedlog spreman za pregled.');return;
+   }
+  }
+  throw Error('BIL provjera nije završena u ograničenom vremenu.');
+ }
+ async function business(output,ids){
+  const API=globalThis.CLEA7Business,F=globalThis.CLEA7Format,studio=globalThis.CLEA7Workbench;
+  if(!API?.modules||!API?.create||!F?.validate||!studio)throw Error('CLEA Studio ili poslovni generator nisu učitani.');
+  const defs=API.modules(),selected=ids.map(id=>defs.find(m=>m.id===id));
+  if(selected.some(x=>!x))throw Error('Nedostaje provjereni CLEA modul.');
+  trace('Link Bridge Elite','Zahtjev je povezan s izvornim CLEA poslovnim modulima.');
+  const app=F.validate(API.create({name:'Moja CLEA aplikacija',company:'Moja CLEA aplikacija',modules:selected}));
+  trace('Expansion Q','Generator je napravio '+app.screens.length+' ekrana i '+Object.keys(app.flows).length+' izvršnih tokova.');
+  trace('Adaptive Recovery','CLEA Format je potvrdio projektnu strukturu.');
+  const summary=node('p','Prijedlog: '+selected.map(m=>m.title).join(', ')+'. '+app.screens.length+' ekrana; lokalni podaci. Projekt još nije promijenjen.');
+  const details=node('details');details.append(node('summary','Pregled strukture aplikacije'),node('pre',JSON.stringify({screens:app.screens.map(s=>({id:s.id,name:s.name})),tables:app.tables,flows:Object.keys(app.flows)},null,2)));
+  const download=node('button','Preuzmi prijedlog');download.type='button';download.onclick=()=>saveJSON(app);
+  const apply=node('button','Otvori u Studiom i testiraj');apply.type='button';
+  apply.onclick=async()=>{
+   if(!confirm('Ovo zamjenjuje trenutni projekt u Studiom. Ako imaš nespremljen rad, prvo ga sačuvaj ili preuzmi kopiju. Nastaviti?'))return;
+   try{
+    const checked=F.validate(app);
+    studio.open(checked);
+    apply.disabled=true;
+    const test=document.querySelector('[data-panel="test"]');test?.click();
+    await studio.run();
+    trace('Holo Interaction','Stvarni CLEA Runtime pokrenuo je pregled aplikacije.');
+    status('Aplikacija je pokrenuta. U kartici „Pokreni i testiraj“ probaj evidencije.');
+   }catch(error){status('Runtime nije završio pokretanje: '+error.message);}
+  };
+  output.append(summary,details,download,apply);
+  status('Aplikacija je pripremljena. Pregledaj prije primjene.');
+ }
+ form.addEventListener('submit',async event=>{
+  const question=input.value.trim(),intent=parse(question);
+  if(!intent||toolBusy)return;
+  event.preventDefault();event.stopImmediatePropagation();
+  if(!question)return;
+  message('Ti',question);input.value='';
+  const answer=message('CLEA · provjereni alat','Pripremam provjereni prijedlog.');
+  const content=answer.querySelector('div');
+  toolBusy=true;$('chat-send').disabled=true;status('CLEA AI provjerava zahtjev lokalno…');
+  try{
+   trace('Core AI Manager','Prepoznat je podržan zadatak, izvan slobodnog razgovora.');
+   content.textContent='';
+   if(intent.kind==='unsupported'){
+    content.textContent=intent.reason;trace('Fallback Executor','Nepodržan zahtjev je odbijen bez promjene projekta.');status(intent.reason);
+   }else if(intent.kind==='calculator'){await calculator(content);}
+   else await business(content,intent.modules);
+  }catch(error){content.textContent=error.message;trace('Fallback Executor','Zadatak nije primijenjen: '+error.message);status(error.message);}
+  finally{toolBusy=false;$('chat-send').disabled=false;}
+ },true);
+})();
