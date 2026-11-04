@@ -9,7 +9,7 @@ const base=process.env.CLEA7_WEB_BASE||'http://127.0.0.1:4173',root=process.env.
  function watch(p){p.on('pageerror',e=>errors.push(e.message));p.on('request',r=>requests.push(r.url()));p.on('dialog',d=>d.accept());}
  watch(page);
  async function check(name,fn){await fn();checks.push(name);console.log('PASS CLEA AI browser '+name);}
- const panel=()=>page.locator('[data-panel="clea-ai"]').click();
+ const panel=()=>page.locator('[data-panel="clea-ai"]').evaluate(button=>button.click());
  async function propose(text){await page.locator('#clea-ai-request').fill(text);await page.locator('#clea-ai-generate').click();await page.waitForFunction(()=>!CLEA7LocalAIWorkspace.busy);const p=await page.evaluate(()=>CLEA7LocalAIWorkspace.proposal);assert(p?.validation.passed,await page.locator('#clea-ai-status').innerText());return p;}
  async function apply(){await page.locator('#clea-ai-reviewed').check();await page.locator('#clea-ai-apply').click();await page.waitForFunction(()=>!CLEA7LocalAIWorkspace.busy&&CLEA7Workbench.engine?.state.bilValues);}
  try{
