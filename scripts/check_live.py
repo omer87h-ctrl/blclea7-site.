@@ -64,6 +64,9 @@ def check():
  for name in ['index.html','proizvodi.html','vizija.html','dokumentacija.html','preuzimanja.html','ai.html','privatnost.html','bil.html','novosti.html']:
   assert read(name)==(ROOT/name).read_bytes(),'Published page is not yet current: '+name
   verified_pages.append(name)
+ for name in ['razgovor/index.html','razgovor/boot.js','razgovor/standalone.css']:
+  assert read(name)==(ROOT/name).read_bytes(),'Published standalone conversation differs: '+name
+  verified_pages.append(name)
  page=read('preuzimanja.html').decode();assert 'Preuzmi SDK' in page and '/actions/runs/' not in page
  assert b'BIL' in read('bil.html')
  compiler=read('studio/workbench/bil-compiler.js');assert compiler==(ROOT/'studio/workbench/bil-compiler.js').read_bytes(),'Published BIL compiler differs.'

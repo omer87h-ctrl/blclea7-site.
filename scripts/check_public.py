@@ -14,7 +14,7 @@ class Page(HTMLParser):
    v=a.get('href')or a.get('src')
    if v:self.links.append(v)
 count=0
-for path in [*ROOT.glob('*.html'),*(ROOT/'studio').rglob('*.html')]:
+for path in [*ROOT.glob('*.html'),*(ROOT/'studio').rglob('*.html'),*(ROOT/'razgovor').glob('*.html')]:
  page=Page(path);assert len(set(page.ids))==len(page.ids),(path,'duplicate ids');assert page.mains==1,(path,'main landmarks')
  for url in page.links:
   parsed=urlsplit(url)
@@ -67,4 +67,9 @@ for item in ai['files']:
 model=json.loads((ROOT/'studio/workbench/chat/model.json').read_text())
 assert model['training']['externalWeights'] is False and model['training']['parameterCount']==135349
 assert 'workspace=clea-chat' in (ROOT/'ai.html').read_text()
+standalone=(ROOT/'razgovor/index.html').read_text()
+assert 'https://clea7.brzoilokalno.com/razgovor/' in standalone
+assert 'Content-Security-Policy' in standalone and '20 CLEA tema' in standalone
+assert 'href="razgovor/"' in (ROOT/'ai.html').read_text()
+assert 'studio.js' not in standalone and 'clea-chat' in standalone
 print('PUBLIC_ORIGINAL_CHAT model, Studio overlay and exact source hashes verified')
