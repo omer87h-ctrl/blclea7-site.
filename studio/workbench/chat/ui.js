@@ -187,3 +187,77 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   finally{toolBusy=false;$('chat-send').disabled=false;}
  },true);
 })();
+
+
+/* BL CLEA AI: opt-in locally served Apache-2.0 language component.
+ * It is not a separate assistant, does not auto-send older chats, and never
+ * transmits CV data or projects. Only opted-in messages go to 127.0.0.1.
+ */
+(function(){
+ const root=document.getElementById('clea-chat'),form=document.getElementById('chat-form');
+ if(!root||!form)return;
+ const input=document.getElementById('chat-question'),submit=document.getElementById('chat-send');
+ const status=document.getElementById('chat-status'),log=document.getElementById('chat-log');
+ const controls=document.createElement('div');controls.className='chat-local-model-controls';
+ const label=document.createElement('label');
+ const check=document.createElement('input');check.type='checkbox';check.id='clea-local-model-opt-in';
+ label.append(check,document.createTextNode(' Koristi lokalni jezički model BL CLEA AI (samo ovaj uređaj)'));
+ const note=document.createElement('p');
+ note.textContent='Opcionalno: razgovor s lokalnim Qwen3.5-0.8B modelom (Apache 2.0). Tek nakon uključivanja šalju se tvoje nove poruke lokalnom CLEA servisu; bez cloud API-ja. BIL i alati ostaju CLEA. Na telefonu nije dostupan ako model radi na HP-u.';
+ const notice=document.createElement('a');notice.href='../../model-licence.html';notice.textContent='Porijeklo modela i obaveze licence';notice.target='_blank';notice.rel='noopener noreferrer';
+ const feedback=document.createElement('p');feedback.id='clea-local-model-status';feedback.setAttribute('role','status');feedback.textContent='Podrazumijevano: izvorni mali CLEA model, bez lokalnog Qwen servisa.';
+ controls.append(label,note,notice,feedback);form.append(controls);
+ const endpoint='http://127.0.0.1:8765';
+ let active=false,loading=false,history=[];
+ check.addEventListener('change',async()=>{
+  active=false;history=[];
+  if(!check.checked){feedback.textContent='Izvorni CLEA model je aktivan. Lokalna istorija Qwen razgovora je odbačena.';return;}
+  feedback.textContent='Provjeravam lokalni CLEA servis na ovom uređaju…';
+  try{
+   const reply=await fetch(endpoint+'/health',{cache:'no-store',signal:AbortSignal.timeout(4000)});
+   if(!reply.ok)throw Error('Lokalni servis nije dostupan.');
+   const data=await reply.json();
+   if(data.brand!=='BL CLEA AI'||data.ready!==true)throw Error('Lokalna baza znanja još nije spremna.');
+   active=true;feedback.textContent='BL CLEA AI lokalni jezički model uključen. Poruke se šalju samo lokalnom servisu.';
+  }catch(error){check.checked=false;feedback.textContent='Lokalni CLEA servis nije pokrenut na ovom uređaju. Izvorni model ostaje dostupan.';}
+ });
+ function message(author,content){
+  const article=document.createElement('article');
+  article.className='chat-message '+(author==='Ti'?'user':'assistant');
+  article.dataset.mode='local';
+  const title=document.createElement('p');title.textContent=author;
+  const body=document.createElement('div');body.textContent=content;
+  article.append(title,body);log.append(article);
+  article.scrollIntoView({block:'nearest'});return body;
+ }
+ form.addEventListener('submit',async event=>{
+  if(!active||loading)return;
+  const question=input.value.trim();
+  if(!question)return;
+  event.preventDefault();event.stopImmediatePropagation();
+  if(question.length>1200){feedback.textContent='Poruka prelazi 1200 znakova.';return;}
+  loading=true;submit.disabled=true;
+  message('Ti',question);input.value='';
+  const body=message('BL CLEA AI · lokalni model','Obrađujem poruku…');
+  feedback.textContent='Lokalni model odgovara; razgovor nije poslan na cloud.';
+  try{
+   const response=await fetch(endpoint+'/chat',{
+    method:'POST',mode:'cors',cache:'no-store',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({question,history:history.slice(-8)}),
+    signal:AbortSignal.timeout(100000)
+   });
+   const data=await response.json();
+   if(!response.ok||typeof data.reply!=='string')throw Error(data.error||'Lokalni model nije vratio odgovor.');
+   body.textContent=data.reply;
+   if(Array.isArray(data.sources)&&data.sources.length){
+    const citation=document.createElement('small');
+    citation.textContent='Lokalni izvori: '+data.sources.map(x=>x.path).join(', ');
+    body.append(document.createElement('br'),citation);
+   }
+   history.push({role:'user',content:question},{role:'assistant',content:data.reply.slice(0,1200)});
+   history=history.slice(-8);
+   feedback.textContent='Odgovor iz lokalnog modela uz CLEA bazu i ograničenja sedam stubova.';
+  }catch(error){body.textContent='Lokalni model nije odgovorio: '+error.message;feedback.textContent='Zahtjev nije uspio; ništa nije pohranjeno u istoriju.';}
+  finally{submit.disabled=false;loading=false;}
+ },true);
+})();
