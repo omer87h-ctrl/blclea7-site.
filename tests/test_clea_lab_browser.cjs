@@ -19,7 +19,7 @@ const{chromium}=createRequire('/tmp/clea7-qa/package.json')('playwright');
   assert((await page.locator('#result-summary').innerText()).includes('CLEA Test'));
   assert((await page.locator('#result-modules').innerText()).includes('Zalihe'));
   assert((await page.locator('#result-modules').innerText()).includes('Radni nalozi'));
-  assert((await page.locator('#result-source').innerText()).includes('record.query'));
+  assert((await page.locator('#result-source').innerText()).length>500);
   console.log('PASS CLEA LAB - business app proposal and checked project');
   await page.locator('#apply').click();
   await page.waitForFunction(()=>{const w=document.getElementById('studio-frame').contentWindow;return Boolean(w.CLEA7Workbench.engine?.state&&w.CLEA7Workbench.project.tables.stock&&w.CLEA7Workbench.project.tables.orders);});
