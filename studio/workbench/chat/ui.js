@@ -2,7 +2,7 @@
 /* Original Studio conversation panel. All conversation data uses text nodes. */
 (function(scope){
 const root=document.getElementById('clea-chat');if(!root)return;
-root.innerHTML='<div class="clea-chat-shell"><section class="clea-chat-room"><header class="clea-chat-heading"><div><p class="eyebrow">BRZO I LOKALNO · VLASTITI MODEL</p><h1>Razgovaraj s CLEA</h1><p>Testni razgovorni model za CLEA teme. Generisanje se izvršava na tvom uređaju.</p></div><span id="chat-ready" role="status">Model nije učitan</span></header><div id="chat-log" role="log" aria-label="Razgovor s CLEA" aria-live="polite" aria-relevant="additions"><article class="chat-welcome"><h2>Jedan razgovor. Sedam stvarnih odgovornosti.</h2><p>Pitaj kako rade BIL, Runtime, Studio, SDK ili sedam stubova. Model ima početno znanje o CLEA platformi; za druga područja jasno kaže da nema provjeren odgovor.</p><div class="chat-examples"><button type="button" data-chat-question="Objasni sedam stubova.">Kako radi sedam stubova?</button><button type="button" data-chat-question="Šta je BIL?">Objasni BIL</button><button type="button" data-chat-question="Kako radi CACI?">Šta pamti cache?</button><button type="button" data-chat-question="Koliko je 23 * 4?">Provjereni proračun</button></div></article></div><form id="chat-form"><label for="chat-question">Tvoje pitanje</label><textarea id="chat-question" maxlength="1200" rows="3" placeholder="Šta CLEA Runtime stvarno radi?"></textarea><div class="chat-composer-actions"><label for="chat-language">Jezik odgovora<select id="chat-language"><option value="bs">Bosanski</option><option value="en">English</option></select></label><button id="chat-send" type="submit" class="primary">Pošalji</button><button id="chat-stop" type="button" disabled>Zaustavi</button></div><p id="chat-status" role="status" aria-live="polite">Razgovor ostaje u ovoj sesiji. Nema AI API-ja ni automatskog treniranja na tvojim porukama.</p></form></section><aside class="clea-chat-inspector"><div class="chat-model-card"><p class="eyebrow">CLEA RUNTIME · 7</p><h2>Sedam stubova</h2><div id="chat-pillars"></div></div><div class="chat-model-card"><h2>Vlastito jezgro razgovora</h2><p id="chat-model-info">Model je dio aplikacije. Ne biraš niti ručno instaliraš tuđe težine.</p><p class="chat-scope">Početno znanje: 20 CLEA tema. Ovo nije opći model s internetskim znanjem.</p><button id="chat-retry" type="button">Učitaj / provjeri model</button><label class="chat-cache-option"><input id="chat-cache" type="checkbox" checked> Ponovo koristi provjerene odgovore</label><button id="chat-clear-cache" type="button">Očisti razgovorni cache</button><button id="chat-clear" type="button">Obriši ovaj razgovor</button><details><summary>Stvarno izvršavanje i privatnost</summary><p>Tekst poruke ne ide serveru za obradu. Datoteke vlastitog modela učitavaju se s ove stranice. Odgovor modela provjerava se prema podržanoj temi; rezervni odgovor je posebno označen. Historija je u RAM-u ove sesije. Zadržava se najnovijih 12 razmjena; ništa se ne čuva trajno.</p><p id="chat-memory"></p><ol id="chat-events"></ol></details></div></aside></div>';
+root.innerHTML='<div class="clea-chat-shell"><section class="clea-chat-room"><header class="clea-chat-heading"><div><p class="eyebrow">BL CLEA AI · BRZO I LOKALNO</p><h1>Razgovaraj s CLEA</h1><p>Jedan razgovor, provjereni CLEA alati i opcionalna veza s HP serverom.</p></div><span id="chat-ready" role="status">Model nije učitan</span></header><div id="chat-log" role="log" aria-label="Razgovor s CLEA" aria-live="polite" aria-relevant="additions"><article class="chat-welcome"><h2>Jedan razgovor. Sedam stvarnih odgovornosti.</h2><p>Pitaj kako rade BIL, Runtime, Studio, SDK ili sedam stubova. Model ima početno znanje o CLEA platformi; za druga područja jasno kaže da nema provjeren odgovor.</p><div class="chat-examples"><button type="button" data-chat-question="Objasni sedam stubova.">Kako radi sedam stubova?</button><button type="button" data-chat-question="Šta je BIL?">Objasni BIL</button><button type="button" data-chat-question="Kako radi CACI?">Šta pamti cache?</button><button type="button" data-chat-question="Koliko je 23 * 4?">Provjereni proračun</button></div></article></div><form id="chat-form"><label for="chat-question">Tvoje pitanje</label><textarea id="chat-question" maxlength="1200" rows="3" placeholder="Šta CLEA Runtime stvarno radi?"></textarea><div class="chat-composer-actions"><label for="chat-language">Jezik odgovora<select id="chat-language"><option value="bs">Bosanski</option><option value="en">English</option></select></label><button id="chat-send" type="submit" class="primary">Pošalji</button><button id="chat-stop" type="button" disabled>Zaustavi</button></div><p id="chat-status" role="status" aria-live="polite">Razgovor ostaje u ovoj sesiji. Nema automatskog treniranja na tvojim porukama.</p></form></section><aside class="clea-chat-inspector"><div class="chat-model-card"><p class="eyebrow">CLEA RUNTIME · 7</p><h2>Sedam stubova</h2><div id="chat-pillars"></div></div><div class="chat-model-card"><h2>Lokalni probni model · 20 CLEA tema</h2><p id="chat-model-info">Model je dio aplikacije. Ne biraš niti ručno instaliraš tuđe težine.</p><p class="chat-scope">Početno znanje: 20 CLEA tema. Ovo nije opći model s internetskim znanjem.</p><button id="chat-retry" type="button">Učitaj / provjeri model</button><label class="chat-cache-option"><input id="chat-cache" type="checkbox" checked> Ponovo koristi provjerene odgovore</label><button id="chat-clear-cache" type="button">Očisti razgovorni cache</button><button id="chat-clear" type="button">Obriši ovaj razgovor</button><details><summary>Stvarno izvršavanje i privatnost</summary><p>U lokalnom probnom načinu tekst poruke ne ide serveru za obradu. Ako uključiš HP servis, nove poruke i historija te sesije šalju se njemu. Datoteke lokalnog modela učitavaju se s ove stranice. Odgovor modela provjerava se prema podržanoj temi; rezervni odgovor je posebno označen. Historija je u RAM-u ove sesije. Zadržava se najnovijih 12 razmjena; ništa se ne čuva trajno.</p><p id="chat-memory"></p><ol id="chat-events"></ol></details></div></aside></div>';
 const $=id=>document.getElementById(id),node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=String(text);return e;};
 let busy=false,loaded=false,loading=false,disposed=false,turn=0;
 const status=text=>{$('chat-status').textContent=text;};
@@ -189,75 +189,65 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
 })();
 
 
-/* BL CLEA AI: opt-in locally served Apache-2.0 language component.
- * It is not a separate assistant, does not auto-send older chats, and never
- * transmits CV data or projects. Only opted-in messages go to 127.0.0.1.
+/* One BL CLEA AI conversation: shared HP transport and an explicit local option.
+ * Existing typed CLEA tools above keep their review/validation path.
  */
 (function(){
  const root=document.getElementById('clea-chat'),form=document.getElementById('chat-form');
- if(!root||!form)return;
+ if(!root||!form||!globalThis.CLEA7AI)return;
  const input=document.getElementById('chat-question'),submit=document.getElementById('chat-send');
  const status=document.getElementById('chat-status'),log=document.getElementById('chat-log');
  const controls=document.createElement('div');controls.className='chat-local-model-controls';
- const label=document.createElement('label');
- const check=document.createElement('input');check.type='checkbox';check.id='clea-local-model-opt-in';
- label.append(check,document.createTextNode(' Koristi lokalni jezički model BL CLEA AI (samo ovaj uređaj)'));
- const note=document.createElement('p');
- note.textContent='Opcionalno: razgovor s lokalnim Qwen3.5-0.8B modelom (Apache 2.0). Tek nakon uključivanja šalju se tvoje nove poruke lokalnom CLEA servisu; bez cloud API-ja. BIL i alati ostaju CLEA. Na telefonu nije dostupan ako model radi na HP-u.';
- const notice=document.createElement('a');notice.href='../../model-licence.html';notice.textContent='Porijeklo modela i obaveze licence';notice.target='_blank';notice.rel='noopener noreferrer';
- const feedback=document.createElement('p');feedback.id='clea-local-model-status';feedback.setAttribute('role','status');feedback.textContent='Podrazumijevano: izvorni mali CLEA model, bez lokalnog Qwen servisa.';
- controls.append(label,note,notice,feedback);form.append(controls);
- const endpoint='http://127.0.0.1:8765';
- let active=false,loading=false,history=[];
- check.addEventListener('change',async()=>{
-  active=false;history=[];
-  if(!check.checked){feedback.textContent='Izvorni CLEA model je aktivan. Lokalna istorija Qwen razgovora je odbačena.';return;}
-  feedback.textContent='Provjeravam lokalni CLEA servis na ovom uređaju…';
-  try{
-   const reply=await fetch(endpoint+'/health',{cache:'no-store',signal:AbortSignal.timeout(4000)});
-   if(!reply.ok)throw Error('Lokalni servis nije dostupan.');
-   const data=await reply.json();
-   if(data.brand!=='BL CLEA AI'||data.ready!==true)throw Error('Lokalna baza znanja još nije spremna.');
-   active=true;feedback.textContent='BL CLEA AI lokalni jezički model uključen. Poruke se šalju samo lokalnom servisu.';
-  }catch(error){check.checked=false;feedback.textContent='Lokalni CLEA servis nije pokrenut na ovom uređaju. Izvorni model ostaje dostupan.';}
- });
+ const publicLabel=document.createElement('label'),publicCheck=document.createElement('input');publicCheck.type='checkbox';publicCheck.id='clea-public-model-opt-in';publicCheck.disabled=true;
+ publicLabel.append(publicCheck,document.createTextNode(' Razgovaraj s BL CLEA AI na HP serveru'));
+ const note=document.createElement('p');note.textContent='U ovom načinu šalju se samo tvoje nove poruke i do četiri prethodne razmjene iz iste sesije. Projekt i CV se ne šalju. Nema automatskog pamćenja ili treniranja.';
+ const advanced=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Napredno: vlastiti lokalni servis';
+ const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.id='clea-local-model-opt-in';
+ label.append(check,document.createTextNode(' Koristi servis na ovom uređaju (127.0.0.1)'));advanced.append(summary,label);
+ const notice=document.createElement('a');notice.href=new URL('model-licence.html',new URL('../../../',document.currentScript.src)).href;notice.textContent='Porijeklo jezičke komponente i licence';notice.target='_blank';notice.rel='noopener noreferrer';
+ const feedback=document.createElement('p');feedback.id='clea-local-model-status';feedback.setAttribute('role','status');feedback.textContent='Provjeravam konfiguraciju javnog povezivanja…';
+ const mount=document.createElement('div');mount.className='clea-access-challenge';mount.hidden=true;
+ controls.append(publicLabel,note,advanced,notice,feedback,mount);form.append(controls);
+ const client=CLEA7AI.create({challengeMount:mount,onStatus:text=>{feedback.textContent=text;status.textContent=text;}});
+ let active=false,loading=false,publicAvailable=false;
+ CLEA7AI.configuration().then(config=>{
+  const preview=config.previewOnly&&new URL(location.href).searchParams.get('clea-verify')===config.deploymentId;
+  publicAvailable=Boolean(config.enabled||preview);publicCheck.disabled=!publicAvailable;
+  feedback.textContent=publicCheck.disabled?'Javni HP server još nije povezan. Lokalni mali model ispod ima samo 20 CLEA tema.':preview?'Provjera javne veze · još nije potvrđena dostupnost za sve korisnike.':'HP veza je podešena. Uključi je za razgovor; ne instaliraš model.';
+ }).catch(()=>{feedback.textContent='Konfiguracija HP veze nije dostupna. Nema slanja poruka serveru.';});
+ async function activate(selected){
+  if(loading)return;
+  active=false;client.reset();
+  if(!selected.checked){feedback.textContent='Slanje modelu na serveru je isključeno; njegova historija ove sesije je obrisana.';return;}
+  const other=selected===check?publicCheck:check;other.checked=false;
+  loading=true;submit.disabled=true;check.disabled=true;if(selected===publicCheck)publicCheck.disabled=true;
+  feedback.textContent='Provjeravam BL CLEA AI servis…';
+  try{client.useLocal(selected===check);await client.check();active=true;feedback.textContent=selected===check?'BL CLEA AI lokalni servis uključen. Šalju se samo nove poruke.':'BL CLEA AI HP servis uključen. Potvrda pristupa slijedi prije prvog pitanja.';}
+  catch(error){selected.checked=false;feedback.textContent=error.message+' Poruka nije poslana modelu.';}
+  finally{loading=false;submit.disabled=false;check.disabled=false;if(selected===publicCheck)publicCheck.disabled=false;}
+ }
+ check.addEventListener('change',()=>activate(check));publicCheck.addEventListener('change',()=>activate(publicCheck));
  function message(author,content){
-  const article=document.createElement('article');
-  article.className='chat-message '+(author==='Ti'?'user':'assistant');
-  article.dataset.mode='local';
-  const title=document.createElement('p');title.textContent=author;
-  const body=document.createElement('div');body.textContent=content;
-  article.append(title,body);log.append(article);
-  article.scrollIntoView({block:'nearest'});return body;
+  const article=document.createElement('article');article.className='chat-message '+(author==='Ti'?'user':'assistant');article.dataset.mode=check.checked?'local':'hp';
+  const title=document.createElement('p');title.textContent=author;const body=document.createElement('div');body.textContent=content;article.append(title,body);log.append(article);
+  for(const row of [...log.querySelectorAll('.chat-message')].slice(0,-24))row.remove();article.scrollIntoView({block:'nearest'});return body;
  }
  form.addEventListener('submit',async event=>{
-  if(!active||loading)return;
-  const question=input.value.trim();
-  if(!question)return;
-  event.preventDefault();event.stopImmediatePropagation();
+  if(!active&&!loading)return;
+  event.preventDefault();event.stopImmediatePropagation();if(loading)return;
+  const question=input.value.trim();if(!question)return;
   if(question.length>1200){feedback.textContent='Poruka prelazi 1200 znakova.';return;}
-  loading=true;submit.disabled=true;
-  message('Ti',question);input.value='';
-  const body=message('BL CLEA AI · lokalni model','Obrađujem poruku…');
-  feedback.textContent='Lokalni model odgovara; razgovor nije poslan na cloud.';
+  loading=true;submit.disabled=true;check.disabled=true;publicCheck.disabled=true;
+  document.getElementById('chat-stop').disabled=false;
+  message('Ti',question);input.value='';const body=message('BL CLEA AI','Obrađujem poruku…');
   try{
-   const response=await fetch(endpoint+'/chat',{
-    method:'POST',mode:'cors',cache:'no-store',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({question,history:history.slice(-8)}),
-    signal:AbortSignal.timeout(100000)
-   });
-   const data=await response.json();
-   if(!response.ok||typeof data.reply!=='string')throw Error(data.error||'Lokalni model nije vratio odgovor.');
-   body.textContent=data.reply;
-   if(Array.isArray(data.sources)&&data.sources.length){
-    const citation=document.createElement('small');
-    citation.textContent='Lokalni izvori: '+data.sources.map(x=>x.path).join(', ');
-    body.append(document.createElement('br'),citation);
-   }
-   history.push({role:'user',content:question},{role:'assistant',content:data.reply.slice(0,1200)});
-   history=history.slice(-8);
-   feedback.textContent='Odgovor iz lokalnog modela uz CLEA bazu i ograničenja sedam stubova.';
-  }catch(error){body.textContent='Lokalni model nije odgovorio: '+error.message;feedback.textContent='Zahtjev nije uspio; ništa nije pohranjeno u istoriju.';}
-  finally{submit.disabled=false;loading=false;}
+   const data=await client.ask(question);body.textContent=data.reply;
+   if(data.sources.length){const citation=document.createElement('small');citation.textContent='Odobreni izvori: '+data.sources.map(x=>typeof x.path==='string'?x.path:'').filter(Boolean).join(', ');body.append(document.createElement('br'),citation);}
+   feedback.textContent=data.transport==='hp'?'Odgovor s HP servera. Provjeri važne tvrdnje.':'Odgovor lokalnog servisa. Provjeri važne tvrdnje.';status.textContent=feedback.textContent;
+  }catch(error){body.textContent=error.message;feedback.textContent='Nema automatskog ponavljanja niti zamjene odgovora drugim modelom.';}
+  finally{submit.disabled=false;loading=false;check.disabled=false;publicCheck.disabled=!publicAvailable;document.getElementById('chat-stop').disabled=true;}
  },true);
+ document.getElementById('chat-stop').addEventListener('click',()=>client.cancel());
+ document.getElementById('chat-clear').addEventListener('click',()=>client.reset());
+ window.addEventListener('pagehide',()=>client.reset());
 })();

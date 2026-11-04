@@ -1,0 +1,10 @@
+{
+  "schema": "clea7.web-ai/1",
+  "enabled": false,
+  "previewOnly": false,
+  "endpoint": null,
+  "deploymentId": null,
+  "turnstileSiteKey": null,
+  "publicHTTPSHealthVerified": false,
+  "phoneConversationVerified": false
+}

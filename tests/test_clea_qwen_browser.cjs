@@ -10,7 +10,7 @@ const assert=require('node:assert/strict');
    res.setHeader('Access-Control-Allow-Private-Network','true');
    res.setHeader('Content-Type','application/json');
    if(req.method==='OPTIONS'){res.writeHead(204).end();return;}
-   if(req.url==='/health'){health++;res.end(JSON.stringify({brand:'BL CLEA AI',ready:true}));return;}
+   if(req.url==='/health'){health++;res.end(JSON.stringify({brand:'BL CLEA AI',apiVersion:'clea7.public-ai/1',mode:'local',ready:true}));return;}
    let body='';req.on('data',x=>body+=x);req.on('end',()=>{received.push(JSON.parse(body));res.end(JSON.stringify({brand:'BL CLEA AI',reply:'Provjeren testni odgovor (mock).',sources:[]}));});
  });
  await new Promise(resolve=>ai.listen(8765,'127.0.0.1',resolve));
@@ -25,6 +25,7 @@ const assert=require('node:assert/strict');
   assert.equal(await page.locator('#clea-local-model-opt-in').isChecked(),false);
   assert.equal(received.length,0);console.log('PASS BL CLEA AI: same Studio interface, opt-in off and no transmitted data');
   await page.locator('[data-panel="clea-chat"]').click();
+  await page.locator('.chat-local-model-controls summary').click();
   await page.locator('#clea-local-model-opt-in').check();
   await page.waitForFunction(()=>document.getElementById('clea-local-model-status').textContent.includes('uključen'),null,{timeout:10000});
   await page.locator('#chat-question').fill('Objasni CLEA jezik.');
@@ -36,6 +37,7 @@ const assert=require('node:assert/strict');
   console.log('PASS BL CLEA AI: browser-to-local CORS opt-in bridge uses only sent question (mock inference)');
   await page.goto('http://127.0.0.1:4173/sense/');
   await page.locator('#sense-ai-question').fill('Kako da napišem opis iskustva?');
+  await page.locator('#sense-ai-target').selectOption('local');
   const old=received.length;
   assert.equal(old,1);
   await page.locator('.sense-ai-bridge button').click();

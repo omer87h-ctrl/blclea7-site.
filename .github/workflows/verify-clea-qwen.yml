@@ -2,6 +2,9 @@ name: Verify licensed BL CLEA AI cross-product integration
 on:
   pull_request:
     paths:
+      - 'clea-ai-client.js'
+      - 'clea-ai-config.json'
+      - 'tests/test_clea_hp_browser.cjs'
       - 'studio/workbench/chat/ui.js'
       - 'studio/workbench/index.html'
       - 'sense/index.html'
@@ -26,6 +29,7 @@ jobs:
         run: |
           node --check studio/workbench/chat/ui.js
           node --check sense/ai-bridge.js
+          node --check clea-ai-client.js
           python3 - <<'PY'
           import hashlib,pathlib
           for file in ('studio/workbench/chat/ui.js','studio/workbench/index.html'):
@@ -40,3 +44,4 @@ jobs:
           server_pid=$!
           trap 'kill "$server_pid" || true' EXIT
           CLEA7_CHROME="$(command -v google-chrome)" node tests/test_clea_qwen_browser.cjs
+          CLEA7_CHROME="$(command -v google-chrome)" node tests/test_clea_hp_browser.cjs
