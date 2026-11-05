@@ -12,7 +12,15 @@ function controls(){for(const id of ['chat-send','chat-question','chat-language'
 function event(item){if(item.pillar==='Holo Interaction'&&item.state==='committed')$('chat-ready').textContent='Vlastiti model je provjeren · lokalno';const card=cards.get(item.pillar);if(card){card.dataset.state=item.state;card.querySelector('small').textContent=item.detail;}const li=node('li');li.append(node('strong',item.pillar),node('span',item.detail));if(Object.keys(item.metrics||{}).length)li.append(node('code',JSON.stringify(item.metrics)));$('chat-events').prepend(li);while($('chat-events').children.length>40)$('chat-events').lastChild.remove();}
 const runtime=scope.CLEA7Chat.create({onEvent:event,onLoading:progress=>{$('chat-ready').textContent='Učitavanje vlastitog modela: '+Math.round(progress.bytes/1024)+' / '+Math.round(progress.total/1024)+' KiB';}});scope.CLEA7ChatWorkspace=runtime;
 function memory(){const stats=runtime.cacheStats;$('chat-memory').textContent='Obračunati RAM cache: '+stats.memoryRetainedBytes+' / '+stats.memoryBudgetBytes+' bajtova. To nije ukupna RAM potrošnja modela ili preglednika. Trajno čuvanje razgovora je isključeno.';}
-async function initialize(){if(loaded||loading||disposed)return;loading=true;controls();try{const info=await runtime.initialize();if(disposed)return;loaded=true;$('chat-ready').textContent='Vlastiti model je provjeren · lokalno';$('chat-model-info').textContent=info.parameterCount.toLocaleString('bs-BA')+' naučenih parametara · '+Math.round(info.weightBytes/1024)+' KiB težina · CPU izvršavanje u radniku. Bez tuđih težina i bez inference servera.';status('Model je spreman. Postavi pitanje o CLEA platformi.');memory();}catch(error){$('chat-ready').textContent='Model nije pokrenut';status(error.message);}finally{loading=false;controls();}}
+async function initialize(){if(loaded||loading||disposed)return;
+if(location.hostname.endsWith('.trycloudflare.com')&&new URL(location.href).searchParams.has('clea-verify')){
+ loaded=true;$('chat-ready').textContent='Privremena HP veza · provjerava se';
+ $('chat-model-info').textContent='Model se izvršava na HP računaru. Lokalni model za 20 CLEA tema nije izvršilac ovog razgovora.';
+ const card=$('chat-model-info').closest('.chat-model-card');card.querySelector('h2').textContent='HP model · privremena proba';card.querySelector('.chat-scope').textContent='Kvalitet malog modela nije jednak velikim servisima. Provjeri važne tvrdnje.';
+ $('chat-cache').closest('label').hidden=true;$('chat-clear-cache').hidden=true;$('chat-retry').hidden=true;
+ status('Povezujem model na HP računaru…');return;
+}
+loading=true;controls();try{const info=await runtime.initialize();if(disposed)return;loaded=true;$('chat-ready').textContent='Vlastiti model je provjeren · lokalno';$('chat-model-info').textContent=info.parameterCount.toLocaleString('bs-BA')+' naučenih parametara · '+Math.round(info.weightBytes/1024)+' KiB težina · CPU izvršavanje u radniku. Bez tuđih težina i bez inference servera.';status('Model je spreman. Postavi pitanje o CLEA platformi.');memory();}catch(error){$('chat-ready').textContent='Model nije pokrenut';status(error.message);}finally{loading=false;controls();}}
 function localVoices(){return typeof scope.SpeechSynthesisUtterance==='function'?(scope.speechSynthesis?.getVoices?.()||[]).filter(v=>v.localService===true):[];}
 const voiceButtons=new Map();
 function pickVoice(language){return localVoices().find(v=>language==='bs'?/^(bs|hr|sr)/i.test(v.lang):/^en/i.test(v.lang));}
@@ -209,10 +217,18 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  const mount=document.createElement('div');mount.className='clea-access-challenge';mount.hidden=true;
  controls.append(publicLabel,note,advanced,notice,feedback,mount);form.append(controls);
  const client=CLEA7AI.create({challengeMount:mount,onStatus:text=>{feedback.textContent=text;status.textContent=text;}});
- let active=false,loading=false,publicAvailable=false;
+ let active=false,loading=false,publicAvailable=false,previewMode=false;
  CLEA7AI.configuration().then(config=>{
   const preview=config.previewOnly&&new URL(location.href).searchParams.get('clea-verify')===config.deploymentId;
   publicAvailable=Boolean(config.enabled||preview);publicCheck.disabled=!publicAvailable;
+  if(config.authentication==='tunnel-email'&&preview){
+   previewMode=true;publicCheck.checked=true;
+   note.textContent='Privremena proba modela na HP računaru. E-mail pristup provjerava Cloudflare; pitanja ostaju u RAM-u ove sesije. Proba se automatski gasi. Model može pogriješiti.';
+   const badge=document.createElement('p');badge.setAttribute('role','status');badge.textContent='HP MODEL · PRIVREMENA PROBA do '+new Date(config.previewEndsAtUnix*1000).toLocaleTimeString();controls.prepend(badge);
+   const scope=document.getElementById('conversation-scope');if(scope)scope.textContent='BL CLEA AI: razgovor s modelom na HP računaru. Za ovu probu koristi se postojeći interfejs; model nije instaliran na tvom telefonu.';
+   const intro=document.querySelector('.chat-welcome p');if(intro)intro.textContent='Postavi pitanje. Ovaj probni razgovor odgovara preko HP računara uz odobreno CLEA znanje. Važne tvrdnje provjeri.';
+   activate(publicCheck);
+  }
   feedback.textContent=publicCheck.disabled?'Javni HP server još nije povezan. Lokalni mali model ispod ima samo 20 CLEA tema.':preview?'Provjera javne veze · još nije potvrđena dostupnost za sve korisnike.':'HP veza je podešena. Uključi je za razgovor; ne instaliraš model.';
  }).catch(()=>{feedback.textContent='Konfiguracija HP veze nije dostupna. Nema slanja poruka serveru.';});
  async function activate(selected){
@@ -233,8 +249,8 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   for(const row of [...log.querySelectorAll('.chat-message')].slice(0,-24))row.remove();article.scrollIntoView({block:'nearest'});return body;
  }
  form.addEventListener('submit',async event=>{
-  if(!active&&!loading)return;
-  event.preventDefault();event.stopImmediatePropagation();if(loading)return;
+  if(!active&&!loading&&!previewMode)return;
+  event.preventDefault();event.stopImmediatePropagation();if(loading)return;if(previewMode&&!active){feedback.textContent='Privremena HP veza nije spremna. Odgovor nije zamijenjen lokalnim probnim modelom.';return;}
   const question=input.value.trim();if(!question)return;
   if(question.length>1200){feedback.textContent='Poruka prelazi 1200 znakova.';return;}
   loading=true;submit.disabled=true;check.disabled=true;publicCheck.disabled=true;

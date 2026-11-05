@@ -5,6 +5,7 @@ on:
       - 'clea-ai-client.js'
       - 'clea-ai-config.json'
       - 'tests/test_clea_hp_browser.cjs'
+      - 'tests/test_clea_protected_preview.cjs'
       - 'scripts/configure_ai_endpoint.py'
       - 'tests/test_ai_endpoint_config.py'
       - 'privatnost.html'
@@ -50,3 +51,4 @@ jobs:
           trap 'kill "$server_pid" || true' EXIT
           CLEA7_CHROME="$(command -v google-chrome)" node tests/test_clea_qwen_browser.cjs
           CLEA7_CHROME="$(command -v google-chrome)" node tests/test_clea_hp_browser.cjs
+          CLEA7_CHROME="$(command -v google-chrome)" node tests/test_clea_protected_preview.cjs

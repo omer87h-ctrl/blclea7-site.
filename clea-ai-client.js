@@ -21,6 +21,12 @@
   if(!value||value.schema!=='clea7.web-ai/1'||typeof value.enabled!=='boolean'||typeof value.previewOnly!=='boolean')throw fail('not_configured');
   if(value.endpoint===null){if(value.enabled||value.previewOnly)throw fail('not_configured');return Object.freeze({...value});}
   const url=new URL(value.endpoint);
+  if(value.authentication==='tunnel-email'){
+   if(value.enabled||!value.previewOnly||url.origin!==location.origin||url.protocol!=='https:'||url.origin!==value.endpoint||
+      !/^[a-z0-9-]+\.trycloudflare\.com$/.test(url.hostname)||!/^[a-f0-9]{32}$/.test(value.deploymentId)||
+      !Number.isInteger(value.previewEndsAtUnix)||value.previewEndsAtUnix*1000<=Date.now())throw fail('not_configured');
+   return Object.freeze({...value});
+  }
   if(url.protocol!=='https:'||url.origin!==value.endpoint||url.username||url.password||url.port||
     !/^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,63}$/.test(url.hostname)||
     !/^[a-f0-9]{32}$/.test(value.deploymentId)||!/^[A-Za-z0-9_-]{10,200}$/.test(value.turnstileSiteKey)||
@@ -40,7 +46,7 @@
  }
  async function request(url,{body,signal,token}={}){
   const headers={};if(body!==undefined)headers['Content-Type']='application/json';if(token)headers.Authorization='Bearer '+token;
-  const response=await fetch(url,{method:body===undefined?'GET':'POST',mode:'cors',credentials:'omit',
+  const response=await fetch(url,{method:body===undefined?'GET':'POST',mode:'cors',credentials:new URL(url).origin===location.origin&&location.hostname.endsWith('.trycloudflare.com')?'same-origin':'omit',
    redirect:'error',cache:'no-store',referrerPolicy:'no-referrer',headers,body:body===undefined?undefined:JSON.stringify(body),signal});
   const value=await readJSON(response);
   if(!response.ok)throw fail(response.status===429?(value.code==='busy'?'busy':'rate_limit'):response.status===401?'session_required':value.code==='challenge_failed'?'challenge_failed':'offline');
@@ -101,7 +107,9 @@
     const config=await target();await health(config,signal);
     if(!config.local&&(!session||Date.now()>=expires)){
      onStatus('Potvrdi pristup. Pitanje se još ne šalje modelu.');
-     const proof=await challenge(challengeMount,config.turnstileSiteKey,signal);
+     const proof=config.authentication==='tunnel-email'?
+      (await request(config.endpoint+'/preview-challenge',{signal})).challenge:
+      await challenge(challengeMount,config.turnstileSiteKey,signal);
      const issued=await request(config.endpoint+'/session',{body:{challenge:proof},signal});
      if(!/^[A-Za-z0-9_-]{43}$/.test(issued.session)||!Number.isInteger(issued.expiresIn)||issued.expiresIn<1||issued.expiresIn>1800)throw fail('identity');
      session=issued.session;expires=Date.now()+issued.expiresIn*1000-5000;
