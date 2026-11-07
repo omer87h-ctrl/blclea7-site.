@@ -1,0 +1,11 @@
+*.js text eol=lf
+*.cjs text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.json text eol=lf
+*.svg text eol=lf
+*.md text eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.woff2 binary
