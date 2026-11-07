@@ -12,15 +12,23 @@ function controls(){for(const id of ['chat-send','chat-question','chat-language'
 function event(item){if(item.pillar==='Holo Interaction'&&item.state==='committed')$('chat-ready').textContent='Vlastiti model je provjeren · lokalno';const card=cards.get(item.pillar);if(card){card.dataset.state=item.state;card.querySelector('small').textContent=item.detail;}const li=node('li');li.append(node('strong',item.pillar),node('span',item.detail));if(Object.keys(item.metrics||{}).length)li.append(node('code',JSON.stringify(item.metrics)));$('chat-events').prepend(li);while($('chat-events').children.length>40)$('chat-events').lastChild.remove();}
 const runtime=scope.CLEA7Chat.create({onEvent:event,onLoading:progress=>{$('chat-ready').textContent='Učitavanje vlastitog modela: '+Math.round(progress.bytes/1024)+' / '+Math.round(progress.total/1024)+' KiB';}});scope.CLEA7ChatWorkspace=runtime;
 function memory(){const stats=runtime.cacheStats;$('chat-memory').textContent='Obračunati RAM cache: '+stats.memoryRetainedBytes+' / '+stats.memoryBudgetBytes+' bajtova. To nije ukupna RAM potrošnja modela ili preglednika. Trajno čuvanje razgovora je isključeno.';}
-async function initialize(){if(loaded||loading||disposed)return;
-if(location.hostname.endsWith('.trycloudflare.com')&&new URL(location.href).searchParams.has('clea-verify')){
- loaded=true;$('chat-ready').textContent='Privremena HP veza · provjerava se';
- $('chat-model-info').textContent='Model se izvršava na HP računaru. Lokalni model za 20 CLEA tema nije izvršilac ovog razgovora.';
- const card=$('chat-model-info').closest('.chat-model-card');card.querySelector('h2').textContent='HP model · privremena proba';card.querySelector('.chat-scope').textContent='Kvalitet malog modela nije jednak velikim servisima. Provjeri važne tvrdnje.';
- $('chat-cache').closest('label').hidden=true;$('chat-clear-cache').hidden=true;$('chat-retry').hidden=true;
- status('Povezujem model na HP računaru…');return;
+async function initialize(){
+ if(loaded||loading||disposed)return;loading=true;controls();
+ try{
+  let hostConfig=null;try{hostConfig=await scope.CLEA7AI?.configuration();}catch{}
+  if(scope.CLEA7AI?.isRuntimeHost(hostConfig)){
+   loaded=true;$('chat-ready').textContent='Provjeravam CLEA servis…';
+   $('chat-model-info').textContent='Jezički model se izvršava na HP računaru. Mali model za 20 CLEA tema nije izvršilac ovog razgovora.';
+   const card=$('chat-model-info').closest('.chat-model-card');card.querySelector('h2').textContent='CLEA model na HP-u';card.querySelector('.chat-scope').textContent='Provjeri važne tvrdnje malog modela. Razgovor se ne koristi za automatsko treniranje.';
+   $('chat-cache').closest('label').hidden=true;$('chat-clear-cache').hidden=true;$('chat-retry').hidden=true;
+   return;
+  }
+  const info=await runtime.initialize();if(disposed)return;loaded=true;$('chat-ready').textContent='Vlastiti model je provjeren · lokalno';
+  $('chat-model-info').textContent=info.parameterCount.toLocaleString('bs-BA')+' naučenih parametara · '+Math.round(info.weightBytes/1024)+' KiB težina · CPU izvršavanje u radniku. Bez tuđih težina i bez inference servera.';
+  status('Model je spreman. Postavi pitanje o CLEA platformi.');memory();
+ }catch(error){$('chat-ready').textContent='Model nije pokrenut';status(error.message);}
+ finally{loading=false;controls();}
 }
-loading=true;controls();try{const info=await runtime.initialize();if(disposed)return;loaded=true;$('chat-ready').textContent='Vlastiti model je provjeren · lokalno';$('chat-model-info').textContent=info.parameterCount.toLocaleString('bs-BA')+' naučenih parametara · '+Math.round(info.weightBytes/1024)+' KiB težina · CPU izvršavanje u radniku. Bez tuđih težina i bez inference servera.';status('Model je spreman. Postavi pitanje o CLEA platformi.');memory();}catch(error){$('chat-ready').textContent='Model nije pokrenut';status(error.message);}finally{loading=false;controls();}}
 function localVoices(){return typeof scope.SpeechSynthesisUtterance==='function'?(scope.speechSynthesis?.getVoices?.()||[]).filter(v=>v.localService===true):[];}
 const voiceButtons=new Map();
 function pickVoice(language){return localVoices().find(v=>language==='bs'?/^(bs|hr|sr)/i.test(v.lang):/^en/i.test(v.lang));}
@@ -217,16 +225,19 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  const mount=document.createElement('div');mount.className='clea-access-challenge';mount.hidden=true;
  controls.append(publicLabel,note,advanced,notice,feedback,mount);form.append(controls);
  const client=CLEA7AI.create({challengeMount:mount,onStatus:text=>{feedback.textContent=text;status.textContent=text;}});
- let active=false,loading=false,publicAvailable=false,previewMode=false;
+ let active=false,loading=false,publicAvailable=false,previewMode=false,runtimeAuthentication=null;
  CLEA7AI.configuration().then(config=>{
-  const preview=config.previewOnly&&new URL(location.href).searchParams.get('clea-verify')===config.deploymentId;
+  runtimeAuthentication=config.authentication;
+  const host=CLEA7AI.isRuntimeHost(config);
+  const preview=config.previewOnly&&(host||new URL(location.href).searchParams.get('clea-verify')===config.deploymentId);
   publicAvailable=Boolean(config.enabled||preview);publicCheck.disabled=!publicAvailable;
-  if(config.authentication==='tunnel-email'&&preview){
+  if(host){
    previewMode=true;publicCheck.checked=true;
-   note.textContent='Privremena proba modela na HP računaru. E-mail pristup provjerava Cloudflare; pitanja ostaju u RAM-u ove sesije. Proba se automatski gasi. Model može pogriješiti.';
-   const badge=document.createElement('p');badge.setAttribute('role','status');badge.textContent='HP MODEL · PRIVREMENA PROBA do '+new Date(config.previewEndsAtUnix*1000).toLocaleTimeString();controls.prepend(badge);
+   note.textContent=config.authentication==='desktop-loopback'?'Model radi na ovom HP-u. Ne trebaš vanjski račun, e-mail ili kôd. Zatvaranje pokretača zaustavlja servis.':config.authentication==='owner-invite'?'Privatni probni pristup. Nema vanjske prijave. Pristup koristi privremeni sigurnosni kolačić; razgovor ostaje u RAM-u.':'Zaštićena privremena proba na HP-u.';
+   const badge=document.createElement('p');badge.setAttribute('role','status');badge.textContent=config.authentication==='desktop-loopback'?'MODEL NA OVOM HP-u':'PRIVATNA VREMENSKI OGRANIČENA PROBA';controls.prepend(badge);
    const scope=document.getElementById('conversation-scope');if(scope)scope.textContent='BL CLEA AI: razgovor s modelom na HP računaru. Za ovu probu koristi se postojeći interfejs; model nije instaliran na tvom telefonu.';
    const intro=document.querySelector('.chat-welcome p');if(intro)intro.textContent='Postavi pitanje. Ovaj probni razgovor odgovara preko HP računara uz odobreno CLEA znanje. Važne tvrdnje provjeri.';
+   if(config.authentication==='desktop-loopback')phoneShareControls();
    activate(publicCheck);
   }
   feedback.textContent=publicCheck.disabled?'Javni HP server još nije povezan. Lokalni mali model ispod ima samo 20 CLEA tema.':preview?'Provjera javne veze · još nije potvrđena dostupnost za sve korisnike.':'HP veza je podešena. Uključi je za razgovor; ne instaliraš model.';
@@ -238,11 +249,26 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   const other=selected===check?publicCheck:check;other.checked=false;
   loading=true;submit.disabled=true;check.disabled=true;if(selected===publicCheck)publicCheck.disabled=true;
   feedback.textContent='Provjeravam BL CLEA AI servis…';
-  try{client.useLocal(selected===check);await client.check();active=true;feedback.textContent=selected===check?'BL CLEA AI lokalni servis uključen. Šalju se samo nove poruke.':'BL CLEA AI HP servis uključen. Potvrda pristupa slijedi prije prvog pitanja.';}
+  try{client.useLocal(selected===check);await client.check();active=true;document.getElementById('chat-ready').textContent='CLEA servis je spreman';feedback.textContent=['desktop-loopback','owner-invite'].includes(runtimeAuthentication)?'BL CLEA AI je spreman. Možeš razgovarati.':selected===check?'BL CLEA AI lokalni servis uključen. Šalju se samo nove poruke.':'BL CLEA AI HP servis uključen. Potvrda pristupa slijedi prije prvog pitanja.';}
   catch(error){selected.checked=false;feedback.textContent=error.message+' Poruka nije poslana modelu.';}
   finally{loading=false;submit.disabled=false;check.disabled=false;if(selected===publicCheck)publicCheck.disabled=false;}
  }
  check.addEventListener('change',()=>activate(check));publicCheck.addEventListener('change',()=>activate(publicCheck));
+ function phoneShareControls(){
+  const button=document.createElement('button');button.type='button';button.textContent='Otvori i na telefonu';
+  const result=document.createElement('div');controls.append(button,result);
+  button.addEventListener('click',async()=>{
+   button.disabled=true;result.textContent='Pripremam privatni probni link. Lokalni razgovor ostaje dostupan…';
+   try{
+    const data=await client.startPhoneShare();result.textContent='Privatni link za telefon · privremena proba, do 45 minuta. Ne objavljuj ga javno.';
+    const field=document.createElement('input');field.type='url';field.readOnly=true;field.value=data.url;field.setAttribute('aria-label','Privatni pozivni link');
+    const copy=document.createElement('button');copy.type='button';copy.textContent='Kopiraj link za telefon';
+    copy.onclick=async()=>{try{await navigator.clipboard.writeText(data.url);copy.textContent='Link je kopiran';}catch{field.focus();field.select();copy.textContent='Označen link — odaberi Kopiraj';}};
+    result.append(field,copy);setTimeout(()=>{copy.disabled=true;field.value='';result.append(document.createTextNode(' Proba je završena; ponovo odaberi Otvori i na telefonu za novu probu.'));},data.secondsRemaining*1000);
+   }catch(error){result.textContent='Telefonska veza trenutno nije dostupna. Lokalni razgovor nastavlja raditi.';}
+   finally{button.disabled=false;}
+  });
+ }
  function message(author,content){
   const article=document.createElement('article');article.className='chat-message '+(author==='Ti'?'user':'assistant');article.dataset.mode=check.checked?'local':'hp';
   const title=document.createElement('p');title.textContent=author;const body=document.createElement('div');body.textContent=content;article.append(title,body);log.append(article);

@@ -78,8 +78,8 @@
     },
     {
       "path": "studio/workbench/chat/ui.js",
-      "bytes": 28716,
-      "sha256": "072f91f84cfedf292d8c9ce96f6a18eacf84e010221dfd2fd65897194e79d648"
+      "bytes": 30659,
+      "sha256": "3754eb155621471ca528f7dcedb2bb2a81a4ba5b009ca1d57b39bfcc95a72fdd"
     },
     {
       "path": "studio/workbench/chat/worker.js",
@@ -88,13 +88,28 @@
     },
     {
       "path": "clea-ai-client.js",
-      "bytes": 9600,
-      "sha256": "2a35490dc1d6485e168dc8f69da58a5c5ef8200c78140530ad7bc0f42768358d"
+      "bytes": 12505,
+      "sha256": "16cc9cee9c3739f2b9bce32a0e70c9a5544b6bd537617627d79254ec36bfd721"
     },
     {
       "path": "clea-ai-config.json",
       "bytes": 225,
       "sha256": "2b5c8add49d38647e13e0aa408043ecce932010b441309b40e54fdb8d2fe6baf"
+    },
+    {
+      "path": "razgovor/index.html",
+      "bytes": 3926,
+      "sha256": "1977dcca930a432fb8171f1e3662cf1d526a23037465df3531e86e783cc9baa7"
+    },
+    {
+      "path": "razgovor/boot.js",
+      "bytes": 4459,
+      "sha256": "c7736e92656fd0e517d8dbaa177b6c60fec708d3242cb30324821babcf02b323"
+    },
+    {
+      "path": "razgovor/standalone.css",
+      "bytes": 7952,
+      "sha256": "e1fb58e8a161a9b2358542dc3911a6f25f051770ca7a6109dad8df4f49ae70c4"
     }
   ]
 }

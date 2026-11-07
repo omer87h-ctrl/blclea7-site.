@@ -12,6 +12,9 @@
   rate_limit:'Dosegnuto je ograničenje zahtjeva. Sačekaj prije novog pitanja.',
   session_required:'Sesija je istekla. Ponovo pošalji pitanje za novu potvrdu pristupa.',
   challenge_failed:'Potvrda pristupa nije uspjela. Pokušaj ponovo.',
+  invitation_required:'Za ovaj razgovor otvori privatni link koji si dobio iz CLEA aplikacije.',
+  invitation_used:'Privatna pozivnica je dosegnula broj probnih sesija.',
+  preview_expired:'Privremena veza je završena. Lokalni CLEA razgovor na HP-u ostaje dostupan.',
   invalid_request:'Poruka ili historija prelazi podržane granice.',
   timeout:'Vrijeme čekanja je isteklo. Zahtjev nije automatski ponovljen.',
   cancelled:'Čekanje je zaustavljeno. Server može završiti već započetu obradu.',
@@ -21,6 +24,18 @@
   if(!value||value.schema!=='clea7.web-ai/1'||typeof value.enabled!=='boolean'||typeof value.previewOnly!=='boolean')throw fail('not_configured');
   if(value.endpoint===null){if(value.enabled||value.previewOnly)throw fail('not_configured');return Object.freeze({...value});}
   const url=new URL(value.endpoint);
+  if(value.authentication==='desktop-loopback'){
+   if(!value.enabled||value.previewOnly||value.local!==true||url.origin!==location.origin||url.origin!==value.endpoint||
+      url.protocol!=='http:'||!['127.0.0.1','localhost'].includes(url.hostname)||url.username||url.password||
+      !/^[a-f0-9]{32}$/.test(value.deploymentId))throw fail('not_configured');
+   return Object.freeze({...value});
+  }
+  if(value.authentication==='owner-invite'){
+   if(value.enabled||!value.previewOnly||url.origin!==location.origin||url.protocol!=='https:'||url.origin!==value.endpoint||
+      !/^[a-z0-9-]+\.trycloudflare\.com$/.test(url.hostname)||!/^[a-f0-9]{32}$/.test(value.deploymentId)||
+      !Number.isInteger(value.previewSecondsRemaining)||value.previewSecondsRemaining<1||value.previewSecondsRemaining>3600)throw fail('not_configured');
+   return Object.freeze({...value});
+  }
   if(value.authentication==='tunnel-email'){
    if(value.enabled||!value.previewOnly||url.origin!==location.origin||url.protocol!=='https:'||url.origin!==value.endpoint||
       !/^[a-z0-9-]+\.trycloudflare\.com$/.test(url.hostname)||!/^[a-f0-9]{32}$/.test(value.deploymentId)||
@@ -49,7 +64,8 @@
   const response=await fetch(url,{method:body===undefined?'GET':'POST',mode:'cors',credentials:new URL(url).origin===location.origin&&location.hostname.endsWith('.trycloudflare.com')?'same-origin':'omit',
    redirect:'error',cache:'no-store',referrerPolicy:'no-referrer',headers,body:body===undefined?undefined:JSON.stringify(body),signal});
   const value=await readJSON(response);
-  if(!response.ok)throw fail(response.status===429?(value.code==='busy'?'busy':'rate_limit'):response.status===401?'session_required':value.code==='challenge_failed'?'challenge_failed':'offline');
+  if(!response.ok)throw fail(response.status===429?(value.code==='busy'?'busy':'rate_limit'):response.status===401?'session_required':
+   ['challenge_failed','invitation_required','invitation_used','preview_expired'].includes(value.code)?value.code:'offline');
   return value;
  }
  async function configuration(){
@@ -82,22 +98,41 @@
  }
  function create({challengeMount,onStatus=()=>{}}={}){
   let history=[],session=null,expires=0,controller=null,local=false,epoch=0;
+  let invitation=/^#invite=([A-Za-z0-9_-]{43})$/.exec(location.hash)?.[1]||null;
   function reset(){epoch++;history=[];session=null;expires=0;controller?.abort();}
   function useLocal(value){if(controller)throw fail('busy');reset();local=value===true;}
   async function target(){
    if(local)return {endpoint:'http://127.0.0.1:8765',local:true};
-   const config=await configuration(),preview=config.previewOnly===true&&new URL(location.href).searchParams.get('clea-verify')===config.deploymentId;
+   const config=await configuration(),preview=config.previewOnly===true&&(config.authentication==='owner-invite'||new URL(location.href).searchParams.get('clea-verify')===config.deploymentId);
    if(!config.enabled&&!preview)throw fail('not_configured');
    return config;
   }
   async function health(config,signal){
    const status=await request(config.endpoint+'/health',{signal});
    if(status.brand!=='BL CLEA AI'||status.apiVersion!=='clea7.public-ai/1'||status.mode!==(config.local?'local':'public')||
-     !config.local&&status.deploymentId!==config.deploymentId)throw fail('identity');
+     config.deploymentId&&status.deploymentId!==config.deploymentId)throw fail('identity');
    if(status.ready!==true)throw fail('offline');
    return status;
   }
-  async function check(){const config=await target();return health(config,AbortSignal.timeout(5000));}
+  function issuedSession(issued){
+   if(!/^[A-Za-z0-9_-]{43}$/.test(issued.session)||!Number.isInteger(issued.expiresIn)||issued.expiresIn<1||issued.expiresIn>1800)throw fail('identity');
+   session=issued.session;expires=Date.now()+issued.expiresIn*1000-5000;
+  }
+  async function inviteSession(config,signal){
+   if(session&&Date.now()<expires)return;
+   try{issuedSession(await request(config.endpoint+'/session',{signal}));}
+   catch(error){
+    if(error.code!=='session_required')throw error;
+    if(!invitation)throw fail('invitation_required');
+    issuedSession(await request(config.endpoint+'/session',{body:{invite:invitation},signal}));
+   }
+   if(/^#invite=/.test(location.hash))globalThis.history.replaceState(null,'',location.pathname+location.search);
+  }
+  async function check(){
+   const config=await target(),signal=AbortSignal.timeout(10000);
+   if(config.authentication==='owner-invite')await inviteSession(config,signal);
+   return health(config,signal);
+  }
   async function ask(question){
    if(controller)throw fail('busy');
    if(typeof question!=='string'||!question.trim()||question.length>1200)throw fail('invalid_request');
@@ -105,14 +140,14 @@
    let timeout=false;const timer=setTimeout(()=>{timeout=true;controller?.abort();},100000);
    try{
     const config=await target();await health(config,signal);
-    if(!config.local&&(!session||Date.now()>=expires)){
+    if(config.authentication==='owner-invite')await inviteSession(config,signal);
+    else if(!config.local&&(!session||Date.now()>=expires)){
      onStatus('Potvrdi pristup. Pitanje se još ne šalje modelu.');
      const proof=config.authentication==='tunnel-email'?
       (await request(config.endpoint+'/preview-challenge',{signal})).challenge:
       await challenge(challengeMount,config.turnstileSiteKey,signal);
      const issued=await request(config.endpoint+'/session',{body:{challenge:proof},signal});
-     if(!/^[A-Za-z0-9_-]{43}$/.test(issued.session)||!Number.isInteger(issued.expiresIn)||issued.expiresIn<1||issued.expiresIn>1800)throw fail('identity');
-     session=issued.session;expires=Date.now()+issued.expiresIn*1000-5000;
+     issuedSession(issued);
     }
     onStatus(config.local?'Model odgovara na ovom uređaju…':'BL CLEA AI na HP serveru obrađuje tvoje pitanje…');
     const body={question:question.trim(),history:history.slice(-8)};
@@ -125,7 +160,18 @@
    }catch(error){if(error.code==='session_required'){session=null;expires=0;}throw timeout?fail('timeout'):signal.aborted?fail('cancelled'):error.code?error:fail('offline');}
    finally{clearTimeout(timer);controller=null;}
   }
-  return Object.freeze({ask,check,reset,useLocal,cancel:()=>controller?.abort(),get busy(){return controller!==null;}});
+  async function startPhoneShare(){
+   const config=await target();
+   if(config.authentication!=='desktop-loopback')throw fail('not_configured');
+   const data=await request(config.endpoint+'/share',{body:{},signal:AbortSignal.timeout(120000)});
+   const url=new URL(data.url);
+   if(url.protocol!=='https:'||url.username||url.password||url.port||!/^[a-z0-9-]+\.trycloudflare\.com$/.test(url.hostname)||
+      url.pathname!=='/razgovor/'||url.search||!/^#invite=[A-Za-z0-9_-]{43}$/.test(url.hash)||
+      !Number.isInteger(data.secondsRemaining)||data.secondsRemaining<1||data.secondsRemaining>2700)throw fail('identity');
+   return data;
+  }
+  return Object.freeze({ask,check,reset,useLocal,startPhoneShare,cancel:()=>controller?.abort(),get busy(){return controller!==null;}});
  }
- globalThis.CLEA7AI=Object.freeze({create,configuration});
+ function isRuntimeHost(config){return !!config&&['owner-invite','desktop-loopback','tunnel-email'].includes(config.authentication);}
+ globalThis.CLEA7AI=Object.freeze({create,configuration,isRuntimeHost});
 })();
