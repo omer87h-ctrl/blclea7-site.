@@ -149,7 +149,7 @@
      const issued=await request(config.endpoint+'/session',{body:{challenge:proof},signal});
      issuedSession(issued);
     }
-    onStatus(config.local?'Model odgovara na ovom uređaju…':'BL CLEA AI na HP serveru obrađuje tvoje pitanje…');
+    onStatus(config.local?'Model odgovara na ovom uređaju…':'BL CLEA AI obrađuje tvoje pitanje…');
     const body={question:question.trim(),history:history.slice(-8)};
     if(new TextEncoder().encode(JSON.stringify(body)).length>16384)throw fail('invalid_request');
     const data=await request(config.endpoint+'/chat',{body,signal,token:config.local?null:session});

@@ -18,8 +18,11 @@ async function initialize(){
   let hostConfig=null;try{hostConfig=await scope.CLEA7AI?.configuration();}catch{}
   if(scope.CLEA7AI?.isRuntimeHost(hostConfig)){
    loaded=true;$('chat-ready').textContent='Provjeravam CLEA servis…';
-   $('chat-model-info').textContent='Jezički model se izvršava na HP računaru. Mali model za 20 CLEA tema nije izvršilac ovog razgovora.';
-   const card=$('chat-model-info').closest('.chat-model-card');card.querySelector('h2').textContent='CLEA model na HP-u';card.querySelector('.chat-scope').textContent='Provjeri važne tvrdnje malog modela. Razgovor se ne koristi za automatsko treniranje.';
+   $('chat-model-info').textContent=hostConfig.executionHost==='disposable-hosted-test'?'Jezički model radi na privremenom testnom Windows serveru. Razgovor se ne izvršava na telefonu.':'Jezički model se izvršava na povezanom računaru. Razgovor se ne izvršava lokalnim modelom za 20 CLEA tema.';
+   const card=$('chat-model-info').closest('.chat-model-card');card.querySelector('h2').textContent='Razgovorni model';card.querySelector('.chat-scope').textContent='Opći razgovor i CLEA dokumentacija kada pitaš za projekat. Model može pogriješiti; provjeri važne činjenice.';
+   $('chat-question').placeholder='Postavi pitanje ili nastavi razgovor…';
+   const examples=[['Zašto nastaju dan i noć?','Zašto se na Zemlji smjenjuju dan i noć?'],['Ideja za ručak','Predloži jednostavan ručak s rižom i povrćem.'],['Pomoć s pisanjem','Pomozi mi napisati kratku, ljubaznu poruku zahvalnosti.'],['Objasni BIL','Objasni BIL u BL CLEA.']];
+   [...root.querySelectorAll('.chat-welcome .chat-examples button[data-chat-question]')].slice(0,4).forEach((button,index)=>{button.textContent=examples[index][0];button.dataset.chatQuestion=examples[index][1];});
    $('chat-cache').closest('label').hidden=true;$('chat-clear-cache').hidden=true;$('chat-retry').hidden=true;
    return;
   }
@@ -235,8 +238,8 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
    previewMode=true;publicCheck.checked=true;
    note.textContent=config.authentication==='desktop-loopback'?'Model radi na ovom HP-u. Ne trebaš vanjski račun, e-mail ili kôd. Zatvaranje pokretača zaustavlja servis.':config.authentication==='owner-invite'?'Privatni probni pristup. Nema vanjske prijave. Pristup koristi privremeni sigurnosni kolačić; razgovor ostaje u RAM-u.':'Zaštićena privremena proba na HP-u.';
    const badge=document.createElement('p');badge.setAttribute('role','status');badge.textContent=config.authentication==='desktop-loopback'?'MODEL NA OVOM HP-u':'PRIVATNA VREMENSKI OGRANIČENA PROBA';controls.prepend(badge);
-   const scope=document.getElementById('conversation-scope');if(scope)scope.textContent='BL CLEA AI: razgovor s modelom na HP računaru. Za ovu probu koristi se postojeći interfejs; model nije instaliran na tvom telefonu.';
-   const intro=document.querySelector('.chat-welcome p');if(intro)intro.textContent='Postavi pitanje. Ovaj probni razgovor odgovara preko HP računara uz odobreno CLEA znanje. Važne tvrdnje provjeri.';
+   const scope=document.getElementById('conversation-scope');if(scope)scope.textContent=config.executionHost==='disposable-hosted-test'?'BL CLEA AI · privatna proba na testnom Windows serveru. Model se ne preuzima na tvoj telefon.':'BL CLEA AI · razgovor s modelom na povezanom računaru.';
+   const intro=document.querySelector('.chat-welcome p');if(intro)intro.textContent='Pitaj o temi koja te zanima. CLEA dokumentacija se koristi za pitanja o projektu. Provjeri važne činjenice; model nema aktivnu internetsku pretragu.';
    if(config.authentication==='desktop-loopback')phoneShareControls();
    activate(publicCheck);
   }
@@ -285,7 +288,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   try{
    const data=await client.ask(question);body.textContent=data.reply;
    if(data.sources.length){const citation=document.createElement('small');citation.textContent='Odobreni izvori: '+data.sources.map(x=>typeof x.path==='string'?x.path:'').filter(Boolean).join(', ');body.append(document.createElement('br'),citation);}
-   feedback.textContent=data.transport==='hp'?'Odgovor s HP servera. Provjeri važne tvrdnje.':'Odgovor lokalnog servisa. Provjeri važne tvrdnje.';status.textContent=feedback.textContent;
+   feedback.textContent=data.transport==='hp'?'Odgovor BL CLEA AI servisa. Provjeri važne tvrdnje.':'Odgovor lokalnog servisa. Provjeri važne tvrdnje.';status.textContent=feedback.textContent;
   }catch(error){body.textContent=error.message;feedback.textContent='Nema automatskog ponavljanja niti zamjene odgovora drugim modelom.';}
   finally{submit.disabled=false;loading=false;check.disabled=false;publicCheck.disabled=!publicAvailable;document.getElementById('chat-stop').disabled=true;}
  },true);
