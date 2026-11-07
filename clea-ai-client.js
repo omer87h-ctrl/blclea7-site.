@@ -127,7 +127,7 @@
   });
  }
  function create({challengeMount,onStatus=()=>{}}={}){
-  let history=[],session=null,expires=0,controller=null,local=false,epoch=0;
+  let history=[],session=null,expires=0,controller=null,local=false,epoch=0,capabilities={};
   let invitation=/^#invite=([A-Za-z0-9_-]{43})$/.exec(location.hash)?.[1]||null;
   function reset(){epoch++;history=[];session=null;expires=0;controller?.abort();}
   function useLocal(value){if(controller)throw fail('busy');reset();local=value===true;}
@@ -143,6 +143,7 @@
      config.deploymentId&&status.deploymentId!==config.deploymentId)throw fail('identity');
    if(status.ready!==true)throw fail('offline');
    if(config.modelProfile?.id&&status.modelProfile?.id!==config.modelProfile.id)throw fail('identity');
+   capabilities=Object.freeze({...status.capabilities});
    return status;
   }
   function issuedSession(issued){
@@ -164,7 +165,7 @@
    if(config.authentication==='owner-invite')await inviteSession(config,signal);
    return health(config,signal);
   }
-  async function ask(question,{onDelta=()=>{}}={}){
+  async function ask(question,{onDelta=()=>{},language='auto',webQuery}={}){
    if(controller)throw fail('busy');
    if(typeof question!=='string'||!question.trim()||question.length>1200)throw fail('invalid_request');
    const ticket=epoch;controller=new AbortController();const signal=controller.signal;
@@ -182,6 +183,12 @@
     }
     onStatus(config.local?'Model odgovara na ovom uređaju…':'BL CLEA AI obrađuje tvoje pitanje…');
     const body={question:question.trim(),history:history.slice(-8)};
+    if(!['auto','bs','en'].includes(language))throw fail('invalid_request');
+    if(capabilities.answerLanguage===true)body.language=language;
+    if(webQuery!==undefined){
+     if(!capabilities.publicSourceLookup||typeof webQuery!=='string'||!webQuery.trim()||webQuery.length>250)throw fail('invalid_request');
+     body.webQuery=webQuery.trim();
+    }
     if(new TextEncoder().encode(JSON.stringify(body)).length>16384)throw fail('invalid_request');
     const data=modelStatus.streaming===true?
      await streamRequest(config.endpoint+'/chat/stream',{body,signal,token:config.local?null:session,onDelta:(delta,reply)=>{if(signal.aborted||ticket!==epoch)throw fail('cancelled');onDelta(delta,reply);}}):
@@ -189,7 +196,10 @@
     if(typeof data.reply!=='string'||!data.reply.trim()||data.reply.length>5000)throw fail('invalid_request');
     if(signal.aborted||ticket!==epoch)throw fail('cancelled');
     history.push({role:'user',content:body.question},{role:'assistant',content:data.reply.slice(0,1200)});history=history.slice(-8);
-    return {reply:data.reply,sources:Array.isArray(data.sources)?data.sources.slice(0,5):[],transport:config.local?'local':'hp'};
+    return {reply:data.reply,sources:Array.isArray(data.sources)?data.sources.slice(0,5):[],
+      webSources:Array.isArray(data.webSources)?data.webSources.slice(0,2):[],internet:data.internet||{requested:false},
+      learnedSources:Array.isArray(data.learnedSources)?data.learnedSources.slice(0,2):[],
+      productContract:data.productContract||null,transport:config.local?'local':'hp'};
    }catch(error){if(error.code==='session_required'){session=null;expires=0;}throw timeout?fail('timeout'):signal.aborted?fail('cancelled'):error.code?error:fail('offline');}
    finally{clearTimeout(timer);controller=null;}
   }
@@ -211,7 +221,16 @@
    });
    history=checked;return history.map(x=>({...x}));
   }
-  return Object.freeze({ask,check,reset,useLocal,startPhoneShare,restoreHistory,history:()=>history.map(x=>({...x})),cancel:()=>controller?.abort(),get busy(){return controller!==null;}});
+  async function approveProjectNote(note){
+   const config=await target();
+   if(config.authentication!=='desktop-loopback'||typeof note!=='string'||!note.trim()||note.length>500)throw fail('invalid_request');
+   return request(config.endpoint+'/memory',{body:{note:note.trim(),approvePublicProjectKnowledge:true},signal:AbortSignal.timeout(10000)});
+  }
+  async function approvePublicSource(sourceUrl){
+   const config=await target();if(config.authentication!=='desktop-loopback')throw fail('invalid_request');
+   return request(config.endpoint+'/memory',{body:{sourceUrl,approvePublicSource:true},signal:AbortSignal.timeout(15000)});
+  }
+  return Object.freeze({ask,check,reset,useLocal,startPhoneShare,approveProjectNote,approvePublicSource,restoreHistory,history:()=>history.map(x=>({...x})),cancel:()=>controller?.abort(),get capabilities(){return capabilities;},get busy(){return controller!==null;}});
  }
  function isRuntimeHost(config){return !!config&&['owner-invite','desktop-loopback','tunnel-email'].includes(config.authentication);}
  globalThis.CLEA7AI=Object.freeze({create,configuration,isRuntimeHost});

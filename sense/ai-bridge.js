@@ -33,7 +33,7 @@
   action.disabled=true;target.disabled=true;status.textContent='Kontaktiram BL CLEA AI…';output.textContent='';
   try{
    client.reset(); // Never include another Sense question or any CV context.
-   const data=await client.ask(question);
+   const data=await client.ask(question,{onDelta:(_delta,reply)=>output.textContent=reply,language:'bs'});
    output.textContent=data.reply;
    status.textContent='Odgovor '+(data.transport==='hp'?'s HP servera':'lokalnog servisa')+'. Provjeri tvrdnje prije upotrebe u prijavi.';
   }catch(error){status.textContent=error.message;}
