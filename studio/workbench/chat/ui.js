@@ -236,6 +236,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   publicAvailable=Boolean(config.enabled||preview);publicCheck.disabled=!publicAvailable;
   if(host){
    previewMode=true;publicCheck.checked=true;
+   if(config.executionHost==='disposable-hosted-test')publicLabel.lastChild.textContent=' Razgovaraj s BL CLEA AI';
    note.textContent=config.authentication==='desktop-loopback'?'Model radi na ovom HP-u. Ne trebaš vanjski račun, e-mail ili kôd. Zatvaranje pokretača zaustavlja servis.':config.authentication==='owner-invite'?'Privatni probni pristup. Nema vanjske prijave. Pristup koristi privremeni sigurnosni kolačić; razgovor ostaje u RAM-u.':'Zaštićena privremena proba na HP-u.';
    const badge=document.createElement('p');badge.setAttribute('role','status');badge.textContent=config.authentication==='desktop-loopback'?'MODEL NA OVOM HP-u':'PRIVATNA VREMENSKI OGRANIČENA PROBA';controls.prepend(badge);
    const scope=document.getElementById('conversation-scope');if(scope)scope.textContent=config.executionHost==='disposable-hosted-test'?'BL CLEA AI · privatna proba na testnom Windows serveru. Model se ne preuzima na tvoj telefon.':'BL CLEA AI · razgovor s modelom na povezanom računaru.';
