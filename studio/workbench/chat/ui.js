@@ -287,7 +287,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   document.getElementById('chat-stop').disabled=false;
   message('Ti',question);input.value='';const body=message('BL CLEA AI','Obrađujem poruku…');
   try{
-   const data=await client.ask(question);body.textContent=data.reply;
+   const data=await client.ask(question,{onDelta:(_delta,reply)=>{body.textContent=reply;}});body.textContent=data.reply;
    if(data.sources.length){const citation=document.createElement('small');citation.textContent='Odobreni izvori: '+data.sources.map(x=>typeof x.path==='string'?x.path:'').filter(Boolean).join(', ');body.append(document.createElement('br'),citation);}
    feedback.textContent=data.transport==='hp'?'Odgovor BL CLEA AI servisa. Provjeri važne tvrdnje.':'Odgovor lokalnog servisa. Provjeri važne tvrdnje.';status.textContent=feedback.textContent;
   }catch(error){body.textContent=error.message;feedback.textContent='Nema automatskog ponavljanja niti zamjene odgovora drugim modelom.';}

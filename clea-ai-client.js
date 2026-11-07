@@ -68,6 +68,36 @@
    ['challenge_failed','invitation_required','invitation_used','preview_expired'].includes(value.code)?value.code:'offline');
   return value;
  }
+ async function streamRequest(url,{body,signal,token,onDelta=()=>{}}){
+  const headers={'Content-Type':'application/json'};if(token)headers.Authorization='Bearer '+token;
+  const response=await fetch(url,{method:'POST',mode:'cors',credentials:new URL(url).origin===location.origin&&location.hostname.endsWith('.trycloudflare.com')?'same-origin':'omit',
+   redirect:'error',cache:'no-store',referrerPolicy:'no-referrer',headers,body:JSON.stringify(body),signal});
+  if(!response.ok){const value=await readJSON(response);throw fail(response.status===429?(value.code==='busy'?'busy':'rate_limit'):response.status===401?'session_required':'offline');}
+  if(!response.headers.get('Content-Type')?.startsWith('text/event-stream')||!response.body?.getReader)throw fail('invalid_request');
+  const reader=response.body.getReader(),decoder=new TextDecoder('utf-8',{fatal:true});
+  let buffer='',total=0,reply='',done=null;
+  function frame(raw){
+   let kind='',data='';for(const line of raw.split('\n')){if(line.startsWith('event:'))kind=line.slice(6).trim();else if(line.startsWith('data:'))data+=line.slice(5).trimStart();}
+   if(!data)return;let value;try{value=JSON.parse(data);}catch{throw fail('invalid_request');}
+   if(kind==='error')throw fail(value.code||'offline');
+   if(kind==='delta'){
+    if(done||typeof value.text!=='string'||reply.length+value.text.length>5000)throw fail('invalid_request');
+    reply+=value.text;onDelta(value.text,reply);
+   }else if(kind==='done'){
+    if(done||!reply.trim()||value.reply!==reply)throw fail('invalid_request');done=value;
+   }else if(!['meta','heartbeat'].includes(kind))throw fail('invalid_request');
+  }
+  try{
+   while(!done){
+    const chunk=await reader.read();if(chunk.done){buffer+=decoder.decode();break;}
+    total+=chunk.value.byteLength;if(total>200000)throw fail('invalid_request');
+    buffer=(buffer+decoder.decode(chunk.value,{stream:true})).replace(/\r\n/g,'\n');
+    if(buffer.length>32768)throw fail('invalid_request');
+    let boundary;while((boundary=buffer.indexOf('\n\n'))>=0){frame(buffer.slice(0,boundary));buffer=buffer.slice(boundary+2);if(done)break;}
+   }
+   if(!done)throw fail('offline');return done;
+  }finally{await reader.cancel().catch(()=>{});reader.releaseLock();}
+ }
  async function configuration(){
   if(!configurationPromise)configurationPromise=request(configURL,{signal:AbortSignal.timeout(5000)}).then(validConfig).catch(error=>{configurationPromise=null;throw error.code?error:fail('not_configured');});
   return configurationPromise;
@@ -133,13 +163,13 @@
    if(config.authentication==='owner-invite')await inviteSession(config,signal);
    return health(config,signal);
   }
-  async function ask(question){
+  async function ask(question,{onDelta=()=>{}}={}){
    if(controller)throw fail('busy');
    if(typeof question!=='string'||!question.trim()||question.length>1200)throw fail('invalid_request');
    const ticket=epoch;controller=new AbortController();const signal=controller.signal;
-   let timeout=false;const timer=setTimeout(()=>{timeout=true;controller?.abort();},100000);
+   let timeout=false;const timer=setTimeout(()=>{timeout=true;controller?.abort();},315000);
    try{
-    const config=await target();await health(config,signal);
+    const config=await target(),modelStatus=await health(config,signal);
     if(config.authentication==='owner-invite')await inviteSession(config,signal);
     else if(!config.local&&(!session||Date.now()>=expires)){
      onStatus('Potvrdi pristup. Pitanje se još ne šalje modelu.');
@@ -152,7 +182,9 @@
     onStatus(config.local?'Model odgovara na ovom uređaju…':'BL CLEA AI obrađuje tvoje pitanje…');
     const body={question:question.trim(),history:history.slice(-8)};
     if(new TextEncoder().encode(JSON.stringify(body)).length>16384)throw fail('invalid_request');
-    const data=await request(config.endpoint+'/chat',{body,signal,token:config.local?null:session});
+    const data=modelStatus.streaming===true?
+     await streamRequest(config.endpoint+'/chat/stream',{body,signal,token:config.local?null:session,onDelta:(delta,reply)=>{if(signal.aborted||ticket!==epoch)throw fail('cancelled');onDelta(delta,reply);}}):
+     await request(config.endpoint+'/chat',{body,signal,token:config.local?null:session});
     if(typeof data.reply!=='string'||!data.reply.trim()||data.reply.length>5000)throw fail('invalid_request');
     if(signal.aborted||ticket!==epoch)throw fail('cancelled');
     history.push({role:'user',content:body.question},{role:'assistant',content:data.reply.slice(0,1200)});history=history.slice(-8);
