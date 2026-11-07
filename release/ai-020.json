@@ -78,8 +78,8 @@
     },
     {
       "path": "studio/workbench/chat/ui.js",
-      "bytes": 31701,
-      "sha256": "b6b763abd267a47ae6cc84574ecf124614eb33545ddd8ca86fa80b79bec7ffca"
+      "bytes": 33458,
+      "sha256": "eb837669361db876144b328881eba948d75f2b5fdf5d38b51a2802ced6d12c56"
     },
     {
       "path": "studio/workbench/chat/worker.js",
@@ -88,8 +88,8 @@
     },
     {
       "path": "clea-ai-client.js",
-      "bytes": 15017,
-      "sha256": "c86b1dcd79380e4eec0eeda40fdf017b0e4b0fbdea2f2bcbd78621a998d337d8"
+      "bytes": 15633,
+      "sha256": "56e468e8aa0874db83231118ea0a990231cd26c958fda35bf7c03522395f9482"
     },
     {
       "path": "clea-ai-config.json",

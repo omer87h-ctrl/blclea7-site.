@@ -142,6 +142,7 @@
    if(status.brand!=='BL CLEA AI'||status.apiVersion!=='clea7.public-ai/1'||status.mode!==(config.local?'local':'public')||
      config.deploymentId&&status.deploymentId!==config.deploymentId)throw fail('identity');
    if(status.ready!==true)throw fail('offline');
+   if(config.modelProfile?.id&&status.modelProfile?.id!==config.modelProfile.id)throw fail('identity');
    return status;
   }
   function issuedSession(issued){
@@ -202,7 +203,15 @@
       !Number.isInteger(data.secondsRemaining)||data.secondsRemaining<1||data.secondsRemaining>2700)throw fail('identity');
    return data;
   }
-  return Object.freeze({ask,check,reset,useLocal,startPhoneShare,cancel:()=>controller?.abort(),get busy(){return controller!==null;}});
+  function restoreHistory(items){
+   if(controller||!Array.isArray(items)||items.length>24||items.length%2)throw fail('invalid_request');
+   const checked=items.map((item,index)=>{
+    if(!item||item.role!==(index%2?'assistant':'user')||typeof item.content!=='string'||!item.content.trim()||item.content.length>1200)throw fail('invalid_request');
+    return {role:item.role,content:item.content};
+   });
+   history=checked;return history.map(x=>({...x}));
+  }
+  return Object.freeze({ask,check,reset,useLocal,startPhoneShare,restoreHistory,history:()=>history.map(x=>({...x})),cancel:()=>controller?.abort(),get busy(){return controller!==null;}});
  }
  function isRuntimeHost(config){return !!config&&['owner-invite','desktop-loopback','tunnel-email'].includes(config.authentication);}
  globalThis.CLEA7AI=Object.freeze({create,configuration,isRuntimeHost});

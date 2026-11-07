@@ -19,6 +19,7 @@ async function initialize(){
   if(scope.CLEA7AI?.isRuntimeHost(hostConfig)){
    loaded=true;$('chat-ready').textContent='Provjeravam CLEA servis…';
    $('chat-model-info').textContent=hostConfig.executionHost==='disposable-hosted-test'?'Jezički model radi na privremenom testnom Windows serveru. Razgovor se ne izvršava na telefonu.':'Jezički model se izvršava na povezanom računaru. Razgovor se ne izvršava lokalnim modelom za 20 CLEA tema.';
+   if(typeof hostConfig.modelProfile?.name==='string')$('chat-model-info').append(document.createTextNode(' '+hostConfig.modelProfile.name+' · lokalna jezička komponenta.'));
    const card=$('chat-model-info').closest('.chat-model-card');card.querySelector('h2').textContent='Razgovorni model';card.querySelector('.chat-scope').textContent='Opći razgovor i CLEA dokumentacija kada pitaš za projekat. Model može pogriješiti; provjeri važne činjenice.';
    $('chat-question').placeholder='Postavi pitanje ili nastavi razgovor…';
    const examples=[['Zašto nastaju dan i noć?','Zašto se na Zemlji smjenjuju dan i noć?'],['Ideja za ručak','Predloži jednostavan ručak s rižom i povrćem.'],['Pomoć s pisanjem','Pomozi mi napisati kratku, ljubaznu poruku zahvalnosti.'],['Objasni BIL','Objasni BIL u BL CLEA.']];
@@ -228,6 +229,25 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  const mount=document.createElement('div');mount.className='clea-access-challenge';mount.hidden=true;
  controls.append(publicLabel,note,advanced,notice,feedback,mount);form.append(controls);
  const client=CLEA7AI.create({challengeMount:mount,onStatus:text=>{feedback.textContent=text;status.textContent=text;}});
+ const persistenceLabel=document.createElement('label'),persistence=document.createElement('input');persistence.type='checkbox';
+ persistenceLabel.append(persistence,document.createTextNode(' Sačuvaj historiju na ovom uređaju'));
+ const persistenceNote=document.createElement('small');persistenceNote.textContent='Opcionalno: posljednje četiri razmjene ostaju u pregledniku do brisanja. Nisu šifrirane; izbjegavaj zajednički računar.';
+ controls.append(persistenceLabel,persistenceNote);
+ const historyKey='clea-ai-owner-history-v1';
+ function persist(){
+  try{if(persistence.checked)localStorage.setItem(historyKey,JSON.stringify({schema:'clea7.browser-history/1',messages:client.history()}));else localStorage.removeItem(historyKey);}
+  catch{persistence.checked=false;feedback.textContent='Preglednik nije sačuvao historiju; razgovor ostaje u ovoj sesiji.';}
+ }
+ function restoreSaved(){
+  try{
+   const raw=localStorage.getItem(historyKey);if(!raw)return;
+   if(raw.length>40000)throw Error('Invalid history');const value=JSON.parse(raw);
+   if(value.schema!=='clea7.browser-history/1')throw Error('Invalid history');
+   const items=client.restoreHistory(value.messages);persistence.checked=true;
+   if(!log.querySelector('.chat-message[data-restored]'))for(const item of items){const body=message(item.role==='user'?'Ti':'BL CLEA AI',item.content);body.parentElement.dataset.restored='true';}
+  }catch{try{localStorage.removeItem(historyKey);}catch{}persistence.checked=false;}
+ }
+ persistence.addEventListener('change',persist);
  let active=false,loading=false,publicAvailable=false,previewMode=false,runtimeAuthentication=null;
  CLEA7AI.configuration().then(config=>{
   runtimeAuthentication=config.authentication;
@@ -253,7 +273,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   const other=selected===check?publicCheck:check;other.checked=false;
   loading=true;submit.disabled=true;check.disabled=true;if(selected===publicCheck)publicCheck.disabled=true;
   feedback.textContent='Provjeravam BL CLEA AI servis…';
-  try{client.useLocal(selected===check);await client.check();active=true;document.getElementById('chat-ready').textContent='CLEA servis je spreman';feedback.textContent=['desktop-loopback','owner-invite'].includes(runtimeAuthentication)?'BL CLEA AI je spreman. Možeš razgovarati.':selected===check?'BL CLEA AI lokalni servis uključen. Šalju se samo nove poruke.':'BL CLEA AI HP servis uključen. Potvrda pristupa slijedi prije prvog pitanja.';}
+  try{client.useLocal(selected===check);await client.check();active=true;restoreSaved();document.getElementById('chat-ready').textContent='CLEA servis je spreman';feedback.textContent=['desktop-loopback','owner-invite'].includes(runtimeAuthentication)?'BL CLEA AI je spreman. Možeš razgovarati.':selected===check?'BL CLEA AI lokalni servis uključen. Šalju se samo nove poruke.':'BL CLEA AI HP servis uključen. Potvrda pristupa slijedi prije prvog pitanja.';}
   catch(error){selected.checked=false;feedback.textContent=error.message+' Poruka nije poslana modelu.';}
   finally{loading=false;submit.disabled=false;check.disabled=false;if(selected===publicCheck)publicCheck.disabled=false;}
  }
@@ -287,13 +307,13 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   document.getElementById('chat-stop').disabled=false;
   message('Ti',question);input.value='';const body=message('BL CLEA AI','Obrađujem poruku…');
   try{
-   const data=await client.ask(question,{onDelta:(_delta,reply)=>{body.textContent=reply;}});body.textContent=data.reply;
+   const data=await client.ask(question,{onDelta:(_delta,reply)=>{body.textContent=reply;}});body.textContent=data.reply;persist();
    if(data.sources.length){const citation=document.createElement('small');citation.textContent='Odobreni izvori: '+data.sources.map(x=>typeof x.path==='string'?x.path:'').filter(Boolean).join(', ');body.append(document.createElement('br'),citation);}
    feedback.textContent=data.transport==='hp'?'Odgovor BL CLEA AI servisa. Provjeri važne tvrdnje.':'Odgovor lokalnog servisa. Provjeri važne tvrdnje.';status.textContent=feedback.textContent;
   }catch(error){body.textContent=error.message;feedback.textContent='Nema automatskog ponavljanja niti zamjene odgovora drugim modelom.';}
   finally{submit.disabled=false;loading=false;check.disabled=false;publicCheck.disabled=!publicAvailable;document.getElementById('chat-stop').disabled=true;}
  },true);
  document.getElementById('chat-stop').addEventListener('click',()=>client.cancel());
- document.getElementById('chat-clear').addEventListener('click',()=>client.reset());
+ document.getElementById('chat-clear').addEventListener('click',()=>{client.reset();persist();});
  window.addEventListener('pagehide',()=>client.reset());
 })();
