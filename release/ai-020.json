@@ -78,8 +78,8 @@
     },
     {
       "path": "studio/workbench/chat/ui.js",
-      "bytes": 33458,
-      "sha256": "eb837669361db876144b328881eba948d75f2b5fdf5d38b51a2802ced6d12c56"
+      "bytes": 33498,
+      "sha256": "44bd8f8c26f9064b14d7f1b7fe9dbc5d9077f8e57310972ae96fd5fd96adfa2b"
     },
     {
       "path": "studio/workbench/chat/worker.js",

@@ -229,7 +229,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  const mount=document.createElement('div');mount.className='clea-access-challenge';mount.hidden=true;
  controls.append(publicLabel,note,advanced,notice,feedback,mount);form.append(controls);
  const client=CLEA7AI.create({challengeMount:mount,onStatus:text=>{feedback.textContent=text;status.textContent=text;}});
- const persistenceLabel=document.createElement('label'),persistence=document.createElement('input');persistence.type='checkbox';
+ const persistenceLabel=document.createElement('label'),persistence=document.createElement('input');persistence.type='checkbox';persistence.id='clea-save-conversation';
  persistenceLabel.append(persistence,document.createTextNode(' Sačuvaj historiju na ovom uređaju'));
  const persistenceNote=document.createElement('small');persistenceNote.textContent='Opcionalno: posljednje četiri razmjene ostaju u pregledniku do brisanja. Nisu šifrirane; izbjegavaj zajednički računar.';
  controls.append(persistenceLabel,persistenceNote);
