@@ -6,11 +6,12 @@
   <meta name="theme-color" content="#111d29">
   <meta name="referrer" content="no-referrer">
   <meta name="description" content="BL CLEA Sense 7 — lokalna provjera CV-a i oglasa, potvrđeni dokazi i pristupačna priprema prijave. Testna verzija by Brzo i Lokalno.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' http://127.0.0.1:8765; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src https://challenges.cloudflare.com">
   <title>BL CLEA Sense 7 — Tvoja prijava, jasni dokazi</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css?v=664e01ae1d0dd8e7">
   <link rel="stylesheet" href="sense-spatial.css?v=5c3d036e29454515">
+  <link rel="stylesheet" href="ai-bridge.css">
   <link rel="stylesheet" href="sense-environment.css?v=67feb5f964d9632f">
   <script defer src="workbench/bil-compiler.js?v=62ed55f58db45253"></script>
   <script defer src="workbench/bil-runtime.js?v=e0efff2ab8006bd1"></script>
@@ -25,6 +26,8 @@
   <script defer src="sense-guide.js?v=afaec139cf570b15"></script>
   <script defer src="sense-position.js?v=65a37c5add8248bd"></script>
   <script defer src="sense-coach.js?v=d7939d0263e9a200"></script>
+  <script defer src="../clea-ai-client.js"></script>
+  <script defer src="ai-bridge.js"></script>
 <link rel="manifest" href="manifest.webmanifest"><script defer src="cv-offline.js?v=081b73c7435b52db"></script></head>
 <body>
   <a class="skip-link" href="#main">Preskoči na radni prostor</a>

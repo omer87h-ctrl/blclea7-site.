@@ -40,18 +40,20 @@
     }
   }, true);
 
-  function start() {
+  async function start() {
     if (started) return;
     started = true;
     if (failedScripts.size) {
       fail('Nije učitana potrebna datoteka: ' + [...failedScripts].join(', ') + '. Provjeri vezu i ponovo učitaj stranicu.');
       return;
     }
-    if (!window.isSecureContext || !window.crypto?.subtle) {
+    let hostConfig=null;try{hostConfig=await window.CLEA7AI?.configuration();}catch{}
+    const runtimeHost=window.CLEA7AI?.isRuntimeHost(hostConfig)===true;
+    if (!window.isSecureContext || (!runtimeHost&&!window.crypto?.subtle)) {
       fail('Za provjeru integriteta modela potreban je siguran HTTPS preglednik s podrškom za Web Crypto. Otvori ovu stranicu direktno u ažuriranom pregledniku.');
       return;
     }
-    if (typeof window.Worker !== 'function') {
+    if (!runtimeHost&&typeof window.Worker !== 'function') {
       fail('Ovaj preglednik ne podržava Web Worker potreban za lokalni model. Otvori stranicu u ažuriranom samostalnom pregledniku.');
       return;
     }
