@@ -42,6 +42,11 @@
       "sha256": "72d69dcbe3cd4c74dd3c49104852af840eb396fecd3e85736001c63c8edefeba"
     },
     {
+      "path": "sense/downloads/BL-CLEA7-Core-SDK-0.37.0-test.zip",
+      "bytes": 317594,
+      "sha256": "6d0bfec3ba0a2a1a068115350cbd477cda60c6497f5ce2bf941d2e8f97652499"
+    },
+    {
       "path": "sense/downloads/SDK-CORE-2.md",
       "bytes": 4071,
       "sha256": "3c3ae2e21be65bc8cd01908bb817c6a3561923edd33af690182f13d24a13d9b5"
@@ -78,13 +83,13 @@
     },
     {
       "path": "sense/index.html",
-      "bytes": 26092,
-      "sha256": "1e4514f054a4641512cc4682e7f784304d0152c74f25facfcadebde34a21c998"
+      "bytes": 26097,
+      "sha256": "a7b98888d7d1d9f862a4db189e3398b3feeb7e235d84c8e44060b798d54debf2"
     },
     {
       "path": "sense/offline-assets.js",
       "bytes": 3272,
-      "sha256": "29b075c95ed9e25d1ee3d3f333273ee6ca2531d964bfc1d44ae03b811d6074b2"
+      "sha256": "4a7641b8b9f9aa0da650e5e0a556d781f7f6fdf10195605b18d8e600fcdb791f"
     },
     {
       "path": "sense/sense-authoring.js",
