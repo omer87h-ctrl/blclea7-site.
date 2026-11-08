@@ -1,0 +1,56 @@
+# Original accessible CV application, authored as BIL; no model or cloud required.
+backend assist using "sense.local/1"
+let name = ""
+let experience = ""
+let education = ""
+let skills = ""
+let cv = ""
+let dictated = ""
+let requested = false
+let stopped = false
+let stopFailure: RemoteFailure? = null
+let failure: RemoteFailure? = null
+let status = "Unesi samo svoje stvarne podatke."
+on review {
+    cv = name + "\n\nRadno iskustvo\n\n" + experience + "\n\nObrazovanje\n\n" + education + "\n\nVještine\n\n" + skills
+    open preview
+}
+on export_cv {
+    request assist.document.docx(cv) into requested catch failure then ready else failed
+}
+on read_cv {
+    request assist.speech.speak(cv) into requested catch failure then ready else failed
+}
+on dictate {
+    request assist.speech.listen("bs-BA") into dictated catch failure then heard else failed
+}
+on stop_speech {
+    request assist.speech.stop() into stopped catch stopFailure
+}
+on heard(result: Text, context: RemoteCompletion) { status = "Pregledaj prepoznati tekst. Prenos u iskustvo biraš zasebno." }
+on append_dictation { experience = experience + "\n" + dictated; dictated = "" }
+on ready(result: Boolean, context: RemoteCompletion) { status = "Sistemska usluga je završila zahtjev. Provjeri rezultat." }
+on failed(problem: RemoteFailure, context: RemoteCompletion) { status = problem.code }
+on back { open editor }
+screen editor "Moj pristupačni CV" {
+    heading "Tvoj CV, tvoji podaci" key title
+    input name label "Ime ili naziv koji želiš navesti" key name
+    input experience label "Radno iskustvo" multiline key experience
+    input education label "Obrazovanje" multiline key education
+    input skills label "Vještine" multiline key skills
+    button "Diktiraj uz dozvolu mikrofona" runs dictate key dictate
+    show dictated key dictated
+    button "Dodaj pregledani tekst u iskustvo" runs append_dictation key append
+    button "Pripremi pregled CV-a" runs review key review
+    show status key status
+}
+screen preview "Pregled CV-a" {
+    heading "Pregledaj prije izvoza" key preview_title
+    show cv key cv
+    button "Preuzmi DOCX uz potvrdu" runs export_cv key export
+    button "Izgovori CV uz potvrdu" runs read_cv key speak
+    button "Zaustavi govor ili diktiranje" runs stop_speech key stop
+    button "Uredi podatke" runs back key back
+    show status key preview_status
+}
+start editor

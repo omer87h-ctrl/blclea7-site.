@@ -1,0 +1,36 @@
+# Original independent SDK example. All names/data are fictional.
+# No Studio, model, network, identity or device permission is required.
+import text
+import collections
+
+record Requirement {
+ key: Text
+ mandatory: Boolean
+}
+record Fact {
+ key: Text
+ confirmed: Boolean
+}
+
+let requirements = [new Requirement { key: "SQL", mandatory: true }, new Requirement { key: "Excel", mandatory: false }]
+let facts = [new Fact { key: "SQL", confirmed: true }, new Fact { key: "Excel", confirmed: false }]
+let supported: List<Text> = []
+let review: List<Text> = []
+
+guard collections.length(requirements) > 0 else raise "Requirements", "No requirements supplied."
+for requirement in requirements {
+ let found = false
+ for fact in facts {
+  if text.normalize(text.lower(text.trim(fact.key))) == text.normalize(text.lower(text.trim(requirement.key))) and fact.confirmed {
+   found = true
+  }
+ }
+ if found {
+  supported = collections.append(supported, requirement.key)
+ } else {
+  review = collections.append(review, requirement.key)
+ }
+}
+supported = collections.unique(supported)
+let message = text.join(supported, ", ")
+show message

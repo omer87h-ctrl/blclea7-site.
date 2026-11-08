@@ -1,0 +1,43 @@
+/* Accessible CV authoring from user-confirmed facts. No inference or upload. */
+(function(scope){'use strict';
+const fields=[['name','Ime ili naziv koji želiš prikazati'],['role','Zanimanje ili kratki opis'],['contact','Kontakt — samo ako ga želiš navesti'],['experience','Radno iskustvo'],['education','Obrazovanje'],['skills','Vještine'],['projects','Projekti']];
+function buildCV(values){
+ if(!values||typeof values!=='object'||Array.isArray(values)||Object.keys(values).some(key=>!fields.some(([id])=>id===key)))throw Error('Nepoznata CV polja.');
+ const read=id=>{const value=values[id]??'';if(typeof value!=='string'||value.length>6000||/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value))throw Error('Polje sadrži previše teksta ili nedozvoljene znakove.');return value.trim();};
+ const identity=['name','role','contact'].map(read).filter(Boolean).join('\n'),sections=[];if(identity)sections.push(identity);
+ for(const [id,label]of fields.slice(3)){const value=read(id);if(value)sections.push(label+'\n\n'+value);}
+ const result=sections.join('\n\n');if(!result||result.length>30000)throw Error('Unesi barem jedan podatak; CV može imati do 30.000 znakova.');return result;
+}
+scope.CLEA7SenseAuthoring=Object.freeze({format:'sense.cv-authoring/1',buildCV});
+if(typeof document==='undefined')return;
+const cv=document.getElementById('cv-text'),draft=document.getElementById('draft-text');if(!cv||!draft)return;
+const make=(tag,text)=>{const element=document.createElement(tag);if(text!==undefined)element.textContent=text;return element;};
+const open=make('button','Napravi CV korak po korak');open.type='button';open.id='sense-create-cv';open.className='button secondary';cv.closest('section').querySelector('.input-bottom')?.append(open);
+const dialog=make('dialog');dialog.id='sense-cv-authoring';dialog.setAttribute('aria-labelledby','sense-authoring-title');
+const title=make('h2','Napravi svoj CV');title.id='sense-authoring-title';title.tabIndex=-1;
+const note=make('p','Navodiš samo vlastite podatke. Nijedan podatak nije obavezan pojedinačno. Sve se obrađuje na ovom uređaju; spremanje biraš zasebno.');
+const progress=make('p');progress.setAttribute('role','status');const panels=[],inputs={};
+for(const [id,label]of fields){const panel=make('section'),labelNode=make('label',label),input=make(id==='name'||id==='role'?'input':'textarea');input.id='sense-cv-'+id;input.maxLength=6000;if(input.tagName==='TEXTAREA')input.rows=5;labelNode.htmlFor=input.id;panel.append(labelNode,input);panels.push(panel);inputs[id]=input;}
+const review=make('section'),preview=make('pre'),confirmLabel=make('label'),approved=make('input');approved.type='checkbox';approved.id='sense-cv-confirm';confirmLabel.append(approved,document.createTextNode(' Pregledao/la sam tekst; ne sadrži izmišljene kvalifikacije.'));review.append(preview,confirmLabel);panels.push(review);
+const controls=make('div');controls.className='button-row';
+const previous=make('button','Prethodno'),next=make('button','Sljedeće'),apply=make('button','Potvrdi i prenesi CV'),close=make('button','Zatvori bez prenosa');for(const button of [previous,next,apply,close]){button.type='button';button.className='button secondary';controls.append(button);}
+previous.id='sense-cv-previous';next.id='sense-cv-next';apply.id='sense-cv-apply';close.id='sense-cv-close';
+dialog.append(title,note,progress,...panels,controls);document.body.append(dialog);let step=0;
+const values=()=>Object.fromEntries(fields.map(([id])=>[id,inputs[id].value]));
+function draw(){panels.forEach((panel,index)=>panel.hidden=index!==step);progress.textContent='Korak '+(step+1)+' od '+panels.length+': '+(fields[step]?.[1]||'Pregled i potvrda');previous.disabled=step===0;next.hidden=step===panels.length-1;apply.hidden=step!==panels.length-1;apply.disabled=!approved.checked;if(step===panels.length-1)preview.textContent=buildCV(values());(fields[step]?inputs[fields[step][0]]:title).focus();}
+open.addEventListener('click',()=>{document.body.classList.add('sense-entered');step=0;approved.checked=false;dialog.showModal();draw();});
+const shortcut=make('button','Novi CV · vođeni unos');shortcut.type='button';shortcut.id='sense-create-cv-shortcut';shortcut.className='button secondary';shortcut.onclick=()=>open.click();document.querySelector('#sense-spatial-host .spatial-footer')?.append(shortcut);
+previous.onclick=()=>{if(step>0){step--;draw();}};next.onclick=()=>{try{if(step===fields.length-1)buildCV(values());step++;draw();}catch(error){step=Math.min(step,fields.length-1);progress.textContent=error.message;}};
+approved.onchange=()=>apply.disabled=!approved.checked;close.onclick=()=>dialog.close();dialog.addEventListener('close',()=>open.focus());
+apply.onclick=()=>{
+ try{if(!approved.checked)throw Error('Prvo potvrdi tekst.');const text=buildCV(values());if((cv.value.trim()||draft.value.trim())&&!scope.confirm('Zamijeniti trenutni CV i nacrt potvrđenim tekstom? Prvo sačuvaj prethodni ako ga želiš zadržati.'))return;
+  cv.value=text;cv.dispatchEvent(new Event('input',{bubbles:true}));draft.value=text;draft.dispatchEvent(new Event('input',{bubbles:true}));dialog.close();document.querySelector('#primary-nav [data-view="workspace"]')?.click();cv.focus();document.getElementById('status-text').textContent='Tvoj potvrđeni CV je spreman za uređivanje i DOCX izvoz. Za kasniji nastavak izaberi Sačuvaj na ovom uređaju ili preuzmi projekt.';
+ }catch(error){progress.textContent=error.message;}
+};
+const file=make('input');file.type='file';file.accept='.txt,text/plain';file.id='sense-cv-text-file';file.hidden=true;
+const upload=make('button','Učitaj tekstualni CV (.txt)');upload.type='button';upload.className='quiet-button';upload.onclick=()=>file.click();open.after(upload,file);
+const download=make('button','Preuzmi trenutni CV kao DOCX');download.type='button';download.id='sense-cv-download';download.className='button secondary';upload.after(download);
+download.onclick=()=>{try{const data=scope.CLEA7SenseDocument.renderDOCX(cv.value),url=URL.createObjectURL(new Blob([data],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})),a=make('a');a.href=url;a.download='Moj-CV-Sense.docx';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);document.getElementById('status-text').textContent='Pripremljen je tvoj trenutni CV kao DOCX. Izvoz ne zahtijeva oglas ili AI servis.';}catch(error){document.getElementById('status-text').textContent=error.message;}};
+file.onchange=async()=>{try{const selected=file.files[0];if(!selected)return;if(selected.size>131072)throw Error('Tekstualna datoteka prelazi 128 KiB.');const text=new TextDecoder('utf-8',{fatal:true}).decode(await selected.arrayBuffer());if(!text.trim()||text.length>30000||text.includes('\0'))throw Error('CV mora biti UTF-8 tekst do 30.000 znakova.');if(cv.value.trim()&&!scope.confirm('Zamijeniti trenutni CV učitanim tekstom?'))return;cv.value=text;cv.dispatchEvent(new Event('input',{bubbles:true}));cv.focus();document.getElementById('status-text').textContent='Učitan je tekstualni CV. Pregledaj ga prije korištenja.';}catch(error){document.getElementById('status-text').textContent=error.message;}finally{file.value='';}};
+scope.addEventListener('sense:erase',()=>{for(const input of Object.values(inputs))input.value='';approved.checked=false;preview.textContent='';if(dialog.open)dialog.close();});
+})(globalThis);

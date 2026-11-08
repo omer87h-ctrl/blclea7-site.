@@ -1,0 +1,54 @@
+name: Verify licensed BL CLEA AI cross-product integration
+on:
+  pull_request:
+    paths:
+      - 'clea-ai-client.js'
+      - 'clea-ai-config.json'
+      - 'tests/test_clea_hp_browser.cjs'
+      - 'tests/test_clea_protected_preview.cjs'
+      - 'scripts/configure_ai_endpoint.py'
+      - 'tests/test_ai_endpoint_config.py'
+      - 'privatnost.html'
+      - 'model-licence.html'
+      - 'studio/workbench/chat/ui.js'
+      - 'studio/workbench/index.html'
+      - 'sense/index.html'
+      - 'sense/ai-bridge.js'
+      - 'sense/ai-bridge.css'
+      - 'tests/test_clea_qwen_browser.cjs'
+      - '.github/workflows/verify-clea-qwen.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/clea7-qa --no-audit --no-fund playwright@1.56.1
+      - name: SHA256 and static checks
+        run: |
+          node --check studio/workbench/chat/ui.js
+          node --check sense/ai-bridge.js
+          node --check clea-ai-client.js
+          python3 -m unittest discover -s tests -p test_ai_endpoint_config.py -v
+          python3 - <<'PY'
+          import hashlib,pathlib
+          for file in ('studio/workbench/chat/ui.js','studio/workbench/index.html'):
+              b=pathlib.Path(file).read_bytes()
+              print('CLEA_INTEGRITY',file,len(b),hashlib.sha256(b).hexdigest())
+          PY
+      - name: Browser tests with mock local model, not real inference
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/clea-qwen-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" || true' EXIT
+          CLEA7_CHROME="$(command -v google-chrome)" node tests/test_clea_qwen_browser.cjs
+          CLEA7_CHROME="$(command -v google-chrome)" node tests/test_clea_hp_browser.cjs
+          CLEA7_CHROME="$(command -v google-chrome)" node tests/test_clea_protected_preview.cjs

@@ -36,7 +36,7 @@ def validate(raw):
         if not key(table) or not isinstance(fields,dict) or not 1<=len(fields)<=50 or any(not key(k) or t not in ('text','number','boolean') for k,t in fields.items()):raise UserError('Neispravan model tabele.')
     p['tables']=tables
     permissions=p.get('permissions',[])
-    if not isinstance(permissions,list) or any(x not in ('camera','location','notifications') for x in permissions):raise UserError('Nepodržana dozvola.')
+    if not isinstance(permissions,list) or any(x not in ('camera','location','notifications','microphone','haptics') for x in permissions):raise UserError('Nepodržana dozvola.')
     screens=p.get('screens');flows=p.get('flows')
     if not isinstance(screens,list) or not 1<=len(screens)<=50 or not isinstance(flows,dict) or len(flows)>200 or not all(key(k) for k in flows):raise UserError('Neispravni ekrani ili tokovi.')
     ids=[s.get('id') for s in screens if isinstance(s,dict)]
@@ -137,7 +137,7 @@ def source_files(root,project):
         'settings.gradle','build.gradle','gradle.properties','runtime/build.gradle',
         'runtime/src/main/AndroidManifest.xml','runtime/src/main/assets/index.html',
         'runtime/src/main/assets/boot.js','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Runtime.java',
-        'runtime/src/main/java/com/brzoilokalno/clea7/Clea7Backend.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Modules.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Camera.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Media.java',
+        'runtime/src/main/java/com/brzoilokalno/clea7/Clea7Backend.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Sense.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Modules.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Camera.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Media.java',
         'app/build.gradle','app/src/main/AndroidManifest.xml',
         'app/src/main/java/com/brzoilokalno/clea7/demo/MainActivity.java',
         'app/src/main/res/xml/clea7_network.xml','app/src/main/res/drawable/clea7_icon.xml','app/src/main/res/values/styles.xml')
@@ -149,14 +149,14 @@ def source_files(root,project):
     # Generated apps contain only the whitelisted embedded consumer and AAR.
     # The repository's independent launcher is a different product, not a missing dependency.
     files['android/settings.gradle']=re.sub(r'^include\b.*$',"include ':runtime', ':app'",files['android/settings.gradle'].decode(),flags=re.MULTILINE).encode()
-    for rel in ('runtime.js','workbench/living.js','workbench/bil-compiler.js','workbench/bil-runtime.js','workbench/format.js','workbench/plan.js','workbench/publisher.js','workbench/package.js','workbench/review.js','workbench/consumer.js','workbench/image-store.js','workbench/firebase-development.js','workbench/android-backend.js','workbench/remote.js','workbench/remote-studio.js','workbench/engine.js','workbench/device.js','workbench/studio.css','launcher/index.html','launcher/launcher.css','launcher/library.js','launcher/player.html','launcher/player.js'):
+    for rel in ('runtime.js','workbench/living.js','workbench/bil-compiler.js','workbench/bil-runtime.js','workbench/working-cache.js','workbench/clea-core.js','workbench/format.js','workbench/plan.js','workbench/publisher.js','workbench/package.js','workbench/review.js','workbench/consumer.js','workbench/image-store.js','workbench/firebase-development.js','workbench/android-backend.js','workbench/remote.js','workbench/remote-studio.js','workbench/engine.js','workbench/sense-sdk.js','workbench/sense-document.js','workbench/sense-backend.js','workbench/device.js','workbench/studio.css','launcher/index.html','launcher/launcher.css','launcher/library.js','launcher/player.html','launcher/player.js'):
         files['web/'+rel]=(root/'web'/rel).read_bytes()
     files['android/app/src/main/assets/application/project.json']=json.dumps(p,ensure_ascii=False,allow_nan=False).encode()
     files['android/gradle.properties']+=('\nclea7Package='+p['package']+'\n'+('clea7DevelopmentBackend=true\n' if any(b['adapter'].startswith('firebase.development/') for b in p.get('remote',{}).get('backends',{}).values()) else '')).encode()
     # App label comes from validated XML-escaped user content; no source injection.
     import html
     manifest=re.sub(r'<uses-permission\b[^>]*/>', '',files['android/app/src/main/AndroidManifest.xml'].decode()).replace('BL CLEA7 aplikacija',html.escape(p['name'],quote=True))
-    permissions_xml=''.join('<uses-permission android:name="'+permission+'"/>' for flag,names in {'camera':['android.permission.CAMERA'],'location':['android.permission.ACCESS_FINE_LOCATION','android.permission.ACCESS_COARSE_LOCATION'],'notifications':['android.permission.POST_NOTIFICATIONS']}.items() if flag in p['permissions'] for permission in names)
+    permissions_xml=''.join('<uses-permission android:name="'+permission+'"/>' for flag,names in {'camera':['android.permission.CAMERA'],'location':['android.permission.ACCESS_FINE_LOCATION','android.permission.ACCESS_COARSE_LOCATION'],'notifications':['android.permission.POST_NOTIFICATIONS'],'microphone':['android.permission.RECORD_AUDIO'],'haptics':['android.permission.VIBRATE']}.items() if flag in p['permissions'] for permission in names)
     manifest=manifest.replace('<application',permissions_xml+'<application',1)
     files['android/app/src/main/AndroidManifest.xml']=manifest.encode()
     gradle=files['android/app/build.gradle'].decode().replace('versionCode 1','versionCode '+str(p['version']))
@@ -173,10 +173,58 @@ def source_zip(root,project):
         for name,contents in source_files(root,project).items():z.writestr(name,contents)
     return output.getvalue()
 
-def build_apk(root,project,destination):
+def release_source_files(root,project):
+    """Current Google Play target profile; unsigned, owner signing remains separate."""
     project=validate(project)
-    java=shutil.which('java');gradle=shutil.which('gradle')
-    sdk=os.environ.get('ANDROID_HOME') or os.environ.get('ANDROID_SDK_ROOT')
+    if any(b['adapter'].startswith('firebase.development/') for b in project.get('remote',{}).get('backends',{}).values()):
+        raise UserError('Razvojni Firebase adapter nije produkcijski backend; release izvoz je odbijen.')
+    files=source_files(root,project)
+    files['android/build.gradle']=files['android/build.gradle'].replace(b"version '8.7.3'",b"version '8.13.2'")
+    for name in ('android/app/build.gradle','android/runtime/build.gradle'):
+        files[name]=files[name].replace(b'compileSdk 35',b'compileSdk 36').replace(b'targetSdk 35',b'targetSdk 36').replace(b"buildToolsVersion '35.0.0'",b"buildToolsVersion '36.0.0'")
+    files['BUILD-INSTRUCTIONS.txt']=(
+        'CLEA Android release source profile: JDK17+, Gradle8.13, AGP8.13.2, Android SDK36/build-tools36.0.0.\n'
+        'Run gradle --no-daemon :app:bundleRelease from android/. Output is unsigned; use your own signing key for upload.\n'
+        'Google Play policy checked 2026-11-08: new apps/updates require API36 from 2026-08-31.\n'
+        'Source: https://support.google.com/googleplay/android-developer/answer/11926878\n'
+        'Target SDK alone is not approval: complete privacy, Data safety, permissions, account and accessibility review.\n'
+        'No Play account, signing key, production Firebase or release is modified by this export.\n').encode()
+    return files
+
+def build_bundle(root,project,destination,toolchain=None,cancel=None):
+    env=toolchain[0] if toolchain else os.environ.copy()
+    java=str(toolchain[1]['java']) if toolchain else shutil.which('java')
+    gradle=str(toolchain[1]['gradle']) if toolchain else shutil.which('gradle')
+    sdk=env.get('ANDROID_HOME') or env.get('ANDROID_SDK_ROOT')
+    if not java or not gradle or not sdk or not (Path(sdk)/'platforms/android-36').is_dir():
+        raise UserError('AAB nije izgrađen: release profil zahtijeva JDK17+, Gradle8.13 i Android SDK36. Nema automatskog preuzimanja.')
+    files=release_source_files(root,project)
+    target=Path(destination);target.mkdir(parents=True,exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='clea7-bundle-') as temp:
+        folder=Path(temp)
+        for name,content in files.items():
+            path=folder/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(content)
+        if toolchain:
+            from .toolchain import gradle_command
+            command=gradle_command(toolchain[1],['--no-daemon',':app:bundleRelease'])
+        else:command=[gradle,'--no-daemon',':app:bundleRelease']
+        from .process import run_bounded
+        result=run_bounded(command,cwd=folder/'android',env=env,timeout=900,cancel=cancel)
+        if result.returncode:raise UserError('AAB build nije prošao:\n'+(result.stderr+result.stdout)[-6000:])
+        bundle=folder/'android/app/build/outputs/bundle/release/app-release.aab'
+        if not bundle.is_file():raise UserError('Alatni lanac nije proizveo AAB.')
+        with zipfile.ZipFile(bundle) as archive:
+            if archive.testzip() or not {'BundleConfig.pb','base/manifest/AndroidManifest.xml','base/dex/classes.dex'}.issubset(archive.namelist()):raise UserError('AAB nije ispravan.')
+        output=target/'application-release-unsigned.aab'
+        if output.exists():raise UserError('AAB izlaz već postoji; odaberi drugi direktorij.')
+        shutil.copy2(bundle,output);return output
+
+def build_apk(root,project,destination,toolchain=None,cancel=None):
+    project=validate(project)
+    env=toolchain[0] if toolchain else os.environ.copy()
+    java=str(toolchain[1]['java']) if toolchain else shutil.which('java')
+    gradle=str(toolchain[1]['gradle']) if toolchain else shutil.which('gradle')
+    sdk=env.get('ANDROID_HOME') or env.get('ANDROID_SDK_ROOT')
     if not java or not gradle or not sdk or not (Path(sdk)/'platforms'/'android-35').is_dir():
         raise UserError('APK nije izgrađen: potreban je instaliran JDK 17+, Gradle 8.10.2 i Android SDK 35. Ništa nije preuzeto ili instalirano automatski.')
     target=Path(destination);target.mkdir(parents=True,exist_ok=True)
@@ -184,7 +232,12 @@ def build_apk(root,project,destination):
         folder=Path(temp)
         for name,contents in source_files(root,project).items():
             path=folder/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(contents)
-        result=subprocess.run([gradle,'--no-daemon',':app:assembleDebug'],cwd=folder/'android',capture_output=True,text=True,timeout=600,shell=False)
+        if toolchain:
+            from .toolchain import gradle_command
+            command=gradle_command(toolchain[1],['--no-daemon',':app:assembleDebug'])
+        else:command=[gradle,'--no-daemon',':app:assembleDebug']
+        from .process import run_bounded
+        result=run_bounded(command,cwd=folder/'android',env=env,timeout=600,cancel=cancel)
         if result.returncode:raise UserError('Android build nije prošao:\n'+(result.stderr+result.stdout)[-6000:])
         apk=folder/'android/app/build/outputs/apk/debug/app-debug.apk'
         if not apk.is_file():raise UserError('Alatni lanac nije proizveo APK.')
@@ -196,3 +249,4 @@ def validate_project(raw):
     if isinstance(raw,dict) and raw.get('format') in ('clea7.application/2','clea7.application/3','clea7.application/4','clea7.application/5','clea7.application/6','clea7.application/7','clea7.application/8','clea7.application/9'):return validate(raw)
     from .schema import validate_app
     return validate_app(raw)
+

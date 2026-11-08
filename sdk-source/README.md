@@ -1,51 +1,45 @@
-# BL CLEA7 public developer SDK 0.15 BIL
+# BL CLEA7 SDK 0.37.0-test — shared Core and dependency cache
 
-Python 3.12+; Node.js 22+ for execution. Offline validation, packaging and real tests:
+Development/test distribution by Brzo i Lokalno. The authoritative BIL compiler,
+bounded interpreter, shared Core, project CLI and original dependency/result cache
+are included. This archive is not an Android/iOS/Windows installer or a claim of
+native platform parity. Python3.12+ and Node22+ are development prerequisites.
+No model, telemetry, cloud service or automatic dependency download is required.
+Optional `ai status/ask/propose` uses a separately running owner-local9B gateway.
+The SDK contains its client, not a model server or weights. `ai propose` requires
+review and passes the actual compiler/isolated Runtime before writing a new file.
+Sense contracts require Runtime0.37 and a host implementing those capabilities;
+this compiler/Core archive does not contain native host binaries/build templates.
 
-```
-python -m clea7 validate sdk/examples/units.application.json
-python -m clea7 package sdk/examples/units.application.json units.clea7 --targets browser,windows,android
-python -m clea7 test units.clea7 --flow convert --state '{"kilometres":2.5}'
-python -m clea7 test-suite sdk/examples/units.application.json sdk/examples/units.tests.json --mode light
-```
-
-Run commands from this extracted SDK root. Install the resulting .clea7 package in the independent Runtime. No Studio is required. Tests execute actual whitelisted instructions in isolated memory. Native adapters are blocked in SHADOW tests. Wrong expected results return failure.
-
-Signed package verification additionally needs cryptography==50.0.0; unsigned package creation and tests use the standard Python/Node libraries. Model weights, accounts, API keys, private publisher identities and the native Windows build host are not included. This is an application SDK, not the Studio source repository.
-
-Original-code terms: LICENSE.txt. Original design material terms: MATERIALS-LICENSE.txt. No universal compatibility, battery or security-superiority claim.
-
-## BLclea Intent Language
-
-```
-python -m clea7 bil check sdk/examples/bil/core.bil
-python -m clea7 bil run sdk/examples/bil/core.bil
-python -m clea7 bil package sdk/examples/bil/counter.bil --output moja-bil.clea7 --id moja_bil
-```
-
-BIL source has its own parser, static types and checked IR. Run from this SDK root. Install application/5 in Runtime 0.6 or newer. The package intentionally contains source and IR; never embed secrets. See docs/BIL-LANGUAGE-SPEC.md and docs/BIL-LIMITATIONS.md. The optional AI proposal contract has no default model connection. Existing JSON application workflows remain supported.
-
-## Povezane aplikacije
-
-BIL application/6 opisuje ekrane, obrasce i tabele. Primjer: sdk/examples/bil/orders.bil. Potreban je Runtime 0.7.0+. Ugovor i granice: docs/STUDIO-APPLICATIONS-0.7.md.
-
-## SDK0.9 — development backend contracts
-
-Compile/validate/package application7 with the original BIL compiler. `--targets browser` is the portable development default. Execute remote events only in a configured Runtime with explicit grants and local demo-clea7 Firebase emulators. This curated SDK excludes the private native host and Android build sources. Existing local applications remain supported. See docs/BIL-ASYNC-REQUESTS.md and docs/PRINCIPAL-STORAGE.md. No production backend, chat, uploads or push service is supplied.
-
-## SDK 0.13
-
-The SDK preserves existing projects and adds native Android capability contracts. Compile and package the original native-media example offline:
+From the extracted SDK directory:
 
 ```sh
-python -m clea7 bil check sdk/examples/bil/native-media.bil
-python -m clea7 bil package sdk/examples/bil/native-media.bil --output Native.clea7
+python -m clea7 doctor
+python -m clea7 project new MyApp
+python -m clea7 project check MyApp
+python -m clea7 project run MyApp --flow calculate
+python -m clea7 project test MyApp
+python -m clea7 project build MyApp --output dist/MyApp.clea7
+python -m clea7 validate MyApp/dist/MyApp.clea7
+python -m clea7 project check sdk/examples/universal-quote
+python -m clea7 project test sdk/examples/universal-quote
 ```
 
-Install Native.clea7 in Android Runtime 0.13 or newer. These hardware capabilities run on Android, not in a browser. Native-only apps do not require a cloud account. Windows Studio can build an embedded APK using a configured Android toolchain. The curated SDK excludes private native host implementation, credentials and user data.
+Existing flat-file commands remain available: bil check/features/compile/run/package,
+validate/package/test/test-suite. Project creation/build refuses destructive overwrite.
+Project dependencies are currently empty; unsupported external dependencies are rejected.
 
+`derive` and new Core3 operations require Runtime0.18. Older sources keep their actual
+feature minimum. The Runtime validates source/IR and package integrity; adding a target
+label does not build or certify that platform. Published native0.15 remains distinct.
 
-## SDK 0.15 — visual presentation
+The RAM working cache stores bounded, app/principal-scoped pure results and exact
+relevant dependencies, with transactional publication. It has no automatic disk storage.
+Development diagnostics show real hit/miss/admission/eviction counters; production hides
+internal event/state detail. Accounted cache bytes are not a hard OS process-memory cap.
+See docs/BIL-DERIVE.md, docs/CLEA-CORE.md and docs/WORKING-CACHE.md.
 
-Typed colours, layout values, numeric visual bindings, original geometric shapes, bounded motion and declared gestures use the versioned bil.ui/2 representation. These packages require Runtime 0.14 or newer. Compile sdk/examples/bil/motion-scene.bil independently of Studio, then run or package it with the same SDK commands above. See docs/BIL-PRESENTATION.md. No arbitrary CSS, remote fonts, uploaded artwork or JavaScript eval is introduced.
-
+LICENSE.txt and MATERIALS-LICENSE.txt are byte-identical to the pinned public0.17 SDK.
+Existing rights and third-party notices remain unchanged. SDK-INVENTORY.json lists the
+size/SHA256 of every other file. Archive hashes prove integrity, not author identity or
+application safety. This development ZIP itself is unsigned.

@@ -1,0 +1,30 @@
+{
+  "format": "clea7.project-tests/1",
+  "cases": [
+    {
+      "name": "Stvarni izračun i ponovno otvaranje",
+      "steps": [
+        {
+          "flow": "increase",
+          "expect": {
+            "values": {
+              "quantity": 3,
+              "total": 60
+            },
+            "screen": "quote"
+          }
+        },
+        {
+          "restart": true,
+          "expect": {
+            "values": {
+              "quantity": 3,
+              "total": 60
+            },
+            "screen": "quote"
+          }
+        }
+      ]
+    }
+  ]
+}

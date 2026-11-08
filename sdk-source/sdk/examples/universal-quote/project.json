@@ -1,0 +1,12 @@
+{
+  "format": "clea7.project/1",
+  "id": "universal_quote",
+  "name": "universal-quote",
+  "version": 1,
+  "entry": "app.bil",
+  "targets": [
+    "browser"
+  ],
+  "tests": "tests.json",
+  "dependencies": []
+}

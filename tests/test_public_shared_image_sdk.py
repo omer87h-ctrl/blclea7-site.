@@ -52,7 +52,7 @@ class PublicSharedImageSDKTests(unittest.TestCase):
 
     def test_web_release_preserves_verified_native_download_identity(self):
         catalog = json.loads((ROOT / 'releases.json').read_text())
-        self.assertEqual(catalog['version'], '0.18.0')
+        self.assertEqual(catalog['version'], '0.37.0')
         self.assertEqual(catalog['native']['version'], '0.15.0')
         self.assertEqual(catalog['native']['source_commit'], '5baaace802746bd64d972568e034abf252b8db73')
         self.assertEqual(catalog['native']['tag'], 'clea7-0.15.0-5baaace')

@@ -48,7 +48,7 @@ def verify_package(value,target=None):
     from .package import decode,MAX_PACKAGE
     hashes,serialization,ec,utils=crypto()
     if not isinstance(value,dict) or set(value)!={'format','manifest','payload','publisherKey','signature'} or value['format']!='clea7.package/2':raise UserError('Neispravna potpisana omotnica.')
-    if value.get('manifest',{}).get('runtime') not in ('0.5.0','0.6.0','0.7.0','0.8.0','0.9.0','0.10.0','0.11.0','0.12.0','0.13.0','0.14.0','0.16.0'):raise UserError('Potpisani paket zahtijeva Runtime 0.5.0 ugovor.')
+    if value.get('manifest',{}).get('runtime') not in ('0.5.0','0.6.0','0.7.0','0.8.0','0.9.0','0.10.0','0.11.0','0.12.0','0.13.0','0.14.0','0.16.0','0.17.0','0.18.0','0.37.0'):raise UserError('Potpisani paket zahtijeva Runtime 0.5.0 ugovor.')
     jwk=value['publisherKey']
     if not isinstance(jwk,dict) or set(jwk)!={'kty','crv','x','y'} or jwk.get('kty')!='EC' or jwk.get('crv')!='P-256':raise UserError('Nepodržan javni ključ autora.')
     x=int.from_bytes(decode64(jwk['x'],32),'big');y=int.from_bytes(decode64(jwk['y'],32),'big');raw=decode64(value['signature'],64)

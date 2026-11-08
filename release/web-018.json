@@ -4,24 +4,34 @@
   "source_commit": "a679e6585d0f77366cff74a5ed182ebc9f32ce9a",
   "files": [
     {
+      "path": "studio/launcher/index.html",
+      "bytes": 2805,
+      "sha256": "cb4d98715215795bf255bfdcf99875df1baae763db548a73217cc089f9e52087"
+    },
+    {
+      "path": "studio/launcher/player.html",
+      "bytes": 3281,
+      "sha256": "d3305811045d527306ecd767be493aefda1e6237fe2ca538f3740754d444fc04"
+    },
+    {
+      "path": "studio/launcher/player.js",
+      "bytes": 7400,
+      "sha256": "b1a3345bee86a504607df60005bb06372a3fa9e9d0b34363dceb11287e1ed5a9"
+    },
+    {
       "path": "studio/workbench/bil-compiler.js",
-      "bytes": 73634,
-      "sha256": "626b3c71d592fa320c5168e7d882f33b0504ed24b1d026ae672772f38159f346"
+      "bytes": 74303,
+      "sha256": "e5e0041c3a0a7cb44a53d3f991982e0296802a119428a64d522275342137b8bb"
     },
     {
       "path": "studio/workbench/bil-runtime.js",
-      "bytes": 72699,
-      "sha256": "45f85c0074d805e66265d36b5deb7efb2d1f6e44ac856c119da38e3cebe05089"
-    },
-    {
-      "path": "studio/workbench/working-cache.js",
-      "bytes": 13568,
-      "sha256": "3cc36cc7794f62c771bc1ed662158547b17032b5bc9d6d31454fe77383166f08"
+      "bytes": 72989,
+      "sha256": "7d7f53a7fbe015068f908dc64721e21d4a400ad69f24991ad26b936990c1bbdb"
     },
     {
       "path": "studio/workbench/clea-core.js",
-      "bytes": 8438,
-      "sha256": "f0f6b98e2033032fd753563b51a5aa7e72d762c56dee2e0a6016a7638dba4c4a"
+      "bytes": 8542,
+      "sha256": "cb4ac242632b033728c6e171c0e0e4163f6a51cd5c6e8ed7953a2113723bed07"
     },
     {
       "path": "studio/workbench/engine.js",
@@ -29,29 +39,19 @@
       "sha256": "c0cd09230e9bac178911a45f9a2d84cac75a693fbad5c145570f63f4bd2fcd82"
     },
     {
-      "path": "studio/workbench/package.js",
-      "bytes": 16802,
-      "sha256": "bb44e6d6c876623da11153bf673d9fe695c1c279d6727c0eaa23bde54128df26"
-    },
-    {
       "path": "studio/workbench/index.html",
-      "bytes": 15276,
-      "sha256": "2d0dd020720e65346a659bc01007eee4bcbc1f7ea980876b353c8b1b1c3cb7d2"
+      "bytes": 15892,
+      "sha256": "1abd09c1cfaf1e61d8a68860e09efe244dee97871f35b5fd092ba9ef514ccc02"
     },
     {
-      "path": "studio/launcher/index.html",
-      "bytes": 2649,
-      "sha256": "08eb04a00e5f1501939306b34b9f6a82947b82650e84100c58a1c74924cbf3a6"
+      "path": "studio/workbench/package.js",
+      "bytes": 17469,
+      "sha256": "78dd191d17d53d42beb17270a756515162ee36fa159641951599852c5b33080d"
     },
     {
-      "path": "studio/launcher/player.html",
-      "bytes": 3125,
-      "sha256": "57a85021693c115b4f9e873b00c6b1ff11fa6492716d67ac98b33673f916cc37"
-    },
-    {
-      "path": "studio/launcher/player.js",
-      "bytes": 7237,
-      "sha256": "261542456cc0c6a042e73bda1693e7d8bdf1dd25553f6d464312958c0fd3ab91"
+      "path": "studio/workbench/working-cache.js",
+      "bytes": 13568,
+      "sha256": "3cc36cc7794f62c771bc1ed662158547b17032b5bc9d6d31454fe77383166f08"
     }
   ],
   "overlays": [

@@ -6,18 +6,19 @@
   <meta name="theme-color" content="#111d29">
   <meta name="referrer" content="no-referrer">
   <meta name="description" content="BL CLEA Sense 7 — lokalna provjera CV-a i oglasa, potvrđeni dokazi i pristupačna priprema prijave. Testna verzija by Brzo i Lokalno.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' http://127.0.0.1:8765; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src https://challenges.cloudflare.com">
   <title>BL CLEA Sense 7 — Tvoja prijava, jasni dokazi</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css?v=664e01ae1d0dd8e7">
   <link rel="stylesheet" href="sense-spatial.css?v=5c3d036e29454515">
+  <link rel="stylesheet" href="ai-bridge.css?v=303fcde00e43ceb2">
   <link rel="stylesheet" href="sense-environment.css?v=67feb5f964d9632f">
   <script defer src="workbench/bil-compiler.js?v=62ed55f58db45253"></script>
   <script defer src="workbench/bil-runtime.js?v=e0efff2ab8006bd1"></script>
   <script defer src="sense-lexicon.js?v=9f40c83cb8750428"></script>
   <script defer src="sense-engine.js?v=0d8699c3b2737726"></script>
   <script defer src="app.js?v=f17ad4e666235ad1"></script>
-  <script defer src="sense-document.js?v=f79dd1b44e24fd37"></script>
+  <script defer src="sense-document.js?v=149921f07f00c6e4"></script>
   <script defer src="sense-spatial.js?v=ae5e11e15f6c1473"></script>
   <script defer src="sense-webgl.js?v=3c3eadd8f3b8b0de"></script>
   <script defer src="sense-feedback.js?v=3032f8356bcfed21"></script>
@@ -25,7 +26,10 @@
   <script defer src="sense-guide.js?v=afaec139cf570b15"></script>
   <script defer src="sense-position.js?v=65a37c5add8248bd"></script>
   <script defer src="sense-coach.js?v=d7939d0263e9a200"></script>
-<link rel="manifest" href="manifest.webmanifest"><script defer src="cv-offline.js?v=081b73c7435b52db"></script></head>
+  <script defer src="../clea-ai-client.js?v=118d216131781f7c"></script>
+  <script defer src="ai-bridge.js?v=23fd8d50765fb33e"></script>
+<link rel="manifest" href="manifest.webmanifest"><script defer src="cv-offline.js?v=081b73c7435b52db"></script><script defer src="sense-sdk.js?v=7c0e29280fb54d31"></script><script defer src="sense-authoring.js?v=bfc6832d72c3c7aa"></script><script defer src="sense-communication.js?v=b2c8e1dae0160a7f"></script><link rel="stylesheet" href="sense-navigation.css?v=b1af8172aab5f75a">
+</head>
 <body>
   <a class="skip-link" href="#main">Preskoči na radni prostor</a>
   <svg class="svg-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
@@ -77,7 +81,7 @@
         <section id="view-draft" class="view" aria-labelledby="draft-title" hidden><div class="section-heading"><div><p class="section-index">04 / PRIPREMA DOKUMENTA</p><h2 id="draft-title">Tvoja prijava.</h2><p>Sense bira izvorne dijelove iskustva povezane s potvrđenim zahtjevima. Ne dopisuje kvalifikacije.</p></div><button id="build-draft" type="button" class="button primary">Pripremi iz potvrđenog<svg aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></button></div><div class="draft-grid"><section class="panel draft-panel"><div class="panel-heading"><div><h3>Tvoj radni nacrt</h3><p id="draft-note">Nacrt još nije pripremljen. Prvo pregledaj i potvrdi povezane navode.</p></div><span id="draft-count" class="character-count">0 znakova</span></div><label class="sr-only" for="draft-text">Radni nacrt CV-a</label><textarea id="draft-text" aria-describedby="draft-note draft-error" aria-errormessage="draft-error" maxlength="40000" spellcheck="false" placeholder="Potvrđeni dijelovi iskustva pojavit će se ovdje. Možeš ih pregledati i ručno urediti."></textarea><p id="draft-error" class="field-help" hidden></p><div class="button-row"><button id="download-draft" type="button" class="button secondary"><svg aria-hidden="true" focusable="false"><use href="#i-download"/></svg>Preuzmi TXT</button><button id="print-draft" type="button" class="button secondary">Štampaj / sačuvaj PDF</button><button id="select-draft" type="button" class="quiet-button">Odaberi tekst</button></div><p class="field-help">Preglednik priprema štampu ili PDF kroz tvoj odabrani sistem. Provjeri raspored i pristupačnost završnog dokumenta.</p></section><aside class="panel draft-sources"><p class="eyebrow">PORIJEKLO NACRTA</p><h3>Šta je korišteno?</h3><div id="draft-claims"><p class="field-help">Nakon pripreme ovdje ćeš vidjeti izvorne navode.</p></div><div id="draft-warnings"></div></aside></div></section>
 
         <details id="runtime-details" class="runtime-details"><summary><span class="runtime-mark">7</span><span>Kako je rezultat nastao?<small>Pravila, izvršavanje i granice provjere</small></span><span class="detail-chevron">⌄</span></summary><div class="runtime-content"><div><h3>Stvarno izvršavanje</h3><p id="runtime-summary">Još nema izvršene analize. Sense koristi BIL pravila i provjerene lokalne operacije.</p><p class="field-help">Trag ispod ne prikazuje tvoj CV, oglas ili privatne navode.</p><button id="download-report" type="button" class="button secondary">Preuzmi izvještaj s unesenim sadržajem</button><p class="field-help">Izvještaj sadrži CV, oglas i nalaze. Preuzmi ga samo ako želiš čuvati taj sadržaj u svojim datotekama.</p></div><pre id="trace" tabindex="0" aria-label="Dijagnostički trag stvarnog izvršavanja">Nema zabilježene analize.</pre></div></details>
-        <section class="panel" aria-labelledby="local-tools-title" style="margin-top:24px;padding:22px"><h2 id="local-tools-title">Zadrži svoj radni prostor</h2><p>Sense radi bez cloud AI-ja i senzorskih dozvola. Možeš preuzeti samostalnu HTML aplikaciju i otvoriti je u pregledniku bez interneta.</p><div class="button-row"><a class="button" href="downloads/BL-CLEA-Sense-0.17-test.html" download>Preuzmi offline Sense</a><a class="button" href="guide.html">Kako sve funkcioniše</a><a class="button" href="downloads/BL-CLEA7-SDK-0.17.0-test.zip" download>Preuzmi razvojni SDK</a></div><div style="margin-top:18px"><button type="button" id="offline-prepare" class="button">Sačuvaj web aplikaciju za offline rad</button><button type="button" id="offline-cancel" class="quiet-button" hidden>Prekini pripremu</button><button type="button" id="offline-clear" class="quiet-button">Ukloni offline kopiju</button><p id="offline-status" role="status" style="margin-top:12px">Offline kopija čuva samo datoteke aplikacije. CV i oglas nisu dio te kopije.</p></div></section><footer class="footer"><span>BL CLEA Sense 7 <span>·</span> by Brzo i Lokalno</span><span>Besplatno · Bez obaveznog računa</span><div><button id="help-open" type="button" class="quiet-button">Pomoć i privatnost</button><button id="erase" type="button" class="quiet-button danger-text">Obriši moj sadržaj</button></div></footer>
+        <section class="panel" aria-labelledby="local-tools-title" style="margin-top:24px;padding:22px"><h2 id="local-tools-title">Zadrži svoj radni prostor</h2><p>Sense radi bez cloud AI-ja i senzorskih dozvola. Možeš preuzeti samostalnu HTML aplikaciju i otvoriti je u pregledniku bez interneta.</p><div class="button-row"><a class="button" href="downloads/BL-CLEA-Sense-0.36-test.html" download>Preuzmi offline Sense</a><a class="button" href="guide.html">Kako sve funkcioniše</a><a class="button" href="downloads/BL-CLEA7-Core-SDK-0.37.0-test.zip" download>Preuzmi razvojni SDK</a></div><div style="margin-top:18px"><button type="button" id="offline-prepare" class="button">Sačuvaj web aplikaciju za offline rad</button><button type="button" id="offline-cancel" class="quiet-button" hidden>Prekini pripremu</button><button type="button" id="offline-clear" class="quiet-button">Ukloni offline kopiju</button><p id="offline-status" role="status" style="margin-top:12px">Offline kopija čuva samo datoteke aplikacije. CV i oglas nisu dio te kopije.</p></div></section><footer class="footer"><span>BL CLEA Sense 7 <span>·</span> by Brzo i Lokalno</span><span>Besplatno · Bez obaveznog računa</span><div><button id="help-open" type="button" class="quiet-button">Pomoć i privatnost</button><button id="erase" type="button" class="quiet-button danger-text">Obriši moj sadržaj</button></div></footer>
       </main>
     </div>
   </div>
@@ -87,5 +91,6 @@
   <dialog id="erase-dialog" aria-labelledby="erase-title" aria-describedby="erase-description"><div class="dialog-heading"><h2 id="erase-title">Obrisati tvoj sadržaj?</h2></div><p id="erase-description">Uklonit će se CV, oglas, nalazi, nacrt i lokalno sačuvan projekt iz ovog preglednika. Već preuzete datoteke ostaju dok ih sam ne obrišeš.</p><div class="button-row"><button id="erase-confirm" type="button" class="button danger">Obriši sadržaj</button><button type="button" data-close="erase-dialog" class="button secondary">Zadrži</button></div></dialog>
   <div id="print-output" class="print-output"><p>BL CLEA Sense 7 · TESTNA VERZIJA · Korisnički nacrt; važne podatke potvrdi.</p><pre id="print-text"></pre></div>
   <noscript><div class="noscript">Za lokalnu analizu potreban je JavaScript. Sadržaj se obrađuje u tvom pregledniku.</div></noscript>
+<script defer src="sense-navigation.js?v=210312218b5cb46c"></script>
 </body>
 </html>

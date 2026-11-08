@@ -1,15 +1,15 @@
 {
   "format": "clea7.public-downloads/1",
-  "version": "0.18.0",
-  "source_commit": "a679e6585d0f77366cff74a5ed182ebc9f32ce9a",
+  "version": "0.37.0",
+  "source_commit": "5040c858d49d3bd658a219e372d3acacc4e3a9c4",
   "verified_run": null,
   "published": [
     {
       "key": "sdk",
-      "name": "BL-CLEA7-SDK-0.18.0-test.zip",
-      "url": "downloads/BL-CLEA7-SDK-0.18.0-test.zip",
-      "size_bytes": 292042,
-      "sha256": "76224a697db6fc79c710d2c2d33b7a624b1f342217f649ddbbbaccfc7e74d41b"
+      "name": "BL-CLEA7-Core-SDK-0.37.0-test.zip",
+      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.37.0-test.zip",
+      "size_bytes": 317594,
+      "sha256": "6d0bfec3ba0a2a1a068115350cbd477cda60c6497f5ce2bf941d2e8f97652499"
     },
     {
       "key": "preview",
@@ -455,20 +455,32 @@
           "sha256": "c98374503315c5356014b86c92e3575ecefeb74bf586ad4d0bb5ac43ee823a2e"
         }
       ]
+    },
+    {
+      "version": "0.18.0",
+      "source_commit": "a679e6585d0f77366cff74a5ed182ebc9f32ce9a",
+      "assets": [
+        {
+          "key": "sdk",
+          "name": "BL-CLEA7-SDK-0.18.0-test.zip",
+          "url": "downloads/BL-CLEA7-SDK-0.18.0-test.zip",
+          "size_bytes": 292042,
+          "sha256": "76224a697db6fc79c710d2c2d33b7a624b1f342217f649ddbbbaccfc7e74d41b"
+        }
+      ]
     }
   ],
   "web": {
-    "version": "0.18.0",
+    "version": "0.37.0",
     "status": "test",
-    "source_commit": "a679e6585d0f77366cff74a5ed182ebc9f32ce9a",
-    "verified_scope": "shared_core_browser_studio_runtime_and_independent_sdk",
+    "source_commit": "5040c858d49d3bd658a219e372d3acacc4e3a9c4",
+    "verified_scope": "shared_core_sense_browser_studio_runtime_and_independent_sdk",
     "verification": {
-      "node_checks": 92,
-      "python_tests_passed": 248,
-      "python_tests_skipped": 1,
-      "browser_scenarios": 13,
       "result": "passed",
-      "environment": "Local Node/Python and Chromium; actual extracted distribution tested"
+      "python_tests_passed": 354,
+      "python_tests_skipped": 2,
+      "node_suites": 40,
+      "source_receipt": "CLEA master0.37 owner verified component receipts; current public CI must pass before deployment"
     },
     "native_verification": false
   },
@@ -476,5 +488,65 @@
     "version": "0.20.0-test",
     "manifest": "release/ai-020.json",
     "scope": "original CLEA-domain conversation and checked application planner"
+  },
+  "checked_037_binaries": [
+    {
+      "name": "BL-CLEA7-Runtime-Android-0.37-debug.apk",
+      "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.37.0-test/BL-CLEA7-Runtime-Android-0.37-debug.apk",
+      "size_bytes": 251702,
+      "sha256": "91d840360bb8b84ec2d8a6255a9076d9eabb77d638c1af4d95a4a684e3350372"
+    },
+    {
+      "name": "BL-CLEA-Sense-CV-0.37-debug.apk",
+      "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.37.0-test/BL-CLEA-Sense-CV-0.37-debug.apk",
+      "size_bytes": 256540,
+      "sha256": "bc0b1c3545ed11c73363d3a0ec2b2687810115aca2499c4d1c6e311f9f85c221"
+    },
+    {
+      "name": "BL-CLEA-Sense-CV-0.37.clea7",
+      "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.37.0-test/BL-CLEA-Sense-CV-0.37.clea7",
+      "size_bytes": 33632,
+      "sha256": "480f78279457d506ee11a5cc744244446f40469b54876033630147f7a3ee9882"
+    }
+  ],
+  "checked_037_binaries_state": "published",
+  "native_current": {
+    "state": "published",
+    "version": "0.37.0-test",
+    "tag": "clea7-0.37.0-test",
+    "repository": "omer87h-ctrl/blclea7-site.",
+    "publication_run": 42505458540,
+    "windows_build_run": 42497146663,
+    "windows_install_run": 42498727971,
+    "android_build_run": 42496596996,
+    "production_signed": false,
+    "new_web_touch_guide_included": false,
+    "assets": [
+      {
+        "key": "installer",
+        "name": "BLclea7-Setup-Windows-x64.exe",
+        "size_bytes": 249093574,
+        "sha256": "3384072fec6a8c982bc74c24d217a82176a9c72c97eef2be1b678293b0aed531",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.37.0-test/BLclea7-Setup-Windows-x64.exe"
+      },
+      {
+        "name": "BL-CLEA7-Runtime-Android-0.37-debug.apk",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.37.0-test/BL-CLEA7-Runtime-Android-0.37-debug.apk",
+        "size_bytes": 251702,
+        "sha256": "91d840360bb8b84ec2d8a6255a9076d9eabb77d638c1af4d95a4a684e3350372"
+      },
+      {
+        "name": "BL-CLEA-Sense-CV-0.37-debug.apk",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.37.0-test/BL-CLEA-Sense-CV-0.37-debug.apk",
+        "size_bytes": 256540,
+        "sha256": "bc0b1c3545ed11c73363d3a0ec2b2687810115aca2499c4d1c6e311f9f85c221"
+      },
+      {
+        "name": "BL-CLEA-Sense-CV-0.37.clea7",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.37.0-test/BL-CLEA-Sense-CV-0.37.clea7",
+        "size_bytes": 33632,
+        "sha256": "480f78279457d506ee11a5cc744244446f40469b54876033630147f7a3ee9882"
+      }
+    ]
   }
 }

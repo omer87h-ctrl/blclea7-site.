@@ -1,0 +1,62 @@
+{
+  "format": "clea7.living-public-overlay/1",
+  "version": "0.36.0-test",
+  "privateSource": "716a8f792a6f606884ed82a46f4ce7add70f0bf2",
+  "coreVersion": "0.18.0",
+  "nativeReleaseChanged": false,
+  "productionDeployment": false,
+  "modelWeightsChanged": false,
+  "keyboardAutomationVerified": true,
+  "physicalAssistiveEvaluation": false,
+  "features": [
+    "seven-pillar verification",
+    "dependency impact",
+    "scoped execution evidence",
+    "accessible authoring",
+    "CV DOCX",
+    "optional device speech",
+    "review-only forum drafts"
+  ],
+  "files": [
+    {
+      "path": "studio/workbench/intelligence.js",
+      "bytes": 16321,
+      "sha256": "c1ee9de5a81ddb3d967a3eb2c5f13e6aa40e7bc87e9ef0d9ac4ca1fd8446eb21"
+    },
+    {
+      "path": "studio/workbench/sense-sdk.js",
+      "bytes": 5781,
+      "sha256": "7c0e29280fb54d3163d717a98a7334b53ff10881ebc291745a6bde3640cc5621"
+    },
+    {
+      "path": "studio/workbench/studio-sense.js",
+      "bytes": 8120,
+      "sha256": "ef5301dff9e57f67e2de5ea184e19f8e18e9df13c2502ca3bc993743c32c8f73"
+    },
+    {
+      "path": "sense/sense-authoring.js",
+      "bytes": 7448,
+      "sha256": "bfc6832d72c3c7aad41fd0b7ea83552ff896fa0661a357e12b377f0ed733e7e1"
+    },
+    {
+      "path": "sense/sense-communication.js",
+      "bytes": 6316,
+      "sha256": "b2c8e1dae0160a7f02e1c7cdf57deebe3223452425316540a3f2b9c476116e90"
+    },
+    {
+      "path": "sense/sense-document.js",
+      "bytes": 8755,
+      "sha256": "149921f07f00c6e4f00103f5764f5bad7b00f32563b1b765118ba797247bf44f"
+    },
+    {
+      "path": "sense/downloads/BL-CLEA-Sense-0.36-test.html",
+      "bytes": 465641,
+      "sha256": "b70db1ae349d474b9c2926865997348c6f124ddcda31c8dbb6fbaf7c51eb8aed"
+    },
+    {
+      "path": "clea-forum-client.js",
+      "bytes": 1523,
+      "sha256": "7f1d1cfa2cfcbd46f7862b841cc91051619a1f35aa0ddea061ea02ee5f66d682"
+    }
+  ]
+}
