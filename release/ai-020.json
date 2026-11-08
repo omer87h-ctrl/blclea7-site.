@@ -8,8 +8,8 @@
   "files": [
     {
       "path": "clea-ai-client.js",
-      "bytes": 17421,
-      "sha256": "118d216131781f7c544bcd3bb3434adaa4238fe93531fed6473d3873026daf6c"
+      "bytes": 18689,
+      "sha256": "c13e2f3faf25dcdc9bbac0e1cd9a3ab326e8a4b0a32fe518a34cf24148330361"
     },
     {
       "path": "clea-ai-config.json",
@@ -23,8 +23,8 @@
     },
     {
       "path": "razgovor/index.html",
-      "bytes": 4350,
-      "sha256": "19adb3145d35f0b283cb33703880a9d94e9dca8fb86bb18db449579e8ce876cd"
+      "bytes": 4884,
+      "sha256": "72e5340bac0a48f9c6392af8892ea9c5f1068fe0ce9df6f68f6bffb854e087b4"
     },
     {
       "path": "razgovor/standalone.css",
@@ -73,8 +73,8 @@
     },
     {
       "path": "studio/workbench/chat/ui.js",
-      "bytes": 41118,
-      "sha256": "c459a00a98376de04e696170129ed603bf773483d4bf906b87be533d8617acc7"
+      "bytes": 49136,
+      "sha256": "6605bd6feb35c19fd71acdc5199c984f90d197c8bb755e26b72719e51bcb28f4"
     },
     {
       "path": "studio/workbench/chat/worker.js",
@@ -98,8 +98,8 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 15892,
-      "sha256": "1abd09c1cfaf1e61d8a68860e09efe244dee97871f35b5fd092ba9ef514ccc02"
+      "bytes": 16492,
+      "sha256": "9ec7f24a24f2dd502113ac595fa0639659638bfe2edd826ec425a8b62a6a360f"
     },
     {
       "path": "studio/workbench/studio.css",
@@ -108,8 +108,8 @@
     },
     {
       "path": "studio/workbench/studio.js",
-      "bytes": 52679,
-      "sha256": "3b3e863a7ec972b8a7b19756cdf14fab86b3130a84d66bd0c69fbedba4e70f13"
+      "bytes": 52999,
+      "sha256": "c22b79fd162c2e7cff3ea370b0be7825d28b5ebdd3a21c21b422298ab562ed26"
     }
   ]
 }

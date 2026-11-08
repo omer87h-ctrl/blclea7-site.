@@ -230,6 +230,54 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  const mount=document.createElement('div');mount.className='clea-access-challenge';mount.hidden=true;
  controls.append(publicLabel,note,advanced,notice,feedback,mount);form.append(controls);
  const client=CLEA7AI.create({challengeMount:mount,onStatus:text=>{feedback.textContent=text;status.textContent=text;}});
+ const taskLabel=document.createElement('label'),taskMode=document.createElement('select');taskMode.id='clea-ai-task-mode';
+ for(const [value,text] of [['auto','Automatski: razgovor ili nova aplikacija'],['chat','Razgovor'],['create','Napravi novu aplikaciju'],['change','Izmijeni trenutnu BIL aplikaciju']]){const option=document.createElement('option');option.value=value;option.textContent=text;taskMode.append(option);}taskLabel.append(document.createTextNode('Šta želiš uraditi?'),taskMode);form.insertBefore(taskLabel,form.firstChild);
+ const sourceLabel=document.createElement('label'),sourceApproved=document.createElement('input');sourceApproved.type='checkbox';sourceApproved.id='clea-ai-source-approved';sourceLabel.hidden=true;sourceLabel.append(sourceApproved,document.createTextNode(' Odobravam slanje BIL izvora ovog projekta svom povezanom modelu radi tražene izmjene. Podaci pokrenute aplikacije se ne šalju.'));taskLabel.after(sourceLabel);
+ function requestedTask(question){if(taskMode.value!=='auto')return taskMode.value;const words=question.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase();if(/^(?:clea[,!:]?\s*)?(?:napravi|kreiraj|izradi|create|build|make|generate)\b/.test(words)&&/aplikacij|\bapp\b|\bapplication\b|\bigru\b|\bgame\b|\bprogram\b/.test(words))return 'create';return 'chat';}
+ taskMode.onchange=()=>{sourceLabel.hidden=taskMode.value!=='change';if(sourceLabel.hidden)sourceApproved.checked=false;};
+ let authorController=null;
+ const author=globalThis.CLEA7AppAuthoring?.create({generate:(intent,options)=>client.ask(intent,{authoring:options.authoring,onDelta:options.onDelta,language:document.getElementById('chat-language').value}),onEvent:event=>{if(event.phase==='model')feedback.textContent='Model sastavlja BIL aplikaciju · pokušaj '+event.attempt+'.';if(event.phase==='repair')feedback.textContent='Kompajler je odbio prijedlog. Model dobija stvarnu dijagnostiku za ispravku.';if(event.phase==='runtime'&&event.event.pillar){const list=document.getElementById('chat-events'),li=document.createElement('li');li.textContent=event.event.pillar+' · '+event.event.state;list.prepend(li);while(list.children.length>40)list.lastElementChild.remove();}}});
+ function downloadSource(source){const url=URL.createObjectURL(new Blob([source],{type:'text/plain;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='moja-clea-aplikacija.bil';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+ function proposalUI(body,proposal){
+  body.replaceChildren();const heading=document.createElement('h3');heading.textContent='BIL aplikacija je pripremljena za pregled';
+  const summary=document.createElement('p'),screens=proposal.application.bil.ir.ui.screens;summary.textContent=screens.length+' ekrana · '+Object.keys(proposal.application.bil.ir.handlers||{}).length+' događaja. Kompajler i izolovano pokretanje su prošli. Ponašanje provjeri na stvarnim kontrolama.';
+  const structure=document.createElement('ul');for(const screen of screens){const li=document.createElement('li');li.textContent=(screen.label||screen.id)+' · '+screen.children.length+' komponenti';structure.append(li);}
+  const details=document.createElement('details'),title=document.createElement('summary'),code=document.createElement('pre');title.textContent='Pregledaj BIL izvor i stvarnu provjeru';code.textContent=proposal.source;const evidence=document.createElement('pre');evidence.textContent=JSON.stringify({scope:proposal.scope,checks:proposal.receipt.results.s3.checks,impact:proposal.impact,attempts:proposal.attempts},null,2);details.append(title,code,evidence);
+  const label=document.createElement('label'),review=document.createElement('input');review.type='checkbox';review.dataset.aiAppReviewed='true';label.append(review,document.createTextNode(' Pregledao/la sam prijedlog i želim ga primijeniti.'));
+  const apply=document.createElement('button');apply.type='button';apply.dataset.aiAppApply='true';apply.disabled=true;apply.textContent=globalThis.CLEA7Workbench?'Primijeni i pokreni u Studiju':'Nastavi s aplikacijom u Studiju';review.onchange=()=>apply.disabled=!review.checked;
+  const result=document.createElement('p');result.setAttribute('role','status');result.dataset.aiAppStatus='true';
+  const download=document.createElement('button');download.type='button';download.textContent='Preuzmi BIL izvor';download.onclick=()=>downloadSource(proposal.source);
+  let applied=null;
+  const undo=document.createElement('button');undo.type='button';undo.textContent='Poništi ovu AI izmjenu';undo.hidden=true;
+  undo.onclick=()=>{try{const studio=globalThis.CLEA7Workbench;if(CLEA7.stable(studio.snapshot())!==applied)throw Error('Nakon primjene je napravljen novi rad. Koristi Studio historiju da ga sačuvaš.');document.getElementById('undo').click();undo.disabled=true;result.textContent='Vraćen je prethodni projekt kroz stvarnu Studio historiju.';}catch(error){result.textContent=error.message;}};
+  apply.onclick=async()=>{if(!review.checked)return;apply.disabled=true;try{
+   const studio=globalThis.CLEA7Workbench;
+   if(!studio){const id=CLEA7Format.newId('handoff'),value={format:'clea7.authoring-handoff/1',source:proposal.source};sessionStorage.setItem(id,JSON.stringify(value));location.assign('/studio/workbench/?workspace=clea-chat&proposal='+encodeURIComponent(id));return;}
+   const before=studio.snapshot(),application=await CLEA7AppAuthoring.recheck(proposal,before);studio.applyReviewed(application,before);applied=CLEA7.stable(studio.snapshot());undo.hidden=false;
+   await studio.run();document.querySelector('[data-panel="test"]')?.click();result.textContent='Aplikacija je stvarno pokrenuta. Isprobaj unos, dugmad i navigaciju, a zatim izvezi CLEA7 paket.';status.textContent=result.textContent;
+  }catch(error){result.textContent=error.message;apply.disabled=!review.checked;}};
+  body.append(heading,summary,structure,details,label,apply,download,undo,result);body.dataset.aiAppProposal='true';
+ }
+ async function authorApplication(body,question,mode){
+  if(!author)throw Error('CLEA koordinacija kreiranja nije učitana. Nije korišten rezervni predložak.');
+  if(client.capabilities.bilAuthoring!==true)throw Error('Ovaj povezani servis još nema ugovor za BIL kreiranje. Potrebno je pokrenuti ažurirani CLEA servis.');
+  const studio=globalThis.CLEA7Workbench,project=studio?.snapshot?.()||null;
+  if(mode==='change'&&!sourceApproved.checked)throw Error('Prvo odobri tačan BIL izvor za ovu izmjenu. Ništa nije poslano modelu.');
+  authorController=new AbortController();
+  try{const proposal=await author.propose(question,{project,mode,sourceApproved:sourceApproved.checked,signal:authorController.signal,onDelta:(_delta,text)=>{body.textContent=text;}});
+   proposalUI(body,proposal);return proposal;
+  }finally{authorController=null;}
+ }
+ function receiveHandoff(){const incoming=new URL(location.href).searchParams.get('proposal');
+ if(incoming&&/^handoff_[a-zA-Z0-9_]+$/.test(incoming)&&globalThis.CLEA7Workbench){
+  const raw=sessionStorage.getItem(incoming);sessionStorage.removeItem(incoming);
+  if(raw&&raw.length<=14000){try{const imported=JSON.parse(raw);if(imported.format!=='clea7.authoring-handoff/1'||typeof imported.source!=='string')throw Error('Neispravan prijedlog.');
+   CLEA7AppAuthoring.adopt(imported.source,{project:CLEA7Workbench.snapshot()}).then(proposal=>{const output=message('CLEA · ponovna lokalna provjera','');proposalUI(output,proposal);}).catch(error=>{feedback.textContent=error.message;});
+  }catch(error){feedback.textContent=error.message;}}
+ }
+
+ }
+ if(globalThis.CLEA7Workbench)receiveHandoff();else addEventListener('clea:studio-ready',receiveHandoff,{once:true});
  const persistenceLabel=document.createElement('label'),persistence=document.createElement('input');persistence.type='checkbox';persistence.id='clea-save-conversation';
  persistenceLabel.append(persistence,document.createTextNode(' Sačuvaj historiju na ovom uređaju'));
  const persistenceNote=document.createElement('small');persistenceNote.textContent='Opcionalno: posljednje četiri razmjene ostaju u pregledniku do brisanja. Nisu šifrirane; izbjegavaj zajednički računar.';
@@ -355,6 +403,8 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   try{
    const options={onDelta:(_delta,reply)=>{body.textContent=reply;},language:document.getElementById('chat-language').value};
    if(webCheck.checked)options.webQuery=webQuery.value.trim();
+   const action=requestedTask(question);
+   if(action==='create'||action==='change'){await authorApplication(body,question,action);feedback.textContent='Stvarni BIL prijedlog je provjeren i čeka tvoj pregled.';return;}
    const data=await client.ask(question,options);decorateReply(body,data.reply);persist();
    if(data.sources.length){const citation=document.createElement('small');citation.textContent='Odobreni izvori: '+data.sources.map(x=>typeof x.path==='string'?x.path:'').filter(Boolean).join(', ');body.append(document.createElement('br'),citation);}
    if(data.webSources.length){
@@ -370,7 +420,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   }catch(error){body.textContent=error.message;feedback.textContent='Nema automatskog ponavljanja niti zamjene odgovora drugim modelom.';}
   finally{submit.disabled=false;loading=false;check.disabled=false;publicCheck.disabled=!publicAvailable;document.getElementById('chat-stop').disabled=true;}
  },true);
- document.getElementById('chat-stop').addEventListener('click',()=>client.cancel());
- document.getElementById('chat-clear').addEventListener('click',()=>{client.reset();persist();});
- window.addEventListener('pagehide',()=>client.reset());
+ document.getElementById('chat-stop').addEventListener('click',()=>{authorController?.abort();client.cancel();});
+ document.getElementById('chat-clear').addEventListener('click',()=>{authorController?.abort();client.reset();persist();});
+ window.addEventListener('pagehide',()=>{authorController?.abort();client.reset();});
 })();

@@ -1,4 +1,4 @@
-/* BL CLEA AI shared transport. No CV/project access, persistent history or tools.
+/* BL CLEA AI shared transport. Project source is sent only through an explicit reviewed authoring operation.
  * Public endpoint comes only from the same-origin owner deployment file.
  * Model responses are data; callers must render them with textContent.
  */
@@ -68,7 +68,7 @@
    ['challenge_failed','invitation_required','invitation_used','preview_expired'].includes(value.code)?value.code:'offline');
   return value;
  }
- async function streamRequest(url,{body,signal,token,onDelta=()=>{}}){
+ async function streamRequest(url,{body,signal,token,onDelta=()=>{},maxReply=5000}){
   const headers={'Content-Type':'application/json'};if(token)headers.Authorization='Bearer '+token;
   const response=await fetch(url,{method:'POST',mode:'cors',credentials:new URL(url).origin===location.origin&&location.hostname.endsWith('.trycloudflare.com')?'same-origin':'omit',
    redirect:'error',cache:'no-store',referrerPolicy:'no-referrer',headers,body:JSON.stringify(body),signal});
@@ -81,7 +81,7 @@
    if(!data)return;let value;try{value=JSON.parse(data);}catch{throw fail('invalid_request');}
    if(kind==='error')throw fail(value.code||'offline');
    if(kind==='delta'){
-    if(done||typeof value.text!=='string'||reply.length+value.text.length>5000)throw fail('invalid_request');
+    if(done||typeof value.text!=='string'||reply.length+value.text.length>maxReply)throw fail('invalid_request');
     reply+=value.text;onDelta(value.text,reply);
    }else if(kind==='done'){
     if(done||!reply.trim()||value.reply!==reply)throw fail('invalid_request');done=value;
@@ -90,7 +90,7 @@
   try{
    while(!done){
     const chunk=await reader.read();if(chunk.done){buffer+=decoder.decode();break;}
-    total+=chunk.value.byteLength;if(total>200000)throw fail('invalid_request');
+    total+=chunk.value.byteLength;if(total>(maxReply>5000?600000:200000))throw fail('invalid_request');
     buffer=(buffer+decoder.decode(chunk.value,{stream:true})).replace(/\r\n/g,'\n');
     if(buffer.length>32768)throw fail('invalid_request');
     let boundary;while((boundary=buffer.indexOf('\n\n'))>=0){frame(buffer.slice(0,boundary));buffer=buffer.slice(boundary+2);if(done)break;}
@@ -132,12 +132,14 @@
   function reset(){epoch++;history=[];session=null;expires=0;controller?.abort();}
   function useLocal(value){if(controller)throw fail('busy');reset();local=value===true;}
   async function target(){
+   if(local&&globalThis.CLEA7Workbench?.nativeAI)return {native:true,local:true};
    if(local)return {endpoint:'http://127.0.0.1:8765',local:true};
    const config=await configuration(),preview=config.previewOnly===true&&(config.authentication==='owner-invite'||new URL(location.href).searchParams.get('clea-verify')===config.deploymentId);
    if(!config.enabled&&!preview)throw fail('not_configured');
    return config;
   }
   async function health(config,signal){
+   if(config.native){const info=await CLEA7Workbench.nativeAI.status();if(!info.available||info.modelProfile!=='qwen3.5-9b-q4_k_m')throw fail('offline');capabilities=Object.freeze({...info.capabilities});return {ready:true,streaming:false,modelProfile:{id:info.modelProfile}};}
    const status=await request(config.endpoint+'/health',{signal});
    if(status.brand!=='BL CLEA AI'||status.apiVersion!=='clea7.public-ai/1'||status.mode!==(config.local?'local':'public')||
      config.deploymentId&&status.deploymentId!==config.deploymentId)throw fail('identity');
@@ -165,7 +167,7 @@
    if(config.authentication==='owner-invite')await inviteSession(config,signal);
    return health(config,signal);
   }
-  async function ask(question,{onDelta=()=>{},language='auto',webQuery}={}){
+  async function ask(question,{onDelta=()=>{},language='auto',webQuery,authoring}={}){
    if(controller)throw fail('busy');
    if(typeof question!=='string'||!question.trim()||question.length>1200)throw fail('invalid_request');
    const ticket=epoch;controller=new AbortController();const signal=controller.signal;
@@ -182,21 +184,29 @@
      issuedSession(issued);
     }
     onStatus(config.local?'Model odgovara na ovom uređaju…':'BL CLEA AI obrađuje tvoje pitanje…');
-    const body={question:question.trim(),history:history.slice(-8)};
+    const body={question:question.trim(),history:authoring?[]:history.slice(-8)};
+    if(authoring!==undefined){
+     if(capabilities.bilAuthoring!==true||!authoring||authoring.format!=='bil.author/1'||!['create','change'].includes(authoring.mode))throw fail('not_configured');
+     if(authoring.mode==='change'&&(authoring.sourceApproved!==true||typeof authoring.source!=='string'))throw fail('invalid_request');
+     if(authoring.mode==='create'&&('source' in authoring||'sourceApproved' in authoring))throw fail('invalid_request');
+     if(webQuery!==undefined)throw fail('invalid_request');
+     body.authoring=JSON.parse(JSON.stringify(authoring));
+    }
     if(!['auto','bs','en'].includes(language))throw fail('invalid_request');
     if(capabilities.answerLanguage===true)body.language=language;
     if(webQuery!==undefined){
      if(!capabilities.publicSourceLookup||typeof webQuery!=='string'||!webQuery.trim()||webQuery.length>250)throw fail('invalid_request');
      body.webQuery=webQuery.trim();
     }
+    if(config.native)delete body.history;
     if(new TextEncoder().encode(JSON.stringify(body)).length>16384)throw fail('invalid_request');
-    const data=modelStatus.streaming===true?
-     await streamRequest(config.endpoint+'/chat/stream',{body,signal,token:config.local?null:session,onDelta:(delta,reply)=>{if(signal.aborted||ticket!==epoch)throw fail('cancelled');onDelta(delta,reply);}}):
+    const data=config.native?await CLEA7Workbench.nativeAI.ask(body):modelStatus.streaming===true?
+     await streamRequest(config.endpoint+'/chat/stream',{body,signal,token:config.local?null:session,maxReply:authoring?12000:5000,onDelta:(delta,reply)=>{if(signal.aborted||ticket!==epoch)throw fail('cancelled');onDelta(delta,reply);}}):
      await request(config.endpoint+'/chat',{body,signal,token:config.local?null:session});
-    if(typeof data.reply!=='string'||!data.reply.trim()||data.reply.length>5000)throw fail('invalid_request');
+    if(typeof data.reply!=='string'||!data.reply.trim()||data.reply.length>(authoring?12000:5000))throw fail('invalid_request');
     if(signal.aborted||ticket!==epoch)throw fail('cancelled');
-    history.push({role:'user',content:body.question},{role:'assistant',content:data.reply.slice(0,1200)});history=history.slice(-8);
-    return {reply:data.reply,sources:Array.isArray(data.sources)?data.sources.slice(0,5):[],
+    if(!authoring){history.push({role:'user',content:body.question},{role:'assistant',content:data.reply.slice(0,1200)});history=history.slice(-8);}
+    return {reply:data.reply,authoring:data.authoring||null,modelProfile:modelStatus.modelProfile?.id||null,sources:Array.isArray(data.sources)?data.sources.slice(0,5):[],
       webSources:Array.isArray(data.webSources)?data.webSources.slice(0,2):[],internet:data.internet||{requested:false},
       learnedSources:Array.isArray(data.learnedSources)?data.learnedSources.slice(0,2):[],
       productContract:data.productContract||null,transport:config.local?'local':'hp'};
