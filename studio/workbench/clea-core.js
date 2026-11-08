@@ -4,7 +4,7 @@
  * No DOM, filesystem, shell, networking or second evaluator lives here.
  */
 (function(scope){
-const VERSION='0.18.0',FORMAT='clea7.core/1';
+const VERSION='0.37.0',FORMAT='clea7.core/1';
 const own=(value,key)=>Object.prototype.hasOwnProperty.call(value,key);
 const clone=value=>JSON.parse(JSON.stringify(value));
 const frozen=value=>{if(value&&typeof value==='object'){for(const child of Object.values(value))frozen(child);Object.freeze(value);}return value;};
@@ -22,6 +22,7 @@ function minimumRuntime(raw,targets=[]){
  if(!Array.isArray(targets)||targets.some(x=>!['browser','windows','android'].includes(x)))fault('CoreTarget','Use explicit supported host target identifiers.');
  const app=application(raw),floors=[({'clea7.application/2':'0.3.0','clea7.application/3':'0.4.0','clea7.application/4':'0.5.0','clea7.application/5':'0.6.0','clea7.application/6':'0.7.0','clea7.application/7':targets.includes('android')?'0.9.0':'0.8.0','clea7.application/8':'0.10.0','clea7.application/9':'0.11.0'})[app.format]];
  if(!floors[0])fault('CoreApplication','Unsupported application contract.');
+ if(Object.values(app.remote?.backends||{}).some(b=>b.adapter==='sense.local/1'))floors.push('0.37.0');
  if(app.bil){compiler().validateApplication(app);floors.push(featuresFor(app.bil.source).minimumRuntime);if(app.bil.ir.ui?.format==='bil.ui/2')floors.push('0.14.0');}
  for(const backend of Object.values(app.remote?.backends||{})){
   if(backend.adapter==='firebase.development/3')floors.push('0.12.0');
