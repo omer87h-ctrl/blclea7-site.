@@ -49,12 +49,12 @@ def status():
                 and value.get('ready') is True and value.get('modelProfile') == PROFILE
                 and value.get('apiVersion') == 'clea7.public-ai/1'):
             return {'available': True, 'port': port, 'modelProfile': PROFILE, 'provider': 'clea',
-                    'message': 'BL CLEA AI 9B je spreman na ovom računaru.'}
+                    'capabilities': value.get('capabilities',{}), 'message': 'BL CLEA AI 9B je spreman na ovom računaru.'}
     return {'available': False, 'provider': 'clea',
             'message': 'Pokreni prečicu CLEA AI 9B na ovom računaru. Model se ne pokreće iz SDK-a.'}
 
 
-def ask(question, *, language='auto', web_query=None):
+def ask(question, *, language='auto', web_query=None,authoring=None):
     if not isinstance(question, str) or not 1 <= len(question.strip()) <= 1200:
         raise UserError('Pitanje mora imati 1–1200 znakova.')
     if language not in ('auto', 'bs', 'en'):
@@ -64,6 +64,11 @@ def ask(question, *, language='auto', web_query=None):
         if not isinstance(web_query, str) or not 1 <= len(web_query.strip()) <= 250:
             raise UserError('Internetski pojam mora imati 1–250 znakova.')
         payload['webQuery'] = web_query.strip()
+    if authoring is not None:
+        from .authoring_contract import validate
+        try:payload['authoring']=validate(authoring)
+        except ValueError as error:raise UserError(str(error)) from None
+        if web_query is not None:raise UserError('BIL kreiranje ne prima internetski upit.')
     selected = status()
     if not selected['available']:
         raise UserError(selected['message'])
@@ -76,7 +81,7 @@ def ask(question, *, language='auto', web_query=None):
 
 def verify_bil_reply(reply, *, metadata=None, checks=()):
     """Model text stays untrusted until the shared compiler/SHADOW protocol passes."""
-    if not isinstance(reply,str) or len(reply)>10000:
+    if not isinstance(reply,str) or len(reply)>12000:
         raise UserError('Model nije vratio ograničen BIL prijedlog.')
     if not isinstance(checks,(tuple,list)) or len(checks)>20:
         raise UserError('Provjera prihvata najviše 20 eksplicitnih slučajeva.')
@@ -95,7 +100,7 @@ def propose_bil(intent, *, metadata=None, checks=()):
     prompt=('Napiši potpun BIL program za sljedeći zahtjev. Vrati jedan zatvoren ```bil blok. '
             'Koristi dokumentovanu BIL sintaksu, stvarne događaje i promjenjivo stanje. '
             'Ne dodaj JavaScript, izmišljene servise ili nenavedene lične podatke.\n'+intent.strip())
-    answer=ask(prompt,language='bs')
+    answer=ask(intent.strip(),language='bs',authoring={'format':'bil.author/1','mode':'create'})
     verified=verify_bil_reply(answer['reply'],metadata=metadata,checks=checks)
     return {'format':'clea7.ai-bil-proposal/1','source':verified['application']['bil']['source'],
             'verification':verified,'requiresReview':True,'modelProfile':PROFILE,

@@ -231,7 +231,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  controls.append(publicLabel,note,advanced,notice,feedback,mount);form.append(controls);
  const client=CLEA7AI.create({challengeMount:mount,onStatus:text=>{feedback.textContent=text;status.textContent=text;}});
  const taskLabel=document.createElement('label'),taskMode=document.createElement('select');taskMode.id='clea-ai-task-mode';
- for(const [value,text] of [['auto','Automatski: razgovor ili nova aplikacija'],['chat','Razgovor'],['create','Napravi novu aplikaciju'],['change','Izmijeni trenutnu BIL aplikaciju']]){const option=document.createElement('option');option.value=value;option.textContent=text;taskMode.append(option);}taskLabel.append(document.createTextNode('Šta želiš uraditi?'),taskMode);form.insertBefore(taskLabel,form.firstChild);
+ for(const [value,text] of [['auto','Automatski: razgovor ili nova aplikacija'],['chat','Razgovor'],['forum','TECH pomoć · pripremi nacrt odgovora'],['create','Napravi novu aplikaciju'],['change','Izmijeni trenutnu BIL aplikaciju']]){const option=document.createElement('option');option.value=value;option.textContent=text;taskMode.append(option);}taskLabel.append(document.createTextNode('Šta želiš uraditi?'),taskMode);if(new URL(location.href).searchParams.get('task')==='forum')taskMode.value='forum';form.insertBefore(taskLabel,form.firstChild);
  const sourceLabel=document.createElement('label'),sourceApproved=document.createElement('input');sourceApproved.type='checkbox';sourceApproved.id='clea-ai-source-approved';sourceLabel.hidden=true;sourceLabel.append(sourceApproved,document.createTextNode(' Odobravam slanje BIL izvora ovog projekta svom povezanom modelu radi tražene izmjene. Podaci pokrenute aplikacije se ne šalju.'));taskLabel.after(sourceLabel);
  function requestedTask(question){if(taskMode.value!=='auto')return taskMode.value;const words=question.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase();if(/^(?:clea[,!:]?\s*)?(?:napravi|kreiraj|izradi|create|build|make|generate)\b/.test(words)&&/aplikacij|\bapp\b|\bapplication\b|\bigru\b|\bgame\b|\bprogram\b/.test(words))return 'create';return 'chat';}
  taskMode.onchange=()=>{sourceLabel.hidden=taskMode.value!=='change';if(sourceLabel.hidden)sourceApproved.checked=false;};
@@ -405,7 +405,15 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
    if(webCheck.checked)options.webQuery=webQuery.value.trim();
    const action=requestedTask(question);
    if(action==='create'||action==='change'){await authorApplication(body,question,action);feedback.textContent='Stvarni BIL prijedlog je provjeren i čeka tvoj pregled.';return;}
-   const data=await client.ask(question,options);decorateReply(body,data.reply);persist();
+   const data=await client.ask(question,{...options,isolateHistory:action==='forum'});decorateReply(body,data.reply);persist();
+   if(action==='forum'){
+    const draft=CLEA7ForumAI.fromAnswer(data),label=document.createElement('p');label.textContent='AI NACRT ZA TECH · Nije objavljeno. Pregledaj prije korištenja.';
+    const area=document.createElement('textarea');area.rows=8;area.maxLength=12000;area.value=draft.body;area.setAttribute('aria-label','Uredi AI nacrt za TECH');
+    const copy=document.createElement('button');copy.type='button';copy.textContent='Kopiraj pregledani nacrt';copy.onclick=async()=>{const text='[AI odgovor: BL CLEA AI — pregledaj tačnost]\n\n'+area.value+'\n\n'+draft.sources.map(s=>s.title+': '+s.url).join('\n');try{await navigator.clipboard.writeText(text);copy.textContent='Nacrt je kopiran; objavu biraš na TECH-u.';}catch{area.focus();area.select();copy.textContent='Tekst je označen. Koristi sistemsko Kopiraj.';}};
+    const save=document.createElement('button');save.type='button';save.textContent='Preuzmi nacrt za pregled';save.onclick=()=>{const value={...draft,body:area.value},a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));a.href=url;a.download='clea-tech-ai-nacrt.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+    const portal=document.createElement('a');portal.href='https://tech.brzoilokalno.com/';portal.textContent='Otvori TECH portal';portal.target='_blank';portal.rel='noopener noreferrer';
+    body.append(label,area,copy,save,portal);
+   }
    if(data.sources.length){const citation=document.createElement('small');citation.textContent='Odobreni izvori: '+data.sources.map(x=>typeof x.path==='string'?x.path:'').filter(Boolean).join(', ');body.append(document.createElement('br'),citation);}
    if(data.webSources.length){
     const sources=document.createElement('div');sources.className='chat-web-sources';sources.append(document.createTextNode('Internetski izvori: '));

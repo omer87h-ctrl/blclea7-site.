@@ -10,7 +10,7 @@ function extract(reply){
  if(blocks.length!==1||(reply.match(/```/g)||[]).length!==2)throw fault('Source','Potreban je jedan potpun zatvoren BIL blok. Nepotpun kod nije primijenjen.');
  const source=blocks[0][1].trim()+'\n';if(new TextEncoder().encode(source).length>10000)throw fault('Source','Prijedlog prelazi ograničeni izvorni prozor. Kod nije skraćen.');return source;
 }
-function create({generate,onEvent=()=>{},attempts=2}={}){
+function create({generate,onEvent=()=>{},attempts=3}={}){
  if(typeof generate!=='function'||![1,2,3].includes(attempts))throw fault('Input','Nedostaje stvarni jezički transport.');
  let busy=false;
  async function propose(intent,{project=null,mode='create',sourceApproved=false,signal,onDelta=()=>{},checks=[]}={}){
@@ -37,11 +37,11 @@ function create({generate,onEvent=()=>{},attempts=2}={}){
      const proposal={format:'clea7.model-app-proposal/1',source,application:verified.application,receipt:verified.receipt,impact,attempts:clone(history),requiresReview:true,scope:verified.verifiedScope,modelProfile:response.modelProfile||'qwen3.5-9b-q4_k_m'};
      certificates.set(proposal,{base,source,mode});onEvent({phase:'ready',attempt});return proposal;
     }catch(error){
-     check();history.push({attempt,passed:false,code:error.code||'Compiler',diagnostic:String(error.message).slice(0,600)});
+     check();history.push({attempt,passed:false,code:error.code||'Compiler',diagnostic:String(error.message).slice(0,600),line:error.location?.line||error.diagnostic?.line||error.line||null,column:error.location?.column||error.diagnostic?.column||error.column||null});
      if(attempt===attempts){error.attempts=clone(history);throw error;}
      // Retry only inference/compilation. No uncertain external effect is repeated.
      // An incomplete source is never auto-repaired by guessing its missing end.
-     previous=source||'';diagnostic=String(error.message).slice(0,600);
+     previous=source||'';diagnostic=(String(error.message)+' '+JSON.stringify(error.diagnostic||error.location||error.loc||{})).slice(0,600);
      onEvent({phase:'repair',attempt,diagnostic});
     }
    }

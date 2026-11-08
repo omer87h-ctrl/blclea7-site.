@@ -167,7 +167,7 @@
    if(config.authentication==='owner-invite')await inviteSession(config,signal);
    return health(config,signal);
   }
-  async function ask(question,{onDelta=()=>{},language='auto',webQuery,authoring}={}){
+  async function ask(question,{onDelta=()=>{},language='auto',webQuery,authoring,isolateHistory=false}={}){
    if(controller)throw fail('busy');
    if(typeof question!=='string'||!question.trim()||question.length>1200)throw fail('invalid_request');
    const ticket=epoch;controller=new AbortController();const signal=controller.signal;
@@ -184,7 +184,7 @@
      issuedSession(issued);
     }
     onStatus(config.local?'Model odgovara na ovom uređaju…':'BL CLEA AI obrađuje tvoje pitanje…');
-    const body={question:question.trim(),history:authoring?[]:history.slice(-8)};
+    const body={question:question.trim(),history:authoring||isolateHistory?[]:history.slice(-8)};
     if(authoring!==undefined){
      if(capabilities.bilAuthoring!==true||!authoring||authoring.format!=='bil.author/1'||!['create','change'].includes(authoring.mode))throw fail('not_configured');
      if(authoring.mode==='change'&&(authoring.sourceApproved!==true||typeof authoring.source!=='string'))throw fail('invalid_request');
@@ -205,7 +205,7 @@
      await request(config.endpoint+'/chat',{body,signal,token:config.local?null:session});
     if(typeof data.reply!=='string'||!data.reply.trim()||data.reply.length>(authoring?12000:5000))throw fail('invalid_request');
     if(signal.aborted||ticket!==epoch)throw fail('cancelled');
-    if(!authoring){history.push({role:'user',content:body.question},{role:'assistant',content:data.reply.slice(0,1200)});history=history.slice(-8);}
+    if(!authoring&&!isolateHistory){history.push({role:'user',content:body.question},{role:'assistant',content:data.reply.slice(0,1200)});history=history.slice(-8);}
     return {reply:data.reply,authoring:data.authoring||null,modelProfile:modelStatus.modelProfile?.id||null,sources:Array.isArray(data.sources)?data.sources.slice(0,5):[],
       webSources:Array.isArray(data.webSources)?data.webSources.slice(0,2):[],internet:data.internet||{requested:false},
       learnedSources:Array.isArray(data.learnedSources)?data.learnedSources.slice(0,2):[],

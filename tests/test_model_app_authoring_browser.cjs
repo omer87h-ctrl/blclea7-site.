@@ -1,6 +1,7 @@
 'use strict';
 /* Real Studio/Runtime/DOM with explicitly labelled inference transport fixtures.
  * Actual HP model authoring has a separate, non-fixture verification job. */
+const fs=require('node:fs/promises');
 const {chromium}=require('/tmp/clea7-qa/node_modules/playwright'),http=require('node:http'),assert=require('node:assert/strict');
 const siteOrigin='http://127.0.0.1:'+String(process.env.CLEA7_TEST_PORT||4173);
 const source='let player = ""\nlet score = 0\non answer { score = score + 1; open result }\non again { score = 0; open play }\nscreen play "Moj kviz" {\n input player label "Igrač" key player\n button "Tačan odgovor" runs answer key answer\n}\nscreen result "Rezultat" { show player key name; show score key score; button "Igraj opet" runs again key again }\nstart play\n';
@@ -37,6 +38,10 @@ const invalid='let score = "text"\nscore = 1\n';
   console.log('PASS actual authoring privacy: no project transmission before approval; running user state is absent from explicit source change');
   await page.getByRole('button',{name:'Poništi ovu AI izmjenu',exact:true}).first().click();assert.equal(await page.evaluate(()=>CLEA7.stable(CLEA7Workbench.snapshot())),before);
   console.log('PASS actual authoring recovery: applied source is reversible through real Studio history');
+  await page.locator('#clea-ai-task-mode').selectOption('forum');await page.locator('#chat-question').fill('Objasni BIL za TECH forum.');await page.locator('#chat-send').click();await page.getByLabel('Uredi AI nacrt za TECH',{exact:true}).waitFor();
+  assert.deepEqual(received.at(-1).history,[]);assert.equal('authoring' in received.at(-1),false);assert((await page.locator('#chat-log').innerText()).includes('Nije objavljeno'));
+  const drafting=page.waitForEvent('download');await page.getByRole('button',{name:'Preuzmi nacrt za pregled',exact:true}).click();const draft=JSON.parse(await fs.readFile(await(await drafting).path(),'utf8'));assert.equal(draft.aiGenerated,true);assert.equal(draft.published,false);
+  console.log('PASS TECH integration: reachable labelled AI draft, isolated conversation context, actual reviewed draft download and no forum posting');
   await connect('razgovor/');await page.locator('#clea-ai-task-mode').selectOption('create');await page.locator('#chat-question').fill('Napravi aplikaciju kviza.');await page.locator('#chat-send').click();await page.waitForSelector('[data-ai-app-proposal]');await page.locator('[data-ai-app-reviewed]').check();await page.locator('[data-ai-app-apply]').click();
   await page.waitForURL('**/studio/workbench/**');await page.waitForSelector('[data-ai-app-proposal]');assert((await page.locator('#chat-log').innerText()).includes('ponovna lokalna provjera'));assert(await page.locator('[data-ai-app-apply]').isDisabled());
   console.log('PASS actual authoring handoff: standalone conversation opens the same original Studio, rechecks source and preserves explicit review');

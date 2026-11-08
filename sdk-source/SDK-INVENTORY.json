@@ -1,6 +1,6 @@
 {
   "format": "clea7.sdk.inventory/1",
-  "version": "0.37.0-test",
+  "version": "0.38.0-test",
   "status": "development-test",
   "referenceSha256": "e622ecb98a7d60999ce686b052bab09ef9db645d0e211526e9986e0060061b8c",
   "licencePreserved": true,
@@ -19,17 +19,17 @@
     {
       "path": "NOTICE.txt",
       "bytes": 331,
-      "sha256": "82e976a6ba40c491575c275a59ad8d8c8a609adf4a6663b7d7f579236bd20c41"
+      "sha256": "9b0482ef5d8ce213cbf5e379d8882f9feec44d601d2df38b4596b758bc3ccb90"
     },
     {
       "path": "README.md",
       "bytes": 2600,
-      "sha256": "3694be9069838af3d51a52ed5e2daf3580fa3b00fc624318de57bd81a93ef8de"
+      "sha256": "55e6b4eb88375b947a9ad1235dc8977fd39a61b8498e7b9fc1fa1d06f533ee43"
     },
     {
       "path": "clea7/__init__.py",
       "bytes": 96,
-      "sha256": "a9e290987ab89abe45b7f6251b314a37febdabb2dd62a0188db89f4efd3e8be0"
+      "sha256": "1583e8077161845fe1f2fdef5d83b793f46a6b972652a2fed67ffc3aa6872be6"
     },
     {
       "path": "clea7/__main__.py",
@@ -40,6 +40,11 @@
       "path": "clea7/application.py",
       "bytes": 21364,
       "sha256": "aee8d655818f584894c8634a87d3438d64806fea0972f39f864becea22e01a76"
+    },
+    {
+      "path": "clea7/authoring_contract.py",
+      "bytes": 1566,
+      "sha256": "7f6fdb4cb9e8addf8318c383f43433491a89d7815465ba77c27fc80962f59396"
     },
     {
       "path": "clea7/bil.py",
@@ -58,8 +63,8 @@
     },
     {
       "path": "clea7/local_client.py",
-      "bytes": 5308,
-      "sha256": "6af33f1a5b76d613b15c66fa55a6b6609de0e1b22b4961bad766d10d2f37379c"
+      "bytes": 5727,
+      "sha256": "92d6a1234b90926f6ccbdbf61bf7398417dee3006cb2708dc0afa4392c276f24"
     },
     {
       "path": "clea7/package.py",
@@ -85,6 +90,11 @@
       "path": "clea7/storage_budget.py",
       "bytes": 1740,
       "sha256": "809761467fe702607b2db24e2983d03930a1c3a176741832b6e25311a4822bfd"
+    },
+    {
+      "path": "docs/AI-APP-AUTHORING.md",
+      "bytes": 3262,
+      "sha256": "5fc71c43ec24a74ed9846d6837cbf4ce0b7ca3395bd4941546f638c4720206b9"
     },
     {
       "path": "docs/ARCHITECTURE-REVIEW-015.md",
@@ -382,6 +392,11 @@
       "sha256": "e941367b25b96a2ec9e355e48fb5abd6d50c2543d48ae8472928bb404f0cf30f"
     },
     {
+      "path": "web/workbench/ai-authoring.js",
+      "bytes": 6016,
+      "sha256": "70470791843b0ae77879374b9d0119bddddab1b73c7ca3b6339d5e06c6613463"
+    },
+    {
       "path": "web/workbench/android-backend.js",
       "bytes": 3379,
       "sha256": "0e3953882806829f56a3bbdfd2b62fc669369657c25a342c18587f357384cfa4"
@@ -433,8 +448,8 @@
     },
     {
       "path": "web/workbench/intelligence.js",
-      "bytes": 16402,
-      "sha256": "624e0c1426f9f49aaa7b89367a60dbd63328b455a43216b819c8d2cd2039ba00"
+      "bytes": 16215,
+      "sha256": "c09f4e02796e339639c2aa895c0f07d0c3ff6ac0f46a2f067c554c43371d2cae"
     },
     {
       "path": "web/workbench/living.js",

@@ -47,6 +47,11 @@
       "sha256": "6d0bfec3ba0a2a1a068115350cbd477cda60c6497f5ce2bf941d2e8f97652499"
     },
     {
+      "path": "sense/downloads/BL-CLEA7-Core-SDK-0.38.0-test.zip",
+      "bytes": 322909,
+      "sha256": "fb2d3f1fa29a857e75a1710213d8942bcbc5d4c3b2e23a44dc3f04261823af58"
+    },
+    {
       "path": "sense/downloads/SDK-CORE-2.md",
       "bytes": 4071,
       "sha256": "3c3ae2e21be65bc8cd01908bb817c6a3561923edd33af690182f13d24a13d9b5"
@@ -84,12 +89,12 @@
     {
       "path": "sense/index.html",
       "bytes": 26237,
-      "sha256": "0f400966033a3e33a4edc199796654936dfbac57407fed83128d6457ab783084"
+      "sha256": "272c9e0333b588d613868564ee3b13cce7497ebeb120cf133adabf7a24038e3b"
     },
     {
       "path": "sense/offline-assets.js",
       "bytes": 3525,
-      "sha256": "04fa3332e24b21bc3a96596e546711d0cd2df0e05cd8a6e041ef4d77154000d2"
+      "sha256": "3c979a47d768ad2fbe1d9941074bc1171ff8098750e6ca26102562e061e16159"
     },
     {
       "path": "sense/sense-authoring.js",
@@ -263,8 +268,8 @@
     },
     {
       "path": "studio/workbench/ai-authoring.js",
-      "bytes": 5802,
-      "sha256": "66eb724e937c1db067c7b7f788e7b500242c89ae964e0845c24fc91f4e0b0f98"
+      "bytes": 6016,
+      "sha256": "70470791843b0ae77879374b9d0119bddddab1b73c7ca3b6339d5e06c6613463"
     },
     {
       "path": "studio/workbench/ai-controls.js",
@@ -348,8 +353,8 @@
     },
     {
       "path": "studio/workbench/chat/ui.js",
-      "bytes": 49136,
-      "sha256": "6605bd6feb35c19fd71acdc5199c984f90d197c8bb755e26b72719e51bcb28f4"
+      "bytes": 50778,
+      "sha256": "5948ff309c87b97ce981195ce09a32040c2c315342ab6e48e55b187827230c56"
     },
     {
       "path": "studio/workbench/chat/worker.js",
@@ -423,13 +428,13 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 16492,
-      "sha256": "9ec7f24a24f2dd502113ac595fa0639659638bfe2edd826ec425a8b62a6a360f"
+      "bytes": 16561,
+      "sha256": "9fc36a55529df821fbd9adf1bdfaf4519e4b8d4eede28f13a3aef1287497c03b"
     },
     {
       "path": "studio/workbench/intelligence.js",
-      "bytes": 16402,
-      "sha256": "624e0c1426f9f49aaa7b89367a60dbd63328b455a43216b819c8d2cd2039ba00"
+      "bytes": 16215,
+      "sha256": "c09f4e02796e339639c2aa895c0f07d0c3ff6ac0f46a2f067c554c43371d2cae"
     },
     {
       "path": "studio/workbench/living.js",

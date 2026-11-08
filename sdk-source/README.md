@@ -1,4 +1,4 @@
-# BL CLEA7 SDK 0.37.0-test — shared Core and dependency cache
+# BL CLEA7 SDK 0.38.0-test — shared Core and dependency cache
 
 Development/test distribution by Brzo i Lokalno. The authoritative BIL compiler,
 bounded interpreter, shared Core, project CLI and original dependency/result cache

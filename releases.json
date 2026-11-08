@@ -1,15 +1,15 @@
 {
   "format": "clea7.public-downloads/1",
-  "version": "0.37.0",
+  "version": "0.38.0-test",
   "source_commit": "5040c858d49d3bd658a219e372d3acacc4e3a9c4",
   "verified_run": null,
   "published": [
     {
       "key": "sdk",
-      "name": "BL-CLEA7-Core-SDK-0.37.0-test.zip",
-      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.37.0-test.zip",
-      "size_bytes": 317594,
-      "sha256": "6d0bfec3ba0a2a1a068115350cbd477cda60c6497f5ce2bf941d2e8f97652499"
+      "name": "BL-CLEA7-Core-SDK-0.38.0-test.zip",
+      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.38.0-test.zip",
+      "size_bytes": 322909,
+      "sha256": "fb2d3f1fa29a857e75a1710213d8942bcbc5d4c3b2e23a44dc3f04261823af58"
     },
     {
       "key": "preview",
@@ -468,10 +468,17 @@
           "sha256": "76224a697db6fc79c710d2c2d33b7a624b1f342217f649ddbbbaccfc7e74d41b"
         }
       ]
+    },
+    {
+      "key": "sdk",
+      "name": "BL-CLEA7-Core-SDK-0.37.0-test.zip",
+      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.37.0-test.zip",
+      "size_bytes": 317594,
+      "sha256": "6d0bfec3ba0a2a1a068115350cbd477cda60c6497f5ce2bf941d2e8f97652499"
     }
   ],
   "web": {
-    "version": "0.37.0",
+    "version": "0.38.0-test",
     "status": "test",
     "source_commit": "5040c858d49d3bd658a219e372d3acacc4e3a9c4",
     "verified_scope": "shared_core_sense_browser_studio_runtime_and_independent_sdk",
