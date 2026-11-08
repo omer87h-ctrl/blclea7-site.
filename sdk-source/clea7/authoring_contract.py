@@ -14,10 +14,11 @@ _texts={'type':'array','items':_text,'maxItems':8}
 # shared JS emitter uses the real BIL parser, compiler and isolated Runtime.
 PLAN_SCHEMA=_object({
  'format':{'const':PLAN_FORMAT},
- 'state':{'type':'array','maxItems':32,'items':_object({'name':_name,'type':_text,'initial':_text})},
+ 'state':{'type':'array','maxItems':32,'items':_object({'name':_name,'type':_text,'value':{'anyOf':[{'type':'string','maxLength':800},{'type':'number'},{'type':'boolean'},{'type':'null'},{'type':'array','maxItems':64,'items':{'anyOf':[{'type':'string','maxLength':800},{'type':'number'},{'type':'boolean'}]}}]}})},
  'backends':{'type':'array','maxItems':4,'items':_object({'name':_name,'adapter':_text})},
  'events':{'type':'array','maxItems':32,'items':_object({'name':_name,'steps':{'type':'array','maxItems':32,'items':{'anyOf':[
   _object({'op':{'const':'set'},'target':_text,'expression':_text}),
+  _object({'op':{'const':'compose'},'target':_name,'parts':{'type':'array','minItems':1,'maxItems':32,'items':{'anyOf':[_object({'text':_text}),_object({'value':_text})]}}}),
   _object({'op':{'const':'open'},'screen':_name}),
   _object({'op':{'const':'request'},'backend':_name,'operation':_text,'args':_texts,'result':_name,'error':_name}),
   _object({'op':{'const':'bil'},'source':_text})

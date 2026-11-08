@@ -48,8 +48,8 @@
     },
     {
       "path": "sense/downloads/BL-CLEA7-Core-SDK-0.38.0-test.zip",
-      "bytes": 325845,
-      "sha256": "49a680abdb512cd8a78e99aa94554449c4c1fddd6e189f5d2d6353e63c96d5d4"
+      "bytes": 326906,
+      "sha256": "a8cedffb55f78ddac43875bb2982032f6f6b33d440cb9e03d4aaa8c7c7112e79"
     },
     {
       "path": "sense/downloads/SDK-CORE-2.md",
@@ -268,8 +268,8 @@
     },
     {
       "path": "studio/workbench/ai-authoring.js",
-      "bytes": 11601,
-      "sha256": "973c5c2a96b1001fa0c996893318d57cbbad9df1e554a9b4630e35e3b155249a"
+      "bytes": 13801,
+      "sha256": "2b6088a76b0d6f9a69023e84cc102af60de753c04dd0675abecb93e7c28c48ec"
     },
     {
       "path": "studio/workbench/ai-controls.js",
@@ -353,8 +353,8 @@
     },
     {
       "path": "studio/workbench/chat/ui.js",
-      "bytes": 52119,
-      "sha256": "bd5a6afe65aa87c9ed0eac448e174b28ce0c311a9e90c9a77438faa108eb958d"
+      "bytes": 52150,
+      "sha256": "370912fb3e4d7945d4e694b7ab35e1c18171fa331e958f385dfcf78d4c3cb9b8"
     },
     {
       "path": "studio/workbench/chat/worker.js",
@@ -429,7 +429,7 @@
     {
       "path": "studio/workbench/index.html",
       "bytes": 16561,
-      "sha256": "37e8fb5fb949d65e9d3d1e692776fe045049ea8c4b9a059a73951ecc9168544a"
+      "sha256": "0e406a4112e8b8c8a5b06829479aa7cde53adeec9434aff0acfd7d663520ba5c"
     },
     {
       "path": "studio/workbench/intelligence.js",

@@ -43,8 +43,8 @@
     },
     {
       "path": "clea7/authoring_contract.py",
-      "bytes": 3600,
-      "sha256": "008b102eea9bafff75f1ae48f2c2ecc355617085c1fa29e6e0d06a00f30cf470"
+      "bytes": 3988,
+      "sha256": "8453650ced45caef9fdab465a1f2d6af01ede64c8771712c0b844bcbea684d29"
     },
     {
       "path": "clea7/bil.py",
@@ -93,8 +93,8 @@
     },
     {
       "path": "docs/AI-APP-AUTHORING.md",
-      "bytes": 4367,
-      "sha256": "568be530a3ee487a59b2537d14b51d32db53853e930f6ff404036494d0029cfb"
+      "bytes": 4923,
+      "sha256": "543e6d644b9ccd22a482ecb619e755a7f72d478294eac93116ebb7ad23d70c7b"
     },
     {
       "path": "docs/ARCHITECTURE-REVIEW-015.md",
@@ -393,8 +393,8 @@
     },
     {
       "path": "web/workbench/ai-authoring.js",
-      "bytes": 11601,
-      "sha256": "973c5c2a96b1001fa0c996893318d57cbbad9df1e554a9b4630e35e3b155249a"
+      "bytes": 13801,
+      "sha256": "2b6088a76b0d6f9a69023e84cc102af60de753c04dd0675abecb93e7c28c48ec"
     },
     {
       "path": "web/workbench/android-backend.js",

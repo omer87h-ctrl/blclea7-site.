@@ -19,6 +19,13 @@ oversized plans and incomplete JSON are rejected. The result still goes through 
 same compiler, types, IR, seven responsibilities and isolated execution. There is no
 second interpreter or fixed CV template. Generic conditions/functions/layouts remain
 real BIL; old fenced BIL replies and source-preserving change requests stay supported.
+State `value` and composition `parts.text` are JSON literals, encoded into BIL by
+CLEA rather than requiring a small model to double-escape source quotations.
+`compose` combines explicit text and BIL value expressions. Missing completion
+cells of a registered local Sense request are inferred only from its trusted
+result contract and the fixed nullable error contract. Their names, types and
+reason appear in the reviewed conversion evidence and emitted source. Existing
+symbols are never silently retyped; unknown operations are not inferred or granted.
 
 The HP service supplies the actual BIL grammar and approved SSD references,
 counts the complete template with the installed tokenizer, disables hidden

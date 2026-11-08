@@ -14,15 +14,31 @@ function emitPlan(plan){
  const expression=x=>{text(x);if(!x.trim())bad('Nedostaje izraz.');parsed('let cleaProbe = '+x,'declare');return x;};
  if(new TextEncoder().encode(JSON.stringify(plan)).length>12000)bad('Strukturirani prijedlog prelazi ograničenje.');
  shape(plan,['format','state','backends','events','screens','start'],['declarations']);if(plan.format!==PLAN_FORMAT)bad('Nepodržana verzija CLEA plana.');
- const lines=[],sourceMap=[];let total=0;
+ const lines=[],sourceMap=[],inferred=[];let total=0;
  const put=(path,source)=>{sourceMap.push({path,line:lines.length+1});lines.push(...source.split('\n'));};
  for(const [i,source] of list(plan.declarations||[],16).entries()){
   text(source);const body=scope.CLEA7BIL.parse(source).body;if(body.length!==1||!['import','record','function'].includes(body[0].kind))bad('Deklaracije plana prihvataju BIL module, zapise i funkcije.');put('declarations.'+i,source);
  }
- for(const [i,state] of list(plan.state,32).entries()){
-  shape(state,['name','type','initial']);name(state.name);text(state.type);expression(state.initial);
+ const states=list(plan.state,32).slice(),declared=new Set(states.map(s=>s?.name)),backends=new Map(list(plan.backends,4).map(b=>[b?.name,b?.adapter]));
+ for(const event of list(plan.events,32))for(const step of list(event.steps,32))if(step?.op==='request'&&backends.get(step.backend)===scope.CLEA7BIL.SENSE_ADAPTER){
+  const contract=own(scope.CLEA7BIL.SENSE_CONTRACTS,step.operation)?scope.CLEA7BIL.SENSE_CONTRACTS[step.operation]:null;if(!contract)continue;
+  for(const [target,type,value] of [[step.result,contract.result,scope.CLEA7BIL.defaultValue(contract.result)],[step.error,'RemoteFailure?',null]]){
+   name(target);if(!declared.has(target)){declared.add(target);states.push({name:target,type,value});inferred.push({name:target,type,reason:'typed local operation completion',operation:step.operation});}
+  }
+ }
+ if(states.length>48)bad('Previše deklarisanih i izvedenih stanja.');
+ function literal(value,depth=0){
+  if(depth>8)bad('Početna vrijednost je preduboka.');
+  if(value===null||typeof value==='string'&&value.length<=800||typeof value==='boolean'||typeof value==='number'&&Number.isFinite(value)&&Math.abs(value)<=1e15)return JSON.stringify(value);
+  if(Array.isArray(value)&&value.length<=64)return '['+value.map(v=>literal(v,depth+1)).join(', ')+']';
+  bad('Početna vrijednost mora biti ograničen JSON literal.');
+ }
+ for(const [i,state] of states.entries()){
+  shape(state,['name','type'],['initial','value']);name(state.name);text(state.type);
+  if(own(state,'initial')===own(state,'value'))bad('Stanje treba jednu početnu vrijednost.');
+  const initial=own(state,'value')?literal(state.value):expression(state.initial);
   if(!/^[A-Za-z][A-Za-z0-9_<>? ]{0,127}$/.test(state.type))bad('Neispravan tip stanja.');
-  const source='let '+state.name+': '+state.type+' = '+state.initial;parsed(source,'declare');put('state.'+i,source);
+  const source='let '+state.name+': '+state.type+' = '+initial;parsed(source,'declare');put('state.'+i,source);
  }
  for(const [i,backend] of list(plan.backends,4).entries()){
   shape(backend,['name','adapter']);name(backend.name);text(backend.adapter);put('backends.'+i,'backend '+backend.name+' using '+JSON.stringify(backend.adapter));
@@ -33,6 +49,9 @@ function emitPlan(plan){
    if(++total>256)bad('Plan prelazi ukupni budžet naredbi.');let source;
    switch(step?.op){
     case 'set':shape(step,['op','target','expression']);text(step.target);source=step.target+' = '+expression(step.expression);parsed(source,'assign');break;
+    case 'compose':
+     shape(step,['op','target','parts']);name(step.target);if(!step.parts?.length)bad('Sastavljanje teksta treba dijelove.');
+     source=step.target+' = '+list(step.parts,32).map(part=>{if(part&&own(part,'text')){shape(part,['text']);return JSON.stringify(text(part.text));}shape(part,['value']);return '('+expression(part.value)+')';}).join(' + ');parsed(source,'assign');break;
     case 'open':shape(step,['op','screen']);source='open '+name(step.screen);break;
     case 'request':
      shape(step,['op','backend','operation','args','result','error']);
@@ -65,16 +84,17 @@ function emitPlan(plan){
  }
  put('start','start '+name(plan.start));const source=lines.join('\n')+'\n';
  if(new TextEncoder().encode(source).length>10000)bad('BIL prijedlog prelazi ograničenje; izvor nije skraćen.');
- scope.CLEA7BIL.parse(source);return {source,sourceMap};
+ scope.CLEA7BIL.parse(source);return {source,sourceMap,inferred};
 }
-function extract(reply){
+function decode(reply){
  if(typeof reply!=='string'||reply.length>12000)throw fault('Source','Model nije vratio ograničen BIL odgovor.');
  const trimmed=reply.trim();
- if(trimmed.startsWith('{')){let plan;try{plan=JSON.parse(trimmed);}catch{throw fault('Plan','Model nije završio JSON plan; nepotpun prijedlog nije primijenjen.');}return emitPlan(plan).source;}
+ if(trimmed.startsWith('{')){let plan;try{plan=JSON.parse(trimmed);}catch{throw fault('Plan','Model nije završio JSON plan; nepotpun prijedlog nije primijenjen.');}return {...emitPlan(plan),representation:'plan',planFormat:PLAN_FORMAT};}
  const blocks=[...reply.matchAll(/```bil[^\S\r\n]*\r?\n([\s\S]*?)```/gi)];
  if(blocks.length!==1||(reply.match(/```/g)||[]).length!==2)throw fault('Source','Potreban je jedan potpun zatvoren BIL blok. Nepotpun kod nije primijenjen.');
- const source=blocks[0][1].trim()+'\n';if(new TextEncoder().encode(source).length>10000)throw fault('Source','Prijedlog prelazi ograničeni izvorni prozor. Kod nije skraćen.');return source;
+ const source=blocks[0][1].trim()+'\n';if(new TextEncoder().encode(source).length>10000)throw fault('Source','Prijedlog prelazi ograničeni izvorni prozor. Kod nije skraćen.');return {source,representation:'bil',sourceMap:[],inferred:[]};
 }
+function extract(reply){return decode(reply).source;}
 function create({generate,onEvent=()=>{},attempts=3}={}){
  if(typeof generate!=='function'||![1,2,3].includes(attempts))throw fault('Input','Nedostaje stvarni jezički transport.');
  let busy=false;
@@ -94,12 +114,12 @@ function create({generate,onEvent=()=>{},attempts=3}={}){
     const response=await generate(intent,{authoring:contract,signal,onDelta});check();
     let source=null;
     try{
-     source=extract(response.reply);onEvent({phase:'verification',attempt});
+     const conversion=decode(response.reply);source=conversion.source;onEvent({phase:'verification',attempt});
      const verified=await scope.CLEA7Intelligence.verifyBIL(source,{metadata,checks,signal,modelAvailable:true,onEvent:e=>onEvent({phase:'runtime',event:e})});check();
      if(!verified.application.bil.ir.ui?.screens?.length)throw fault('UI','Prijedlog nema stvarni aplikacijski ekran.');
      const impact=project?.bil?scope.CLEA7Intelligence.impact(await scope.CLEA7Intelligence.dependencyGraph(project),verified.graph):null;
      history.push({attempt,passed:true});
-     const proposal={format:'clea7.model-app-proposal/1',source,application:verified.application,receipt:verified.receipt,impact,attempts:clone(history),requiresReview:true,scope:verified.verifiedScope,modelProfile:response.modelProfile||'qwen3.5-9b-q4_k_m'};
+     const proposal={format:'clea7.model-app-proposal/1',source,application:verified.application,receipt:verified.receipt,impact,conversion:{representation:conversion.representation,sourceMap:conversion.sourceMap,inferred:conversion.inferred},attempts:clone(history),requiresReview:true,scope:verified.verifiedScope,modelProfile:response.modelProfile||'qwen3.5-9b-q4_k_m'};
      certificates.set(proposal,{base,source,mode});onEvent({phase:'ready',attempt});return proposal;
     }catch(error){
      check();history.push({attempt,passed:false,code:error.code||'Compiler',diagnostic:String(error.message).slice(0,600),line:error.location?.line||error.diagnostic?.line||error.line||null,column:error.location?.column||error.diagnostic?.column||error.column||null});
