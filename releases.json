@@ -492,22 +492,61 @@
   "checked_037_binaries": [
     {
       "name": "BL-CLEA7-Runtime-Android-0.37-debug.apk",
-      "url": "downloads/BL-CLEA7-Runtime-Android-0.37-debug.apk",
+      "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.37.0-test/BL-CLEA7-Runtime-Android-0.37-debug.apk",
       "size_bytes": 251702,
       "sha256": "91d840360bb8b84ec2d8a6255a9076d9eabb77d638c1af4d95a4a684e3350372"
     },
     {
       "name": "BL-CLEA-Sense-CV-0.37-debug.apk",
-      "url": "downloads/BL-CLEA-Sense-CV-0.37-debug.apk",
+      "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.37.0-test/BL-CLEA-Sense-CV-0.37-debug.apk",
       "size_bytes": 256540,
       "sha256": "bc0b1c3545ed11c73363d3a0ec2b2687810115aca2499c4d1c6e311f9f85c221"
     },
     {
       "name": "BL-CLEA-Sense-CV-0.37.clea7",
-      "url": "downloads/BL-CLEA-Sense-CV-0.37.clea7",
+      "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.37.0-test/BL-CLEA-Sense-CV-0.37.clea7",
       "size_bytes": 33632,
       "sha256": "480f78279457d506ee11a5cc744244446f40469b54876033630147f7a3ee9882"
     }
   ],
-  "checked_037_binaries_state": "approved_tested_local_files; Windows release transfer pending"
+  "checked_037_binaries_state": "published",
+  "native_current": {
+    "state": "published",
+    "version": "0.37.0-test",
+    "tag": "clea7-0.37.0-test",
+    "repository": "omer87h-ctrl/blclea7-site.",
+    "publication_run": 42505458540,
+    "windows_build_run": 42497146663,
+    "windows_install_run": 42498727971,
+    "android_build_run": 42496596996,
+    "production_signed": false,
+    "new_web_touch_guide_included": false,
+    "assets": [
+      {
+        "key": "installer",
+        "name": "BLclea7-Setup-Windows-x64.exe",
+        "size_bytes": 249093574,
+        "sha256": "3384072fec6a8c982bc74c24d217a82176a9c72c97eef2be1b678293b0aed531",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.37.0-test/BLclea7-Setup-Windows-x64.exe"
+      },
+      {
+        "name": "BL-CLEA7-Runtime-Android-0.37-debug.apk",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.37.0-test/BL-CLEA7-Runtime-Android-0.37-debug.apk",
+        "size_bytes": 251702,
+        "sha256": "91d840360bb8b84ec2d8a6255a9076d9eabb77d638c1af4d95a4a684e3350372"
+      },
+      {
+        "name": "BL-CLEA-Sense-CV-0.37-debug.apk",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.37.0-test/BL-CLEA-Sense-CV-0.37-debug.apk",
+        "size_bytes": 256540,
+        "sha256": "bc0b1c3545ed11c73363d3a0ec2b2687810115aca2499c4d1c6e311f9f85c221"
+      },
+      {
+        "name": "BL-CLEA-Sense-CV-0.37.clea7",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-0.37.0-test/BL-CLEA-Sense-CV-0.37.clea7",
+        "size_bytes": 33632,
+        "sha256": "480f78279457d506ee11a5cc744244446f40469b54876033630147f7a3ee9882"
+      }
+    ]
+  }
 }
