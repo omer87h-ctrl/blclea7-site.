@@ -343,6 +343,9 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  }
  persistence.addEventListener('change',persist);
  let active=false,loading=false,publicAvailable=false,previewMode=false,runtimeAuthentication=null;
+ let nativeOwner=false;
+ function connectNativeOwner(){if(!globalThis.CLEA7Workbench?.nativeAI)return;nativeOwner=true;check.checked=true;note.textContent='Ovaj Windows Studio koristi tvoj postojeći lokalni CLEA9B servis. Nova aplikacija ne šalje postojeći projekt; izmjena izvora traži tvoje odobrenje.';activate(check);}
+ if(globalThis.CLEA7Workbench)connectNativeOwner();else addEventListener('clea:studio-ready',connectNativeOwner,{once:true});
  CLEA7AI.configuration().then(config=>{
   runtimeAuthentication=config.authentication;
   const host=CLEA7AI.isRuntimeHost(config);
@@ -393,8 +396,8 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   for(const row of [...log.querySelectorAll('.chat-message')].slice(0,-24))row.remove();article.scrollIntoView({block:'nearest'});return body;
  }
  form.addEventListener('submit',async event=>{
-  if(!active&&!loading&&!previewMode)return;
-  event.preventDefault();event.stopImmediatePropagation();if(loading)return;if(previewMode&&!active){feedback.textContent='Privremena HP veza nije spremna. Odgovor nije zamijenjen lokalnim probnim modelom.';return;}
+  if(!active&&!loading&&!previewMode&&!nativeOwner)return;
+  event.preventDefault();event.stopImmediatePropagation();if(loading)return;if((previewMode||nativeOwner)&&!active){feedback.textContent='Povezani CLEA servis nije spreman. Odgovor nije zamijenjen lokalnim probnim modelom.';return;}
   const question=input.value.trim();if(!question)return;
   if(question.length>1200){feedback.textContent='Poruka prelazi 1200 znakova.';return;}
   loading=true;submit.disabled=true;check.disabled=true;publicCheck.disabled=true;
