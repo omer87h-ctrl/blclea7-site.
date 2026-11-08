@@ -43,8 +43,8 @@
     },
     {
       "path": "clea7/authoring_contract.py",
-      "bytes": 1566,
-      "sha256": "7f6fdb4cb9e8addf8318c383f43433491a89d7815465ba77c27fc80962f59396"
+      "bytes": 3600,
+      "sha256": "008b102eea9bafff75f1ae48f2c2ecc355617085c1fa29e6e0d06a00f30cf470"
     },
     {
       "path": "clea7/bil.py",
@@ -63,8 +63,8 @@
     },
     {
       "path": "clea7/local_client.py",
-      "bytes": 5727,
-      "sha256": "92d6a1234b90926f6ccbdbf61bf7398417dee3006cb2708dc0afa4392c276f24"
+      "bytes": 5508,
+      "sha256": "226e8d9b76d01560f3bd354007a40e76de00cd72c6a896197862963f07003667"
     },
     {
       "path": "clea7/package.py",
@@ -93,8 +93,8 @@
     },
     {
       "path": "docs/AI-APP-AUTHORING.md",
-      "bytes": 3262,
-      "sha256": "5fc71c43ec24a74ed9846d6837cbf4ce0b7ca3395bd4941546f638c4720206b9"
+      "bytes": 4367,
+      "sha256": "568be530a3ee487a59b2537d14b51d32db53853e930f6ff404036494d0029cfb"
     },
     {
       "path": "docs/ARCHITECTURE-REVIEW-015.md",
@@ -233,8 +233,8 @@
     },
     {
       "path": "sdk/bil-cli.cjs",
-      "bytes": 10973,
-      "sha256": "2a0c8d13b83d00210a0fcdc8a8acb93806f028823fa077a76231856a4dd3604c"
+      "bytes": 11182,
+      "sha256": "0ecb6727098a059daa63c97ce386f9fc24e69dc224b361c0ace4b6a7e51533e3"
     },
     {
       "path": "sdk/examples/bil/community.bil",
@@ -393,8 +393,8 @@
     },
     {
       "path": "web/workbench/ai-authoring.js",
-      "bytes": 6016,
-      "sha256": "70470791843b0ae77879374b9d0119bddddab1b73c7ca3b6339d5e06c6613463"
+      "bytes": 11601,
+      "sha256": "973c5c2a96b1001fa0c996893318d57cbbad9df1e554a9b4630e35e3b155249a"
     },
     {
       "path": "web/workbench/android-backend.js",

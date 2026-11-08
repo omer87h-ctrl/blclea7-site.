@@ -264,7 +264,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   const studio=globalThis.CLEA7Workbench,project=studio?.snapshot?.()||null;
   if(mode==='change'&&!sourceApproved.checked)throw Error('Prvo odobri tačan BIL izvor za ovu izmjenu. Ništa nije poslano modelu.');
   authorController=new AbortController();
-  try{const proposal=await author.propose(question,{project,mode,sourceApproved:sourceApproved.checked,signal:authorController.signal,onDelta:(_delta,text)=>{body.textContent=text;}});
+  try{const proposal=await author.propose(question,{project,mode,sourceApproved:sourceApproved.checked,representation:client.capabilities.bilAuthoringPlan==='clea7.authoring-plan/1'?'plan':'bil',signal:authorController.signal,onDelta:(_delta,text)=>{body.textContent=text;}});
    proposalUI(body,proposal);return proposal;
   }finally{authorController=null;}
  }
@@ -396,7 +396,10 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   for(const row of [...log.querySelectorAll('.chat-message')].slice(0,-24))row.remove();article.scrollIntoView({block:'nearest'});return body;
  }
  form.addEventListener('submit',async event=>{
-  if(!active&&!loading&&!previewMode&&!nativeOwner)return;
+  if(!active&&!loading&&!previewMode&&!nativeOwner){
+   if(['create','change','forum'].includes(requestedTask(input.value.trim()))){event.preventDefault();event.stopImmediatePropagation();feedback.textContent='Za ovaj zadatak poveži svoj lokalni CLEA9B servis. Mali model za CLEA teme ne može izraditi ovaj prijedlog.';}
+   return;
+  }
   event.preventDefault();event.stopImmediatePropagation();if(loading)return;if((previewMode||nativeOwner)&&!active){feedback.textContent='Povezani CLEA servis nije spreman. Odgovor nije zamijenjen lokalnim probnim modelom.';return;}
   const question=input.value.trim();if(!question)return;
   if(question.length>1200){feedback.textContent='Poruka prelazi 1200 znakova.';return;}
@@ -428,7 +431,9 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
    if(data.internet.requested&&data.internet.status!=='retrieved'){const missing=document.createElement('small');missing.textContent=data.internet.status==='no_results'?'Javni upit nije našao odgovarajući izvor.':'Internetski izvor trenutno nije dostupan; pretraga nije uspjela.';body.append(document.createElement('br'),missing);}
    if(data.learnedSources.length){const saved=document.createElement('small');saved.textContent='Korišteno odobreno znanje na SSD-u: '+data.learnedSources.map(x=>x.title).join(', ');body.append(document.createElement('br'),saved);}
    feedback.textContent=data.transport==='hp'?'Odgovor BL CLEA AI servisa. Provjeri važne tvrdnje.':'Odgovor lokalnog servisa. Provjeri važne tvrdnje.';status.textContent=feedback.textContent;
-  }catch(error){body.textContent=error.message;feedback.textContent='Nema automatskog ponavljanja niti zamjene odgovora drugim modelom.';}
+  }catch(error){body.textContent=error.message;
+   if(error.failedProposal){const details=document.createElement('details'),summary=document.createElement('summary'),code=document.createElement('pre');summary.textContent='Pregledaj odbijeni prijedlog i dijagnostiku';code.textContent=String(error.failedProposal).slice(0,12000);details.append(summary,code);const diagnostic=document.createElement('pre');diagnostic.textContent=JSON.stringify(error.attempts||[],null,2);details.append(diagnostic);body.append(details);}
+   feedback.textContent='Projekt nije promijenjen. Nije korišten drugi model ili rezervni predložak.';}
   finally{submit.disabled=false;loading=false;check.disabled=false;publicCheck.disabled=!publicAvailable;document.getElementById('chat-stop').disabled=true;}
  },true);
  document.getElementById('chat-stop').addEventListener('click',()=>{authorController?.abort();client.cancel();});

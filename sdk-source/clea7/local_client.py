@@ -85,12 +85,8 @@ def verify_bil_reply(reply, *, metadata=None, checks=()):
         raise UserError('Model nije vratio ograničen BIL prijedlog.')
     if not isinstance(checks,(tuple,list)) or len(checks)>20:
         raise UserError('Provjera prihvata najviše 20 eksplicitnih slučajeva.')
-    blocks=re.findall(r'```bil[^\S\r\n]*\r?\n(.*?)```',reply,re.S|re.I)
-    if len(blocks)!=1 or reply.count('```')!=2:
-        raise UserError('Tražen je jedan potpun zatvoren BIL blok; izvor nije zamijenjen.')
     from .bil import request
-    source=blocks[0].strip()+'\n'
-    return request({'action':'verify','source':source,'metadata':metadata or {},'checks':list(checks)})
+    return request({'action':'verify-reply','reply':reply,'metadata':metadata or {},'checks':list(checks)})
 
 
 def propose_bil(intent, *, metadata=None, checks=()):
@@ -100,7 +96,7 @@ def propose_bil(intent, *, metadata=None, checks=()):
     prompt=('Napiši potpun BIL program za sljedeći zahtjev. Vrati jedan zatvoren ```bil blok. '
             'Koristi dokumentovanu BIL sintaksu, stvarne događaje i promjenjivo stanje. '
             'Ne dodaj JavaScript, izmišljene servise ili nenavedene lične podatke.\n'+intent.strip())
-    answer=ask(intent.strip(),language='bs',authoring={'format':'bil.author/1','mode':'create'})
+    answer=ask(intent.strip(),language='bs',authoring={'format':'bil.author/1','mode':'create','representation':'plan'})
     verified=verify_bil_reply(answer['reply'],metadata=metadata,checks=checks)
     return {'format':'clea7.ai-bil-proposal/1','source':verified['application']['bil']['source'],
             'verification':verified,'requiresReview':True,'modelProfile':PROFILE,

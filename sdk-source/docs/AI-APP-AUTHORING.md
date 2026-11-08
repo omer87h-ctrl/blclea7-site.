@@ -10,16 +10,30 @@ and an exact bounded BIL source; running app state, CV values, files and unrelat
 conversation are excluded. Source is never silently truncated. Authoring and
 normal chat share one generation gate and the verified installed model.
 
+Creation can request `representation:"plan"`: the installed model uses llama.cpp's
+JSON-schema constrained decoding for `clea7.authoring-plan/1`. This data describes
+typed state, backend declarations, event steps, screens and navigation. The original
+shared `emitPlan` emits BIL with plan-path/line mappings. Every expression and advanced
+fragment is parsed by the actual BIL parser; structure injection, unknown fields,
+oversized plans and incomplete JSON are rejected. The result still goes through the
+same compiler, types, IR, seven responsibilities and isolated execution. There is no
+second interpreter or fixed CV template. Generic conditions/functions/layouts remain
+real BIL; old fenced BIL replies and source-preserving change requests stay supported.
+
 The HP service supplies the actual BIL grammar and approved SSD references,
 counts the complete template with the installed tokenizer, disables hidden
-thinking consistently and reserves at most1536 output tokens within the existing
-4096-token context. Normal chat stays512. An oversized request is rejected.
+thinking consistently and reserves at most2048 output tokens for a structured plan,
+1536 for direct BIL within the existing4096-token context. Normal chat stays512.
+An oversized request is rejected. Plan creation uses at most1200 characters of
+attributed reference context, reserving room for the complete generated program.
 This is a bounded model context; SSD capacity does not expand RAM or reasoning.
 
 `workbench/ai-authoring.js` coordinates inference, real compiler feedback and up
 to three attempts. The original seven-pillar verifier checks types, source hash,
 isolated initialization and any explicit handler expectations. A successful
-initialization is never advertised as proof of every application behavior.
+initialization is never advertised as proof of every application behavior. A failed
+proposal stays available for explicit in-memory source/diagnostic review and is never
+applied. Production does not silently store failed proposals or train on them.
 
 The Studio presents actual screens, source and check scope. Reviewed apply uses
 the existing history transaction, recompiles and rejects a changed project or

@@ -1,15 +1,15 @@
 {
   "format": "clea7.public-downloads/1",
   "version": "0.38.0-test",
-  "source_commit": "5040c858d49d3bd658a219e372d3acacc4e3a9c4",
+  "source_commit": "61cf738d45c36732937f2b46c3a0adb7ba21162c",
   "verified_run": null,
   "published": [
     {
       "key": "sdk",
       "name": "BL-CLEA7-Core-SDK-0.38.0-test.zip",
       "url": "sense/downloads/BL-CLEA7-Core-SDK-0.38.0-test.zip",
-      "size_bytes": 322909,
-      "sha256": "fb2d3f1fa29a857e75a1710213d8942bcbc5d4c3b2e23a44dc3f04261823af58"
+      "size_bytes": 325845,
+      "sha256": "49a680abdb512cd8a78e99aa94554449c4c1fddd6e189f5d2d6353e63c96d5d4"
     },
     {
       "key": "preview",
@@ -480,14 +480,14 @@
   "web": {
     "version": "0.38.0-test",
     "status": "test",
-    "source_commit": "5040c858d49d3bd658a219e372d3acacc4e3a9c4",
+    "source_commit": "61cf738d45c36732937f2b46c3a0adb7ba21162c",
     "verified_scope": "shared_core_sense_browser_studio_runtime_and_independent_sdk",
     "verification": {
       "result": "passed",
-      "python_tests_passed": 354,
+      "python_tests_passed": 360,
       "python_tests_skipped": 2,
       "node_suites": 40,
-      "source_receipt": "CLEA master0.37 owner verified component receipts; current public CI must pass before deployment"
+      "source_receipt": "CLEA0.38 compiler and browser checks; actual9B app acceptance is a separate gate."
     },
     "native_verification": false
   },

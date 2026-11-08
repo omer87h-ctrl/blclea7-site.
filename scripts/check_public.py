@@ -33,7 +33,7 @@ assert 'ILDuA90WSVz2FTZdmWleQ0lzbGCLmFndZ6wlT5V74Ow' in (ROOT/'index.html').read
 assert not list(ROOT.rglob('session.json')) and not list(ROOT.rglob('identity.json'))
 for forbidden in ['main.py','runtime_main.py','clea7/desktop.py','clea7/host.py','clea7/cloud_ai.py','clea7/ai.py']:
  assert not (ROOT/'sdk-source'/forbidden).exists(),forbidden
-catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='5040c858d49d3bd658a219e372d3acacc4e3a9c4'
+catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='61cf738d45c36732937f2b46c3a0adb7ba21162c'
 download_page=(ROOT/'preuzimanja.html').read_text()
 for page in ROOT.glob('*.html'):
  assert 'Studio i SDK 0.38-test · Runtime i native paketi 0.37-test' in page.read_text(),(page,'stale visible release version')
