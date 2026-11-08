@@ -7,19 +7,42 @@ from .application import validate
 from .schema import UserError
 
 FORMAT='clea7.package/1'
-RUNTIME='0.16.0'
+RUNTIME='0.37.0'
 MAX_PACKAGE=2*1024*1024
 MAX_APPLICATION=1024*1024
 TARGETS={'browser','windows','android'}
 MANIFEST_KEYS={'id','name','version','runtime','abi','targets','permissions','dependencies','sha256','publisher'}
 
+def minimum_runtime(app,targets):
+    """Minimum supported host, preserving all older application contracts."""
+    floor=_application_minimum_runtime(app,targets)
+    if app.get('bil'):
+        from .bil import core_features
+        feature_floor=core_features(app)['minimumRuntime']
+        if tuple(map(int,feature_floor.split('.')))>tuple(map(int,floor.split('.'))):floor=feature_floor
+    return floor
+
+def _application_minimum_runtime(app,targets):
+    if any(b['adapter']=='sense.local/1' for b in app.get('remote',{}).get('backends',{}).values()):return '0.37.0'
+    if any(b['adapter']=='firebase.development/4' for b in app.get('remote',{}).get('backends',{}).values()):return '0.16.0'
+    if app.get('bil',{}).get('ir',{}).get('ui',{}).get('format')=='bil.ui/2':return '0.14.0'
+    if any(b['adapter']=='android.native/1' for b in app.get('remote',{}).get('backends',{}).values()):return '0.13.0'
+    if any(b['adapter']=='firebase.development/3' for b in app.get('remote',{}).get('backends',{}).values()):return '0.12.0'
+    abi=app['format']
+    if abi=='clea7.application/9':return '0.11.0'
+    if abi=='clea7.application/8':return '0.10.0'
+    if abi=='clea7.application/7':return '0.9.0' if 'android' in targets else '0.8.0'
+    return {'clea7.application/6':'0.7.0','clea7.application/5':'0.6.0',
+            'clea7.application/4':'0.5.0','clea7.application/3':'0.4.0'}.get(abi,'0.3.0')
+
 def encode(project,targets=None,publisher=''):
     app=validate(project)
     if targets is None and any(b['adapter']=='android.native/1' for b in app.get('remote',{}).get('backends',{}).values()):targets=('android',)
+    if targets is None and app.get('remote',{}).get('backends') and all(b['adapter']=='sense.local/1' for b in app['remote']['backends'].values()):targets=('browser','windows','android')
     if targets is None:targets=('browser',) if app['format'] in ('clea7.application/7','clea7.application/8','clea7.application/9') else ('browser','windows')
     payload=json.dumps(app,ensure_ascii=False,allow_nan=False,separators=(',',':')).encode()
     if len(payload)>MAX_APPLICATION:raise UserError('Aplikacija prelazi 1 MiB.')
-    manifest={'id':app['id'],'name':app['name'],'version':app['version'],'runtime':'0.16.0' if any(b['adapter']=='firebase.development/4' for b in app.get('remote',{}).get('backends',{}).values()) else '0.14.0' if app.get('bil',{}).get('ir',{}).get('ui',{}).get('format')=='bil.ui/2' else '0.13.0' if any(b['adapter']=='android.native/1' for b in app.get('remote',{}).get('backends',{}).values()) else '0.12.0' if any(b['adapter']=='firebase.development/3' for b in app.get('remote',{}).get('backends',{}).values()) else '0.11.0' if app['format']=='clea7.application/9' else '0.10.0' if app['format']=='clea7.application/8' else ('0.9.0' if 'android' in targets else '0.8.0') if app['format'] in ('clea7.application/7','clea7.application/8','clea7.application/9') else '0.7.0' if app['format']=='clea7.application/6' else '0.6.0' if app['format']=='clea7.application/5' else '0.5.0' if app['format']=='clea7.application/4' else '0.4.0' if app['format']=='clea7.application/3' else '0.3.0',
+    manifest={'id':app['id'],'name':app['name'],'version':app['version'],'runtime':minimum_runtime(app,targets),
               'abi':app['format'],'targets':list(targets),'permissions':sorted(set(app['permissions'])),
               'dependencies':[],'sha256':hashlib.sha256(payload).hexdigest(),'publisher':publisher}
     if app['format'] in ('clea7.application/7','clea7.application/8','clea7.application/9'):manifest['remote']=app['remote']
@@ -42,7 +65,7 @@ def decode(raw,target=None):
         if manifest['abi'] not in ('clea7.application/2','clea7.application/3','clea7.application/4','clea7.application/5','clea7.application/6','clea7.application/7','clea7.application/8','clea7.application/9') or not isinstance(manifest['runtime'],str) or not re.fullmatch(r'\d+\.\d+\.\d+',manifest['runtime']):raise ValueError()
         if tuple(map(int,manifest['runtime'].split('.')))>tuple(map(int,RUNTIME.split('.'))):raise UserError('Paket zahtijeva noviji runtime.')
         if not isinstance(manifest['targets'],list) or not manifest['targets'] or any(x not in TARGETS for x in manifest['targets']) or len(set(manifest['targets']))!=len(manifest['targets']):raise ValueError()
-        if manifest['abi'] in ('clea7.application/7','clea7.application/8','clea7.application/9') and ('windows' in manifest['targets'] or 'android' in manifest['targets'] and tuple(map(int,manifest['runtime'].split('.'))) < (0,9,0)):raise UserError('application/7 Android zahtijeva Runtime 0.9.0 native broker; Windows cilj još nije podržan.')
+        if manifest['abi'] in ('clea7.application/7','clea7.application/8','clea7.application/9') and ('android' in manifest['targets'] and tuple(map(int,manifest['runtime'].split('.'))) < (0,9,0)):raise UserError('application/7 Android zahtijeva Runtime 0.9.0 native broker; Windows cilj još nije podržan.')
         if target and target not in manifest['targets']:raise UserError('Paket ne podržava ovaj izvršni cilj.')
         if manifest['dependencies']!=[]:raise UserError('Vanjske zavisnosti nisu podržane u package/1.')
         if not isinstance(manifest['publisher'],str) or len(manifest['publisher'])>100:raise ValueError()
@@ -51,6 +74,14 @@ def decode(raw,target=None):
         payload=base64.b64decode(value['payload'],validate=True)
         if len(payload)>MAX_APPLICATION or hashlib.sha256(payload).hexdigest()!=manifest['sha256']:raise UserError('Integritet aplikacije nije potvrđen.')
         app=validate(json.loads(payload))
+        backends=app.get('remote',{}).get('backends',{})
+        if backends and 'windows' in manifest['targets'] and not all(b['adapter']=='sense.local/1' for b in backends.values()):raise UserError('Windows udaljeni broker nije podržan; Sense lokalni adapter je zaseban ugovor.')
+        if any(b['adapter']=='sense.local/1' for b in backends.values()) and tuple(map(int,manifest['runtime'].split('.'))) < (0,37,0):raise UserError('Sense lokalne mogućnosti zahtijevaju Runtime 0.37.0.')
+        if app.get('bil'):
+            from .bil import core_features
+            features=core_features(app)
+            if features['version']>=2 and tuple(map(int,manifest['runtime'].split('.'))) < tuple(map(int,features['minimumRuntime'].split('.'))):
+                raise UserError('BIL Core'+str(features['version'])+' zahtijeva Runtime '+features['minimumRuntime']+'.')
         if any(b['adapter']=='firebase.development/4' for b in app.get('remote',{}).get('backends',{}).values()) and tuple(map(int,manifest['runtime'].split('.'))) < (0,16,0):raise UserError('Zajedničke slike zahtijevaju Runtime 0.16.0.')
         if app.get('bil',{}).get('ir',{}).get('ui',{}).get('format')=='bil.ui/2' and tuple(map(int,manifest['runtime'].split('.'))) < (0,14,0):raise UserError('Napredni BIL prikaz zahtijeva Runtime 0.14.0.')
         if any(b['adapter']=='android.native/1' for b in app.get('remote',{}).get('backends',{}).values()) and (tuple(map(int,manifest['runtime'].split('.'))) < (0,13,0) or manifest['targets']!=['android']):raise UserError('Native BIL zahtijeva Android Runtime 0.13.0.')

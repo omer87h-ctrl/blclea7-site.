@@ -1,0 +1,94 @@
+# BL CLEA Sense — typed evidence policy, original code by Brzo i Lokalno.
+# No private source text, model inference, network operation or hiring probability.
+import collections
+import text
+record Requirement {
+ id: Text,
+ kind: Text,
+ mandatory: Boolean,
+ found: Boolean,
+ negated: Boolean,
+ ambiguous: Boolean,
+ mismatch: Boolean,
+ action: Boolean,
+ confirmed: Boolean,
+ denied: Boolean,
+ uncertain: Boolean
+}
+record Finding { id: Text, status: Text, reason: Text }
+const allowedKinds = ["skills", "education", "certificates", "language", "experience", "deadlines", "attachments", "other"]
+let requirements: List<Requirement> = []
+const noFindings: List<Finding> = []
+let findings: List<Finding> = []
+let total = 0
+let supported = 0
+let unconfirmed = 0
+let notfound = 0
+let contradicted = 0
+let needsclarification = 0
+let mandatory = 0
+let mandatoryOpen = 0
+
+fn classify(item: Requirement) -> Finding {
+ if item.denied {
+  return new Finding { id: item.id, status: "contradicted", reason: "user_denied" }
+ }
+ if item.uncertain {
+  return new Finding { id: item.id, status: "needsclarification", reason: "user_uncertain" }
+ }
+ if item.action {
+  if item.confirmed {
+   return new Finding { id: item.id, status: "supported", reason: "action_confirmed" }
+  } else {
+   return new Finding { id: item.id, status: "needsclarification", reason: "action_requires_review" }
+  }
+ }
+ if item.negated {
+  return new Finding { id: item.id, status: "contradicted", reason: "explicit_negative_source" }
+ }
+ if item.mismatch {
+  return new Finding { id: item.id, status: "contradicted", reason: "explicit_level_or_duration_gap" }
+ }
+ if item.ambiguous {
+  return new Finding { id: item.id, status: "needsclarification", reason: "qualified_or_unclear_source" }
+ }
+ if item.found {
+  if item.confirmed {
+   return new Finding { id: item.id, status: "supported", reason: "source_and_user_confirmation" }
+  } else {
+   return new Finding { id: item.id, status: "unconfirmed", reason: "source_requires_confirmation" }
+  }
+ } else {
+  return new Finding { id: item.id, status: "notfound", reason: "not_found_in_provided_cv" }
+ }
+}
+
+on assess {
+ guard collections.length(requirements) <= 64 else raise "SenseBudget", "Sense accepts at most 64 requirements."
+ findings = noFindings
+ total = 0
+ supported = 0
+ unconfirmed = 0
+ notfound = 0
+ contradicted = 0
+ needsclarification = 0
+ mandatory = 0
+ mandatoryOpen = 0
+ for item in requirements {
+  guard collections.contains(allowedKinds, item.kind) else raise "SenseKind", "Unknown requirement kind."
+  guard text.trim(item.id) != "" else raise "SenseIdentity", "Requirement identity is required."
+  guard not item.confirmed or item.action or item.found else raise "SenseEvidence", "Confirmation requires a source fact."
+  let finding = classify(item)
+  findings = collections.append(findings, finding)
+  total = total + 1
+  if finding.status == "supported" { supported = supported + 1 }
+  if finding.status == "unconfirmed" { unconfirmed = unconfirmed + 1 }
+  if finding.status == "notfound" { notfound = notfound + 1 }
+  if finding.status == "contradicted" { contradicted = contradicted + 1 }
+  if finding.status == "needsclarification" { needsclarification = needsclarification + 1 }
+  if item.mandatory {
+   mandatory = mandatory + 1
+   if finding.status != "supported" { mandatoryOpen = mandatoryOpen + 1 }
+  }
+ }
+}

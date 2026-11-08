@@ -38,8 +38,8 @@
     },
     {
       "path": "sense/downloads/BL-CLEA-Sense-0.37-test.html",
-      "bytes": 466600,
-      "sha256": "72d69dcbe3cd4c74dd3c49104852af840eb396fecd3e85736001c63c8edefeba"
+      "bytes": 482186,
+      "sha256": "5f5ac6be0d224eaf2c0d9bfea0d1ada4743744be07d5b0db82a68768d0c725a1"
     },
     {
       "path": "sense/downloads/BL-CLEA7-Core-SDK-0.37.0-test.zip",
@@ -83,13 +83,13 @@
     },
     {
       "path": "sense/index.html",
-      "bytes": 26097,
-      "sha256": "a7b98888d7d1d9f862a4db189e3398b3feeb7e235d84c8e44060b798d54debf2"
+      "bytes": 26237,
+      "sha256": "0e81b4e2f9daab7b218ff3af9e9312302e04f5b7e65c3d07945a38e11e85795c"
     },
     {
       "path": "sense/offline-assets.js",
-      "bytes": 3272,
-      "sha256": "4a7641b8b9f9aa0da650e5e0a556d781f7f6fdf10195605b18d8e600fcdb791f"
+      "bytes": 3525,
+      "sha256": "3cf5a1a3eea3c469ad4a910ce936641fd6f22b1d3f4a0428c9d2083f566aecc4"
     },
     {
       "path": "sense/sense-authoring.js",
@@ -135,6 +135,16 @@
       "path": "sense/sense-lexicon.js",
       "bytes": 3633,
       "sha256": "9f40c83cb87504280694479bdd6f1b259477ac89a99bd8ae9638bf73f20e2db0"
+    },
+    {
+      "path": "sense/sense-navigation.css",
+      "bytes": 2377,
+      "sha256": "b1af8172aab5f75a14c935815f640b0f05cb4a320f67382ebd0716ca0d409498"
+    },
+    {
+      "path": "sense/sense-navigation.js",
+      "bytes": 13123,
+      "sha256": "210312218b5cb46c9fc85b4c9f3952274657c4ac3bef97845a9a3cb27c5919ce"
     },
     {
       "path": "sense/sense-position.js",
@@ -408,8 +418,8 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 15790,
-      "sha256": "5a796177452d4df935f9a2640bc4fc6ce5ce6815f8550a5877139f08be0c86cf"
+      "bytes": 15892,
+      "sha256": "1abd09c1cfaf1e61d8a68860e09efe244dee97871f35b5fd092ba9ef514ccc02"
     },
     {
       "path": "studio/workbench/intelligence.js",
@@ -480,6 +490,16 @@
       "path": "studio/workbench/sense-document.js",
       "bytes": 8755,
       "sha256": "149921f07f00c6e4f00103f5764f5bad7b00f32563b1b765118ba797247bf44f"
+    },
+    {
+      "path": "studio/workbench/sense-navigation.css",
+      "bytes": 2377,
+      "sha256": "b1af8172aab5f75a14c935815f640b0f05cb4a320f67382ebd0716ca0d409498"
+    },
+    {
+      "path": "studio/workbench/sense-navigation.js",
+      "bytes": 13123,
+      "sha256": "210312218b5cb46c9fc85b4c9f3952274657c4ac3bef97845a9a3cb27c5919ce"
     },
     {
       "path": "studio/workbench/sense-sdk.js",

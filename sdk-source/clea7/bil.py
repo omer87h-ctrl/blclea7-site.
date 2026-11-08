@@ -18,16 +18,134 @@ def safe(value):
 
 NATIVE_TYPES={'NativeMedia':{'handle':'Text','mime':'Text','width':'Number','height':'Number','bytes':'Number'},'NativeLocation':{'latitude':'Number','longitude':'Number','accuracy':'Number','timestamp':'Number'},'NativeReceipt':{'posted':'Boolean','id':'Number'}}
 NATIVE_OPS={'camera.capture':(0,'NativeMedia'),'media.pick':(0,'NativeMedia'),'media.list':(0,'NativeMediaList'),'media.inspect':(1,'NativeMedia'),'media.remove':(1,'Boolean'),'location.current':(0,'NativeLocation'),'notification.post':(1,'NativeReceipt')}
+SENSE_OPS={'speech.speak':(1,'Boolean'),'speech.listen':(1,'Text'),'speech.stop':(0,'Boolean'),'document.docx':(1,'Boolean'),'haptic.cue':(1,'Boolean')}
 IMAGE_OPS={'image.choose':(0,'NativeMedia'),'image.upload':(2,'RemoteImage'),'image.load':(1,'NativeMedia'),'image.remove':(1,'Boolean'),'image.discard':(1,'Boolean')}
 IMAGE_TYPES={**NATIVE_TYPES,'RemoteImage':{'path':'Text'}}
 REMOTE_OPS=frozenset(('auth.register','auth.session','auth.signIn','auth.signOut','document.delete','document.get','document.set','document.add','query.list','query.documents','observe.query.documents','observe.document.get','observe.query.list'))
 
+# These are feature names, not executable Python operations. The execution host
+# recompiles BIL source and checks canonical IR; this native envelope validator
+# can inspect the already bounded IR without requiring an installed Node runtime.
+CORE2_OPERATIONS=frozenset(('text.normalize','text.includes','text.trim',
+    'text.codePointLength','text.sliceCodePoints','text.split','text.join',
+    'collections.contains','collections.slice','collections.concat','collections.unique'))
+CORE3_OPERATIONS=frozenset(('json.encode','json.decode'))
+
+def core_features(project):
+    """Return structural feature requirements from a validated application.
+
+    This is not a second lexer/compiler. Full source/IR integrity remains the
+    trusted host compiler's responsibility before execution. Core feature
+    markers are verified again by that authoritative compiler.
+    """
+    ir=project.get('bil',{}).get('ir',{}) if isinstance(project,dict) else {}
+    used=set()
+    def inspect(value):
+        if isinstance(value,list):
+            for child in value:inspect(child)
+        elif isinstance(value,dict):
+            if value.get('op')=='CALL' and value.get('call') in CORE2_OPERATIONS:used.add(value['call'])
+            if value.get('op')=='CALL' and value.get('call') in CORE3_OPERATIONS:used.add(value['call'])
+            if value.get('op')=='STORE_NEW' and value.get('coreFeature')=='derive':used.add('derive')
+            if value.get('op')=='LOOP_WHILE':used.add('while')
+            for child in value.values():
+                if isinstance(child,(list,dict)):inspect(child)
+    # validate_program bounds this structure before packaging uses this helper.
+    for value in (ir.get('main',[]),ir.get('functions',{}),ir.get('handlers',{})):inspect(value)
+    for item in ir.get('sourceMap',[]):
+        if isinstance(item,dict) and item.get('coreFeature') in ('guard','derive','while'):used.add(item['coreFeature'])
+    version=3 if used & (CORE3_OPERATIONS|{'derive','while'}) else 2 if used else 1
+    return {'format':'bil.core.features/1','version':version,
+            'minimumRuntime':'0.18.0' if version==3 else '0.17.0' if used else '0.6.0','used':sorted(used)}
+
+def validate_derive_markers(ir):
+    """Check the new bounded native metadata, not a second source compiler.
+
+    The trusted execution host still recompiles source and compares the whole
+    IR. This structural check prevents accepting malformed declarations or a
+    source-map marker as proof of a valid derivation.
+    """
+    declarations={}
+    markers={}
+    while_markers={}
+    while_nodes={}
+    for item in ir['sourceMap']:
+        if not isinstance(item,dict) or 'coreFeature' not in item:continue
+        feature=item['coreFeature']
+        if feature=='guard' and item.get('op')=='BRANCH':continue
+        if feature not in ('derive','while') or item.get('op')!=('STORE_NEW' if feature=='derive' else 'LOOP_WHILE') or not safe(item.get('id')):
+            raise UserError('Nepoznata BIL Core mogućnost u source mapi.')
+        if set(item)!={'id','op','coreFeature','line','column','start','end'}:
+            raise UserError('Neispravna BIL derive source mapa.')
+        if item['id'] in markers or item['id'] in while_markers:raise UserError('Duplirana BIL Core source mapa.')
+        (markers if feature=='derive' else while_markers)[item['id']]=item
+
+    def loads(value):
+        result=set()
+        if isinstance(value,list):
+            for child in value:result.update(loads(child))
+        elif isinstance(value,dict):
+            if value.get('op')=='LOAD' and isinstance(value.get('name'),str):result.add(value['name'])
+            for child in value.values():
+                if isinstance(child,(dict,list)):result.update(loads(child))
+        return result
+
+    seen=set()
+    for statement in ir['main']:
+        if not isinstance(statement,dict):continue
+        if statement.get('coreFeature')=='derive':
+            required={'op','id','loc','name','mutable','global','declaredType','value','coreFeature','dependencies'}
+            name=statement.get('name');identifier=statement.get('id');deps=statement.get('dependencies')
+            symbol=ir['globals'].get(name) if isinstance(name,str) else None
+            if set(statement)!=required or statement.get('op')!='STORE_NEW' or not safe(identifier) or not safe(name) or statement.get('mutable') is not False or statement.get('global') is not True:
+                raise UserError('Neispravna BIL derive deklaracija.')
+            if not isinstance(symbol,dict) or symbol.get('mutable') is not False or statement['declaredType']!=symbol.get('type'):
+                raise UserError('BIL derive mora odgovarati nepromjenjivom globalnom tipu.')
+            if not isinstance(deps,list) or any(not safe(dep) or dep not in seen or dep==name for dep in deps) or deps!=sorted(set(deps)) or set(deps)!=loads(statement['value']):
+                raise UserError('BIL derive zavisnosti ne odgovaraju ranijem globalnom stanju.')
+            if identifier in declarations or identifier not in markers:
+                raise UserError('BIL derive nema jedinstvenu source mapu.')
+            marker=markers[identifier];location=statement.get('loc')
+            if not isinstance(location,dict) or set(location)!={'line','column','start','end'} or any(type(location.get(k)) is not int for k in location) or location['line']<1 or location['column']<1 or location['start']<0 or location['end']<location['start'] or any(marker.get(k)!=location.get(k) for k in ('line','column','start','end')):
+                raise UserError('BIL derive source lokacija ne odgovara deklaraciji.')
+            declarations[identifier]=statement
+        if statement.get('op')=='STORE_NEW' and statement.get('global') is True and isinstance(statement.get('name'),str):seen.add(statement['name'])
+    if set(markers)!=set(declarations):raise UserError('BIL derive marker nema odgovarajuću deklaraciju.')
+
+    def inspect(value):
+        if isinstance(value,list):
+            for child in value:inspect(child)
+        elif isinstance(value,dict):
+            if 'op' in value and 'id' in value:
+                if value['op']=='LOOP_WHILE':
+                    required={'op','id','loc','condition','limit','body','coreFeature'}
+                    identifier=value.get('id');location=value.get('loc');condition=value.get('condition')
+                    if set(value)!=required or value.get('coreFeature')!='while' or not safe(identifier) or type(value.get('limit')) is not int or not 1<=value['limit']<=100 or not isinstance(value.get('body'),list) or not isinstance(condition,dict) or condition.get('type')!='Boolean':
+                        raise UserError('Neispravan ograničeni BIL while plan.')
+                    if identifier in while_nodes or identifier not in while_markers:raise UserError('BIL while nema jedinstvenu source mapu.')
+                    marker=while_markers[identifier]
+                    if not isinstance(location,dict) or set(location)!={'line','column','start','end'} or any(type(location.get(k)) is not int for k in location) or location['line']<1 or location['column']<1 or location['start']<0 or location['end']<location['start'] or any(marker.get(k)!=location.get(k) for k in ('line','column','start','end')):
+                        raise UserError('BIL while source lokacija ne odgovara planu.')
+                    while_nodes[identifier]=value
+                if 'coreFeature' in value and not (value.get('coreFeature')=='derive' and declarations.get(value.get('id')) is value or value.get('coreFeature')=='while' and while_nodes.get(value.get('id')) is value):
+                    raise UserError('BIL Core oznaka nije dozvoljena u ovom izvršnom bloku.')
+                if 'dependencies' in value and value.get('coreFeature')!='derive':raise UserError('BIL derive zavisnosti nemaju deklarisanu mogućnost.')
+            if value.get('op')=='CALL' and isinstance(value.get('call'),str) and value['call'].startswith('json.'):
+                operation=value['call'];arguments=value.get('args')
+                if operation not in CORE3_OPERATIONS or 'json' not in ir['imports'] or not isinstance(arguments,list) or len(arguments)!=(1 if operation=='json.encode' else 2):raise UserError('Neispravan tipizirani BIL JSON poziv.')
+                if operation=='json.encode' and value.get('type')!='Text':raise UserError('BIL JSON kodiranje mora vratiti Text.')
+                if operation=='json.decode' and (not isinstance(arguments[0],dict) or arguments[0].get('type')!='Text' or not isinstance(arguments[1],dict) or value.get('type')!=arguments[1].get('type') or value.get('type') in ('Void','Null','Unknown')):raise UserError('BIL JSON dekodiranje treba tekst i provjeren primjer tipa.')
+            for child in value.values():
+                if isinstance(child,(list,dict)):inspect(child)
+    for block in (ir['main'],ir['functions'],ir['handlers']):inspect(block)
+    if set(while_markers)!=set(while_nodes):raise UserError('BIL while marker nema odgovarajući plan.')
+
 def validate_remote(value):
     if not isinstance(value,dict) or set(value)!={'format','backends'} or value['format']!='bil.remote/1' or not isinstance(value['backends'],dict) or not 1<=len(value['backends'])<=4:raise UserError('Neispravan BIL remote ugovor.')
     for name,backend in value['backends'].items():
-        if not safe(name) or not isinstance(backend,dict) or set(backend)!={'adapter','operations'} or backend['adapter'] not in ('firebase.development/1','firebase.development/2','firebase.development/3','firebase.development/4','android.native/1'):raise UserError('Nepodržan udaljeni adapter.')
+        if not safe(name) or not isinstance(backend,dict) or set(backend)!={'adapter','operations'} or backend['adapter'] not in ('firebase.development/1','firebase.development/2','firebase.development/3','firebase.development/4','android.native/1','sense.local/1'):raise UserError('Nepodržan udaljeni adapter.')
         operations=backend['operations']
-        if not isinstance(operations,list) or any(not isinstance(op,str) or (op not in (NATIVE_OPS if backend['adapter']=='android.native/1' else REMOTE_OPS|IMAGE_OPS.keys() if backend['adapter']=='firebase.development/4' else REMOTE_OPS) or op in ('query.documents','observe.query.documents') and backend['adapter'] not in ('firebase.development/3','firebase.development/4') or backend['adapter']=='firebase.development/1' and (op in ('query.list','query.documents','document.add') or op.startswith('observe.'))) for op in operations) or operations!=sorted(set(operations)):raise UserError('Neispravne udaljene operacije.')
+        if not isinstance(operations,list) or any(not isinstance(op,str) or (op not in (SENSE_OPS if backend['adapter']=='sense.local/1' else NATIVE_OPS if backend['adapter']=='android.native/1' else REMOTE_OPS|IMAGE_OPS.keys() if backend['adapter']=='firebase.development/4' else REMOTE_OPS) or op in ('query.documents','observe.query.documents') and backend['adapter'] not in ('firebase.development/3','firebase.development/4') or backend['adapter']=='firebase.development/1' and (op in ('query.list','query.documents','document.add') or op.startswith('observe.'))) for op in operations) or operations!=sorted(set(operations)):raise UserError('Neispravne udaljene operacije.')
     return value
 
 
@@ -74,7 +192,7 @@ def validate_program(project):
     rich_ui=isinstance(ir.get('ui'),dict) and ir['ui'].get('format')=='bil.ui/2'
     for key in ('globals','records','functions','handlers'):
         if not isinstance(ir[key],dict) or len(ir[key])>(4224 if rich_ui and key=='handlers' else 128 if rich_ui and key in ('globals','functions') else 192 if extended and key=='handlers' else 64) or any(not safe(k) for k in ir[key]):raise UserError('Neispravni BIL simboli.')
-    if not isinstance(ir['imports'],list) or len(ir['imports'])>3 or any(x not in ('math','text','collections') for x in ir['imports']):raise UserError('Nedozvoljen BIL modul.')
+    if not isinstance(ir['imports'],list) or len(ir['imports'])>4 or any(x not in ('math','text','collections','json') for x in ir['imports']):raise UserError('Nedozvoljen BIL modul.')
     if not isinstance(ir['main'],list) or not isinstance(ir['sourceMap'],list) or len(ir['sourceMap'])>8000 or not isinstance(ir['controls'],list) or len(ir['controls'])>64:raise UserError('Neispravan BIL plan.')
     count=0
     def walk(value,depth=0):
@@ -90,6 +208,7 @@ def validate_program(project):
             for v in value:walk(v,depth+1)
         elif value is not None and type(value) not in (str,int,float,bool):raise UserError('BIL treba podatkovne vrijednosti.')
     walk(ir)
+    validate_derive_markers(ir)
     completion_type={'record':{'requestId':'Text','sourceId':'Text','backend':'Text','operation':'Text'},'name':'RemoteCompletion'}
     remote_failure_type={'record':{'code':'Text','message':'Text','uncertain':'Boolean'},'name':'RemoteFailure'}
     update_type={'record':{'subscriptionId':'Text','sourceId':'Text','backend':'Text','operation':'Text','sequence':'Number','kind':'Text'},'name':'RemoteUpdate'}
@@ -104,7 +223,7 @@ def validate_program(project):
     used_events=set();watches=set();cancellations=set()
     if remote:
         validate_remote(project.get('remote'));validate_remote(ir.get('remote'))
-        if not live and any(b['adapter'] in ('firebase.development/3','firebase.development/4','android.native/1') for b in ir['remote']['backends'].values()):raise UserError('Adapter3 zahtijeva BIL5 aplikacijski ugovor.')
+        if not live and any(b['adapter'] in ('firebase.development/3','firebase.development/4','android.native/1','sense.local/1') for b in ir['remote']['backends'].values()):raise UserError('Adapter3 zahtijeva BIL5 aplikacijski ugovor.')
         if project['remote']!=ir['remote']:raise UserError('Udaljene mogućnosti ne odgovaraju BIL izvoru.')
         actual={name:set() for name in ir['remote']['backends']}
         def requests(value):
@@ -112,7 +231,7 @@ def validate_program(project):
                 for entry in value:requests(entry)
             elif isinstance(value,dict):
                 if value.get('op') in ('REQUEST','WATCH'):
-                    if set(value)!=({'op','id','loc','backend','operation','args','target','error','resultType'}|({'completion'} if asynchronous and 'completion' in value else set())|({'subscription','interval'} if live and value.get('op')=='WATCH' else set())) or not isinstance(value.get('backend'),str) or value['backend'] not in actual or not isinstance(value.get('operation'),str) or value['operation'] not in (NATIVE_OPS if ir['remote']['backends'][value['backend']]['adapter']=='android.native/1' else REMOTE_OPS|IMAGE_OPS.keys() if ir['remote']['backends'][value['backend']]['adapter']=='firebase.development/4' else REMOTE_OPS) or not isinstance(value.get('args'),list) or not safe(value.get('target')) or not safe(value.get('error')) or value['target'] not in ir['globals'] or value['error'] not in ir['globals']:raise UserError('Neispravan udaljeni BIL zahtjev.')
+                    if set(value)!=({'op','id','loc','backend','operation','args','target','error','resultType'}|({'completion'} if asynchronous and 'completion' in value else set())|({'subscription','interval'} if live and value.get('op')=='WATCH' else set())) or not isinstance(value.get('backend'),str) or value['backend'] not in actual or not isinstance(value.get('operation'),str) or value['operation'] not in (SENSE_OPS if ir['remote']['backends'][value['backend']]['adapter']=='sense.local/1' else NATIVE_OPS if ir['remote']['backends'][value['backend']]['adapter']=='android.native/1' else REMOTE_OPS|IMAGE_OPS.keys() if ir['remote']['backends'][value['backend']]['adapter']=='firebase.development/4' else REMOTE_OPS) or not isinstance(value.get('args'),list) or not safe(value.get('target')) or not safe(value.get('error')) or value['target'] not in ir['globals'] or value['error'] not in ir['globals']:raise UserError('Neispravan udaljeni BIL zahtjev.')
                     target=ir['globals'][value['target']];error=ir['globals'][value['error']]
                     if not isinstance(target,dict) or target.get('mutable') is not True or value['resultType']!=target.get('type'):raise UserError('Tip udaljenog rezultata ne odgovara stanju.')
                     failure_type=error.get('type',{}) if isinstance(error,dict) else {}
@@ -121,7 +240,10 @@ def validate_program(project):
                     if value['operation'].startswith('observe.') or (value['operation'] in ('query.list','query.documents','document.add') or value['op']=='WATCH') and ir['remote']['backends'][value['backend']]['adapter'] not in ('firebase.development/2','firebase.development/3','firebase.development/4') or value['operation']=='query.documents' and ir['remote']['backends'][value['backend']]['adapter'] not in ('firebase.development/3','firebase.development/4'):raise UserError('Neispravan adapter za upit ili pretplatu.')
                     result=value['resultType'];nullable=isinstance(result,dict) and 'nullable' in result
                     result_type=result['nullable'] if nullable else result
-                    if ir['remote']['backends'][value['backend']]['adapter']=='android.native/1':
+                    if ir['remote']['backends'][value['backend']]['adapter']=='sense.local/1':
+                        spec=SENSE_OPS[value['operation']]
+                        if len(value['args'])!=spec[0] or result_type!=spec[1]:raise UserError('Sense operation has an invalid typed contract.')
+                    elif ir['remote']['backends'][value['backend']]['adapter']=='android.native/1':
                         native_result=NATIVE_OPS[value['operation']][1]
                         expected={'list':{'record':NATIVE_TYPES['NativeMedia'],'name':'NativeMedia'}} if native_result=='NativeMediaList' else 'Boolean' if native_result=='Boolean' else {'record':NATIVE_TYPES[native_result],'name':native_result}
                         if result_type!=expected:raise UserError('Native rezultat ne odgovara registrovanom tipu.')
@@ -142,7 +264,7 @@ def validate_program(project):
                             fields=result['list']['record']
                             if set(fields)!={'id','path','value'} or fields['id']!='Text' or fields['path']!='Text' or not isinstance(fields['value'],dict) or not isinstance(fields['value'].get('record'),dict):raise UserError('Identificirani upit treba id, path i tipizirani value Record.')
                     elif result!='Boolean':raise UserError('Udaljena izmjena treba Boolean rezultat.')
-                    expected_args=(NATIVE_OPS[value['operation']][0] if value['operation'] in NATIVE_OPS else IMAGE_OPS[value['operation']][0] if value['operation'] in IMAGE_OPS else {'auth.session':0,'auth.register':0,'auth.signIn':0,'auth.signOut':0,'document.get':1,'document.set':2,'document.delete':1,'query.list':2,'query.documents':2,'document.add':2}[value['operation']])
+                    expected_args=(SENSE_OPS[value['operation']][0] if value['operation'] in SENSE_OPS else NATIVE_OPS[value['operation']][0] if value['operation'] in NATIVE_OPS else IMAGE_OPS[value['operation']][0] if value['operation'] in IMAGE_OPS else {'auth.session':0,'auth.register':0,'auth.signIn':0,'auth.signOut':0,'document.get':1,'document.set':2,'document.delete':1,'query.list':2,'query.documents':2,'document.add':2}[value['operation']])
                     if len(value['args'])!=expected_args:raise UserError('Udaljeni zahtjev ima neispravan broj argumenata.')
                     if 'completion' in value:
                         completion=value['completion']
@@ -200,6 +322,7 @@ def validate_program(project):
         if (ui['screens'] and ui['start'] not in screens) or (not ui['screens'] and ui['start']!=''):raise UserError('BIL početni ekran nije deklarisan.')
         expected_state['bilScreen']=ui['start']
     expected_permissions=sorted({{'camera.capture':'camera','location.current':'location','notification.post':'notifications'}[op] for b in ir.get('remote',{}).get('backends',{}).values() if b['adapter']=='android.native/1' for op in b['operations'] if op in ('camera.capture','location.current','notification.post')})
+    expected_permissions=sorted(set(expected_permissions)|{{'speech.listen':'microphone','haptic.cue':'haptics'}[op] for b in ir.get('remote',{}).get('backends',{}).values() if b['adapter']=='sense.local/1' for op in b['operations'] if op in ('speech.listen','haptic.cue')})
     if project['state']!=expected_state or sorted(project['permissions'])!=expected_permissions or project['tables']:raise UserError('BIL početno stanje ili dozvole ne odgovaraju ugovoru.')
     expected={'bil_main':[{'action':'bil','block':'main'}]}
     for name,body in ir['handlers'].items():

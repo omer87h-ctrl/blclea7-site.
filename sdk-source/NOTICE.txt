@@ -1,1 +1,4 @@
-BLclea7 SDK0.9 by Brzo i Lokalno. Public application compiler, checked Runtime and developer contracts only. Existing owner-controlled LICENSE.txt and separate third-party/material licences remain unchanged. No private native host, signing identity, user content or credentials are included.
+BL CLEA7 SDK0.37.0-test by Brzo i Lokalno. Public compiler/interpreter/Core,
+checked project CLI and bounded dependency-cache distribution only. Existing licences
+retained exactly. No private native host, credentials, identity, user content, model
+weights or telemetry. Native builds and physical-device verification are separate.

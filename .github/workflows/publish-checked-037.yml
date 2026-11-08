@@ -1,0 +1,42 @@
+name: Publish exact owner-approved 0.37 binaries
+on:
+  push:
+    branches: [work/clea-qwen-unified-027]
+    paths: [.github/workflows/publish-checked-037.yml]
+  workflow_dispatch:
+    inputs:
+      transfer_url:
+        description: Short-lived HTTPS transfer of the exact approved installer artifact
+        type: string
+        required: true
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m unittest discover -s tests -p test_publish_checked_037.py -v
+  publish:
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'omer87h-ctrl/blclea7-site.' && github.actor == 'omer87h-ctrl'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: write
+    concurrency:
+      group: clea-checked-release-037
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        env:
+          CLEA_APPROVED_TRANSFER_URL: ${{ inputs.transfer_url }}
+        with:
+          script: core.setSecret(process.env.CLEA_APPROVED_TRANSFER_URL);
+      - name: Verify exact artifact identities and publish only reviewed binaries
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CLEA_APPROVED_TRANSFER_URL: ${{ inputs.transfer_url }}
+        run: python -m scripts.publish_checked_037
