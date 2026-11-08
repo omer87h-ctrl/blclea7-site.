@@ -4,7 +4,9 @@
 const VERSION='sense.local/1',fault=(code,message,uncertain=false)=>Object.assign(Error(message),{code,uncertain});
 let owner=null;
 const pending=new Map();
-function profile(){try{const value=JSON.parse(scope.CLEA7SenseDevice?.profile?.()||'{}');return value.format==='clea7.sense-native/1'&&value.enabled===true?value:null;}catch{return null;}}
+function metadata(){try{const value=JSON.parse(scope.CLEA7SenseDevice?.profile?.()||'{}');return value.format==='clea7.sense-native/1'&&value.version===VERSION?value:null;}catch{return null;}}
+function profile(){const value=metadata();return value?.enabled===true?value:null;}
+function target(){return metadata()?'android':'browser';}
 function nativeSend(method,data,{signal}={}){
  if(signal?.aborted)return Promise.reject(fault('Cancelled','Sense radnja je otkazana.'));
  if(!profile()||typeof scope.CLEA7SenseDevice?.[method]!=='function'||pending.size>=8)return Promise.reject(fault('Unavailable','Native Sense nije dostupan.'));
@@ -70,5 +72,5 @@ function create({application,backend,operations,prompt=ask,save=download}={}){
   finally{clearTimeout(timer);signal?.removeEventListener('abort',cancel);controller.signal.removeEventListener('abort',abort);listener?.abort();current=null;owner=null;}
  },close(){closed=true;current?.abort();}});
 }
-scope.CLEA7SenseBackend=Object.freeze({version:VERSION,create,profile,receive});
+scope.CLEA7SenseBackend=Object.freeze({version:VERSION,create,profile,target,receive});
 })(globalThis);

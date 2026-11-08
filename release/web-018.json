@@ -5,8 +5,8 @@
   "files": [
     {
       "path": "studio/launcher/index.html",
-      "bytes": 2649,
-      "sha256": "08eb04a00e5f1501939306b34b9f6a82947b82650e84100c58a1c74924cbf3a6"
+      "bytes": 2805,
+      "sha256": "cb4d98715215795bf255bfdcf99875df1baae763db548a73217cc089f9e52087"
     },
     {
       "path": "studio/launcher/player.html",
@@ -15,8 +15,8 @@
     },
     {
       "path": "studio/launcher/player.js",
-      "bytes": 7237,
-      "sha256": "261542456cc0c6a042e73bda1693e7d8bdf1dd25553f6d464312958c0fd3ab91"
+      "bytes": 7400,
+      "sha256": "b1a3345bee86a504607df60005bb06372a3fa9e9d0b34363dceb11287e1ed5a9"
     },
     {
       "path": "studio/workbench/bil-compiler.js",

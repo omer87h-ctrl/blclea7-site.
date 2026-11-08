@@ -208,8 +208,8 @@
     },
     {
       "path": "studio/launcher/index.html",
-      "bytes": 2649,
-      "sha256": "08eb04a00e5f1501939306b34b9f6a82947b82650e84100c58a1c74924cbf3a6"
+      "bytes": 2805,
+      "sha256": "cb4d98715215795bf255bfdcf99875df1baae763db548a73217cc089f9e52087"
     },
     {
       "path": "studio/launcher/launcher.css",
@@ -218,8 +218,8 @@
     },
     {
       "path": "studio/launcher/library.js",
-      "bytes": 6757,
-      "sha256": "2488a9354c10b70ba169e56d4eb90c4420bae5d8f74f1bf31086dfcc851d0d82"
+      "bytes": 6822,
+      "sha256": "a9eed447317ad0ed7ee4bb3f0ba764b246e0e205259d8b450361811d90aeb18e"
     },
     {
       "path": "studio/launcher/player.html",
@@ -228,8 +228,8 @@
     },
     {
       "path": "studio/launcher/player.js",
-      "bytes": 7237,
-      "sha256": "261542456cc0c6a042e73bda1693e7d8bdf1dd25553f6d464312958c0fd3ab91"
+      "bytes": 7400,
+      "sha256": "b1a3345bee86a504607df60005bb06372a3fa9e9d0b34363dceb11287e1ed5a9"
     },
     {
       "path": "studio/mobile-preview.css",
@@ -453,13 +453,13 @@
     },
     {
       "path": "studio/workbench/remote-studio.js",
-      "bytes": 28457,
-      "sha256": "5d5a317b4724373f3bc27eaa6396ec19bd7325bc9558d5fb5fbb22e5ae5492d9"
+      "bytes": 28992,
+      "sha256": "d72832521e86c97589c8c129639cfc55b3ddd5e0eabf4c5453853f90bbdbe6aa"
     },
     {
       "path": "studio/workbench/remote.js",
-      "bytes": 23295,
-      "sha256": "f23899c7977752ed1f8bc67bd99c75cfde67da8f7c1352d100a8a93b0b8ae5ef"
+      "bytes": 23306,
+      "sha256": "a8fcfaceb6d72e324f048fdc027b6bec6e4bdc77cef158c1c825ea27c1a10594"
     },
     {
       "path": "studio/workbench/review.js",
@@ -468,8 +468,8 @@
     },
     {
       "path": "studio/workbench/sense-backend.js",
-      "bytes": 10381,
-      "sha256": "149fa10e35f916d9cc6b5a0c93e8ee4a494a6e509f0af638849080e82b19d26e"
+      "bytes": 10534,
+      "sha256": "e46d425d478887d0fb33e4052e708caaf9c5b3b9d9dac2d80458411bbd07a951"
     },
     {
       "path": "studio/workbench/sense-document.js",
@@ -503,8 +503,8 @@
     },
     {
       "path": "studio/workbench/studio.css",
-      "bytes": 32127,
-      "sha256": "1b2fdc4cb1cf9a3799b2554fd501365ca98a38149f5dfe705fc007ee64a76c13"
+      "bytes": 32263,
+      "sha256": "7c5929426e3bbbdfd219a2305d55435874a65afcba6a9a815f6fa7489aa0de27"
     },
     {
       "path": "studio/workbench/studio.js",
