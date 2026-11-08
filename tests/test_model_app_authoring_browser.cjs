@@ -6,13 +6,14 @@ const {chromium}=require('/tmp/clea7-qa/node_modules/playwright'),http=require('
 const siteOrigin='http://127.0.0.1:'+String(process.env.CLEA7_TEST_PORT||4173);
 const source='let player = ""\nlet score = 0\non answer { score = score + 1; open result }\non again { score = 0; open play }\nscreen play "Moj kviz" {\n input player label "Igrač" key player\n button "Tačan odgovor" runs answer key answer\n}\nscreen result "Rezultat" { show player key name; show score key score; button "Igraj opet" runs again key again }\nstart play\n';
 const invalid='let score = "text"\nscore = 1\n';
+const plan={format:'clea7.authoring-plan/1',state:[{name:'player',type:'Text',value:''},{name:'score',type:'Number',value:0}],backends:[],events:[{name:'answer',steps:[{op:'set',target:'score',expression:'score + 1'},{op:'open',screen:'result'}]},{name:'again',steps:[{op:'set',target:'score',expression:'0'},{op:'open',screen:'play'}]}],screens:[{id:'play',title:'Moj kviz',items:[{kind:'input',name:'player',label:'Igrač'},{kind:'button',label:'Tačan odgovor',runs:'answer'}]},{id:'result',title:'Rezultat',items:[{kind:'show',expression:'player'},{kind:'show',expression:'score'},{kind:'button',label:'Igraj opet',runs:'again'}]}],start:'play'};
 (async()=>{
- let received=[],failFirst=true;
+ let received=[],failFirst=true,structured=false;
  const server=http.createServer((req,res)=>{
   res.setHeader('Access-Control-Allow-Origin',siteOrigin);res.setHeader('Access-Control-Allow-Headers','Content-Type');res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');res.setHeader('Access-Control-Allow-Private-Network','true');res.setHeader('Content-Type','application/json');
   if(req.method==='OPTIONS'){res.writeHead(204).end();return;}
-  if(req.url==='/health'){res.end(JSON.stringify({brand:'BL CLEA AI',apiVersion:'clea7.public-ai/1',mode:'local',ready:true,modelProfile:{id:'qwen3.5-9b-q4_k_m'},capabilities:{bilAuthoring:true,bilAuthoringContract:'bil.author/1'}}));return;}
-  let raw='';req.on('data',x=>raw+=x);req.on('end',()=>{const value=JSON.parse(raw);received.push(value);const code=failFirst?invalid:source;failFirst=false;res.end(JSON.stringify({reply:'```bil\n'+code+'```',authoring:{format:'bil.author/1'},sources:[]}));});
+  if(req.url==='/health'){res.end(JSON.stringify({brand:'BL CLEA AI',apiVersion:'clea7.public-ai/1',mode:'local',ready:true,modelProfile:{id:'qwen3.5-9b-q4_k_m'},capabilities:{bilAuthoring:true,bilAuthoringContract:'bil.author/1',bilAuthoringPlan:'clea7.authoring-plan/1'}}));return;}
+  let raw='';req.on('data',x=>raw+=x);req.on('end',()=>{const value=JSON.parse(raw);received.push(value);const code=failFirst?invalid:source;failFirst=false;res.end(JSON.stringify({reply:structured?JSON.stringify(plan):'```bil\n'+code+'```',authoring:{format:'bil.author/1'},sources:[]}));});
  });await new Promise(r=>server.listen(8765,'127.0.0.1',r));
  const browser=await chromium.launch({executablePath:process.env.CLEA7_CHROME||'/usr/bin/chromium',args:['--no-sandbox']}),context=await browser.newContext({acceptDownloads:true}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));
@@ -42,9 +43,11 @@ const invalid='let score = "text"\nscore = 1\n';
   assert.deepEqual(received.at(-1).history,[]);assert.equal('authoring' in received.at(-1),false);assert((await page.locator('#chat-log').innerText()).includes('Nije objavljeno'));
   const drafting=page.waitForEvent('download');await page.getByRole('button',{name:'Preuzmi nacrt za pregled',exact:true}).click();const draft=JSON.parse(await fs.readFile(await(await drafting).path(),'utf8'));assert.equal(draft.aiGenerated,true);assert.equal(draft.published,false);
   console.log('PASS TECH integration: reachable labelled AI draft, isolated conversation context, actual reviewed draft download and no forum posting');
-  await connect('razgovor/');await page.locator('#clea-ai-task-mode').selectOption('create');await page.locator('#chat-question').fill('Napravi aplikaciju kviza.');await page.locator('#chat-send').click();await page.waitForSelector('[data-ai-app-proposal]');await page.locator('[data-ai-app-reviewed]').check();await page.locator('[data-ai-app-apply]').click();
+  structured=true;await connect('razgovor/');await page.locator('#clea-ai-task-mode').selectOption('create');await page.locator('#chat-question').fill('Napravi aplikaciju kviza.');await page.locator('#chat-send').click();await page.waitForSelector('[data-ai-app-proposal]');assert.equal(received.at(-1).authoring.representation,'plan');await page.locator('[data-ai-app-reviewed]').check();await page.locator('[data-ai-app-apply]').click();
   await page.waitForURL('**/studio/workbench/**');await page.waitForSelector('[data-ai-app-proposal]');assert((await page.locator('#chat-log').innerText()).includes('ponovna lokalna provjera'));assert(await page.locator('[data-ai-app-apply]').isDisabled());
   console.log('PASS actual authoring handoff: standalone conversation opens the same original Studio, rechecks source and preserves explicit review');
+  await page.locator('[data-ai-app-reviewed]').check();await page.locator('[data-ai-app-apply]').click();await page.locator('#player').getByLabel('Igrač',{exact:true}).fill('Zora plan');await page.locator('#player').getByRole('button',{name:'Tačan odgovor',exact:true}).click();await page.waitForFunction(()=>CLEA7Workbench.engine.state.bilValues.score===1);assert((await page.locator('#player').innerText()).includes('Zora plan'));
+  console.log('PASS structured plan transport: literal JSON state -> actual BIL emitter/compiler -> reviewed handoff -> real game events and state (inference fixture)');
   assert.deepEqual(errors,[]);
  }catch(error){console.error('AUTHORING_DEBUG',JSON.stringify({received:received.map(x=>({question:x.question,contract:x.authoring})),errors,status:await page.locator('[role=status]').allTextContents(),text:(await page.locator('#chat-log').innerText()).slice(-2000)}));throw error;}finally{await browser.close();await new Promise(r=>server.close(r));}
 })().catch(error=>{console.error(error);process.exitCode=1;});
