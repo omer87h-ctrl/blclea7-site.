@@ -145,7 +145,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
     trace('Expansion Q','BIL izvor je generisan i provjeren kroz izvorni kompajler i Runtime.');
     const note=node('p','BIL kalkulator je stvarno provjeren. Pregledaj izvor prije primjene.');
     const details=node('details');details.append(node('summary','Izvor aplikacije'),node('pre',proposal.source));
-    const button=node('button','Pregledao sam — primijeni u Studiom');button.type='button';
+    const button=node('button','Pregledao sam — primijeni u Studiju');button.type='button';
     button.onclick=async()=>{
      if(!confirm('Primijeniti ovaj provjereni BIL prijedlog na trenutni Studio projekt?'))return;
      const checked=$('clea-ai-reviewed');checked.checked=true;checked.dispatchEvent(new Event('change',{bubbles:true}));
@@ -171,9 +171,9 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   const summary=node('p','Prijedlog: '+selected.map(m=>m.title).join(', ')+'. '+app.screens.length+' ekrana; lokalni podaci. Projekt još nije promijenjen.');
   const details=node('details');details.append(node('summary','Pregled strukture aplikacije'),node('pre',JSON.stringify({screens:app.screens.map(s=>({id:s.id,name:s.name})),tables:app.tables,flows:Object.keys(app.flows)},null,2)));
   const download=node('button','Preuzmi prijedlog');download.type='button';download.onclick=()=>saveJSON(app);
-  const apply=node('button','Otvori u Studiom i testiraj');apply.type='button';
+  const apply=node('button','Otvori u Studiju i testiraj');apply.type='button';
   apply.onclick=async()=>{
-   if(!confirm('Ovo zamjenjuje trenutni projekt u Studiom. Ako imaš nespremljen rad, prvo ga sačuvaj ili preuzmi kopiju. Nastaviti?'))return;
+   if(!confirm('Ovo zamjenjuje trenutni projekt u Studiju. Ako imaš nespremljen rad, prvo ga sačuvaj ili preuzmi kopiju. Nastaviti?'))return;
    try{
     const checked=F.validate(app);
     studio.open(checked);
@@ -253,13 +253,13 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
    if(match[1].toLowerCase()==='bil'&&globalThis.CLEA7Core){
     const check=document.createElement('button');check.type='button';check.textContent='Provjeri BIL prijedlog';
     const result=document.createElement('p');result.setAttribute('role','status');body.append(check,result);
-    check.onclick=()=>{
+    check.onclick=async()=>{
      try{
-      const verified=CLEA7Core.compile(match[2],{id:'ai_proposal_'+Date.now(),name:'Moj CLEA prijedlog'});
-      result.textContent='Izvorni CLEA kompajler potvrdio je gramatiku i tipove. Kod još nije pokrenut.';check.disabled=true;
+      const verified=await CLEA7Intelligence.verifyBIL(match[2],{metadata:{id:'ai_proposal_'+Date.now(),name:'Moj CLEA prijedlog'},modelAvailable:true});
+      result.textContent='Sedam stubova provjerilo je BIL, tipove i pokretanje u izolovanom Runtimeu. Ostale tokove treba testirati prije izvoza.';check.disabled=true;
       const download=document.createElement('button');download.type='button';download.textContent='Preuzmi provjereni .bil';
       download.onclick=()=>{const url=URL.createObjectURL(new Blob([match[2]],{type:'text/plain;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='clea-ai-prijedlog.bil';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};body.append(download);
-      if(globalThis.CLEA7Workbench){const open=document.createElement('button');open.type='button';open.textContent='Otvori prijedlog u Studiom';open.onclick=()=>{if(!confirm('Otvoriti pregledani prijedlog kao novi trenutni projekt? Prethodno sačuvaj nespremljen rad.'))return;CLEA7Workbench.open(verified.application);result.textContent='Prijedlog je otvoren. Pokreni ga kroz Studio kada budeš spreman.';};body.append(open);}
+      if(globalThis.CLEA7Workbench){const open=document.createElement('button');open.type='button';open.textContent='Otvori prijedlog u Studiju';open.onclick=()=>{if(!confirm('Otvoriti pregledani prijedlog kao novi trenutni projekt? Prethodno sačuvaj nespremljen rad.'))return;CLEA7Workbench.open(verified.application);result.textContent='Prijedlog je otvoren. Pokreni ga kroz Studio kada budeš spreman.';};body.append(open);}
      }catch(error){result.textContent='BIL prijedlog nije prošao kompajler: '+error.message;}
     };
    }
@@ -274,6 +274,10 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   const result=document.createElement('p');result.setAttribute('role','status');
   button.onclick=async()=>{button.disabled=true;try{const saved=await client.approveProjectNote(note.value);result.textContent='Sačuvano '+saved.notes.length+' odobrenih projektnih napomena. Težine modela nisu mijenjane.';note.value='';}catch(error){result.textContent=error.message;}finally{button.disabled=false;}};
   details.append(title,warning,note,button,result);controls.append(details);
+  const sourceLabel=document.createElement('label'),source=document.createElement('input');source.type='url';source.maxLength=1000;sourceLabel.append(document.createTextNode('URL odobrenog izvora koji želiš ukloniti'),source);
+  const remove=document.createElement('button');remove.type='button';remove.textContent='Ukloni ovaj izvor iz CLEA memorije';
+  remove.onclick=async()=>{if(!source.value.trim()||!confirm('Ukloniti ovaj odobreni izvor iz lokalne CLEA baze?'))return;remove.disabled=true;try{const value=await client.removePublicSource(source.value.trim());result.textContent=value.removed?'Izvor je uklonjen iz pretrage. Težine modela nisu promijenjene.':'Ovaj URL nije bio u odobrenoj bazi.';}catch(error){result.textContent=error.message;}finally{remove.disabled=false;}};
+  details.append(sourceLabel,remove);
  }
  const historyKey='clea-ai-owner-history-v1';
  function persist(){

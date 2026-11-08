@@ -230,7 +230,11 @@
    const config=await target();if(config.authentication!=='desktop-loopback')throw fail('invalid_request');
    return request(config.endpoint+'/memory',{body:{sourceUrl,approvePublicSource:true},signal:AbortSignal.timeout(15000)});
   }
-  return Object.freeze({ask,check,reset,useLocal,startPhoneShare,approveProjectNote,approvePublicSource,restoreHistory,history:()=>history.map(x=>({...x})),cancel:()=>controller?.abort(),get capabilities(){return capabilities;},get busy(){return controller!==null;}});
+  async function removePublicSource(sourceUrl){
+   const config=await target();if(config.authentication!=='desktop-loopback'||typeof sourceUrl!=='string'||sourceUrl.length>1000)throw fail('invalid_request');
+   return request(config.endpoint+'/memory',{body:{sourceUrl,deletePublicSource:true},signal:AbortSignal.timeout(10000)});
+  }
+  return Object.freeze({ask,check,reset,useLocal,startPhoneShare,approveProjectNote,approvePublicSource,removePublicSource,restoreHistory,history:()=>history.map(x=>({...x})),cancel:()=>controller?.abort(),get capabilities(){return capabilities;},get busy(){return controller!==null;}});
  }
  function isRuntimeHost(config){return !!config&&['owner-invite','desktop-loopback','tunnel-email'].includes(config.authentication);}
  globalThis.CLEA7AI=Object.freeze({create,configuration,isRuntimeHost});

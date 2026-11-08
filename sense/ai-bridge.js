@@ -20,7 +20,7 @@
  const action=document.createElement('button');action.type='button';action.textContent='Pošalji samo ovo pitanje';action.className='button secondary';
  const status=document.createElement('p');status.id='sense-ai-local-status';status.setAttribute('role','status');status.textContent='Nema slanja dok ne potvrdiš pitanje. CV analiza nastavlja raditi lokalno i bez AI servera.';
  const output=document.createElement('pre');output.id='sense-ai-local-answer';output.setAttribute('aria-live','polite');
- const link=document.createElement('a');link.href='../studio/workbench/?workspace=clea-chat';link.textContent='Nastavi u istom BL CLEA AI razgovoru u Studiom →';
+ const link=document.createElement('a');link.href='../studio/workbench/?workspace=clea-chat';link.textContent='Nastavi u istom BL CLEA AI razgovoru u Studiju →';
  const mount=document.createElement('div');mount.hidden=true;
  const client=CLEA7AI.create({challengeMount:mount,onStatus:text=>status.textContent=text});
  target.addEventListener('change',()=>client.useLocal(target.value==='local'));
