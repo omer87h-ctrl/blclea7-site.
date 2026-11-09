@@ -29,11 +29,11 @@ def anonymous_full_download(item,expected):
    size+=len(chunk);assert size<=item['size_bytes'];digest.update(chunk)
  assert size==item['size_bytes'] and digest.hexdigest()==item['sha256'],'Anonymous binary hash differs: '+item['key']
  assert valid_magic(item,head)
- return {'key':item.get('key',item['name']),'bytes':size,'sha256':digest.hexdigest(),'anonymousDownloadProbeBytes':len(head),'releaseDigestMatches':None,'anonymousDownloadSha256Verified':True,'metadataStatus':'github-api-rate-limited'}
+ return {'key':item.get('key') or item['name'],'bytes':size,'sha256':digest.hexdigest(),'anonymousDownloadProbeBytes':len(head),'releaseDigestMatches':None,'anonymousDownloadSha256Verified':True,'metadataStatus':'github-api-rate-limited'}
 
 def valid_magic(item,head):
- if item['name'].endswith('.exe'):return head.startswith(b'MZ')
- if item['name'].endswith('.clea7'):return head.lstrip().startswith(b'{') or head.startswith(b'PK\x03\x04')
+ if item.get('key')=='installer' or item.get('name','').endswith('.exe'):return head.startswith(b'MZ')
+ if item.get('name','').endswith('.clea7'):return head.lstrip().startswith(b'{') or head.startswith(b'PK\x03\x04')
  return head.startswith(b'PK\x03\x04')
 
 def native_checks(native):
@@ -56,7 +56,7 @@ def native_checks(native):
    if response.status==206:assert response.headers['Content-Range'].startswith('bytes 0-') and response.headers['Content-Range'].endswith('/'+str(item['size_bytes']))
    else:assert int(response.headers['Content-Length'])==item['size_bytes']
    head=response.read(4096);assert valid_magic(item,head)
-  verified.append({'key':item.get('key',item['name']),'bytes':item['size_bytes'],'sha256':item['sha256'],'anonymousDownloadProbeBytes':len(head),'releaseDigestMatches':True,'metadataStatus':'verified'})
+  verified.append({'key':item.get('key') or item['name'],'bytes':item['size_bytes'],'sha256':item['sha256'],'anonymousDownloadProbeBytes':len(head),'releaseDigestMatches':True,'metadataStatus':'verified'})
  return verified
 def read(path):
  request=urllib.request.Request(BASE+path,headers={'User-Agent':'BL-CLEA7-public-delivery-check','Cache-Control':'no-cache'})
