@@ -1,5 +1,8 @@
 name: Publish exact owner-approved Windows0.38 installer
 on:
+  push:
+    branches: [work/clea-qwen-unified-027]
+    paths: [.github/workflows/publish-checked-038.yml]
   workflow_dispatch:
     inputs:
       transfer_url:
@@ -10,7 +13,7 @@ permissions:
   contents: read
 jobs:
   publish:
-    if: github.repository == 'omer87h-ctrl/blclea7-site.' && github.actor == 'omer87h-ctrl'
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'omer87h-ctrl/blclea7-site.' && github.actor == 'omer87h-ctrl'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     permissions:
