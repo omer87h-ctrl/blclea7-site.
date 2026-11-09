@@ -60,6 +60,7 @@ jobs:
           # The retired inspector/topic tabs are covered by Core unit tests.
           # Exercise their replacement through the actual single conversation.
           node tests/test_unified_ai_browser.cjs || browser_failed=1
+          python tests/browser_sense_navigation.py --site . --output test-evidence/sense-touch || browser_failed=1
           node tests/test_model_app_authoring_browser.cjs || browser_failed=1
           node tests/test_clea_lab_browser.cjs || browser_failed=1
           node tests/test_public_site.cjs || browser_failed=1
