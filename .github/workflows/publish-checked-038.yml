@@ -5,6 +5,11 @@ on:
     paths: [.github/workflows/publish-checked-038.yml]
   workflow_dispatch:
     inputs:
+      variant:
+        description: Exact checked installer build
+        type: choice
+        options: [initial, single-ai]
+        default: initial
       transfer_url:
         description: Short-lived HTTPS transfer of the exact approved installer artifact
         type: string
@@ -32,4 +37,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           CLEA_APPROVED_TRANSFER_URL: ${{ inputs.transfer_url }}
+          CLEA_CHECKED_VARIANT: ${{ inputs.variant || 'initial' }}
         run: python -m scripts.publish_checked_038

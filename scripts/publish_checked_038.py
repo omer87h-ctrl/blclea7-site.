@@ -11,21 +11,34 @@ ARCHIVE_SHA='92591a71d3cac9d06cb3d773749b35157ccff53af87eb1ee5d2c92bd7582572d'
 INSTALLER_BYTES=249142364
 INSTALLER_SHA='86634ddb6fa92b23eef0f5a5d7237a62d4f0595e66a1d24357e38b657d60d006'
 
+def release_spec(variant='initial'):
+ if variant=='initial':
+  return dict(tag=TAG,source=SOURCE,build_run=BUILD_RUN,archive_bytes=ARCHIVE_BYTES,archive_sha=ARCHIVE_SHA,installer_bytes=INSTALLER_BYTES,installer_sha=INSTALLER_SHA,receipt='windows-installed-038.json',notes='038-WINDOWS-NOTES.md',title='BL CLEA7 Windows0.38 — checked Studio, Runtime and installer')
+ if variant=='single-ai':
+  return dict(tag='clea7-windows-0.38-single-ai-test',source='0491ab804260c801a793b691a49eaba73e76ce3e',build_run=42562785101,archive_bytes=249267447,archive_sha='4d8155aa7eb4cfeec8020b7f7c08423b837e99cc0a67dfcad20d10647e6a1108',installer_bytes=249209930,installer_sha='f0c11f6c8af05e843a38b280c385fa845568c013382b77151c30e35a813d5408',receipt='windows-installed-single-ai-038.json',notes='038-SINGLE-AI-WINDOWS-NOTES.md',title='BL CLEA7 Windows0.38 — one AI workspace, Studio and Runtime')
+ raise ValueError('Unknown checked release variant.')
+
+def install_receipt(root,spec):
+ receipt=json.loads((root/'release'/spec['receipt']).read_text())
+ if (receipt.get('passed') is not True or receipt.get('installerSource')!=spec['source'] or receipt.get('installerSha256')!=spec['installer_sha']
+     or receipt.get('installedManifestVerified',{}).get('verified') is not True
+     or not all(receipt.get(k) is True for k in ('actualInstallerExecuted','actualUninstallerExecuted','userFilesPreserved'))):raise ValueError('Actual matching installation/uninstallation proof is required.')
+ return receipt
+
 def main():
  if (os.environ.get('GITHUB_REPOSITORY')!=REPO or os.environ.get('GITHUB_ACTOR')!='omer87h-ctrl' or os.environ.get('GITHUB_EVENT_NAME')!='workflow_dispatch'):
   raise ValueError('Explicit owner release dispatch required.')
  root=Path(__file__).resolve().parents[1]
- receipt=json.loads((root/'release/windows-installed-038.json').read_text())
- if (receipt.get('passed') is not True or receipt.get('installerSource')!=SOURCE or receipt.get('installerSha256')!=INSTALLER_SHA
-     or not all(receipt.get(k) is True for k in ('actualInstallerExecuted','actualUninstallerExecuted','userFilesPreserved'))):raise ValueError('Actual installation/uninstallation proof is required.')
+ spec=release_spec(os.environ.get('CLEA_CHECKED_VARIANT','initial'))
+ receipt=install_receipt(root,spec)
  value=validate_url(os.environ.get('CLEA_APPROVED_TRANSFER_URL',''))
  with tempfile.TemporaryDirectory(prefix='clea-approved-038-') as folder:
   folder=Path(folder);archive=folder/'approved.zip'
-  download(value,archive,archive_bytes=ARCHIVE_BYTES,archive_sha=ARCHIVE_SHA)
-  installer=unpack(archive,folder,archive_bytes=ARCHIVE_BYTES,archive_sha=ARCHIVE_SHA,installer_bytes=INSTALLER_BYTES,installer_sha=INSTALLER_SHA)
-  sums=folder/'SHA256SUMS.txt';sums.write_text(INSTALLER_SHA+'  '+INSTALLER+'\n')
-  provenance=folder/'provenance.json';provenance.write_text(json.dumps({'format':'clea7.checked-public-binaries/1','version':'0.38.0-test','windows':{'buildRun':BUILD_RUN,'source':SOURCE,'bytes':INSTALLER_BYTES,'sha256':INSTALLER_SHA,'installedManifestVerified':receipt['installedManifestVerified'],'actualInstallAndUninstall':True},'productionSigned':False,'containsModel':False,'containsPrivateProjectSource':False,'physicalAssistiveEvaluation':False},indent=2)+'\n')
-  subprocess.run(['gh','release','create',TAG,str(installer),str(sums),str(provenance),'--repo',REPO,'--target',os.environ['GITHUB_SHA'],'--prerelease','--title','BL CLEA7 Windows0.38 — checked Studio, Runtime and installer','--notes-file',str(root/'release/038-WINDOWS-NOTES.md')],check=True)
+  download(value,archive,archive_bytes=spec['archive_bytes'],archive_sha=spec['archive_sha'])
+  installer=unpack(archive,folder,archive_bytes=spec['archive_bytes'],archive_sha=spec['archive_sha'],installer_bytes=spec['installer_bytes'],installer_sha=spec['installer_sha'])
+  sums=folder/'SHA256SUMS.txt';sums.write_text(spec['installer_sha']+'  '+INSTALLER+'\n')
+  provenance=folder/'provenance.json';provenance.write_text(json.dumps({'format':'clea7.checked-public-binaries/1','version':'0.38.0-test','variant':os.environ.get('CLEA_CHECKED_VARIANT','initial'),'windows':{'buildRun':spec['build_run'],'installationRun':receipt['verificationRun'],'source':spec['source'],'bytes':spec['installer_bytes'],'sha256':spec['installer_sha'],'installedManifestVerified':receipt['installedManifestVerified'],'actualInstallAndUninstall':True},'productionSigned':False,'containsModel':False,'containsPrivateProjectSource':False,'physicalAssistiveEvaluation':False},indent=2)+'\n')
+  subprocess.run(['gh','release','create',spec['tag'],str(installer),str(sums),str(provenance),'--repo',REPO,'--target',os.environ['GITHUB_SHA'],'--prerelease','--title',spec['title'],'--notes-file',str(root/'release'/spec['notes'])],check=True)
  print('Published only the exact checked Windows development installer.')
 
 if __name__=='__main__':
