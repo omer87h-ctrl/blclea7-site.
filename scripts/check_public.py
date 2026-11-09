@@ -84,9 +84,9 @@ for a in current['assets']:
 print('PUBLIC_CHECKED_037 current installer, Android and universal package release metadata verified')
 
 windows=catalog["windows_current"]
-assert windows["state"]=="published" and windows["publication_run"]==42560374444
-assert windows["source_commit"]=="e274a756db0f367684fde2fe2bb61840a3bf8f27"
+assert windows["state"]=="published" and windows["publication_run"]==42564577149
+assert windows["source_commit"]=="0491ab804260c801a793b691a49eaba73e76ce3e"
 asset=windows["assets"][0]
-assert asset["size_bytes"]==249142364 and asset["sha256"]=="86634ddb6fa92b23eef0f5a5d7237a62d4f0595e66a1d24357e38b657d60d006"
+assert asset["size_bytes"]==249209930 and asset["sha256"]=="f0c11f6c8af05e843a38b280c385fa845568c013382b77151c30e35a813d5408"
 assert asset["url"] in download_page and asset["sha256"] in download_page
 print("PUBLIC_CHECKED_WINDOWS038 exact installed binary and anonymous release link verified")
