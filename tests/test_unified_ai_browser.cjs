@@ -16,11 +16,11 @@ const {chromium}=createRequire('/tmp/clea7-qa/package.json')('playwright');
   await page.locator('#clea-ai-settings>summary').click();await page.locator('#clea-offline-options>summary').click();await page.locator('#clea-offline-help').check();await page.waitForFunction(()=>document.getElementById('chat-ready').textContent.includes('je provjeren'));
   console.log('PASS ONE CLEA AI NAV: one AI entry and dispatcher, honest disconnected state, explicit offline help');
 
+  const before=await page.evaluate(()=>CLEA7Workbench.project.id);
   await page.locator('#chat-question').fill('Napravi aplikaciju za zalihe i radne naloge.');
   await page.locator('#chat-send').click();
   await page.getByRole('button',{name:'Otvori u Studiju i testiraj'}).waitFor();
   assert((await page.locator('#chat-log').innerText()).includes('Radni nalozi'));
-  const before=await page.evaluate(()=>CLEA7Workbench.project.id);
   assert.equal(before,await page.evaluate(()=>CLEA7Workbench.project.id));
   await page.getByRole('button',{name:'Otvori u Studiju i testiraj'}).click();
   await page.waitForFunction(()=>Boolean(CLEA7Workbench.engine?.state && CLEA7Workbench.project.tables.stock && CLEA7Workbench.project.tables.orders));

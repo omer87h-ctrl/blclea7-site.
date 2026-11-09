@@ -480,14 +480,14 @@
   "web": {
     "version": "0.38.0-test",
     "status": "test",
-    "source_commit": "0078c9dd62ce6497d741cebfc254306ad43ab177",
+    "source_commit": "0491ab804260c801a793b691a49eaba73e76ce3e",
     "verified_scope": "shared_core_sense_browser_studio_runtime_and_independent_sdk",
     "verification": {
       "result": "passed",
       "python_tests_passed": 360,
       "python_tests_skipped": 2,
       "node_suites": 40,
-      "source_receipt": "CLEA0.38 compiler and browser checks; actual9B app acceptance is a separate gate."
+      "source_receipt": "Single AI UI, explicit optional offline helper, compiler/Runtime/browser checks; actual9B app acceptance remains a separate gate."
     },
     "native_verification": false
   },
@@ -559,21 +559,22 @@
   "windows_current": {
     "state": "published",
     "version": "0.38.0-test",
-    "tag": "clea7-windows-0.38.0-test",
+    "tag": "clea7-windows-0.38-single-ai-test",
     "repository": "omer87h-ctrl/blclea7-site.",
-    "publication_run": 42560374444,
-    "windows_build_run": 42534855702,
-    "windows_install_run": 42559217819,
-    "source_commit": "e274a756db0f367684fde2fe2bb61840a3bf8f27",
+    "publication_run": 42564577149,
+    "windows_build_run": 42562785101,
+    "windows_install_run": 42563904883,
+    "source_commit": "0491ab804260c801a793b691a49eaba73e76ce3e",
     "production_signed": false,
     "assets": [
       {
         "key": "installer",
         "name": "BLclea7-Setup-Windows-x64.exe",
-        "size_bytes": 249142364,
-        "sha256": "86634ddb6fa92b23eef0f5a5d7237a62d4f0595e66a1d24357e38b657d60d006",
-        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-windows-0.38.0-test/BLclea7-Setup-Windows-x64.exe"
+        "size_bytes": 249209930,
+        "sha256": "f0c11f6c8af05e843a38b280c385fa845568c013382b77151c30e35a813d5408",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-windows-0.38-single-ai-test/BLclea7-Setup-Windows-x64.exe"
       }
-    ]
+    ],
+    "verified_ui": "single_ai_workspace"
   }
 }
