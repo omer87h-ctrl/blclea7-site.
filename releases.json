@@ -1,15 +1,16 @@
 {
   "format": "clea7.public-downloads/1",
-  "version": "0.38.0-test",
-  "source_commit": "0078c9dd62ce6497d741cebfc254306ad43ab177",
+  "version": "0.39.0-test",
+  "source_commit": "a489e7abdbd6766f677a8b9279ea97b3e3b78fce",
   "verified_run": null,
   "published": [
     {
       "key": "sdk",
-      "name": "BL-CLEA7-Core-SDK-0.38.0-test.zip",
-      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.38.0-test.zip",
-      "size_bytes": 326906,
-      "sha256": "a8cedffb55f78ddac43875bb2982032f6f6b33d440cb9e03d4aaa8c7c7112e79"
+      "name": "BL-CLEA7-Core-SDK-0.39.0-test.zip",
+      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.39.0-test.zip",
+      "size_bytes": 1006124,
+      "sha256": "cdbc0bae4f3872fd47587bb465835e927c7360dff29be861af4b24d82a076596",
+      "version": "0.39.0-test"
     },
     {
       "key": "preview",
@@ -478,16 +479,19 @@
     }
   ],
   "web": {
-    "version": "0.38.0-test",
+    "version": "0.39.0-test",
     "status": "test",
-    "source_commit": "0491ab804260c801a793b691a49eaba73e76ce3e",
+    "source_commit": "a489e7abdbd6766f677a8b9279ea97b3e3b78fce",
     "verified_scope": "shared_core_sense_browser_studio_runtime_and_independent_sdk",
     "verification": {
       "result": "passed",
-      "python_tests_passed": 360,
+      "python_tests_passed": 361,
       "python_tests_skipped": 2,
-      "node_suites": 40,
-      "source_receipt": "Single AI UI, explicit optional offline helper, compiler/Runtime/browser checks; actual9B app acceptance remains a separate gate."
+      "source_receipt": "Actual behavioral tests, independent SDK round trip and local document import; genuine9B generation has a separate acceptance gate.",
+      "targeted_node_checks": 21,
+      "real_chrome_touch_checks": 8,
+      "real_document_import_checks": 6,
+      "real_studio_sdk_behavior_checks": 4
     },
     "native_verification": false
   },

@@ -33,10 +33,10 @@ assert 'ILDuA90WSVz2FTZdmWleQ0lzbGCLmFndZ6wlT5V74Ow' in (ROOT/'index.html').read
 assert not list(ROOT.rglob('session.json')) and not list(ROOT.rglob('identity.json'))
 for forbidden in ['main.py','runtime_main.py','clea7/desktop.py','clea7/host.py','clea7/cloud_ai.py','clea7/ai.py']:
  assert not (ROOT/'sdk-source'/forbidden).exists(),forbidden
-catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='0078c9dd62ce6497d741cebfc254306ad43ab177'
+catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='a489e7abdbd6766f677a8b9279ea97b3e3b78fce'
 download_page=(ROOT/'preuzimanja.html').read_text()
 for page in ROOT.glob('*.html'):
- assert 'Studio i SDK 0.38-test · Android Runtime 0.37-test' in page.read_text(),(page,'stale visible release version')
+ assert 'Studio i SDK 0.39-test · Android Runtime 0.37-test' in page.read_text(),(page,'stale visible release version')
 for entry in catalog['published']:
  p=ROOT/entry['url'];data=p.read_bytes();assert p.is_relative_to(ROOT) and len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],p
  if entry['key'] in ('sdk','preview'):

@@ -24,7 +24,7 @@
     {
       "path": "razgovor/index.html",
       "bytes": 4950,
-      "sha256": "de21bfd0e78f902312b00ab1791da65ffbb95cbce91fbe72fc2d577a79220a41"
+      "sha256": "ded7631cafb309072d51a8ef962be6833f2f32da2afcf5a50bdd513a692c6a39"
     },
     {
       "path": "razgovor/standalone.css",
@@ -73,8 +73,8 @@
     },
     {
       "path": "studio/workbench/chat/ui.js",
-      "bytes": 55387,
-      "sha256": "096af237bcb13544536595a6f4f95f276967ab898ae007c72c0af7755d0d8124"
+      "bytes": 58622,
+      "sha256": "61f7a657be0357ac79fda0e3463a11ba9eff4c4f86c551eb8246f69c0edaa4ca"
     },
     {
       "path": "studio/workbench/chat/worker.js",
@@ -98,13 +98,13 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 16442,
-      "sha256": "dc0411c619984e70338af1b120fbeff9ede6e716d5ff02e5e8259d4dd6539258"
+      "bytes": 16506,
+      "sha256": "11305c4e2eb9e51e4231965bc4c5f9011fc3ff9bb414ef411e2ca42b2b43a84d"
     },
     {
       "path": "studio/workbench/studio.css",
-      "bytes": 32390,
-      "sha256": "e09784bd841f30991c94cad7d428832662cadebd034ffe0dda24a79f181abbec"
+      "bytes": 32650,
+      "sha256": "6ae9363e66e8149f75a3c7688a4e3f8f24a1257298d0f2e1f794463a98d27403"
     },
     {
       "path": "studio/workbench/studio.js",

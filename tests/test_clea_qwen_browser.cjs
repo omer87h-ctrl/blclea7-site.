@@ -41,7 +41,7 @@ const assert=require('node:assert/strict');
   await page.locator('#sense-ai-target').selectOption('local');
   const old=received.length;
   assert.equal(old,1);
-  await page.locator('.sense-ai-bridge button').click();
+  await page.locator('#sense-ai-send').click();
   await page.waitForFunction(()=>document.getElementById('sense-ai-local-answer').textContent.includes('Provjeren testni odgovor'),null,{timeout:10000});
   assert.equal(received.length,2);
   assert.deepEqual(received[1],{question:'Kako da napišem opis iskustva?',history:[]});

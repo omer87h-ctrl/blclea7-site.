@@ -62,7 +62,7 @@ def read(path):
  request=urllib.request.Request(BASE+path,headers={'User-Agent':'BL-CLEA7-public-delivery-check','Cache-Control':'no-cache'})
  with urllib.request.urlopen(request,timeout=20) as response:
   if response.status!=200 or not response.url.startswith(BASE):raise ValueError('Unexpected public status or redirect for '+path)
-  return response.read(2*1024*1024)
+  return response.read(8*1024*1024)
 def check():
  home=read('').decode();assert 'ILDuA90WSVz2FTZdmWleQ0lzbGCLmFndZ6wlT5V74Ow' in home;assert 'studio/workbench/' in home
  verified_pages=[]

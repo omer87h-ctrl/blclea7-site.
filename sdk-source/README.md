@@ -1,4 +1,4 @@
-# BL CLEA7 SDK 0.38.0-test — shared Core and dependency cache
+# BL CLEA7 SDK 0.39.0-test — shared Core and dependency cache
 
 Development/test distribution by Brzo i Lokalno. The authoritative BIL compiler,
 bounded interpreter, shared Core, project CLI and original dependency/result cache
@@ -31,7 +31,10 @@ Project dependencies are currently empty; unsupported external dependencies are 
 
 `derive` and new Core3 operations require Runtime0.18. Older sources keep their actual
 feature minimum. The Runtime validates source/IR and package integrity; adding a target
-label does not build or certify that platform. Published native0.15 remains distinct.
+label does not build or certify that platform. Native builds and signatures require their own evidence. Browser Sense document import
+uses the included Apache-2.0 PDF.js client/worker; local-TTS document reading and
+reviewed behavioral checks are documented in docs/SENSE-DOCUMENT-IMPORT.md and
+docs/STUDIO-TESTS-039.md. No OCR or neural weight training is implied.
 
 The RAM working cache stores bounded, app/principal-scoped pure results and exact
 relevant dependencies, with transactional publication. It has no automatic disk storage.

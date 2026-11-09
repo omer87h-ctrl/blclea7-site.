@@ -103,6 +103,7 @@ function create({generate,onEvent=()=>{},attempts=3}={}){
   if(typeof intent!=='string'||!intent.trim()||intent.length>1200||!['create','change'].includes(mode))throw fault('Input','Napiši opis aplikacije do 1200 znakova.');
   if(mode==='change'&&(!project?.bil||sourceApproved!==true))throw fault('Permission','Za izmjenu izričito odobri slanje BIL izvora trenutnog projekta svom modelu.');
   const base=project?scope.CLEA7.stable(project):null;
+  checks=clone(checks);if(!Array.isArray(checks)||checks.length>20)throw fault('Input','Previše ili neispravne lokalne provjere.');
   if(mode==='change'&&new TextEncoder().encode(project.bil.source).length>10000)throw fault('Context','Projekt je veći od trenutnog modelskog prozora. Izvor nije skraćen niti poslan.');
   const metadata=mode==='change'?Object.fromEntries(['id','name','package','version','licenses'].filter(k=>project[k]!==undefined).map(k=>[k,clone(project[k])])):{id:scope.CLEA7Format.newId('ai'),name:'Moja CLEA aplikacija'};
   const history=[];let previous=null,diagnostic=null;busy=true;
@@ -120,7 +121,7 @@ function create({generate,onEvent=()=>{},attempts=3}={}){
      const impact=project?.bil?scope.CLEA7Intelligence.impact(await scope.CLEA7Intelligence.dependencyGraph(project),verified.graph):null;
      history.push({attempt,passed:true});
      const proposal={format:'clea7.model-app-proposal/1',source,application:verified.application,receipt:verified.receipt,impact,conversion:{representation:conversion.representation,sourceMap:conversion.sourceMap,inferred:conversion.inferred},attempts:clone(history),requiresReview:true,scope:verified.verifiedScope,modelProfile:response.modelProfile||'qwen3.5-9b-q4_k_m'};
-     certificates.set(proposal,{base,source,mode});onEvent({phase:'ready',attempt});return proposal;
+     certificates.set(proposal,{base,source,mode,checks:clone(checks)});onEvent({phase:'ready',attempt});return proposal;
     }catch(error){
      check();history.push({attempt,passed:false,code:error.code||'Compiler',diagnostic:String(error.message).slice(0,600),line:error.location?.line||error.diagnostic?.line||error.line||null,column:error.location?.column||error.diagnostic?.column||error.column||null});
      if(attempt===attempts){error.attempts=clone(history);error.failedProposal=source||response.reply;throw error;}
@@ -139,7 +140,7 @@ async function recheck(proposal,current,{signal}={}){
  if(!certificate||proposal.source!==certificate.source||proposal.application?.bil?.source!==certificate.source)throw fault('Verification','Ovaj prijedlog nema važeću lokalnu provjeru.');
  if(certificate.base!==null&&scope.CLEA7.stable(current)!==certificate.base)throw fault('Stale','Projekt ili BIL skica su promijenjeni nakon zahtjeva. Novi rad nije prepisan.');
  const metadata=Object.fromEntries(['id','name','package','version','licenses'].filter(k=>proposal.application[k]!==undefined).map(k=>[k,clone(proposal.application[k])]));
- const verified=await scope.CLEA7Intelligence.verifyBIL(certificate.source,{metadata,signal,modelAvailable:true});
+ const verified=await scope.CLEA7Intelligence.verifyBIL(certificate.source,{metadata,checks:certificate.checks||[],signal,modelAvailable:true});
  return verified.application;
 }
 async function adopt(source,{project=null}={}){
