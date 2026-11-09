@@ -555,5 +555,25 @@
         "sha256": "480f78279457d506ee11a5cc744244446f40469b54876033630147f7a3ee9882"
       }
     ]
+  },
+  "windows_current": {
+    "state": "published",
+    "version": "0.38.0-test",
+    "tag": "clea7-windows-0.38.0-test",
+    "repository": "omer87h-ctrl/blclea7-site.",
+    "publication_run": 42560374444,
+    "windows_build_run": 42534855702,
+    "windows_install_run": 42559217819,
+    "source_commit": "e274a756db0f367684fde2fe2bb61840a3bf8f27",
+    "production_signed": false,
+    "assets": [
+      {
+        "key": "installer",
+        "name": "BLclea7-Setup-Windows-x64.exe",
+        "size_bytes": 249142364,
+        "sha256": "86634ddb6fa92b23eef0f5a5d7237a62d4f0595e66a1d24357e38b657d60d006",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-windows-0.38.0-test/BLclea7-Setup-Windows-x64.exe"
+      }
+    ]
   }
 }
