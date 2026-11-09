@@ -3,6 +3,9 @@ on:
   pull_request:
     paths:
       - 'studio/workbench/chat/ui.js'
+      - 'studio/workbench/ai-authoring.js'
+      - 'clea-ai-client.js'
+      - 'tests/test_model_app_authoring_browser.cjs'
       - 'tests/test_unified_ai_browser.cjs'
       - '.github/workflows/verify-unified-ai.yml'
   workflow_dispatch:
@@ -28,3 +31,4 @@ jobs:
           server_pid=$!
           trap 'kill "$server_pid" || true' EXIT
           CLEA7_CHROME="$(command -v google-chrome)" node tests/test_unified_ai_browser.cjs
+          CLEA7_CHROME="$(command -v google-chrome)" node tests/test_model_app_authoring_browser.cjs

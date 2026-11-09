@@ -2,7 +2,7 @@
 // Executes only the repository's compiler/Core/interpreter. BIL input is data.
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),{webcrypto}=require('node:crypto');
 const root=path.resolve(__dirname,'..'),scope={crypto:webcrypto,performance,TextEncoder,TextDecoder,URL,Blob,AbortController,setTimeout,clearTimeout,Date,console};scope.globalThis=scope;vm.createContext(scope);
-for(const f of ['runtime','workbench/living','workbench/bil-compiler','workbench/bil-runtime','workbench/working-cache','workbench/clea-core','workbench/format','workbench/plan','workbench/review','workbench/consumer','workbench/engine','workbench/intelligence'])vm.runInContext(fs.readFileSync(path.join(root,'web',f+'.js'),'utf8'),scope);
+for(const f of ['runtime','workbench/living','workbench/bil-compiler','workbench/bil-runtime','workbench/working-cache','workbench/clea-core','workbench/format','workbench/plan','workbench/review','workbench/consumer','workbench/engine','workbench/intelligence','workbench/ai-authoring'])vm.runInContext(fs.readFileSync(path.join(root,'web',f+'.js'),'utf8'),scope);
 const own=(value,key)=>Object.prototype.hasOwnProperty.call(value,key),copy=value=>JSON.parse(JSON.stringify(value));
 function options(request){
  if(request.cache!==undefined&&!['enabled','off'].includes(request.cache))throw Error('Use cache enabled or off.');
@@ -49,6 +49,7 @@ async function testProject(request,app){
 async function run(request){
  if(request.action==='doctor')return {format:'clea7.sdk.doctor/1',node:process.versions.node,minimumNode:'22.0.0',nodeSupported:Number(process.versions.node.split('.')[0])>=22,compiler:{language:scope.CLEA7BIL.VERSION,ir:scope.CLEA7BIL.IR,coreFeatures:scope.CLEA7BIL.CORE_FEATURES},offline:true};
  if(request.action==='verify')return scope.CLEA7Intelligence.verifyBIL(request.source,{metadata:request.metadata||{},checks:request.checks||[]});
+ if(request.action==='verify-reply')return scope.CLEA7Intelligence.verifyBIL(scope.CLEA7AppAuthoring.extract(request.reply),{metadata:request.metadata||{},checks:request.checks||[]});
  const result=scope.CLEA7Core.compile(request.source,request.metadata||{}),features=scope.CLEA7Core.featuresFor(result),extra=features.version>=2?{features}:{};
  if(request.action==='features')return {valid:true,features};
  if(request.action==='info')return {valid:true,core:scope.CLEA7Core.FORMAT,coreVersion:scope.CLEA7Core.VERSION,requirements:scope.CLEA7Core.describe(result,request.targets||[])};

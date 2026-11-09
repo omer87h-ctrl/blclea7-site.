@@ -69,7 +69,7 @@ const base=process.env.CLEA7_WEB_BASE||'http://127.0.0.1:4173',out='test-evidenc
    assert.deepEqual(errors,[]);assert.deepEqual(requests.filter(r=>new URL(r.url).origin!==base||r.method!=='GET'),[]);assert.equal(requests.some(r=>/question=|prompt=|%C5%A0ta/.test(r.url)),false);
   });
   await check('missing real module fails visibly instead of showing fake readiness',async()=>{
-   const failure=await context.newPage();try{await failure.route('**/chat/ui.js',route=>route.abort());await failure.goto(base+'/razgovor/');await failure.locator('#conversation-load-error').waitFor({state:'visible'});assert((await failure.locator('#conversation-load-error').innerText()).includes('ui.js'));assert.equal(await failure.locator('#chat-send').count(),0);}finally{await failure.close();}
+   const failure=await context.newPage();try{await failure.route('**/chat/ui.js*',route=>route.abort());await failure.goto(base+'/razgovor/');await failure.locator('#conversation-load-error').waitFor({state:'visible'});assert((await failure.locator('#conversation-load-error').innerText()).includes('ui.js'));assert.equal(await failure.locator('#chat-send').count(),0);}finally{await failure.close();}
   });
  }catch(error){await page.screenshot({path:out+'/failure.png',fullPage:true}).catch(()=>{});await fs.writeFile(out+'/failure.json',JSON.stringify({message:error.message,checks,errors},null,2));throw error;}
  finally{await fs.writeFile(out+'/browser.json',JSON.stringify({format:'clea7.standalone-chat.browser/1',checks,errors,requests,workers,model:'existing-v1',physicalAudioVerified:false,generalConversationVerified:false,appGenerationVerified:false},null,2));await browser.close();}
