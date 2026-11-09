@@ -1,0 +1,55 @@
+{
+  "format": "clea7.android-artifacts/1",
+  "source": "a489e7abdbd6766f677a8b9279ea97b3e3b78fce",
+  "actualGradleBuild": true,
+  "actualAndroidEmulatorSenseTest": true,
+  "independentRuntimeInstallAndSenseTest": true,
+  "application": "actual keyboard-authored BIL Sense CV",
+  "published": false,
+  "signedForPlay": false,
+  "physicalDeviceTested": false,
+  "speechHardwareTested": false,
+  "releaseTargetSdk": 36,
+  "policySource": "https://support.google.com/googleplay/android-developer/answer/11926878",
+  "artifacts": [
+    {
+      "path": "apk/application-debug.apk",
+      "bytes": 257028,
+      "sha256": "eda796c887879033f62d7e2a9811d7d17bf86dca8711fb7d8247e4eb1efc2041"
+    },
+    {
+      "path": "aab/application-release-unsigned.aab",
+      "bytes": 219020,
+      "sha256": "efbeb930ccf25447f46fb670c871abb3fa619db28233b61d70d3eb2d81fcac5b"
+    },
+    {
+      "path": "runtime/BL-CLEA7-Runtime-debug.apk",
+      "bytes": 252190,
+      "sha256": "ca204dcf78f4b2e976f81451cdc74f60084dad54d5c55160a5e44bf6657019c0"
+    }
+  ],
+  "verificationRun": 42662434666,
+  "artifactArchiveSha256": "26c029fada0fe2dee88062de67682c3de5baed3a7c869003aff6a727ca1924bf",
+  "publicAssets": [
+    {
+      "name": "BL-CLEA-Sense-CV-0.39-debug.apk",
+      "size_bytes": 257028,
+      "sha256": "eda796c887879033f62d7e2a9811d7d17bf86dca8711fb7d8247e4eb1efc2041"
+    },
+    {
+      "name": "BL-CLEA-Sense-CV-0.39-unsigned.aab",
+      "size_bytes": 219020,
+      "sha256": "efbeb930ccf25447f46fb670c871abb3fa619db28233b61d70d3eb2d81fcac5b"
+    },
+    {
+      "name": "BL-CLEA7-Runtime-Android-0.39-debug.apk",
+      "size_bytes": 252190,
+      "sha256": "ca204dcf78f4b2e976f81451cdc74f60084dad54d5c55160a5e44bf6657019c0"
+    },
+    {
+      "name": "BL-CLEA-Sense-CV-0.39.clea7",
+      "size_bytes": 54193,
+      "sha256": "115ae1d51dae72879df930730d66663423e9aeae8fa5f440667448ad14a0615d"
+    }
+  ]
+}
