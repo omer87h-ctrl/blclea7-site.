@@ -1,4 +1,5 @@
 'use strict';
+const siteOrigin='http://127.0.0.1:'+(process.env.CLEA7_TEST_PORT||4173);
 // Network fixtures test the actual browser UI/protocol, not real HP/TLS/model quality.
 const {chromium}=require('/tmp/clea7-qa/node_modules/playwright');
 const assert=require('node:assert/strict');
@@ -12,7 +13,7 @@ const assert=require('node:assert/strict');
  page.on('pageerror',e=>failures.push(e.message));page.on('dialog',d=>d.accept());
  await page.addInitScript(()=>{globalThis.turnstile={render(mount,options){mount.textContent='Fixture access challenge';setTimeout(()=>options.callback('accepted-fixture-challenge'),0);return 'fixture';},remove(){}};});
  await page.route('**/clea-ai-config.json',route=>route.fulfill({json:config}));
- await page.route('http://127.0.0.1:4173/**',async route=>{
+ await page.route((siteOrigin+"/**"),async route=>{
   if(new URL(route.request().url()).pathname==='/clea-ai-config.json')return route.fallback();
   const response=await route.fetch(),type=response.headers()['content-type']||'';
   if(!type.includes('text/html'))return route.fulfill({response});
@@ -22,7 +23,7 @@ const assert=require('node:assert/strict');
  });
  await page.route(endpoint+'/**',async route=>{
   const request=route.request(),path=new URL(request.url()).pathname;
-  const headers={'Access-Control-Allow-Origin':'http://127.0.0.1:4173','Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Allow-Methods':'GET, POST, OPTIONS'};
+  const headers={'Access-Control-Allow-Origin':siteOrigin,'Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Allow-Methods':'GET, POST, OPTIONS'};
   if(request.method()==='OPTIONS')return route.fulfill({status:204,headers});
   if(path==='/health')return route.fulfill({status:healthy?200:503,headers,json:{brand:'BL CLEA AI',apiVersion:'clea7.public-ai/1',mode:'public',ready:healthy,deploymentId:wrongIdentity?'0'.repeat(32):identity}});
   if(path==='/session'){sessions++;assert.deepEqual(request.postDataJSON(),{challenge:'accepted-fixture-challenge'});return route.fulfill({headers,json:{session:token,expiresIn:900}});}
@@ -31,12 +32,12 @@ const assert=require('node:assert/strict');
   return route.fulfill({status,headers,json:status===200?{reply:'Fixture HP odgovor: <img src=x onerror=alert(1)>',sources:[]}:{code:status===429?'busy':'session_required',error:'Fixture error'}});
  });
  try{
-  await page.goto('http://127.0.0.1:4173/studio/workbench/');
+  await page.goto((siteOrigin+"/studio/workbench/"));
   await page.locator('[data-panel="clea-chat"]').click();
   await page.waitForFunction(()=>!document.getElementById('clea-public-model-opt-in').disabled);
   assert.equal(received.length,0);assert.equal(sessions,0);
-  await page.locator('#clea-public-model-opt-in').check();
-  await page.waitForFunction(()=>document.getElementById('clea-local-model-status').textContent.includes('HP servis uključen'));
+  await page.locator('#clea-ai-settings>summary').click();await page.locator('.chat-local-model-controls summary').click();await page.locator('#clea-public-model-opt-in').check();
+  await page.waitForFunction(()=>document.getElementById('clea-local-model-status').textContent.includes('spreman'));
   assert.equal(sessions,0);assert.equal(received.length,0);
   await page.locator('#chat-question').fill('Objasni CLEA jezgro.');await page.locator('#chat-send').click();
   await page.waitForFunction(()=>document.getElementById('chat-log').textContent.includes('Fixture HP odgovor'));
@@ -58,7 +59,7 @@ const assert=require('node:assert/strict');
   assert.equal(received.length,3);
   console.log('PASS HP browser fixture: busy/offline states, no automatic retry or false fallback');
   healthy=true;status=200;
-  await page.goto('http://127.0.0.1:4173/sense/');
+  await page.goto((siteOrigin+"/sense/"));
   await page.waitForSelector('#sense-ai-question');
   await page.evaluate(()=>{for(const area of document.querySelectorAll('textarea'))if(area.id!=='sense-ai-question')area.value='PRIVATE_CV_MUST_NOT_BE_SENT';localStorage.setItem('private-cv-fixture','PRIVATE_CV_MUST_NOT_BE_SENT');});
   assert.equal(received.length,3);

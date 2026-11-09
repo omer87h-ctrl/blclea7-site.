@@ -15,7 +15,7 @@ function screenNow(){return project.screens.find(s=>s.id===screen)||project.scre
 function walk(nodes,fn){for(const n of nodes){fn(n,nodes);walk(n.children||[],fn);}}
 function locate(id){let found;for(const s of project.screens)walk(s.children,(n,parent)=>{if(n.id===id)found={n,parent};});return found;}
 function unique(prefix){return F.newId(prefix);}
-function panel(name,runPreview=true){if(project.bil&&['design','logic','data'].includes(name))name='bil';if(name==='test'||name==='build'){try{bilStudio?.applyPending();}catch(e){status(e.message);return;}}document.querySelectorAll('.panel').forEach(p=>p.hidden=p.id!==name);document.querySelectorAll('[data-panel]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.panel===name)));if(name==='test'&&runPreview)startPlayer().catch(e=>status(e.message));if(name==='runtime')drawRuntime();if(name==='lab')lab.refresh().catch(e=>status(e.message));if(name==='source')codeEditor?.enter().catch(e=>status(e.message));if(name==='bil')bilStudio?.enter().catch(e=>status(e.message));if(name!=='motion')pro?.stop();if(name==='motion')pro?.renderMotion();if(name==='machines')pro?.renderMachines();}
+function panel(name,runPreview=true){if(name==='clea-ai'||name==='assistant')name='clea-chat';if(project.bil&&['design','logic','data'].includes(name))name='bil';document.body.dataset.workspace=name;if(name==='test'||name==='build'){try{bilStudio?.applyPending();}catch(e){status(e.message);return;}}document.querySelectorAll('.panel').forEach(p=>p.hidden=p.id!==name);document.querySelectorAll('[data-panel]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.panel===name)));if(name==='test'&&runPreview)startPlayer().catch(e=>status(e.message));if(name==='runtime')drawRuntime();if(name==='lab')lab.refresh().catch(e=>status(e.message));if(name==='source')codeEditor?.enter().catch(e=>status(e.message));if(name==='bil')bilStudio?.enter().catch(e=>status(e.message));if(name!=='motion')pro?.stop();if(name==='motion')pro?.renderMotion();if(name==='machines')pro?.renderMachines();}
 document.querySelectorAll('[data-panel]').forEach(b=>b.onclick=()=>panel(b.dataset.panel));
 // Revision conflict protection is applied against the last observed project value.
 let saved=null;
@@ -106,6 +106,6 @@ draw();panel('design');status(vault.persistent?'CLEA7 Studio je spreman · dizaj
 globalThis.dispatchEvent(new Event('clea:studio-ready'));
 // Only fixed Studio workspaces may be selected by a public link.
 const linkedWorkspace=new URLSearchParams(location.search).get('workspace');
-if(['clea-chat','clea-ai'].includes(linkedWorkspace))document.querySelector('[data-panel="'+linkedWorkspace+'"]').click();
+if(['clea-chat','clea-ai','assistant'].includes(linkedWorkspace))document.querySelector('[data-panel="clea-chat"]').click();
 })();
 
