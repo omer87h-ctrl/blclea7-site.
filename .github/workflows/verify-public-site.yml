@@ -57,8 +57,10 @@ jobs:
           node tests/test_public_appearance_ui.cjs
           python tests/test_universal018_browser.py --output test-evidence/universal018-browser
           browser_failed=0
-          CLEA7_WEB_PATH=/studio node tests/test_clea_ai_browser.cjs || browser_failed=1
-          CLEA7_WEB_PATH=/studio node tests/test_clea_chat_browser.cjs || browser_failed=1
+          # The retired inspector/topic tabs are covered by Core unit tests.
+          # Exercise their replacement through the actual single conversation.
+          node tests/test_unified_ai_browser.cjs || browser_failed=1
+          node tests/test_model_app_authoring_browser.cjs || browser_failed=1
           node tests/test_clea_lab_browser.cjs || browser_failed=1
           node tests/test_public_site.cjs || browser_failed=1
           node tests/test_public_acceptance.cjs || browser_failed=1

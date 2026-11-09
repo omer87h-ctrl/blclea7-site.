@@ -1,4 +1,5 @@
 'use strict';
+const siteOrigin='http://127.0.0.1:'+(process.env.CLEA7_TEST_PORT||4173);
 // Browser/transport fixtures only, not live HP, email delivery or Cloudflare proof.
 const {chromium}=require('/tmp/clea7-qa/node_modules/playwright');
 const assert=require('node:assert/strict');
@@ -17,11 +18,11 @@ const assert=require('node:assert/strict');
   if(url.pathname==='/session'){assert.deepEqual(req.postDataJSON(),{challenge:'fixture-nonce'});return route.fulfill({json:{session:'T'.repeat(43),expiresIn:900}});}
   if(url.pathname==='/chat'){history.push(req.postDataJSON());return route.fulfill({json:{reply:'Protected HP fixture response',sources:[]}});}
   assetRequests.push(url.pathname);
-  const response=await route.fetch({url:'http://127.0.0.1:4173'+url.pathname+url.search});return route.fulfill({response});
+  const response=await route.fetch({url:siteOrigin+url.pathname+url.search});return route.fulfill({response});
  });
  try{
   await page.goto(origin+'/razgovor/?clea-verify='+identity);
-  await page.waitForFunction(()=>document.getElementById('clea-local-model-status')?.textContent.includes('HP servis uključen'));
+  await page.waitForFunction(()=>document.getElementById('clea-local-model-status')?.textContent.includes('spreman'));
   assert.equal(await page.locator('#conversation-load-error').isVisible(),false);
   assert.equal(await page.locator('#clea-public-model-opt-in').isChecked(),true);
   await page.locator('#chat-question').fill('Objasni CLEA.');await page.locator('#chat-send').click();
