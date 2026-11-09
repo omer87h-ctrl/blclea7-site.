@@ -1,0 +1,32 @@
+name: Publish exact owner-approved Windows0.38 installer
+on:
+  workflow_dispatch:
+    inputs:
+      transfer_url:
+        description: Short-lived HTTPS transfer of the exact approved installer artifact
+        type: string
+        required: true
+permissions:
+  contents: read
+jobs:
+  publish:
+    if: github.repository == 'omer87h-ctrl/blclea7-site.' && github.actor == 'omer87h-ctrl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: write
+    concurrency:
+      group: clea-checked-release-038
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        env:
+          CLEA_APPROVED_TRANSFER_URL: ${{ inputs.transfer_url }}
+        with:
+          script: core.setSecret(process.env.CLEA_APPROVED_TRANSFER_URL);
+      - name: Verify actual install receipt and exact artifact integrity before publishing
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CLEA_APPROVED_TRANSFER_URL: ${{ inputs.transfer_url }}
+        run: python -m scripts.publish_checked_038

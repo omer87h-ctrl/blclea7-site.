@@ -39,19 +39,19 @@ def verify(path,size,digest):
 class NoRedirect(HTTPRedirectHandler):
  def redirect_request(self,*args,**kwargs):return None
 
-def download(value,path):
+def download(value,path,*,archive_bytes=ARCHIVE_BYTES,archive_sha=ARCHIVE_SHA):
  value=validate_url(value)
  with build_opener(NoRedirect()).open(Request(value,headers={'User-Agent':'CLEA-approved-binary-transfer/0.37'}),timeout=45) as response,path.open('xb') as output:
   if response.status!=200:raise ValueError('Transfer unavailable.')
   size=0
   while block:=response.read(1024*1024):
    size+=len(block)
-   if size>ARCHIVE_BYTES:raise ValueError('Transfer exceeds approved size.')
+   if size>archive_bytes:raise ValueError('Transfer exceeds approved size.')
    output.write(block)
- verify(path,ARCHIVE_BYTES,ARCHIVE_SHA)
+ verify(path,archive_bytes,archive_sha)
 
-def unpack(path,destination):
- verify(path,ARCHIVE_BYTES,ARCHIVE_SHA)
+def unpack(path,destination,*,archive_bytes=ARCHIVE_BYTES,archive_sha=ARCHIVE_SHA,installer_bytes=INSTALLER_BYTES,installer_sha=INSTALLER_SHA):
+ verify(path,archive_bytes,archive_sha)
  with zipfile.ZipFile(path) as archive:
   entries=archive.infolist();names=[e.filename for e in entries]
   if len(names)!=len(set(names)):raise ValueError('Duplicate archive entry.')
@@ -60,15 +60,15 @@ def unpack(path,destination):
    if p.is_absolute() or '..' in p.parts or '\\' in entry.filename or stat.S_ISLNK(entry.external_attr>>16):
     raise ValueError('Unexpected archive path.')
   selected=[e for e in entries if PurePosixPath(e.filename).name==INSTALLER]
-  if len(selected)!=1 or selected[0].file_size!=INSTALLER_BYTES:raise ValueError('Approved installer is missing.')
+  if len(selected)!=1 or selected[0].file_size!=installer_bytes:raise ValueError('Approved installer is missing.')
   result=destination/INSTALLER
   with archive.open(selected[0]) as source,result.open('xb') as output:
    total=0
    while block:=source.read(1024*1024):
     total+=len(block)
-    if total>INSTALLER_BYTES:raise ValueError('Unexpected expanded installer size.')
+    if total>installer_bytes:raise ValueError('Unexpected expanded installer size.')
     output.write(block)
- verify(result,INSTALLER_BYTES,INSTALLER_SHA)
+ verify(result,installer_bytes,installer_sha)
  return result
 
 def main():
