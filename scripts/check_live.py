@@ -5,8 +5,8 @@ ROOT=Path(__file__).resolve().parents[1]
 BASE='https://clea7.brzoilokalno.com/'
 REPO='omer87h-ctrl/blclea7-site.'
 TAG='clea7-0.15.0-5baaace'
-def fetch_release_metadata():
- url='https://api.github.com/repos/'+REPO+'/releases/tags/'+TAG
+def fetch_release_metadata(tag=TAG):
+ url='https://api.github.com/repos/'+REPO+'/releases/tags/'+tag
  try:
   with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'BL-CLEA7-anonymous-download-check'}),timeout=30) as response:
    return json.load(response)
@@ -28,16 +28,21 @@ def anonymous_full_download(item,expected):
    if not head:head=chunk[:4096]
    size+=len(chunk);assert size<=item['size_bytes'];digest.update(chunk)
  assert size==item['size_bytes'] and digest.hexdigest()==item['sha256'],'Anonymous binary hash differs: '+item['key']
- assert head.startswith(b'MZ' if item['key']=='installer' else b'PK\x03\x04')
- return {'key':item['key'],'bytes':size,'sha256':digest.hexdigest(),'anonymousDownloadProbeBytes':len(head),'releaseDigestMatches':None,'anonymousDownloadSha256Verified':True,'metadataStatus':'github-api-rate-limited'}
+ assert valid_magic(item,head)
+ return {'key':item.get('key') or item['name'],'bytes':size,'sha256':digest.hexdigest(),'anonymousDownloadProbeBytes':len(head),'releaseDigestMatches':None,'anonymousDownloadSha256Verified':True,'metadataStatus':'github-api-rate-limited'}
+
+def valid_magic(item,head):
+ if item.get('key')=='installer' or item.get('name','').endswith('.exe'):return head.startswith(b'MZ')
+ if item.get('name','').endswith('.clea7'):return head.lstrip().startswith(b'{') or head.startswith(b'PK\x03\x04')
+ return head.startswith(b'PK\x03\x04')
 
 def native_checks(native):
- release=fetch_release_metadata()
- if release is not None:assert not release.get('draft') and release['tag_name']==TAG
- assert len(native['assets'])==4 and {a['key'] for a in native['assets']}=={'studio','runtime','android','installer'}
+ tag=native['tag'];assert native['repository']==REPO and native['assets']
+ release=fetch_release_metadata(tag)
+ if release is not None:assert not release.get('draft') and release['tag_name']==tag
  verified=[]
  for item in native['assets']:
-  expected='https://github.com/'+REPO+'/releases/download/'+TAG+'/'+item['name']
+  expected='https://github.com/'+REPO+'/releases/download/'+tag+'/'+item['name']
   assert item['url']==expected
   if release is None:
    verified.append(anonymous_full_download(item,expected));continue
@@ -50,8 +55,8 @@ def native_checks(native):
    assert response.status in (200,206)
    if response.status==206:assert response.headers['Content-Range'].startswith('bytes 0-') and response.headers['Content-Range'].endswith('/'+str(item['size_bytes']))
    else:assert int(response.headers['Content-Length'])==item['size_bytes']
-   head=response.read(4096);assert head.startswith(b'MZ' if item['key']=='installer' else b'PK\x03\x04')
-  verified.append({'key':item['key'],'bytes':item['size_bytes'],'sha256':item['sha256'],'anonymousDownloadProbeBytes':len(head),'releaseDigestMatches':True,'metadataStatus':'verified'})
+   head=response.read(4096);assert valid_magic(item,head)
+  verified.append({'key':item.get('key') or item['name'],'bytes':item['size_bytes'],'sha256':item['sha256'],'anonymousDownloadProbeBytes':len(head),'releaseDigestMatches':True,'metadataStatus':'verified'})
  return verified
 def read(path):
  request=urllib.request.Request(BASE+path,headers={'User-Agent':'BL-CLEA7-public-delivery-check','Cache-Control':'no-cache'})
@@ -77,15 +82,16 @@ def check():
  ai=json.loads(read('release/ai-020.json'));assert ai==json.loads((ROOT/'release/ai-020.json').read_text()),'AI manifest is not current.'
  for item in ai['files']:
   data=read(item['path']);assert len(data)==item['bytes'] and hashlib.sha256(data).hexdigest()==item['sha256'],'AI source is not current: '+item['path']
- catalog=json.loads(read('releases.json'));assert catalog['source_commit']=='a679e6585d0f77366cff74a5ed182ebc9f32ce9a'
+ catalog=json.loads(read('releases.json'));expected=json.loads((ROOT/'releases.json').read_text());assert catalog==expected,'Published catalogue is not current.'
  verified=[]
  for entry in catalog['published']:
-  path=entry['url'];assert path.startswith('downloads/') and '..' not in path and ':' not in path
+  path=entry['url'];assert path.startswith(('downloads/','sense/downloads/')) and '..' not in path and ':' not in path
   data=read(path);assert len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],path
   verified.append({'path':path,'bytes':len(data),'sha256':entry['sha256']})
- expected=json.loads((ROOT/'releases.json').read_text())
  if expected['native']['state']=='published':assert catalog['native']==expected['native'],'Published catalog is not yet current.'
- native=native_checks(catalog['native']) if catalog['native']['state']=='published' else []
+ current=catalog.get('native_current',catalog['native'])
+ native=native_checks(current) if current['state']=='published' else []
+ if catalog.get('windows_current',{}).get('state')=='published':native+=native_checks(catalog['windows_current'])
  report={'format':'clea7.live-delivery-check/1','url':BASE,'anonymous':True,'runtimeMatchesVerifiedSource':True,'publicPagesMatchVerifiedSource':verified_pages,'downloads':verified,'nativeStatus':catalog['native']['state'],'nativeDownloads':native}
  target=ROOT/'test-evidence/live-delivery.json';target.parent.mkdir(exist_ok=True);target.write_text(json.dumps(report,indent=2)+'\n');print('PUBLIC_LIVE_DELIVERY '+json.dumps(report))
 if __name__=='__main__':
