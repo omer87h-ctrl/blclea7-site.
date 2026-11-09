@@ -64,3 +64,5 @@ body.studio-shell{margin:0;background:#080e16;font-size:13px;min-width:0}.studio
 
 /* Visibility and focus agree for every Studio workspace and retired entry. */
 .studio-shell [hidden]{display:none!important}
+
+.studio-test-suite{grid-column:1/-1;min-width:0}.studio-test-suite textarea{width:100%;max-width:100%;font:inherit}.studio-test-suite label{display:block;margin-top:12px}.studio-test-suite button{margin:8px 8px 8px 0}.studio-test-suite select{max-width:100%}

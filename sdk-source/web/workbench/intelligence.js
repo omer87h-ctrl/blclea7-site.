@@ -117,16 +117,18 @@ async function verifyBIL(source,{metadata={},checks=[],signal,onEvent,modelAvail
  register('source.snapshot',PILLARS[1],'project.read',async()=>{const hash=await scope.CLEA7.digest(source);if(!hash)throw fail('Integrity','SHA-256 unavailable.');return {sourceHash:hash,compiler:scope.CLEA7BIL.VERSION};});
  register('bil.compile',PILLARS[2],'bil.compile',()=>{application=scope.CLEA7Core.compile(source,metadata).application;scope.CLEA7Core.validateApplication(application);return {application:application.id,format:application.format,typed:true};});
  register('runtime.shadow',PILLARS[3],'runtime.shadow',async(context,abort)=>{
-  const vault=new scope.CLEA7.MemoryVault();engine=new scope.CLEA7Engine.Engine(application,{vault,reality:'SHADOW',modules:null,cacheEnabled:false});
+  const vault=new scope.CLEA7.MemoryVault(),fresh=()=>new scope.CLEA7Engine.Engine(application,{vault,reality:'SHADOW',modules:null,cacheEnabled:false});engine=fresh();
   const results=[],cancel=()=>engine?.close();abort.addEventListener('abort',cancel,{once:true});
   try{
    await engine.open();results.push({name:'initialization',passed:true});
    for(const test of checks){
     if(abort.aborted)throw fail('Cancelled','Verification cancelled.');
-    if(!test||typeof test.flow!=='string'||!Object.hasOwn(application.flows,'bil_'+test.flow)||!object(test.expect)||Object.keys(test).some(k=>!['flow','expect'].includes(k)))throw fail('Test','Invalid checked handler expectation.');
-    await engine.dispatch('bil_'+test.flow);
-    for(const [name,value]of Object.entries(test.expect))if(!Object.hasOwn(application.bil.ir.globals,name)||scope.CLEA7.stable(engine.state.bilValues[name])!==scope.CLEA7.stable(value))throw fail('Verification','Runtime expectation failed.');
-    results.push({name:'event:'+test.flow,passed:true});
+    if(!test||!object(test.expect)||Object.keys(test).some(k=>!['flow','restart','expect','screen','error'].includes(k))||(test.restart===true?Object.hasOwn(test,'flow'):Object.hasOwn(test,'restart')||typeof test.flow!=='string'||!Object.hasOwn(application.flows,'bil_'+test.flow))||test.screen!==undefined&&(typeof test.screen!=='string'||!application.bil.ir.ui?.screens.some(s=>s.id===test.screen))||test.error!==undefined&&(typeof test.error!=='string'||!test.error||test.error.length>200))throw fail('Test','Invalid checked handler expectation.');
+    let actualError=null;try{if(test.restart===true){engine.close();engine=fresh();await engine.open();}else await engine.dispatch('bil_'+test.flow);}catch(error){actualError=error;}
+    if(test.error!==undefined){if(!actualError||!actualError.message.includes(test.error))throw fail('Verification','Runtime error expectation failed.');}else if(actualError)throw actualError;
+    for(const [name,value]of Object.entries(test.expect))if(!Object.hasOwn(application.bil.ir.globals,name)||scope.CLEA7.stable(engine.state.bilValues[name])!==scope.CLEA7.stable(value))throw fail('Verification','Runtime expectation failed for '+name+'.');
+    if(test.screen!==undefined&&engine.state.bilScreen!==test.screen)throw fail('Verification','Runtime screen expectation failed.');
+    results.push({name:test.restart?'restart':'event:'+test.flow,passed:true});
    }
    execution={reality:'SHADOW',checks:results,events:engine.events.length,localStateDiscarded:true};return execution;
   }finally{abort.removeEventListener('abort',cancel);engine.close();engine=null;}

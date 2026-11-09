@@ -1,4 +1,6 @@
-BL CLEA7 SDK0.38.0-test by Brzo i Lokalno. Public compiler/interpreter/Core,
+BL CLEA7 SDK0.39.0-test by Brzo i Lokalno. Public compiler/interpreter/Core,
 checked project CLI and bounded dependency-cache distribution only. Existing licences
 retained exactly. No private native host, credentials, identity, user content, model
 weights or telemetry. Native builds and physical-device verification are separate.
+PDF.js6.5.438, Mozilla and contributors, Apache-2.0; unmodified client/worker, full
+licence and provenance are in web/sense/vendor/pdfjs.

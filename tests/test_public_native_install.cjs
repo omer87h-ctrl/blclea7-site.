@@ -20,7 +20,7 @@ const fs=require('node:fs/promises'),assert=require('node:assert/strict');
   const config=page.locator('#clea7-remote-config');await config.waitFor();
   for(const input of await config.locator('input[type=checkbox]').all())await input.check();
   await config.locator('#remote-config-approve').click();
-  await page.waitForFunction(()=>document.querySelector('dialog [role=status]')?.textContent.includes('dozvole'));
+  await page.waitForFunction(()=>document.querySelector('dialog[open] [role=status]')?.textContent.includes('dozvole'));
   assert.equal(await page.locator('[data-app="'+id+'"]').count(),0);
   console.log('PASS native launcher actual install controls reject missing per-application hardware consent');
   for(const input of await permissions.all())await input.check();

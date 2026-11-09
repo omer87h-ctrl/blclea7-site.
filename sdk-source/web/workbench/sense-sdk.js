@@ -48,10 +48,22 @@ function listener({onFinal=()=>{},onInterim=()=>{},onState=()=>{}}={}){
  }
  return Object.freeze({start,stop(){if(current)current.stop();},abort,get active(){return current!==null;}});
 }
+function reader(options={}){
+ const output=speaker(options);let generation=0,active=false;
+ const stop=()=>{generation++;active=false;output.stop();};
+ async function read(text,permission={}){
+  if(permission.approved!==true)throw fault('Permission','Prvo potvrdi sadržaj koji želiš čuti.');
+  if(typeof text!=='string'||!text.trim()||text.length>30000)throw fault('Budget','Čitanje podržava tekst do 30.000 znakova.');
+  stop();const own=generation;active=true;
+  try{for(const part of text.match(/[\s\S]{1,2800}(?:\s|$)|[\s\S]{1,2800}/g)||[]){if(own!==generation)throw fault('Cancelled','Čitanje je zaustavljeno.');await output.speak(part,permission);}return {spoken:true,localVoice:true,characters:text.length};}
+  finally{if(own===generation)active=false;}
+ }
+ return Object.freeze({read,stop,voices:output.voices,get active(){return active;}});
+}
 function vibrate(pattern,{approved=false}={}){
  if(approved!==true)throw fault('Permission','Taktilni signal nije odobren.');
  if(!Array.isArray(pattern)||!pattern.length||pattern.length>12||pattern.some(x=>!Number.isInteger(x)||x<0||x>1000)||pattern.reduce((a,b)=>a+b,0)>5000)throw fault('Input','Neispravan ograničeni taktilni signal.');
  if(typeof scope.navigator?.vibrate!=='function')throw fault('Unavailable','Uređaj ne nudi vibraciju.');return {accepted:scope.navigator.vibrate(pattern)===true,meaning:'event cue; not a Braille display'};
 }
-scope.CLEA7SenseSDK=Object.freeze({format:'sense.sdk/1',capabilities,speaker,listener,vibrate});
+scope.CLEA7SenseSDK=Object.freeze({format:'sense.sdk/1',capabilities,speaker,reader,listener,vibrate});
 })(globalThis);

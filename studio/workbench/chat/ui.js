@@ -273,7 +273,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  const sourceLabel=document.createElement('label'),sourceApproved=document.createElement('input');sourceApproved.type='checkbox';sourceApproved.id='clea-ai-source-approved';sourceLabel.hidden=true;sourceLabel.append(sourceApproved,document.createTextNode(' Odobravam slanje BIL izvora ovog projekta svom povezanom modelu radi tražene izmjene. Podaci pokrenute aplikacije se ne šalju.'));taskLabel.after(sourceLabel);
  function requestedTask(question){if(taskMode.value!=='auto')return taskMode.value;const words=question.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase();if(/^(?:clea[,!:]?\s*)?(?:napravi|kreiraj|izradi|create|build|make|generate)\b/.test(words)&&/aplikacij|\bapp\b|\bapplication\b|\bigru\b|\bgame\b|\bprogram\b/.test(words))return 'create';return 'chat';}
  taskMode.onchange=()=>{sourceLabel.hidden=taskMode.value!=='change';if(sourceLabel.hidden)sourceApproved.checked=false;};
- let authorController=null;
+ let authorController=null;const proposalTests=new WeakMap();
  const author=globalThis.CLEA7AppAuthoring?.create({generate:(intent,options)=>client.ask(intent,{authoring:options.authoring,onDelta:options.onDelta,language:document.getElementById('chat-language').value}),onEvent:event=>{if(event.phase==='model')feedback.textContent='Model sastavlja BIL aplikaciju · pokušaj '+event.attempt+'.';if(event.phase==='repair')feedback.textContent='Kompajler je odbio prijedlog. Model dobija stvarnu dijagnostiku za ispravku.';if(event.phase==='runtime'&&event.event.pillar){const list=document.getElementById('chat-events'),li=document.createElement('li');li.textContent=event.event.pillar+' · '+event.event.state;list.prepend(li);while(list.children.length>40)list.lastElementChild.remove();}}});
  function downloadSource(source){const url=URL.createObjectURL(new Blob([source],{type:'text/plain;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='moja-clea-aplikacija.bil';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
  function proposalUI(body,proposal){
@@ -291,6 +291,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   apply.onclick=async()=>{if(!review.checked)return;apply.disabled=true;try{
    const studio=globalThis.CLEA7Workbench;
    if(!studio){const id=CLEA7Format.newId('handoff'),value={format:'clea7.authoring-handoff/1',source:proposal.source};sessionStorage.setItem(id,JSON.stringify(value));location.assign('/studio/workbench/?workspace=clea-chat&proposal='+encodeURIComponent(id));return;}
+   const boundTests=proposalTests.get(proposal);if(boundTests&&globalThis.CLEA7StudioTests?.signature()!==boundTests)throw Error('Testovi su promijenjeni nakon prijedloga. Zatraži novu provjeru prije primjene.');
    const before=studio.snapshot(),application=await CLEA7AppAuthoring.recheck(proposal,before);studio.applyReviewed(application,before);applied=CLEA7.stable(studio.snapshot());undo.hidden=false;
    await studio.run();document.querySelector('[data-panel="test"]')?.click();result.textContent='Aplikacija je stvarno pokrenuta. Isprobaj unos, dugmad i navigaciju, a zatim izvezi CLEA7 paket.';status.textContent=result.textContent;
   }catch(error){result.textContent=error.message;apply.disabled=!review.checked;}};
@@ -302,7 +303,8 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   const studio=globalThis.CLEA7Workbench,project=studio?.snapshot?.()||null;
   if(mode==='change'&&!sourceApproved.checked)throw Error('Prvo odobri tačan BIL izvor za ovu izmjenu. Ništa nije poslano modelu.');
   authorController=new AbortController();
-  try{const proposal=await author.propose(question,{project,mode,sourceApproved:sourceApproved.checked,representation:client.capabilities.bilAuthoringPlan==='clea7.authoring-plan/1'?'plan':'bil',signal:authorController.signal,onDelta:(_delta,text)=>{body.textContent=text;}});
+  const selectedTests=mode==='change'?globalThis.CLEA7StudioTests?.activeChecks():null;
+  try{const proposal=await author.propose(question,{project,mode,checks:selectedTests?.checks||[],sourceApproved:sourceApproved.checked,representation:client.capabilities.bilAuthoringPlan==='clea7.authoring-plan/1'?'plan':'bil',signal:authorController.signal,onDelta:(_delta,text)=>{body.textContent=text;}});if(selectedTests)proposalTests.set(proposal,selectedTests.signature);
    proposalUI(body,proposal);return proposal;
   }finally{authorController=null;}
  }
