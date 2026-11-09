@@ -6,14 +6,15 @@ const {chromium}=createRequire('/tmp/clea7-qa/package.json')('playwright');
  const context=await browser.newContext({viewport:{width:1300,height:900}}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('dialog',dialog=>dialog.accept());
  try{
-  await page.goto('http://127.0.0.1:4173/studio/workbench/');
+  await page.goto('http://127.0.0.1:'+(process.env.CLEA7_TEST_PORT||4173)+'/studio/workbench/');
   await page.waitForFunction(()=>globalThis.CLEA7Workbench&&globalThis.CLEA7LocalAIWorkspace);
   assert.equal((await page.locator('[data-panel="clea-chat"]').innerText()),'CLEA AI');
-  assert.equal(await page.locator('[data-panel="clea-ai"]').isVisible(),false);
-  assert.equal(await page.locator('[data-panel="assistant"]').isVisible(),false);
+  assert.equal(await page.locator('[data-panel="clea-ai"]').count(),0);
+  assert.equal(await page.locator('[data-panel="assistant"]').count(),0);
   await page.locator('[data-panel="clea-chat"]').click();
-  await page.waitForFunction(()=>document.getElementById('chat-ready').textContent.includes('je provjeren'));
-  console.log('PASS ONE CLEA AI NAV: one visible AI entry, original model loaded');
+  assert((await page.locator('#chat-ready').innerText()).includes('nije povezan'));assert(await page.locator('#chat-send').isDisabled());assert(await page.locator('#clea-connect-model').isVisible());
+  await page.locator('#clea-ai-settings>summary').click();await page.locator('#clea-offline-options>summary').click();await page.locator('#clea-offline-help').check();await page.waitForFunction(()=>document.getElementById('chat-ready').textContent.includes('je provjeren'));
+  console.log('PASS ONE CLEA AI NAV: one AI entry and dispatcher, honest disconnected state, explicit offline help');
 
   await page.locator('#chat-question').fill('Napravi aplikaciju za zalihe i radne naloge.');
   await page.locator('#chat-send').click();

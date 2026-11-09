@@ -18,13 +18,13 @@
     },
     {
       "path": "razgovor/boot.js",
-      "bytes": 4459,
-      "sha256": "c7736e92656fd0e517d8dbaa177b6c60fec708d3242cb30324821babcf02b323"
+      "bytes": 4778,
+      "sha256": "7f7cbc8be79783f3533e2cb384e1f930229849d396e8073b57e27360aeca2eb4"
     },
     {
       "path": "razgovor/index.html",
       "bytes": 4950,
-      "sha256": "071cefaf6f3b03c2b69cffc97a07050807ad742891f3d822c2ba1c829df2fe65"
+      "sha256": "de21bfd0e78f902312b00ab1791da65ffbb95cbce91fbe72fc2d577a79220a41"
     },
     {
       "path": "razgovor/standalone.css",
@@ -43,8 +43,8 @@
     },
     {
       "path": "studio/workbench/chat/chat.css",
-      "bytes": 4504,
-      "sha256": "c714365bc981d818297aa58ad55337f91e573953788fd043a68eb0566914036a"
+      "bytes": 6065,
+      "sha256": "b54a6f432f2eaec3e3c4cd1e1a865173237b20d73467c113aa0994a2670d5578"
     },
     {
       "path": "studio/workbench/chat/knowledge.json",
@@ -73,8 +73,8 @@
     },
     {
       "path": "studio/workbench/chat/ui.js",
-      "bytes": 52150,
-      "sha256": "370912fb3e4d7945d4e694b7ab35e1c18171fa331e958f385dfcf78d4c3cb9b8"
+      "bytes": 55387,
+      "sha256": "096af237bcb13544536595a6f4f95f276967ab898ae007c72c0af7755d0d8124"
     },
     {
       "path": "studio/workbench/chat/worker.js",
@@ -98,18 +98,18 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 16561,
-      "sha256": "0e406a4112e8b8c8a5b06829479aa7cde53adeec9434aff0acfd7d663520ba5c"
+      "bytes": 16442,
+      "sha256": "dc0411c619984e70338af1b120fbeff9ede6e716d5ff02e5e8259d4dd6539258"
     },
     {
       "path": "studio/workbench/studio.css",
-      "bytes": 32263,
-      "sha256": "7c5929426e3bbbdfd219a2305d55435874a65afcba6a9a815f6fa7489aa0de27"
+      "bytes": 32390,
+      "sha256": "e09784bd841f30991c94cad7d428832662cadebd034ffe0dda24a79f181abbec"
     },
     {
       "path": "studio/workbench/studio.js",
-      "bytes": 52999,
-      "sha256": "c22b79fd162c2e7cff3ea370b0be7825d28b5ebdd3a21c21b422298ab562ed26"
+      "bytes": 53095,
+      "sha256": "2dc91ceaa9f2c526c0836a9ce305a02a3d57a4139624d57a1141e3449a306b03"
     }
   ]
 }

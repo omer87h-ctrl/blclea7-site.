@@ -16,7 +16,9 @@ const base=process.env.CLEA7_WEB_BASE||'http://127.0.0.1:4173',out='test-evidenc
  async function diagnostics(){await page.locator('#conversation-diagnostics>summary').click();assert.equal(await page.locator('#conversation-diagnostics').getAttribute('open'),'');}
  try{
   await page.goto(base+'/razgovor/');
-  await check('automatically verifies exact original model in a real Worker without booting Studio',async()=>{
+  await check('one connection space and explicit offline help verify the original Worker without booting Studio',async()=>{
+   await page.locator('#clea-connect-model').waitFor();assert((await page.locator('#chat-ready').innerText()).includes('nije povezan'));assert(await page.locator('#chat-send').isDisabled());
+   await page.locator('#clea-ai-settings>summary').click();await page.locator('#clea-offline-options>summary').click();await page.locator('#clea-offline-help').check();
    await page.waitForFunction(()=>document.querySelector('#chat-ready').textContent.includes('je provjeren'));
    assert.equal(await page.evaluate(()=>typeof CLEA7Workbench),'undefined');
    const description=await page.evaluate(()=>CLEA7ChatWorkspace.description);

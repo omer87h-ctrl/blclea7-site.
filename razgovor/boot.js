@@ -72,12 +72,10 @@
     }
 
     // Move the actual diagnostics nodes; never recreate controls or listeners.
-    const diagnostics = document.createElement('details');
+    const diagnostics = document.getElementById('clea-execution-details')||document.createElement('details');
     diagnostics.id = 'conversation-diagnostics';
-    const summary = document.createElement('summary');
-    summary.textContent = 'Kako radi model i privatnost';
-    diagnostics.append(summary, inspector);
-    shell.append(diagnostics);
+    if(!diagnostics.querySelector('summary')){const summary=document.createElement('summary');summary.textContent='Plan i izvršavanje';diagnostics.append(summary);}
+    if(!diagnostics.isConnected)inspector.append(diagnostics);
 
     // The real UI owns loading, readiness, cancellation and errors. Expose its
     // retry control automatically when loading fails, without inventing a reply.
@@ -87,7 +85,9 @@
     });
     observer.observe(ready, { childList: true, characterData: true, subtree: true });
     window.addEventListener('beforeunload', function () { observer.disconnect(); }, { once: true });
-    retry.click();
+    // The single AI space connects through its real service. Offline topic
+    // help is an explicit optional mode, not the default conversation model.
+    if(!runtimeHost)document.getElementById('chat-ready').textContent='Model nije povezan';
   }
 
   if (document.readyState === 'complete') start();

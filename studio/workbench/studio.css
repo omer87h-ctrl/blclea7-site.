@@ -61,3 +61,6 @@ body.studio-shell{margin:0;background:#080e16;font-size:13px;min-width:0}.studio
 
 /* Hidden capability fields must not re-enter layout or keyboard navigation. */
 .bil-remote-authoring [hidden]{display:none!important}
+
+/* Visibility and focus agree for every Studio workspace and retired entry. */
+.studio-shell [hidden]{display:none!important}
