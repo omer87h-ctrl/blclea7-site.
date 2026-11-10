@@ -1,7 +1,7 @@
 {
   "format": "clea7.public-downloads/1",
   "version": "0.39.0-test",
-  "source_commit": "a489e7abdbd6766f677a8b9279ea97b3e3b78fce",
+  "source_commit": "9092f01f2034454f692c634066f9ed0bd39d0de9",
   "verified_run": null,
   "published": [
     {
@@ -481,7 +481,7 @@
   "web": {
     "version": "0.39.0-test",
     "status": "test",
-    "source_commit": "a489e7abdbd6766f677a8b9279ea97b3e3b78fce",
+    "source_commit": "9092f01f2034454f692c634066f9ed0bd39d0de9",
     "verified_scope": "shared_core_sense_browser_studio_runtime_and_independent_sdk",
     "verification": {
       "result": "passed",
@@ -491,7 +491,9 @@
       "targeted_node_checks": 21,
       "real_chrome_touch_checks": 8,
       "real_document_import_checks": 6,
-      "real_studio_sdk_behavior_checks": 4
+      "real_studio_sdk_behavior_checks": 4,
+      "working_element_kinds": 9,
+      "working_element_chrome_checks": 6
     },
     "native_verification": false
   },
@@ -580,5 +582,42 @@
       }
     ],
     "verified_ui": "single_ai_workspace"
+  },
+  "android_current": {
+    "state": "published",
+    "version": "0.39.0-test",
+    "tag": "clea7-android-0.39-test",
+    "repository": "omer87h-ctrl/blclea7-site.",
+    "source_commit": "a489e7abdbd6766f677a8b9279ea97b3e3b78fce",
+    "verification_run": 42662434666,
+    "physical_device_tested": false,
+    "production_signed": false,
+    "assets": [
+      {
+        "name": "BL-CLEA-Sense-CV-0.39-debug.apk",
+        "size_bytes": 257028,
+        "sha256": "eda796c887879033f62d7e2a9811d7d17bf86dca8711fb7d8247e4eb1efc2041",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-android-0.39-test/BL-CLEA-Sense-CV-0.39-debug.apk"
+      },
+      {
+        "name": "BL-CLEA-Sense-CV-0.39-unsigned.aab",
+        "size_bytes": 219020,
+        "sha256": "efbeb930ccf25447f46fb670c871abb3fa619db28233b61d70d3eb2d81fcac5b",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-android-0.39-test/BL-CLEA-Sense-CV-0.39-unsigned.aab"
+      },
+      {
+        "name": "BL-CLEA7-Runtime-Android-0.39-debug.apk",
+        "size_bytes": 252190,
+        "sha256": "ca204dcf78f4b2e976f81451cdc74f60084dad54d5c55160a5e44bf6657019c0",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-android-0.39-test/BL-CLEA7-Runtime-Android-0.39-debug.apk"
+      },
+      {
+        "name": "BL-CLEA-Sense-CV-0.39.clea7",
+        "size_bytes": 54193,
+        "sha256": "115ae1d51dae72879df930730d66663423e9aeae8fa5f440667448ad14a0615d",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-android-0.39-test/BL-CLEA-Sense-CV-0.39.clea7"
+      }
+    ],
+    "publication_run": 42664618066
   }
 }

@@ -33,10 +33,10 @@ assert 'ILDuA90WSVz2FTZdmWleQ0lzbGCLmFndZ6wlT5V74Ow' in (ROOT/'index.html').read
 assert not list(ROOT.rglob('session.json')) and not list(ROOT.rglob('identity.json'))
 for forbidden in ['main.py','runtime_main.py','clea7/desktop.py','clea7/host.py','clea7/cloud_ai.py','clea7/ai.py']:
  assert not (ROOT/'sdk-source'/forbidden).exists(),forbidden
-catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='a489e7abdbd6766f677a8b9279ea97b3e3b78fce'
+catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='9092f01f2034454f692c634066f9ed0bd39d0de9'
 download_page=(ROOT/'preuzimanja.html').read_text()
 for page in ROOT.glob('*.html'):
- assert 'Studio i SDK 0.39-test · Android Runtime 0.37-test' in page.read_text(),(page,'stale visible release version')
+ assert 'Studio i SDK 0.39-test · Android Runtime 0.39-test' in page.read_text(),(page,'stale visible release version')
 for entry in catalog['published']:
  p=ROOT/entry['url'];data=p.read_bytes();assert p.is_relative_to(ROOT) and len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],p
  if entry['key'] in ('sdk','preview'):
@@ -90,3 +90,15 @@ asset=windows["assets"][0]
 assert asset["size_bytes"]==249209930 and asset["sha256"]=="f0c11f6c8af05e843a38b280c385fa845568c013382b77151c30e35a813d5408"
 assert asset["url"] in download_page and asset["sha256"] in download_page
 print("PUBLIC_CHECKED_WINDOWS038 exact installed binary and anonymous release link verified")
+
+android=catalog['android_current']
+assert android['state']=='published' and android['version']=='0.39.0-test'
+assert android['source_commit']=='a489e7abdbd6766f677a8b9279ea97b3e3b78fce' and android['verification_run']==42662434666
+assert android['publication_run']==42664618066 and android['production_signed'] is False
+proof=json.loads((ROOT/'release/android-039.json').read_text())
+assert len(android['assets'])==4 and proof['actualAndroidEmulatorSenseTest'] is True
+for asset,expected in zip(android['assets'],proof['publicAssets']):
+ assert all(asset[k]==expected[k] for k in ('name','size_bytes','sha256'))
+ assert asset['url']=='https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-android-0.39-test/'+asset['name']
+assert android['assets'][2]['url'] in download_page
+print('PUBLIC_CHECKED_ANDROID039 exact source, emulator evidence and published downloads verified')
