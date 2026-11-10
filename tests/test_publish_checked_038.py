@@ -31,4 +31,10 @@ class CurrentReleaseTests(unittest.TestCase):
    with zipfile.ZipFile(unsafe,'w') as z:z.writestr('../private-file',b'no');z.writestr(candidate.INSTALLER,data)
    with self.assertRaises(ValueError):unpack(unsafe,root,**dict(kwargs,archive_bytes=unsafe.stat().st_size,archive_sha=hashlib.sha256(unsafe.read_bytes()).hexdigest()))
 
+ def test_working_elements_release_requires_its_exact_actual_installer_proof(self):
+  root=Path(__file__).resolve().parents[1];spec=candidate.release_spec('integrated-039')
+  self.assertEqual(spec['build_run'],42667011893);self.assertEqual(spec['installer_bytes'],249726161)
+  proof=candidate.install_receipt(root,spec);self.assertEqual(proof['verificationRun'],42868865644)
+  with self.assertRaises(ValueError):candidate.install_receipt(root,dict(spec,receipt='windows-installed-single-ai-038.json'))
+
 if __name__=='__main__':unittest.main()

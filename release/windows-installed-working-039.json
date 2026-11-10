@@ -1,0 +1,17 @@
+{
+  "format": "clea7.windows-installed/1",
+  "passed": true,
+  "installerSource": "9092f01f2034454f692c634066f9ed0bd39d0de9",
+  "installerSha256": "d181418bf3551eca54b57d5786822b4d75eb522c77041101bcc55f58f4242393",
+  "installedManifestVerified": {
+    "verified": true,
+    "product": "studio",
+    "files": 977
+  },
+  "actualInstallerExecuted": true,
+  "actualUninstallerExecuted": true,
+  "userFilesPreserved": true,
+  "sdkOrModelsDownloaded": false,
+  "productionPublished": false,
+  "verificationRun": 42868865644
+}

@@ -328,8 +328,13 @@
     },
     {
       "path": "studio/workbench/bil-designer.js",
-      "bytes": 32405,
-      "sha256": "2b05de8a258bab6032cb1b4dd36ad40dca435d751d3bdd53ad15a5241cc0c7de"
+      "bytes": 32516,
+      "sha256": "b78a7db87119d5f94daa5a05504eb6e8f7156672aa4098522a636d2a4414f192"
+    },
+    {
+      "path": "studio/workbench/bil-elements.js",
+      "bytes": 12108,
+      "sha256": "3ad811435b163191a5affc78a958bb6772120ab2df4ca97eead13846340d7314"
     },
     {
       "path": "studio/workbench/bil-runtime.js",
@@ -343,8 +348,8 @@
     },
     {
       "path": "studio/workbench/business.js",
-      "bytes": 12048,
-      "sha256": "75fed16308b80b1333a0a56f57928b0120b81652d4f83cd7cbd0fb981b5e7956"
+      "bytes": 12046,
+      "sha256": "eb66f0d5eac1d018fe7e8953e3b6d984c444307d4944bf4eceb89dc4ed7bd770"
     },
     {
       "path": "studio/workbench/caci.js",
@@ -463,8 +468,8 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 16506,
-      "sha256": "11305c4e2eb9e51e4231965bc4c5f9011fc3ff9bb414ef411e2ca42b2b43a84d"
+      "bytes": 16564,
+      "sha256": "d0c6ebd0150e8d27c46e224c052c5910aa0899f3810e3ab89ee0539157ef22d9"
     },
     {
       "path": "studio/workbench/intelligence.js",
@@ -573,8 +578,8 @@
     },
     {
       "path": "studio/workbench/studio-tests.js",
-      "bytes": 10361,
-      "sha256": "4833c97ac4889a34a994e0a4176dc620062d62309eacef80f53ffbd53bda96bb"
+      "bytes": 10548,
+      "sha256": "dde690373ee9348bdb1b47262cdd1142dbf918da4123f5af2dec3f4663be960d"
     },
     {
       "path": "studio/workbench/studio.css",

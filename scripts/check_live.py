@@ -92,6 +92,7 @@ def check():
  current=catalog.get('native_current',catalog['native'])
  native=native_checks(current) if current['state']=='published' else []
  if catalog.get('windows_current',{}).get('state')=='published':native+=native_checks(catalog['windows_current'])
+ if catalog.get('android_current',{}).get('state')=='published':native+=native_checks(catalog['android_current'])
  report={'format':'clea7.live-delivery-check/1','url':BASE,'anonymous':True,'runtimeMatchesVerifiedSource':True,'publicPagesMatchVerifiedSource':verified_pages,'downloads':verified,'nativeStatus':catalog['native']['state'],'nativeDownloads':native}
  target=ROOT/'test-evidence/live-delivery.json';target.parent.mkdir(exist_ok=True);target.write_text(json.dumps(report,indent=2)+'\n');print('PUBLIC_LIVE_DELIVERY '+json.dumps(report))
 if __name__=='__main__':
