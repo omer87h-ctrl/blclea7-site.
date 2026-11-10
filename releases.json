@@ -564,24 +564,24 @@
   },
   "windows_current": {
     "state": "published",
-    "version": "0.38.0-test",
-    "tag": "clea7-windows-0.38-single-ai-test",
+    "version": "0.39.0-test",
+    "tag": "clea7-windows-0.39-test",
     "repository": "omer87h-ctrl/blclea7-site.",
-    "publication_run": 42564577149,
-    "windows_build_run": 42562785101,
-    "windows_install_run": 42563904883,
-    "source_commit": "0491ab804260c801a793b691a49eaba73e76ce3e",
+    "publication_run": 42869786543,
+    "windows_build_run": 42667011893,
+    "windows_install_run": 42868865644,
+    "source_commit": "9092f01f2034454f692c634066f9ed0bd39d0de9",
     "production_signed": false,
     "assets": [
       {
         "key": "installer",
         "name": "BLclea7-Setup-Windows-x64.exe",
-        "size_bytes": 249209930,
-        "sha256": "f0c11f6c8af05e843a38b280c385fa845568c013382b77151c30e35a813d5408",
-        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-windows-0.38-single-ai-test/BLclea7-Setup-Windows-x64.exe"
+        "size_bytes": 249726161,
+        "sha256": "d181418bf3551eca54b57d5786822b4d75eb522c77041101bcc55f58f4242393",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-windows-0.39-test/BLclea7-Setup-Windows-x64.exe"
       }
     ],
-    "verified_ui": "single_ai_workspace"
+    "verified_ui": "single_ai_workspace_and_working_elements"
   },
   "android_current": {
     "state": "published",
@@ -619,5 +619,28 @@
       }
     ],
     "publication_run": 42664618066
-  }
+  },
+  "windows_archived": [
+    {
+      "state": "published",
+      "version": "0.38.0-test",
+      "tag": "clea7-windows-0.38-single-ai-test",
+      "repository": "omer87h-ctrl/blclea7-site.",
+      "publication_run": 42564577149,
+      "windows_build_run": 42562785101,
+      "windows_install_run": 42563904883,
+      "source_commit": "0491ab804260c801a793b691a49eaba73e76ce3e",
+      "production_signed": false,
+      "assets": [
+        {
+          "key": "installer",
+          "name": "BLclea7-Setup-Windows-x64.exe",
+          "size_bytes": 249209930,
+          "sha256": "f0c11f6c8af05e843a38b280c385fa845568c013382b77151c30e35a813d5408",
+          "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-windows-0.38-single-ai-test/BLclea7-Setup-Windows-x64.exe"
+        }
+      ],
+      "verified_ui": "single_ai_workspace"
+    }
+  ]
 }

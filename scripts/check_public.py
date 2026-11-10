@@ -84,12 +84,12 @@ for a in current['assets']:
 print('PUBLIC_CHECKED_037 current installer, Android and universal package release metadata verified')
 
 windows=catalog["windows_current"]
-assert windows["state"]=="published" and windows["publication_run"]==42564577149
-assert windows["source_commit"]=="0491ab804260c801a793b691a49eaba73e76ce3e"
+assert windows["state"]=="published" and windows["publication_run"]==42869786543
+assert windows["source_commit"]=="9092f01f2034454f692c634066f9ed0bd39d0de9"
 asset=windows["assets"][0]
-assert asset["size_bytes"]==249209930 and asset["sha256"]=="f0c11f6c8af05e843a38b280c385fa845568c013382b77151c30e35a813d5408"
+assert asset["size_bytes"]==249726161 and asset["sha256"]=="d181418bf3551eca54b57d5786822b4d75eb522c77041101bcc55f58f4242393"
 assert asset["url"] in download_page and asset["sha256"] in download_page
-print("PUBLIC_CHECKED_WINDOWS038 exact installed binary and anonymous release link verified")
+print("PUBLIC_CHECKED_WINDOWS039 exact installed binary and anonymous release link verified")
 
 android=catalog['android_current']
 assert android['state']=='published' and android['version']=='0.39.0-test'
