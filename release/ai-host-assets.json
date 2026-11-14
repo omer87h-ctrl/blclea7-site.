@@ -67,6 +67,11 @@
       "sha256": "61ef9a834c1568d8947616805b2767144d89b40f209ffbf88b8c6922977e1fef"
     },
     {
+      "path": "sense/downloads/BL-CLEA7-Core-SDK-0.41.0-test.zip",
+      "bytes": 1042595,
+      "sha256": "ccbdb2e1bab096a5df7a59fa6202807a84760f43cff17f297afc983c88815e3e"
+    },
+    {
       "path": "sense/downloads/SDK-CORE-2.md",
       "bytes": 4071,
       "sha256": "3c3ae2e21be65bc8cd01908bb817c6a3561923edd33af690182f13d24a13d9b5"
@@ -104,12 +109,12 @@
     {
       "path": "sense/index.html",
       "bytes": 26430,
-      "sha256": "278213d8e73ef2c88457619e1ed58f19193307a6dbdb9acd7582d17bfaabcfc8"
+      "sha256": "5cf29960be9a8cb8b80c72eecbed5615998546bda652c2b5d2d83dfaf15f7fc0"
     },
     {
       "path": "sense/offline-assets.js",
       "bytes": 4094,
-      "sha256": "6584d78e7e159336b90078eec705f6ad3374244145fb3e269f172971b62b99cb"
+      "sha256": "5c0da1b525dd8937a620448ee977068c290a09b5c9ef1e2d497dffacb53e9c3a"
     },
     {
       "path": "sense/sense-authoring.js",
@@ -268,8 +273,8 @@
     },
     {
       "path": "studio/launcher/index.html",
-      "bytes": 3228,
-      "sha256": "3b1f76ce2c9af19fd175cbeef1db92bf6118d5e8b4a1cdcbfd496a76ac2c255d"
+      "bytes": 3503,
+      "sha256": "7fb764ef29e1400588da82b3b608453428974e2c261be241f83e5e0afda66ad3"
     },
     {
       "path": "studio/launcher/launcher.css",
@@ -308,8 +313,8 @@
     },
     {
       "path": "studio/workbench/ai-authoring.js",
-      "bytes": 13985,
-      "sha256": "6ba7d8ab755b09dc4ad58a78f6020ea615fc7c4d68c347f79ec832d15b597b70"
+      "bytes": 16225,
+      "sha256": "1824d37a0180bb238855df0bd5fdef361e8776168df4880aae74805ed128b57e"
     },
     {
       "path": "studio/workbench/ai-controls.js",
@@ -338,18 +343,18 @@
     },
     {
       "path": "studio/workbench/bil-elements.js",
-      "bytes": 19678,
-      "sha256": "651010fe178f6c1206b2131a51b9d9ceffa36d29b42e4dc90e421481e56b3084"
+      "bytes": 19835,
+      "sha256": "513ad2097b80c3b12627907d814ecdddc5bfb04fe3a088fb6290a4296dfae05c"
     },
     {
       "path": "studio/workbench/bil-runtime.js",
-      "bytes": 81044,
-      "sha256": "089cb5791eef2b77582051f5ccb254468e7f7467ab8334b2b5a3542b6bd6bafb"
+      "bytes": 81189,
+      "sha256": "95655b32b1fe73c640e898c41e86e54fcc80b6896d56f7f6705a05cc8e67ce1e"
     },
     {
       "path": "studio/workbench/bil-studio.js",
-      "bytes": 13885,
-      "sha256": "3583a48e20695a852a7829844c82da29ff2cdb5bec5158bdd812423e8f1ad1c5"
+      "bytes": 14057,
+      "sha256": "8d4f47095b79ddd2a6b2963162b1ba569ad6b943036d97c0ae7a667d940f5496"
     },
     {
       "path": "studio/workbench/business.js",
@@ -398,8 +403,8 @@
     },
     {
       "path": "studio/workbench/chat/ui.js",
-      "bytes": 58622,
-      "sha256": "61f7a657be0357ac79fda0e3463a11ba9eff4c4f86c551eb8246f69c0edaa4ca"
+      "bytes": 64174,
+      "sha256": "40b76f846a941a0e7a8561547afc140c801b977f80f58785e153b11643fe1dec"
     },
     {
       "path": "studio/workbench/chat/worker.js",
@@ -423,8 +428,8 @@
     },
     {
       "path": "studio/workbench/clea-draw.js",
-      "bytes": 24939,
-      "sha256": "3e8921de771474e308e47eaa8271183baf385bb7b3fd24d58bb8c868c3e9fbfe"
+      "bytes": 29243,
+      "sha256": "ed695517b28e8dd47b91421aaeda6cb2ad30cf61e90399f4ecbcef1f8d3bd4a0"
     },
     {
       "path": "studio/workbench/clea-intent-model.js",
@@ -478,8 +483,8 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 17043,
-      "sha256": "e9e3163c7c1578c8fa6c489f2855250980cf9e4b03961d20fe81a058abba932b"
+      "bytes": 17127,
+      "sha256": "cc32431bd5350327206ac124918139a4126f2d444bcee6d534f526dc5c6e65aa"
     },
     {
       "path": "studio/workbench/intelligence.js",
@@ -582,6 +587,11 @@
       "sha256": "025fae1eeb706580fa13b46272aa229bbe8194d4214c5ac4c3537373fb756f56"
     },
     {
+      "path": "studio/workbench/studio-operator.js",
+      "bytes": 12719,
+      "sha256": "d3604548931124932288d8c01f86cdbdd86747536f01eb00c6732052cd5887f7"
+    },
+    {
       "path": "studio/workbench/studio-sense.js",
       "bytes": 8120,
       "sha256": "ef5301dff9e57f67e2de5ea184e19f8e18e9df13c2502ca3bc993743c32c8f73"
@@ -593,13 +603,13 @@
     },
     {
       "path": "studio/workbench/studio.css",
-      "bytes": 34751,
-      "sha256": "c2abd4bf9b408271b0bca4022813df51095a8a7fd7f8abb4a007078116cf1bc9"
+      "bytes": 35283,
+      "sha256": "9a88360599d1c49b7ddbb2f891db27e53639e4627ff121a2dc1ce1c679356c45"
     },
     {
       "path": "studio/workbench/studio.js",
-      "bytes": 53110,
-      "sha256": "3468925c6ab54ff11da84bf27d138d2a9d7b3df76e3d32fc2fcc073e833ff8f7"
+      "bytes": 53264,
+      "sha256": "2a59bcdc18e3c8df6eed81fa56d7d3209cc9ade19a995ad63264edc3d56fbee9"
     },
     {
       "path": "studio/workbench/toolchain-ui.js",

@@ -7,9 +7,9 @@
  const source=new URL(document.currentScript.src),configURL=new URL('clea-ai-config.json',source);
  let configurationPromise,widgetPromise;
  const errors={not_configured:'Javni BL CLEA AI još nije povezan. Nema slanja poruka.',
-  offline:'BL CLEA AI server trenutno nije dostupan. Pokušaj kasnije.',
+  offline:'Server u doradi · lokalni model trenutno nije dostupan. Studio i lokalni alati ostaju dostupni.',
   busy:'BL CLEA AI odgovara drugom korisniku. Sačekaj pa pošalji ponovo.',
-  rate_limit:'Dosegnuto je ograničenje zahtjeva. Sačekaj prije novog pitanja.',
+  rate_limit:'Servis trenutno čeka slobodne resurse. Pokušaj ponovo kasnije.',
   session_required:'Sesija je istekla. Ponovo pošalji pitanje za novu potvrdu pristupa.',
   challenge_failed:'Potvrda pristupa nije uspjela. Pokušaj ponovo.',
   invitation_required:'Za ovaj razgovor otvori privatni link koji si dobio iz CLEA aplikacije.',
@@ -59,20 +59,35 @@
   }else{raw=await response.text();if(new TextEncoder().encode(raw).length>32768)throw fail('invalid_request');}
   try{return JSON.parse(raw);}catch{throw fail('invalid_request');}
  }
+ // Retry only an explicit HTTP rejection before admission. A broken connection,
+ // partial stream or model error is uncertain and is never replayed automatically.
+ function rejected(response,value){
+  const error=fail(response.status===429?(value.code==='busy'?'busy':'rate_limit'):response.status===401?'session_required':
+   ['challenge_failed','invitation_required','invitation_used','preview_expired'].includes(value.code)?value.code:'offline');
+  if(response.status===429&&['busy','rate_limit'].includes(value.code)){
+   error.notAdmitted=true;const delay=Number(response.headers.get('Retry-After'));
+   error.retryMs=Number.isFinite(delay)&&delay>0?Math.max(250,Math.min(60000,delay*1000)):5000;
+  }return error;
+ }
+ function waitForCapacity(ms,signal){return new Promise((resolve,reject)=>{
+  if(signal.aborted){reject(fail('cancelled'));return;}
+  const abort=()=>{clearTimeout(timer);reject(fail('cancelled'));};
+  const timer=setTimeout(()=>{signal.removeEventListener('abort',abort);resolve();},ms);
+  signal.addEventListener('abort',abort,{once:true});
+ });}
  async function request(url,{body,signal,token}={}){
   const headers={};if(body!==undefined)headers['Content-Type']='application/json';if(token)headers.Authorization='Bearer '+token;
   const response=await fetch(url,{method:body===undefined?'GET':'POST',mode:'cors',credentials:new URL(url).origin===location.origin&&location.hostname.endsWith('.trycloudflare.com')?'same-origin':'omit',
    redirect:'error',cache:'no-store',referrerPolicy:'no-referrer',headers,body:body===undefined?undefined:JSON.stringify(body),signal});
   const value=await readJSON(response);
-  if(!response.ok)throw fail(response.status===429?(value.code==='busy'?'busy':'rate_limit'):response.status===401?'session_required':
-   ['challenge_failed','invitation_required','invitation_used','preview_expired'].includes(value.code)?value.code:'offline');
+  if(!response.ok)throw rejected(response,value);
   return value;
  }
  async function streamRequest(url,{body,signal,token,onDelta=()=>{},maxReply=5000}){
   const headers={'Content-Type':'application/json'};if(token)headers.Authorization='Bearer '+token;
   const response=await fetch(url,{method:'POST',mode:'cors',credentials:new URL(url).origin===location.origin&&location.hostname.endsWith('.trycloudflare.com')?'same-origin':'omit',
    redirect:'error',cache:'no-store',referrerPolicy:'no-referrer',headers,body:JSON.stringify(body),signal});
-  if(!response.ok){const value=await readJSON(response);throw fail(response.status===429?(value.code==='busy'?'busy':'rate_limit'):response.status===401?'session_required':'offline');}
+  if(!response.ok){const value=await readJSON(response);throw rejected(response,value);}
   if(!response.headers.get('Content-Type')?.startsWith('text/event-stream')||!response.body?.getReader)throw fail('invalid_request');
   const reader=response.body.getReader(),decoder=new TextDecoder('utf-8',{fatal:true});
   let buffer='',total=0,reply='',done=null;
@@ -200,9 +215,13 @@
     }
     if(config.native)delete body.history;
     if(new TextEncoder().encode(JSON.stringify(body)).length>16384)throw fail('invalid_request');
-    const data=config.native?await CLEA7Workbench.nativeAI.ask(body):modelStatus.streaming===true?
+    let data;while(true){try{data=config.native?await CLEA7Workbench.nativeAI.ask(body):modelStatus.streaming===true?
      await streamRequest(config.endpoint+'/chat/stream',{body,signal,token:config.local?null:session,maxReply:authoring?12000:5000,onDelta:(delta,reply)=>{if(signal.aborted||ticket!==epoch)throw fail('cancelled');onDelta(delta,reply);}}):
-     await request(config.endpoint+'/chat',{body,signal,token:config.local?null:session});
+     await request(config.endpoint+'/chat',{body,signal,token:config.local?null:session});break;
+    }catch(error){if(config.native||error.notAdmitted!==true)throw error;
+     onStatus('Čekam slobodan model · zahtjev još nije prihvaćen. Možeš zaustaviti čekanje.');
+     await waitForCapacity(error.retryMs,signal);if(ticket!==epoch)throw fail('cancelled');
+    }}
     if(typeof data.reply!=='string'||!data.reply.trim()||data.reply.length>(authoring?12000:5000))throw fail('invalid_request');
     if(signal.aborted||ticket!==epoch)throw fail('cancelled');
     if(!authoring&&!isolateHistory){history.push({role:'user',content:body.question},{role:'assistant',content:data.reply.slice(0,1200)});history=history.slice(-8);}

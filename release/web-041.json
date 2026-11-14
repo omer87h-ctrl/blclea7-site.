@@ -1,0 +1,31 @@
+{
+  "format": "clea7.connected-web-delivery/1",
+  "version": "0.41.0-test",
+  "sourceCommit": "ae85ea55d6547b8a798112936f3b9cb351dc7c3a",
+  "actualBrowserFlow": {
+    "format": "clea7.unified-studio-browser/1",
+    "passed": true,
+    "checks": [
+      "A real conversation command invokes registered Studio tools, passes real compiler/behavior/restart checks, requires review and runs in the one Draw workspace without a neural or response fixture",
+      "Draw request uses the same conversation/operator, adds a real component and preserves current project identity and saved movement",
+      "Components and typed collections are authored and executed directly in Draw; one existing Runtime mount preserves unrelated saved values",
+      "Reviewed apply/run adds no duplicate history entry; one AI Undo restores the exact previous complete project",
+      "The same exported combined Draw/UI/collection package executes and persists in independent Runtime; one mount and unique DOM IDs survive panel changes and390px layout"
+    ],
+    "errors": [],
+    "actualNeuralInference": false,
+    "modelTransportFixture": false,
+    "physicalDeviceTested": false
+  },
+  "pythonTests": {
+    "privateRan": 385,
+    "privatePassed": 383,
+    "privatePlatformSkipped": 2,
+    "publicPassed": 67
+  },
+  "actualSourceTechRequests": 9,
+  "actualSourceTechCandidates": 2,
+  "googleIndexVerified": false,
+  "nativeCurrent": "separately verified0.40",
+  "ownerHPAvailable": false
+}

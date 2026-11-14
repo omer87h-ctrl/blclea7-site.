@@ -40,7 +40,7 @@ def validate(value):
  if value.get('format')!=FORMAT or value.get('mode') not in ('create','change'):
   raise ValueError('Unsupported BIL authoring operation.')
  mode=value['mode'];source=value.get('source')
- if value.get('representation','bil') not in ('bil','plan') or (mode=='change' and value.get('representation','bil')!='bil'):
+ if value.get('representation','bil') not in ('bil','plan','tools') or (mode=='change' and value.get('representation','bil') not in ('bil','tools')):
   raise ValueError('Use a structured plan for creation, or BIL source for an existing project change.')
  if mode=='change':
   if value.get('sourceApproved') is not True or not isinstance(source,str) or not source.strip():

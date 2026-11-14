@@ -1,7 +1,7 @@
 'use strict';
 const siteOrigin='http://127.0.0.1:'+(process.env.CLEA7_TEST_PORT||4173);
 // Network fixtures test the actual browser UI/protocol, not real HP/TLS/model quality.
-const {chromium}=require('/tmp/clea7-qa/node_modules/playwright');
+const {chromium}=require('node:module').createRequire('/tmp/clea7-qa/package.json')('playwright');
 const assert=require('node:assert/strict');
 (async()=>{
  const endpoint='https://ai.clea7.example',identity='a'.repeat(32),token='T'.repeat(43);
@@ -61,13 +61,13 @@ const assert=require('node:assert/strict');
   console.log('PASS HP browser fixture: explicit opt-in, bounded session history, text-only reply, no stored token or chat');
   status=429;
   await page.locator('#chat-question').fill('Test zauzetosti.');await page.locator('#chat-send').click();
-  await page.waitForFunction(()=>document.getElementById('chat-log').textContent.includes('odgovara drugom korisniku'));
-  assert.equal(received.length,3);await page.waitForTimeout(200);assert.equal(received.length,3);
+  await page.waitForFunction(()=>document.getElementById('chat-status').textContent.includes('Čekam slobodan model'));
+  assert.equal(received.length,3);await page.waitForTimeout(200);assert.equal(received.length,3);await page.locator('#chat-stop').click();await page.waitForFunction(()=>!document.getElementById('chat-send').disabled);
   healthy=false;
   await page.locator('#chat-question').fill('Ne smije otići ugašenom modelu.');await page.locator('#chat-send').click();
-  await page.waitForFunction(()=>document.getElementById('chat-log').textContent.includes('server trenutno nije dostupan'));
+  await page.waitForFunction(()=>document.getElementById('chat-log').textContent.includes('Server u doradi'));
   assert.equal(received.length,3);
-  console.log('PASS HP browser fixture: busy/offline states, no automatic retry or false fallback');
+  console.log('PASS HP browser fixture: rejected busy request waits/cancels before retry; offline has no send or false fallback');
   healthy=true;status=200;
   await page.goto((siteOrigin+"/sense/"));
   await page.waitForSelector('#sense-ai-question');

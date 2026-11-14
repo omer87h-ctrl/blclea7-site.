@@ -36,7 +36,7 @@ for forbidden in ['main.py','runtime_main.py','clea7/desktop.py','clea7/host.py'
 catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610'
 download_page=(ROOT/'preuzimanja.html').read_text()
 for page in ROOT.glob('*.html'):
- assert 'Web Studio i SDK 0.40-test · Windows 0.40-test · Android 0.40-test' in page.read_text(),(page,'stale visible release version')
+ assert 'Web Studio i SDK 0.41-test · Windows 0.40-test · Android 0.40-test' in page.read_text(),(page,'stale visible release version')
 for entry in catalog['published']:
  p=ROOT/entry['url'];data=p.read_bytes();assert p.is_relative_to(ROOT) and len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],p
  if entry['key'] in ('sdk','preview'):

@@ -7,10 +7,10 @@
     {
       "key": "sdk",
       "name": "BL-CLEA7-Core-SDK-0.40.0-test.zip",
-      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.40.0-test.zip",
-      "size_bytes": 1026932,
-      "sha256": "61ef9a834c1568d8947616805b2767144d89b40f209ffbf88b8c6922977e1fef",
-      "version": "0.40.0-test"
+      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.41.0-test.zip",
+      "size_bytes": 1042595,
+      "sha256": "ccbdb2e1bab096a5df7a59fa6202807a84760f43cff17f297afc983c88815e3e",
+      "version": "0.41.0-test"
     },
     {
       "key": "preview",
@@ -726,5 +726,10 @@
       ],
       "publication_run": 42664618066
     }
-  ]
+  ],
+  "web_current": {
+    "version": "0.41.0-test",
+    "scope": "Studio/Draw/operator/shared AI client/TECH monitor/SDK; native installers retain their verified versions",
+    "source_commit": "ae85ea55d6547b8a798112936f3b9cb351dc7c3a"
+  }
 }
