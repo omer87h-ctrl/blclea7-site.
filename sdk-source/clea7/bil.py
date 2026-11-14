@@ -173,11 +173,59 @@ def validate_presentation_node(node,ir):
         if not isinstance(motion,dict) or set(motion)!={'preset','duration'} or motion['preset'] not in ('none','fade','slide','move','scale') or type(motion['duration']) is not int or not 0<=motion['duration']<=2000:raise UserError('Neispravan ugovor animacije.')
     if 'gestures' in node:
         gestures=node['gestures']
-        if node['type'] not in ('row','card','heading','text','shape') or not isinstance(gestures,dict) or not set(gestures)<=GESTURES:raise UserError('Neispravan ugovor gesti.')
+        if node['type'] not in ('row','card','heading','text','shape','drawing') or not isinstance(gestures,dict) or not set(gestures)<=GESTURES:raise UserError('Neispravan ugovor gesti.')
         for key,event in gestures.items():
             if not isinstance(event,dict) or set(event)!={'handler','entry'} or not safe(event['handler']) or not safe(event['entry']) or event['handler'] not in ir['handlers'] or event['entry'] not in ir['handlers'] or event['handler'] in ir.get('events',{}).get('handlers',{}):raise UserError('Gesta treba postojeću običnu radnju.')
             code=ir['handlers'][event['entry']]
             if len(code)!=1 or code[0].get('op')!='UI_EVENT' or code[0].get('control')!=node['id'] or code[0].get('gesture')!=key:raise UserError('Izvršni ugovor geste ne odgovara komponenti.')
+
+def validate_cards_node(node,ir):
+    required={'id','type','loc','name','label','columns','identity','selection','image','actionLabel','handler','empty','entry'}
+    if not required <= set(node) or set(node)-required-{'style','motion'}:
+        raise UserError('Neispravan ugovor BIL kartica.')
+    if any(not safe(node[key]) for key in ('name','identity','selection','handler','entry')):raise UserError('Neispravan identitet ugovora kartica.')
+    if ir['ui']['format']!='bil.ui/3':raise UserError('Kartice zahtijevaju bil.ui/3.')
+    item=ir['globals'].get(node['name'],{}).get('type',{})
+    item=item.get('list',{}) if isinstance(item,dict) else {}
+    fields=item.get('record',{}) if isinstance(item,dict) else {}
+    selected=ir['globals'].get(node['selection'],{})
+    if not fields or fields.get(node['identity'])!='Text' or selected.get('type')!='Text' or selected.get('mutable') is not True:
+        raise UserError('Kartice trebaju List<Record>, tekstualni identitet i promjenjivi tekstualni odabir.')
+    columns=node['columns']
+    if not isinstance(columns,list) or not 1<=len(columns)<=8:raise UserError('Kartice trebaju 1–8 polja.')
+    seen=set()
+    for column in columns:
+        if not isinstance(column,dict) or set(column)!={'field','label'} or not safe(column['field']) or column['field'] in seen or fields.get(column['field']) not in ('Text','Number','Boolean'):
+            raise UserError('Neispravno polje kartice.')
+        seen.add(column['field'])
+        if not isinstance(column['label'],str) or not column['label'].strip() or len(column['label'])>200:raise UserError('Neispravan naziv polja kartice.')
+    for key in ('label','actionLabel','empty'):
+        if not isinstance(node[key],str) or not node[key].strip() or len(node[key])>200:raise UserError('Nazivi kartica trebaju 1–200 znakova.')
+    if not safe(node['handler']) or node['handler'].startswith('ui_') or node['handler'] not in ir['handlers'] or node['handler'] in ir.get('events',{}).get('handlers',{}):
+        raise UserError('Kartica treba postojeći obični događaj.')
+    if node['entry']!='ui_'+node['id'] or node['entry'] not in ir['handlers']:raise UserError('Neispravan ulazni događaj kartice.')
+    if node['image'] is not None:
+        if not safe(node['image']):raise UserError('Neispravno polje fotografije kartice.')
+        photo=fields.get(node['image'],{})
+        photo=photo.get('nullable',photo) if isinstance(photo,dict) else {}
+        if not isinstance(photo,dict) or photo.get('record')!=NATIVE_TYPES['NativeMedia'] or not any(b['adapter'] in ('android.native/1','firebase.development/4') for b in ir.get('remote',{}).get('backends',{}).values()):
+            raise UserError('Fotografija kartice treba NativeMedia i podržani adapter.')
+
+def validate_draw_node(node,ir):
+    if ir['ui']['format']!='bil.ui/3':raise UserError('Draw zahtijeva bil.ui/3.')
+    base={'id','type','loc','label'}
+    extra={'spaceSize','children'} if node['type']=='space' else {'points','role','closed','fill','ink','weight'}
+    if not base|extra <= set(node) or set(node)-base-extra-{'style','motion','gestures'}:raise UserError('Neispravan Draw objekat.')
+    if not isinstance(node['label'],str) or not node['label'].strip() or len(node['label'])>160:raise UserError('Draw objekat treba naziv1–160 znakova.')
+    if node['type']=='space':
+        size=node['spaceSize']
+        if not isinstance(size,list) or len(size)!=2 or any(type(x) not in (int,float) or not 64<=x<=4096 for x in size) or not isinstance(node['children'],list) or any(not isinstance(n,dict) or n.get('type')!='drawing' for n in node['children']):raise UserError('Draw prostor treba dimenzije64–4096 i objekte crteža.')
+        return
+    points=node['points']
+    if not isinstance(points,list) or not 2<=len(points)<=256 or any(not isinstance(p,list) or len(p)!=2 or any(type(v) not in (int,float) or not 0<=v<=1000 for v in p) for p in points):raise UserError('Crtež treba2–256 parova koordinata0–1000.')
+    if node['role'] not in ('object','actor','door','solid') or type(node['closed']) is not bool or type(node['weight']) not in (int,float) or not 1<=node['weight']<=16:raise UserError('Neispravna Draw uloga ili debljina linije.')
+    for key in ('fill','ink'):
+        if not isinstance(node[key],str) or not (re.fullmatch(r'#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?',node[key]) or node[key] in ('transparent','currentColor')):raise UserError('Nedozvoljena boja crteža.')
 
 def validate_program(project):
     live=project.get('format')=='clea7.application/9'
@@ -189,7 +237,7 @@ def validate_program(project):
     if not isinstance(bundle,dict) or set(bundle)!={'format','source','ir'} or bundle['format']!='bil.program/'+str(version):raise UserError('Neispravna BIL omotnica.')
     source=bundle['source'];ir=bundle['ir']
     if not isinstance(source,str) or len(source)>131072 or not isinstance(ir,dict) or set(ir)!=({'format','language','globals','records','imports','functions','handlers','main','controls','sourceMap'}|({'ui'} if extended else set())|({'remote'} if remote else set())|({'events'} if asynchronous else set())) or ir['format']!='bil.ir/'+str(version) or ir['language']!='bil/'+str(version):raise UserError('Nepodržan BIL ugovor.')
-    rich_ui=isinstance(ir.get('ui'),dict) and ir['ui'].get('format')=='bil.ui/2'
+    rich_ui=isinstance(ir.get('ui'),dict) and ir['ui'].get('format') in ('bil.ui/2','bil.ui/3')
     for key in ('globals','records','functions','handlers'):
         if not isinstance(ir[key],dict) or len(ir[key])>(4224 if rich_ui and key=='handlers' else 128 if rich_ui and key in ('globals','functions') else 192 if extended and key=='handlers' else 64) or any(not safe(k) for k in ir[key]):raise UserError('Neispravni BIL simboli.')
     if not isinstance(ir['imports'],list) or len(ir['imports'])>4 or any(x not in ('math','text','collections','json') for x in ir['imports']):raise UserError('Nedozvoljen BIL modul.')
@@ -303,12 +351,14 @@ def validate_program(project):
     expected_state={'bilValues':initial,'bilViews':[],'bilMotion':[]}
     if extended:
         ui=ir['ui']
-        if not isinstance(ui,dict) or set(ui)!={'format','start','screens'} or ui['format'] not in ('bil.ui/1','bil.ui/2') or not isinstance(ui['screens'],list) or len(ui['screens'])>(64 if rich_ui else 32):raise UserError('Neispravan BIL UI ugovor.')
+        if not isinstance(ui,dict) or set(ui)!={'format','start','screens'} or ui['format'] not in ('bil.ui/1','bil.ui/2','bil.ui/3') or not isinstance(ui['screens'],list) or len(ui['screens'])>(64 if rich_ui else 32):raise UserError('Neispravan BIL UI ugovor.')
         screens=set();node_ids=set()
         def nodes(items,depth=0):
             if not isinstance(items,list) or depth>8:raise UserError('Neispravan BIL raspored.')
             for n in items:
-                if not isinstance(n,dict) or not safe(n.get('id')) or n['id'] in node_ids or n.get('type') not in (('row','card','heading','text','input','select','toggle','table','view','button','image','shape') if rich_ui else ('row','card','heading','text','input','select','toggle','table','view','button','image')):raise UserError('Neispravna BIL komponenta.')
+                if not isinstance(n,dict) or not safe(n.get('id')) or n['id'] in node_ids or n.get('type') not in (('row','card','heading','text','input','select','toggle','table','view','button','image','shape','cards','drawing','space') if rich_ui else ('row','card','heading','text','input','select','toggle','table','view','button','image')):raise UserError('Neispravna BIL komponenta.')
+                if n['type']=='cards':validate_cards_node(n,ir)
+                if n['type'] in ('drawing','space'):validate_draw_node(n,ir)
                 if rich_ui:validate_presentation_node(n,ir)
                 elif any(key in n for key in ('style','motion','geometry','gestures')):raise UserError('Napredni prikaz zahtijeva bil.ui/2.')
                 node_ids.add(n['id'])

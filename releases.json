@@ -1,16 +1,16 @@
 {
   "format": "clea7.public-downloads/1",
-  "version": "0.39.0-test",
-  "source_commit": "9092f01f2034454f692c634066f9ed0bd39d0de9",
+  "version": "0.40.0-test",
+  "source_commit": "980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610",
   "verified_run": null,
   "published": [
     {
       "key": "sdk",
-      "name": "BL-CLEA7-Core-SDK-0.39.0-test.zip",
-      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.39.0-test.zip",
-      "size_bytes": 1006124,
-      "sha256": "cdbc0bae4f3872fd47587bb465835e927c7360dff29be861af4b24d82a076596",
-      "version": "0.39.0-test"
+      "name": "BL-CLEA7-Core-SDK-0.40.0-test.zip",
+      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.40.0-test.zip",
+      "size_bytes": 1026932,
+      "sha256": "61ef9a834c1568d8947616805b2767144d89b40f209ffbf88b8c6922977e1fef",
+      "version": "0.40.0-test"
     },
     {
       "key": "preview",
@@ -476,26 +476,38 @@
       "url": "sense/downloads/BL-CLEA7-Core-SDK-0.37.0-test.zip",
       "size_bytes": 317594,
       "sha256": "6d0bfec3ba0a2a1a068115350cbd477cda60c6497f5ce2bf941d2e8f97652499"
+    },
+    {
+      "key": "sdk",
+      "name": "BL-CLEA7-Core-SDK-0.39.0-test.zip",
+      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.39.0-test.zip",
+      "size_bytes": 1006124,
+      "sha256": "cdbc0bae4f3872fd47587bb465835e927c7360dff29be861af4b24d82a076596",
+      "version": "0.39.0-test"
     }
   ],
   "web": {
-    "version": "0.39.0-test",
+    "version": "0.40.0-test",
     "status": "test",
-    "source_commit": "9092f01f2034454f692c634066f9ed0bd39d0de9",
-    "verified_scope": "shared_core_sense_browser_studio_runtime_and_independent_sdk",
+    "source_commit": "980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610",
+    "verified_scope": "functional_Draw_typed_collections_shared_Core_Studio_Runtime_and_independent_SDK",
     "verification": {
       "result": "passed",
-      "python_tests_passed": 361,
+      "integrationRun": 43598051815,
+      "python_tests_passed": 374,
       "python_tests_skipped": 2,
-      "source_receipt": "Actual behavioral tests, independent SDK round trip and local document import; genuine9B generation has a separate acceptance gate.",
-      "targeted_node_checks": 21,
-      "real_chrome_touch_checks": 8,
-      "real_document_import_checks": 6,
-      "real_studio_sdk_behavior_checks": 4,
-      "working_element_kinds": 9,
-      "working_element_chrome_checks": 6
+      "actualDrawBrowserGroups": 6,
+      "actualCardsBrowserGroups": 6,
+      "actualDrawCompilerCoreGroups": 4,
+      "actualCardsCompilerCoreGroups": 9,
+      "physicalDeviceTested": false,
+      "actual9BInference": false
     },
-    "native_verification": false
+    "native_verification": false,
+    "native_receipts": [
+      "release/windows-ui-040.json",
+      "release/windows-installed-cards-040.json"
+    ]
   },
   "ai_overlay": {
     "version": "0.20.0-test",
@@ -564,24 +576,24 @@
   },
   "windows_current": {
     "state": "published",
-    "version": "0.39.0-test",
-    "tag": "clea7-windows-0.39-test",
+    "version": "0.40.0-test",
+    "tag": "clea7-windows-0.40-test",
     "repository": "omer87h-ctrl/blclea7-site.",
-    "publication_run": 42869786543,
-    "windows_build_run": 42667011893,
-    "windows_install_run": 42868865644,
-    "source_commit": "9092f01f2034454f692c634066f9ed0bd39d0de9",
+    "publication_run": 43600140921,
+    "windows_build_run": 43598140076,
+    "windows_install_run": 43598140076,
+    "source_commit": "980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610",
     "production_signed": false,
     "assets": [
       {
         "key": "installer",
         "name": "BLclea7-Setup-Windows-x64.exe",
-        "size_bytes": 249726161,
-        "sha256": "d181418bf3551eca54b57d5786822b4d75eb522c77041101bcc55f58f4242393",
-        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-windows-0.39-test/BLclea7-Setup-Windows-x64.exe"
+        "size_bytes": 249769336,
+        "sha256": "486a3abeed9fc0a8f3a044942a54b3c493901ed17b975bfab82faea191fcebd7",
+        "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-windows-0.40-test/BLclea7-Setup-Windows-x64.exe"
       }
     ],
-    "verified_ui": "single_ai_workspace_and_working_elements"
+    "verified_ui": "functional_Draw_UI3_typed_collections_and_single_AI_workspace"
   },
   "android_current": {
     "state": "published",
@@ -641,6 +653,27 @@
         }
       ],
       "verified_ui": "single_ai_workspace"
+    },
+    {
+      "state": "published",
+      "version": "0.39.0-test",
+      "tag": "clea7-windows-0.39-test",
+      "repository": "omer87h-ctrl/blclea7-site.",
+      "publication_run": 42869786543,
+      "windows_build_run": 42667011893,
+      "windows_install_run": 42868865644,
+      "source_commit": "9092f01f2034454f692c634066f9ed0bd39d0de9",
+      "production_signed": false,
+      "assets": [
+        {
+          "key": "installer",
+          "name": "BLclea7-Setup-Windows-x64.exe",
+          "size_bytes": 249726161,
+          "sha256": "d181418bf3551eca54b57d5786822b4d75eb522c77041101bcc55f58f4242393",
+          "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-windows-0.39-test/BLclea7-Setup-Windows-x64.exe"
+        }
+      ],
+      "verified_ui": "single_ai_workspace_and_working_elements"
     }
   ]
 }

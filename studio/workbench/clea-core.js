@@ -4,7 +4,7 @@
  * No DOM, filesystem, shell, networking or second evaluator lives here.
  */
 (function(scope){
-const VERSION='0.37.0',FORMAT='clea7.core/1';
+const VERSION='0.40.0',FORMAT='clea7.core/1';
 const own=(value,key)=>Object.prototype.hasOwnProperty.call(value,key);
 const clone=value=>JSON.parse(JSON.stringify(value));
 const frozen=value=>{if(value&&typeof value==='object'){for(const child of Object.values(value))frozen(child);Object.freeze(value);}return value;};
@@ -23,7 +23,7 @@ function minimumRuntime(raw,targets=[]){
  const app=application(raw),floors=[({'clea7.application/2':'0.3.0','clea7.application/3':'0.4.0','clea7.application/4':'0.5.0','clea7.application/5':'0.6.0','clea7.application/6':'0.7.0','clea7.application/7':targets.includes('android')?'0.9.0':'0.8.0','clea7.application/8':'0.10.0','clea7.application/9':'0.11.0'})[app.format]];
  if(!floors[0])fault('CoreApplication','Unsupported application contract.');
  if(Object.values(app.remote?.backends||{}).some(b=>b.adapter==='sense.local/1'))floors.push('0.37.0');
- if(app.bil){compiler().validateApplication(app);floors.push(featuresFor(app.bil.source).minimumRuntime);if(app.bil.ir.ui?.format==='bil.ui/2')floors.push('0.14.0');}
+ if(app.bil){compiler().validateApplication(app);floors.push(featuresFor(app.bil.source).minimumRuntime);if(app.bil.ir.ui?.format==='bil.ui/2')floors.push('0.14.0');if(app.bil.ir.ui?.format==='bil.ui/3')floors.push('0.40.0');}
  for(const backend of Object.values(app.remote?.backends||{})){
   if(backend.adapter==='firebase.development/3')floors.push('0.12.0');
   if(backend.adapter==='android.native/1')floors.push('0.13.0');
@@ -33,7 +33,7 @@ function minimumRuntime(raw,targets=[]){
 }
 function describe(raw,targets=[]){
  const app=validateApplication(raw),features=app.bil?featuresFor(app.bil.source):{format:'bil.core.features/1',version:1,minimumRuntime:'0.3.0',used:[]},required=new Set();
- if(app.bil){required.add('bil.execute/1');if(app.bil.ir.ui)required.add('bil.ui-model/1');if(app.bil.ir.ui?.format==='bil.ui/2')required.add('bil.ui-model/2');for(const feature of features.used)required.add('bil.feature/'+feature);if(features.used.includes('derive'))required.add('bil.derive/1');}
+ if(app.bil){required.add('bil.execute/1');if(app.bil.ir.ui)required.add('bil.ui-model/1');if(['bil.ui/2','bil.ui/3'].includes(app.bil.ir.ui?.format))required.add('bil.ui-model/2');if(app.bil.ir.ui?.format==='bil.ui/3')required.add('bil.ui-model/3');for(const feature of features.used)required.add('bil.feature/'+feature);if(features.used.includes('derive'))required.add('bil.derive/1');}
  else required.add(app.format);
  for(const backend of Object.values(app.remote?.backends||{})){
   required.add('adapter:'+backend.adapter);for(const operation of backend.operations||[])required.add('operation:'+backend.adapter+':'+operation);
@@ -43,7 +43,7 @@ function describe(raw,targets=[]){
 function profile(options={}){
  if(!options||typeof options!=='object'||Array.isArray(options))fault('CoreProfile','Host profile must be an object.');
  const runtime=options.runtime||VERSION;version(runtime);
- const defaults=['bil.execute/1','bil.ui-model/1','bil.ui-model/2'];for(const feature of scope.CLEA7BILRuntime?.SUPPORTED_CORE_FEATURES||[])defaults.push('bil.feature/'+feature);if(typeof scope.CLEA7BILRuntime?.reconcileDerived==='function')defaults.push('bil.derive/1');
+ const defaults=['bil.execute/1','bil.ui-model/1','bil.ui-model/2','bil.ui-model/3'];for(const feature of scope.CLEA7BILRuntime?.SUPPORTED_CORE_FEATURES||[])defaults.push('bil.feature/'+feature);if(typeof scope.CLEA7BILRuntime?.reconcileDerived==='function')defaults.push('bil.derive/1');
  const capabilities=options.capabilities===undefined?defaults:options.capabilities,permissions=options.permissions||[];
  if(!Array.isArray(capabilities)||capabilities.length>256||capabilities.some(x=>typeof x!=='string'||!x.length||x.length>180||!/^[A-Za-z0-9._:/-]+$/.test(x)))fault('CoreProfile','Host capabilities must be bounded explicit identifiers.');
  if(!Array.isArray(permissions)||permissions.length>32||permissions.some(x=>typeof x!=='string'||!x.length||x.length>64))fault('CoreProfile','Host permissions must be explicit bounded names.');

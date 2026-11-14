@@ -18,6 +18,8 @@ def release_spec(variant='initial'):
   return dict(tag='clea7-windows-0.38-single-ai-test',source='0491ab804260c801a793b691a49eaba73e76ce3e',build_run=42562785101,archive_bytes=249267447,archive_sha='4d8155aa7eb4cfeec8020b7f7c08423b837e99cc0a67dfcad20d10647e6a1108',installer_bytes=249209930,installer_sha='f0c11f6c8af05e843a38b280c385fa845568c013382b77151c30e35a813d5408',receipt='windows-installed-single-ai-038.json',notes='038-SINGLE-AI-WINDOWS-NOTES.md',title='BL CLEA7 Windows0.38 — one AI workspace, Studio and Runtime')
  if variant=='integrated-039':
   return dict(version='0.39.0-test',tag='clea7-windows-0.39-test',source='9092f01f2034454f692c634066f9ed0bd39d0de9',build_run=42667011893,archive_bytes=249783922,archive_sha='fa891cd14b7b0099ef50a73a9586dd83c97e36c59196b2a88f41434acb7fa91c',installer_bytes=249726161,installer_sha='d181418bf3551eca54b57d5786822b4d75eb522c77041101bcc55f58f4242393',receipt='windows-installed-working-039.json',notes='039-WINDOWS-NOTES.md',title='BL CLEA7 Windows0.39 — connected visual elements, Studio and Runtime')
+ if variant=='draw-040':
+  return dict(version='0.40.0-test',tag='clea7-windows-0.40-test',source='980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610',build_run=43598140076,archive_bytes=249827535,archive_sha='53ceec13fa0d46eccec6aa3fd2cec7950699d0dea3e958f71d59dde2c1b64d11',installer_bytes=249769336,installer_sha='486a3abeed9fc0a8f3a044942a54b3c493901ed17b975bfab82faea191fcebd7',receipt='windows-installed-cards-040.json',notes='040-WINDOWS-NOTES.md',title='BL CLEA7 Windows0.40 — functional Draw, typed collections and shared Runtime')
  raise ValueError('Unknown checked release variant.')
 
 def install_receipt(root,spec):

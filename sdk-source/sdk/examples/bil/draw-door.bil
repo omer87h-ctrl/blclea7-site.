@@ -1,0 +1,98 @@
+import math
+screen home "Moj Draw prostor" {
+    heading "Moj svijet" key title
+
+    space "CLEA7 Draw" size [800, 450] {
+    drawing "Igrač" points [[0,0],[1000,0],[1000,1000],[0,1000],[0,0]] role actor closed fill "#2dd4bf" ink "#e2e8f0" weight 2 style {
+            x draw7_player_x
+            y draw7_player_y
+            width 40
+            height 60
+        } motion move 180 gestures {
+            swipeLeft runs draw7_player_left
+            swipeRight runs draw7_player_right
+        } key draw7_player
+    
+    drawing "Vrata" points [[0,0],[1000,0],[1000,1000],[0,1000],[0,0]] role door closed fill "#c084fc" ink "#e2e8f0" weight 2 style {
+        x draw7_door_render_x
+        y draw7_door_y
+        width 50
+        height 140
+    } motion move 180 key draw7_door
+} key draw7_world_home_30f4df
+
+    row "Igrač · upravljanje" {
+        button "Igrač · Lijevo" runs draw7_player_left key draw7_player_left_button
+        button "Igrač · Desno" runs draw7_player_right key draw7_player_right_button
+        button "Igrač · Gore" runs draw7_player_up key draw7_player_up_button
+        button "Igrač · Dolje" runs draw7_player_down key draw7_player_down_button
+    } key draw7_player_controls
+
+    button "Vrati Draw položaje" runs draw7_reset key draw7_reset_button
+}
+start home
+
+record CleaDrawBox { scene: Text, x: Number, y: Number, width: Number, height: Number }
+
+fn draw7_free(scene: Text, x: Number, y: Number, width: Number, height: Number) -> Boolean {
+    for box in draw7_solids {
+        if box.scene == scene and box.width > 0 and x < box.x + box.width and x + width > box.x and y < box.y + box.height and y + height > box.y { return false }
+    }
+    return true
+}
+fn draw7_near(ax: Number, ay: Number, aw: Number, ah: Number, bx: Number, by: Number, bw: Number, bh: Number, radius: Number) -> Boolean {
+    let dx = ax + aw / 2 - bx - bw / 2
+    let dy = ay + ah / 2 - by - bh / 2
+    return dx * dx + dy * dy <= radius * radius
+}
+fn draw7_slide(opened: Boolean, distance: Number) -> Number {
+    if opened { return distance }
+    return 0
+}
+fn draw7_closed_width(opened: Boolean, width: Number) -> Number {
+    if opened { return 0 }
+    return width
+}
+
+let draw7_player_x = 100
+let draw7_player_y = 160
+on draw7_player_left {
+    let nx = math.clamp(draw7_player_x + -16, 0, 760)
+    let ny = math.clamp(draw7_player_y + 0, 0, 390)
+    if draw7_free("home", nx, ny, 40, 60) { draw7_player_x = nx; draw7_player_y = ny }
+}
+
+on draw7_player_right {
+    let nx = math.clamp(draw7_player_x + 16, 0, 760)
+    let ny = math.clamp(draw7_player_y + 0, 0, 390)
+    if draw7_free("home", nx, ny, 40, 60) { draw7_player_x = nx; draw7_player_y = ny }
+}
+
+on draw7_player_up {
+    let nx = math.clamp(draw7_player_x + 0, 0, 760)
+    let ny = math.clamp(draw7_player_y + -16, 0, 390)
+    if draw7_free("home", nx, ny, 40, 60) { draw7_player_x = nx; draw7_player_y = ny }
+}
+
+on draw7_player_down {
+    let nx = math.clamp(draw7_player_x + 0, 0, 760)
+    let ny = math.clamp(draw7_player_y + 16, 0, 390)
+    if draw7_free("home", nx, ny, 40, 60) { draw7_player_x = nx; draw7_player_y = ny }
+}
+
+on draw7_reset {
+    draw7_player_x = 100
+    draw7_player_y = 160
+    draw7_door_x = 240
+    draw7_door_y = 120
+}
+
+
+
+let draw7_door_x = 240
+let draw7_door_y = 120
+derive draw7_door_open = draw7_near(draw7_player_x, draw7_player_y, 40, 60, draw7_door_x, draw7_door_y, 50, 140, 120)
+derive draw7_door_render_x = draw7_door_x + draw7_slide(draw7_door_open, 62)
+
+
+derive draw7_solids: List<CleaDrawBox> = [new CleaDrawBox { scene: "home", x: draw7_door_x, y: draw7_door_y, width: draw7_closed_width(draw7_door_open, 50), height: 140 }]
