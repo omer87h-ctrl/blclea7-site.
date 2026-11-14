@@ -1,0 +1,23 @@
+{
+  "format": "clea7.core-delivery/1",
+  "version": "0.40.0-test",
+  "source": "980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610",
+  "integrationRun": 43598051815,
+  "sdk": {
+    "path": "sense/downloads/BL-CLEA7-Core-SDK-0.40.0-test.zip",
+    "bytes": 1026932,
+    "sha256": "61ef9a834c1568d8947616805b2767144d89b40f209ffbf88b8c6922977e1fef",
+    "files": 113
+  },
+  "Draw": "checked BIL UI3 SVG objects, bounded controllers, scene-scoped collisions, proximity, real state explanations",
+  "collections": "typed stable-key cards, per-item transactional actions, search/pagination",
+  "browserProofs": [
+    "draw-040-browser.json",
+    "cards-040-browser.json"
+  ],
+  "windowsBuildAndInstallRun": 43598140076,
+  "actual9BInference": false,
+  "fullMasterComplete": false,
+  "fullPhysicsEngine": false,
+  "productionSigned": false
+}

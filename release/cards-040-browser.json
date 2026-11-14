@@ -1,0 +1,17 @@
+{
+  "format": "clea7.bil-cards-browser/1",
+  "passed": true,
+  "checks": [
+    "Actual visual collection insertion preserves original source/project, exact Undo and empty factual data",
+    "Real typed inputs add records; keyboard card action, selection/details and search execute without AI",
+    "Actual exported0.40 package installs, executes card actions and retains records/selection after independent Runtime reload",
+    "Original non-business learning app runs both screens, validates answers, awards each task once and fits390px",
+    "Bounded12-row pagination, inert HTML text, quoted stable keys, reordered late clicks, duplicate-key rollback and deleted-key rejection work in actual DOM",
+    "Actual card image rendering decodes original JPEG bytes; explicit trusted-media fixture proves stale-principal suppression and arbitrary-URL denial, not physical camera/server ownership"
+  ],
+  "errors": [],
+  "actualNeuralInference": false,
+  "physicalDeviceTested": false,
+  "productionBackendTested": false,
+  "trustedMediaBoundaryUsesExplicitFixture": true
+}

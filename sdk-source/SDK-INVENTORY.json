@@ -1,6 +1,6 @@
 {
   "format": "clea7.sdk.inventory/1",
-  "version": "0.39.0-test",
+  "version": "0.40.0-test",
   "status": "development-test",
   "referenceSha256": "e622ecb98a7d60999ce686b052bab09ef9db645d0e211526e9986e0060061b8c",
   "licencePreserved": true,
@@ -19,17 +19,17 @@
     {
       "path": "NOTICE.txt",
       "bytes": 469,
-      "sha256": "a9fc8f0666eb95c5c928cf4dcc09a54a10394a7413c47d9dee7047abaf3ce122"
+      "sha256": "b87119338d6a55006c46ac754db3180b717e27146d593094b68de79ebf591962"
     },
     {
       "path": "README.md",
       "bytes": 2880,
-      "sha256": "80be76ac70a9b8dbf38a5a4085dfbdf7d6727e6336cbc92f5ab7992e7bf9d486"
+      "sha256": "23d6754879a455af37df7c09ea1d1c5800462f7fd26f41ec1348a677dd3215ac"
     },
     {
       "path": "clea7/__init__.py",
       "bytes": 96,
-      "sha256": "2d88a383ad8651f29661257f6d6bf88b749f48b69f0d7d7fa9722a9c4f4dc420"
+      "sha256": "0d360a008b698b9135638dacabe6a35224e27abf3a6676ec6ab30fc462529c6a"
     },
     {
       "path": "clea7/__main__.py",
@@ -48,8 +48,8 @@
     },
     {
       "path": "clea7/bil.py",
-      "bytes": 34511,
-      "sha256": "eaf85a9620446e462607bd45c40dfcc940fabd54b97638c37a304a4e4f3e5509"
+      "bytes": 39181,
+      "sha256": "57afe6d0f42f104671bec7307a0117b5bec9e53af227ef0ee6fe6fc21d2948f9"
     },
     {
       "path": "clea7/doctor.py",
@@ -68,8 +68,8 @@
     },
     {
       "path": "clea7/package.py",
-      "bytes": 9547,
-      "sha256": "3848cd19671118166bc347995312b6a141cb8a5348aed5ef90211bc790b04221"
+      "bytes": 9842,
+      "sha256": "7b67fe69f31a68d03efecb4957ccb9aee20073471f9025acf02af0751a572eb4"
     },
     {
       "path": "clea7/project.py",
@@ -83,8 +83,8 @@
     },
     {
       "path": "clea7/signing.py",
-      "bytes": 6676,
-      "sha256": "1d7e78361f1e14f6d45d7de3e092cfaba8ceff534466cc44319691887b66e8e2"
+      "bytes": 6685,
+      "sha256": "abb283af02ffcfdd29a0ba3496fc15bd6a1f913345a5e7504e73a90ce6849bba"
     },
     {
       "path": "clea7/storage_budget.py",
@@ -110,6 +110,11 @@
       "path": "docs/BIL-ASYNC-REQUESTS.md",
       "bytes": 21003,
       "sha256": "3f39cc28aa2ab9664d06a3dcdf03e2c1772566f644a3bf06f0fcadc3383d44eb"
+    },
+    {
+      "path": "docs/BIL-CARDS.md",
+      "bytes": 4987,
+      "sha256": "c4e182f65b387b60e789a46568074aa693d4f900f68d55ce4eade1f7ddfabce8"
     },
     {
       "path": "docs/BIL-COMPLETION-EVENTS.md",
@@ -165,6 +170,11 @@
       "path": "docs/CLEA-CORE.md",
       "bytes": 3895,
       "sha256": "e1952457089e0d9fcbab18fa8a71b558b92fde96360596d21939ea16629b5332"
+    },
+    {
+      "path": "docs/CLEA7-DRAW.md",
+      "bytes": 4679,
+      "sha256": "b1b5e73c63297fbd0703d7b30e7029b80a7b33fcf8e6a5cd47bebb0446984d08"
     },
     {
       "path": "docs/DOCUMENT-IDENTITIES.md",
@@ -247,6 +257,11 @@
       "sha256": "0ecb6727098a059daa63c97ce386f9fc24e69dc224b361c0ace4b6a7e51533e3"
     },
     {
+      "path": "sdk/examples/bil/cards-learning.bil",
+      "bytes": 2030,
+      "sha256": "1aff47dce74a3095106daa8c8df01ef8f3bda8a7f14fb629d947f4df8a9d2f1d"
+    },
+    {
       "path": "sdk/examples/bil/community.bil",
       "bytes": 5831,
       "sha256": "3ab7b869502950bc52e5076e15879a7e68991fd23f99ff9fdc6ad1770c36041d"
@@ -275,6 +290,11 @@
       "path": "sdk/examples/bil/document-identities.bil",
       "bytes": 3091,
       "sha256": "903d549b48f688450d072c72955d8b3d45c13bdac8beccb5ba2caf2e7b6ed30b"
+    },
+    {
+      "path": "sdk/examples/bil/draw-door.bil",
+      "bytes": 3650,
+      "sha256": "fffb999c2f9a4ebd524889da6ec35a4e5687c12ab33aba4b9b16ecccccca964f"
     },
     {
       "path": "sdk/examples/bil/expenses.bil",
@@ -438,18 +458,23 @@
     },
     {
       "path": "web/workbench/bil-compiler.js",
-      "bytes": 74303,
-      "sha256": "e5e0041c3a0a7cb44a53d3f991982e0296802a119428a64d522275342137b8bb"
+      "bytes": 79363,
+      "sha256": "c0ca314e113232ebc96f13b8fa84be93389481e19322c6a23ff79b98388a602d"
     },
     {
       "path": "web/workbench/bil-runtime.js",
-      "bytes": 72989,
-      "sha256": "7d7f53a7fbe015068f908dc64721e21d4a400ad69f24991ad26b936990c1bbdb"
+      "bytes": 81044,
+      "sha256": "089cb5791eef2b77582051f5ccb254468e7f7467ab8334b2b5a3542b6bd6bafb"
     },
     {
       "path": "web/workbench/clea-core.js",
-      "bytes": 8542,
-      "sha256": "cb4ac242632b033728c6e171c0e0e4163f6a51cd5c6e8ed7953a2113723bed07"
+      "bytes": 8709,
+      "sha256": "271f0702b2af3d8e86580f7aecefac209b95cf38f088fce1bdb92b0edcb43ebc"
+    },
+    {
+      "path": "web/workbench/clea-draw.js",
+      "bytes": 24939,
+      "sha256": "3e8921de771474e308e47eaa8271183baf385bb7b3fd24d58bb8c868c3e9fbfe"
     },
     {
       "path": "web/workbench/consumer.js",
@@ -493,8 +518,8 @@
     },
     {
       "path": "web/workbench/package.js",
-      "bytes": 17469,
-      "sha256": "78dd191d17d53d42beb17270a756515162ee36fa159641951599852c5b33080d"
+      "bytes": 17663,
+      "sha256": "7232e9d5e2e228ec63812afa336e96ad0aefdee85970b0546928b318c4844b87"
     },
     {
       "path": "web/workbench/plan.js",

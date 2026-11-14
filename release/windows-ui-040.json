@@ -1,0 +1,28 @@
+{
+  "format": "clea7.windows-ui/1",
+  "source": "980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610",
+  "verificationRun": 43598140076,
+  "passed": true,
+  "checks": [
+    "actual frozen app-local WebView2 GUI",
+    "Studio bootstrap",
+    "generated component click",
+    "application/2 flow and persistence",
+    "application/3 authored app actual controls",
+    "guarded machine event and trace",
+    "original browser-Studio-authored BIL UI2 scene",
+    "Windows BIL navigation and actual button execution",
+    "custom record persistence and restart",
+    "shared guided authoring module available",
+    "bounded additive BIL state extension preserves existing Windows data",
+    "nine working visual elements available",
+    "actual added progress handler preserves existing frozen Windows data",
+    "actual typed card collection fields and record creation",
+    "actual per-card handler preserves previous Windows data",
+    "functional Draw SVG scene from the same BIL compiler",
+    "actual Draw controller and proximity door preserve previous application data"
+  ],
+  "actualFrozenWebView": true,
+  "actualAIInference": false,
+  "physicalAssistiveEvaluation": false
+}

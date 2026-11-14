@@ -7,7 +7,7 @@ from .application import validate
 from .schema import UserError
 
 FORMAT='clea7.package/1'
-RUNTIME='0.37.0'
+RUNTIME='0.40.0'
 MAX_PACKAGE=2*1024*1024
 MAX_APPLICATION=1024*1024
 TARGETS={'browser','windows','android'}
@@ -23,6 +23,7 @@ def minimum_runtime(app,targets):
     return floor
 
 def _application_minimum_runtime(app,targets):
+    if app.get('bil',{}).get('ir',{}).get('ui',{}).get('format')=='bil.ui/3':return '0.40.0'
     if any(b['adapter']=='sense.local/1' for b in app.get('remote',{}).get('backends',{}).values()):return '0.37.0'
     if any(b['adapter']=='firebase.development/4' for b in app.get('remote',{}).get('backends',{}).values()):return '0.16.0'
     if app.get('bil',{}).get('ir',{}).get('ui',{}).get('format')=='bil.ui/2':return '0.14.0'
@@ -83,6 +84,7 @@ def decode(raw,target=None):
             if features['version']>=2 and tuple(map(int,manifest['runtime'].split('.'))) < tuple(map(int,features['minimumRuntime'].split('.'))):
                 raise UserError('BIL Core'+str(features['version'])+' zahtijeva Runtime '+features['minimumRuntime']+'.')
         if any(b['adapter']=='firebase.development/4' for b in app.get('remote',{}).get('backends',{}).values()) and tuple(map(int,manifest['runtime'].split('.'))) < (0,16,0):raise UserError('Zajedničke slike zahtijevaju Runtime 0.16.0.')
+        if app.get('bil',{}).get('ir',{}).get('ui',{}).get('format')=='bil.ui/3' and tuple(map(int,manifest['runtime'].split('.'))) < (0,40,0):raise UserError('BIL kartice zahtijevaju Runtime 0.40.0.')
         if app.get('bil',{}).get('ir',{}).get('ui',{}).get('format')=='bil.ui/2' and tuple(map(int,manifest['runtime'].split('.'))) < (0,14,0):raise UserError('Napredni BIL prikaz zahtijeva Runtime 0.14.0.')
         if any(b['adapter']=='android.native/1' for b in app.get('remote',{}).get('backends',{}).values()) and (tuple(map(int,manifest['runtime'].split('.'))) < (0,13,0) or manifest['targets']!=['android']):raise UserError('Native BIL zahtijeva Android Runtime 0.13.0.')
         if any(b['adapter']=='firebase.development/3' for b in app.get('remote',{}).get('backends',{}).values()) and tuple(map(int,manifest['runtime'].split('.'))) < (0,12,0):raise UserError('Identiteti upita zahtijevaju Runtime 0.12.0.')

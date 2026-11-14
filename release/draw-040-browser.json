@@ -1,0 +1,16 @@
+{
+  "format": "clea7.draw-browser/1",
+  "passed": true,
+  "checks": [
+    "Actual Draw UI creates an actor and proximity door as checked source-mapped BIL with the same project identity and SVG geometry",
+    "Real Runtime keyboard events move the original drawing and open the door by the BIL proximity condition; the rendered SVG path is real",
+    "Draw explains the actual running object state and exact checked BIL rule, without a model-generated explanation",
+    "Actual freehand pointer input becomes bounded vector points; exact shared Undo restores the previous complete BIL source",
+    "Initial-layout editing preserves saved gameplay position until the explicit compiled reset action applies the new position",
+    "Same exported package installs and executes drawing/controls/proximity in independent Runtime, persists through reload and fits390px"
+  ],
+  "errors": [],
+  "actualNeuralInference": false,
+  "physicalDeviceTested": false,
+  "fullPhysicsEngineClaimed": false
+}

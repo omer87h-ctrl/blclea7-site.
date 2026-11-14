@@ -1,0 +1,50 @@
+# Original offline learning application — BL CLEA by Brzo i Lokalno.
+# Content is explicit application data, not a generated AI answer.
+import collections
+record Lesson { id: Text, title: Text, detail: Text, points: Number }
+let lessons: List<Lesson> = [new Lesson { id: "logic", title: "Logički izazov", detail: "Koliko je 7 × 6?", points: 10 }, new Lesson { id: "access", title: "Pristupačan interfejs", detail: "Koja tipka pomjera fokus na sljedeću kontrolu?", points: 15 }]
+let selected = ""
+let question = ""
+let answer = ""
+let feedback = ""
+let score = 0
+let solved: List<Text> = []
+on open_lesson {
+    for lesson in lessons {
+        if lesson.id == selected { question = lesson.detail }
+    }
+    answer = ""
+    feedback = ""
+    open exercise
+}
+on check_answer {
+    let correct = false
+    if selected == "logic" and answer == "42" {
+        feedback = "Tačno. Zadatak vrijedi 10 bodova."
+        correct = true
+    } else {
+        if selected == "access" and answer == "Tab" {
+            feedback = "Tačno. Zadatak vrijedi 15 bodova."
+            correct = true
+        } else { feedback = "Pokušaj ponovo. Odgovori sa 42 ili Tab za odgovarajući zadatak." }
+    }
+    if correct and not collections.contains(solved, selected) {
+        solved = collections.append(solved, selected)
+        for lesson in lessons {
+            if lesson.id == selected { score = score + lesson.points }
+        }
+    }
+}
+screen home "Laboratorij ideja" {
+    heading "Izaberi izazov" key title
+    show score key total_score
+    cards lessons label "Moje lekcije" fields [title: "Lekcija", detail: "Zadatak", points: "Bodovi"] identity id select selected action "Otvori lekciju" runs open_lesson empty "Nema dostupnih lekcija." key learning_cards
+}
+screen exercise "Zadatak" {
+    show question key question
+    input answer label "Tvoj odgovor" required key answer
+    button "Provjeri odgovor" runs check_answer validate key check
+    show feedback key feedback
+    button "Sve lekcije" opens home key back
+}
+start home

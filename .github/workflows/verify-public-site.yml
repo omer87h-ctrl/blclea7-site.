@@ -35,6 +35,8 @@ jobs:
       - run: node tests/test_public_bil_apps.cjs
       - run: node tests/test_bil_guided_authoring.cjs
       - run: CLEA7_SOURCE_WEB=studio node tests/test_bil_working_elements.cjs
+      - run: CLEA7_SOURCE_WEB=studio node tests/test_bil_cards.cjs
+      - run: CLEA7_SOURCE_WEB=studio node tests/test_clea_draw.cjs
       - name: Independently execute curated public SDK
         working-directory: sdk-source
         run: |
@@ -65,6 +67,8 @@ jobs:
           python tests/browser_sense_import.py --site . --standalone sense/downloads/BL-CLEA-Sense-0.39-test.html --output test-evidence/sense-import || browser_failed=1
           python tests/browser_studio_tests.py --site . --output test-evidence/studio-behavior || browser_failed=1
           python tests/browser_working_elements.py --site . --output test-evidence/working-elements || browser_failed=1
+          python tests/browser_bil_cards.py --site . --output test-evidence/cards-040 || browser_failed=1
+          python tests/browser_clea_draw.py --site . --output test-evidence/draw-040 || browser_failed=1
           node tests/test_model_app_authoring_browser.cjs || browser_failed=1
           node tests/test_clea_lab_browser.cjs || browser_failed=1
           node tests/test_public_site.cjs || browser_failed=1

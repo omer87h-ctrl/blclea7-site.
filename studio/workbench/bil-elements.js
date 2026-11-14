@@ -77,6 +77,45 @@ function build(source,spec){
  B.compile(next);
  return {source:next,added:{screen:spec.screen,globals,handlers,element:id},kind:spec.kind};
 }
+function buildCollection(source,spec){
+ const c=B.compile(source),page=c.ast.body.find(n=>n.kind==='screen'&&n.name===spec.screen),id=String(spec.id||'');
+ if(!page||!B.safe(id)||id.length>24)throw Error('Odaberi ekran i jedinstven identitet kolekcije do24 znaka.');
+ const label=String(spec.label||'Moja kolekcija').trim(),action=String(spec.action||'Otvori detalje').trim();
+ if(!label||label.length>160||!action||action.length>160)throw Error('Naziv kolekcije i radnje treba1–160 znakova.');
+ const names=new Set(c.ast.body.map(n=>n.name).filter(Boolean)),declarations=[],events=[];let nodes;
+ const fresh=name=>{if(names.has(name))throw Error('Identitet '+name+' već postoji; postojeći kod nije promijenjen.');names.add(name);return name;};
+ if(spec.collection){
+  const type=c.ir.globals[spec.collection]?.type?.list?.record,selected=c.ir.globals[spec.selection];
+  if(!type||type[spec.identity]!=='Text'||selected?.type!=='Text'||!selected.mutable||!c.ast.body.some(n=>n.kind==='handler'&&n.name===spec.handler&&!n.params))throw Error('Odaberi postojeću kolekciju, tekstualni identitet i odabir te obični događaj.');
+  const columns=Object.keys(type).filter(k=>['Text','Number','Boolean'].includes(type[k])).slice(0,8);if(!columns.length)throw Error('Kolekcija treba barem jedno tekstualno, brojčano ili Boolean polje.');
+  if(spec.columns!==undefined){if(!Array.isArray(spec.columns)||!spec.columns.length||spec.columns.length>8||spec.columns.some(k=>!columns.includes(k)))throw Error('Odaberi podržana polja kartice.');columns.splice(0,columns.length,...spec.columns);}
+  nodes='cards '+spec.collection+' label '+q(label)+' fields ['+columns.map(k=>k+': '+q(k)).join(', ')+'] identity '+spec.identity+' select '+spec.selection+(spec.image?' image '+spec.image:'')+' action '+q(action)+' runs '+spec.handler+' empty '+q('Još nema stavki.')+' key '+id+'_cards';
+ }else{
+  for(const module of ['text','json','collections'])if(!c.ir.imports.includes(module)){if(names.has(module))throw Error('Postojeći simbol '+module+' sprečava siguran import; preimenuj ga u kodu.');declarations.push('import '+module);}
+  const record=fresh(id+'Entry'),items=fresh(id+'_items'),selected=fresh(id+'_selected'),title=fresh(id+'_title'),detail=fresh(id+'_detail'),shownTitle=fresh(id+'_shown_title'),shownDetail=fresh(id+'_shown_detail'),sequence=fresh(id+'_next'),add=fresh(id+'_add'),open=fresh(id+'_open');
+  declarations.push('record '+record+' { id: Text, title: Text, detail: Text }','let '+items+': List<'+record+'> = []','let '+selected+' = ""','let '+title+' = ""','let '+detail+' = ""','let '+shownTitle+' = ""','let '+shownDetail+' = ""','let '+sequence+' = 1');
+  events.push('on '+add+' {\n    if text.trim('+title+') == "" { raise "ItemTitle", "Upiši naziv stavke." }\n    '+items+' = collections.append('+items+', new '+record+' { id: '+q(id+'_')+' + json.encode('+sequence+'), title: '+title+', detail: '+detail+' })\n    '+sequence+' = '+sequence+' + 1\n    '+title+' = ""\n    '+detail+' = ""\n}',
+   'on '+open+' {\n    for item in '+items+' {\n        if item.id == '+selected+' { '+shownTitle+' = item.title; '+shownDetail+' = item.detail }\n    }\n}');
+  nodes='card '+q(label+' · nova stavka')+' {\n    input '+title+' label "Naziv stavke" required key '+id+'_title_input\n    input '+detail+' label "Sadržaj stavke" multiline key '+id+'_detail_input\n    button "Dodaj stavku" runs '+add+' validate key '+id+'_add_button\n}\ncards '+items+' label '+q(label)+' fields [title: "Naziv", detail: "Sadržaj"] identity id select '+selected+' action '+q(action)+' runs '+open+' empty "Dodaj prvu vlastitu stavku." key '+id+'_cards\ncard "Odabrana stavka" {\n    show '+shownTitle+' key '+id+'_chosen_title\n    show '+shownDetail+' key '+id+'_chosen_detail\n}';
+ }
+ const at=page.childrenEnd??page.loc.end-1,added='\n    '+nodes.replaceAll('\n','\n    ')+'\n',next=(declarations.length?declarations.join('\n')+'\n':'')+source.slice(0,at)+added+source.slice(at)+(events.length?'\n'+events.join('\n\n')+'\n':'');
+ B.compile(next);return {source:next,added:{screen:spec.screen,element:id+'_cards',collection:spec.collection||id+'_items',selection:spec.selection||id+'_selected',minimumRuntime:'0.40.0'}};
+}
+function attachCollection(api){
+ const d=api.parent.ownerDocument||document,el=(tag,text)=>{const n=d.createElement(tag);if(text!==undefined)n.textContent=text;return n;},root=el('details');root.id='bil-card-collections';
+ root.append(el('summary','Kolekcije · kartice, galerije i radnje po stavci'),el('p','Prikaži vlastitu kolekciju kao ponavljajuće kartice. Svaka stavka ima stabilan identitet i stvarnu radnju. Nova kolekcija počinje prazna, bez izmišljenih podataka. Za izvoz je potreban Runtime0.40.'));
+ const field=(text,id,tag='input')=>{const label=el('label',text),n=el(tag);n.id=id;n.setAttribute('aria-label',text);label.append(n);root.append(label);return n;};
+ const collection=field('Izvor kartica','bil-cards-source','select'),id=field('Identitet nove kolekcije kartica','bil-cards-id'),label=field('Naziv kolekcije kartica','bil-cards-label'),action=field('Naziv radnje kartice','bil-cards-action');
+ id.value='my_cards';id.maxLength=24;label.value='Moja kolekcija';action.value='Otvori detalje';
+ const identity=field('Polje stabilnog identiteta','bil-cards-identity','select'),selection=field('Tekstualni podatak odabira','bil-cards-selection','select'),handler=field('Događaj radnje kartice','bil-cards-handler','select'),image=field('Polje fotografije kartice','bil-cards-image','select');
+ const status=el('p'),button=el('button','Dodaj kolekciju u odabrani ekran');status.id='bil-cards-status';status.setAttribute('role','status');button.type='button';button.id='bil-cards-add';
+ const fill=(n,values,blank)=>{const old=n.value;n.replaceChildren();if(blank){const o=el('option',blank);o.value='';n.append(o);}for(const value of values){const o=el('option',value);o.value=value;n.append(o);}if([...n.options].some(o=>o.value===old))n.value=old;};
+ function details(c){const fields=c.ir.globals[collection.value]?.type?.list?.record||{};fill(identity,Object.keys(fields).filter(k=>fields[k]==='Text'));if(identity.querySelector('option[value="id"]'))identity.value='id';fill(image,Object.keys(fields).filter(k=>{const t=fields[k]?.nullable||fields[k];return t?.name==='NativeMedia';}),'Bez fotografije');for(const n of [identity,selection,handler,image])n.closest('label').hidden=!collection.value;}
+ function refresh(){try{const c=B.compile(api.source());fill(collection,Object.keys(c.ir.globals).filter(k=>c.ir.globals[k].type?.list?.record),'Kreiraj novu praznu kolekciju');fill(selection,Object.keys(c.ir.globals).filter(k=>c.ir.globals[k].type==='Text'&&c.ir.globals[k].mutable));fill(handler,c.ast.body.filter(n=>n.kind==='handler'&&!n.params).map(n=>n.name));details(c);button.disabled=!c.ir.ui?.screens.length;}catch{button.disabled=true;}}
+ collection.onchange=()=>details(B.compile(api.source()));
+ button.onclick=()=>{try{const next=buildCollection(api.source(),{screen:api.screen(),id:id.value,label:label.value,action:action.value,collection:collection.value,identity:identity.value,selection:selection.value,handler:handler.value,image:image.value});api.setSource(next.source);api.inspect();status.textContent='Kolekcija je dodana s podacima i događajima. Pokreni aplikaciju; Poništi vraća prethodni izvor.';refresh();}catch(error){status.textContent=error.message;api.error(error);}};
+ root.append(button,status);api.parent.append(root);refresh();return {refresh};
+}
 function attach(api){
  const d=document,el=(tag,text)=>{const n=d.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
  const root=el('details');root.id='bil-working-elements';root.open=true;root.append(el('summary','Radni elementi · podaci, interakcije i događaji'),el('p','Dodaj u postojeći projekt. Element dobija provjeren BIL kod i stvarno ponašanje; tvoji ekrani, algoritmi i podaci ostaju sačuvani. Poništi vraća cijelu ovu izmjenu.'));
@@ -110,5 +149,5 @@ function attach(api){
  }catch(error){status.textContent=error.message;api.error(error);}};
  root.append(button,status,preview);api.parent.append(root);configure();refresh();return {refresh};
 }
-scope.CLEA7BILElements=Object.freeze({format:'bil.working-elements/1',kinds:KINDS,build,attach});
+scope.CLEA7BILElements=Object.freeze({format:'bil.working-elements/1',kinds:KINDS,build,attach,buildCollection,attachCollection});
 })(globalThis);
