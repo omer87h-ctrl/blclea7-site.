@@ -19,5 +19,8 @@
   "actual9BInference": false,
   "fullMasterComplete": false,
   "fullPhysicsEngine": false,
-  "productionSigned": false
+  "productionSigned": false,
+  "androidBuildAndEmulatorRun": 43600739763,
+  "androidPublicationRun": 43601702005,
+  "windowsPublicationRun": 43600140921
 }

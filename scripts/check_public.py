@@ -36,7 +36,7 @@ for forbidden in ['main.py','runtime_main.py','clea7/desktop.py','clea7/host.py'
 catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610'
 download_page=(ROOT/'preuzimanja.html').read_text()
 for page in ROOT.glob('*.html'):
- assert 'Web Studio i SDK 0.40-test · Windows 0.40-test · Android 0.39-test' in page.read_text(),(page,'stale visible release version')
+ assert 'Web Studio i SDK 0.40-test · Windows 0.40-test · Android 0.40-test' in page.read_text(),(page,'stale visible release version')
 for entry in catalog['published']:
  p=ROOT/entry['url'];data=p.read_bytes();assert p.is_relative_to(ROOT) and len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],p
  if entry['key'] in ('sdk','preview'):
@@ -92,13 +92,13 @@ assert asset["url"] in download_page and asset["sha256"] in download_page
 print("PUBLIC_CHECKED_WINDOWS040 exact installed binary and anonymous release link verified")
 
 android=catalog['android_current']
-assert android['state']=='published' and android['version']=='0.39.0-test'
-assert android['source_commit']=='a489e7abdbd6766f677a8b9279ea97b3e3b78fce' and android['verification_run']==42662434666
-assert android['publication_run']==42664618066 and android['production_signed'] is False
-proof=json.loads((ROOT/'release/android-039.json').read_text())
-assert len(android['assets'])==4 and proof['actualAndroidEmulatorSenseTest'] is True
+assert android['state']=='published' and android['version']=='0.40.0-test'
+assert android['source_commit']=='9c319ff92c9e8df223aff7274b922cce5baef616' and android['verification_run']==43600739763
+assert android['publication_run']==43601702005 and android['production_signed'] is False
+proof=json.loads((ROOT/'release/android-040.json').read_text())
+assert len(android['assets'])==6 and proof['actualAndroidEmulatorSenseTest'] is True
 for asset,expected in zip(android['assets'],proof['publicAssets']):
  assert all(asset[k]==expected[k] for k in ('name','size_bytes','sha256'))
- assert asset['url']=='https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-android-0.39-test/'+asset['name']
+ assert asset['url']=='https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-android-0.40-test/'+asset['name']
 assert android['assets'][2]['url'] in download_page
-print('PUBLIC_CHECKED_ANDROID039 exact source, emulator evidence and published downloads verified')
+print('PUBLIC_CHECKED_ANDROID040 exact source, emulator evidence and published downloads verified')

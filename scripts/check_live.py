@@ -76,7 +76,7 @@ def check():
  assert b'BIL' in read('bil.html')
  compiler=read('studio/workbench/bil-compiler.js');assert compiler==(ROOT/'studio/workbench/bil-compiler.js').read_bytes(),'Published BIL compiler differs.'
  engine=read('studio/workbench/engine.js');assert engine==(ROOT/'studio/workbench/engine.js').read_bytes(),'Published runtime differs from verified source.'
- for path in ['studio/workbench/working-cache.js','studio/workbench/clea-core.js','studio/launcher/player.html','studio/launcher/player.js','studio/workbench/bil-authoring.js','studio/workbench/bil-studio.js','studio/workbench/bil-designer.js','studio/workbench/bil-runtime.js','studio/workbench/index.html']:
+ for path in ['studio/workbench/working-cache.js','studio/workbench/clea-draw.js','studio/workbench/clea-core.js','studio/launcher/player.html','studio/launcher/player.js','studio/workbench/bil-authoring.js','studio/workbench/bil-studio.js','studio/workbench/bil-designer.js','studio/workbench/bil-runtime.js','studio/workbench/index.html']:
   assert read(path)==(ROOT/path).read_bytes(),'Published Studio differs: '+path
  assert b'CLEA7Library' in read('studio/launcher/library.js')
  ai=json.loads(read('release/ai-020.json'));assert ai==json.loads((ROOT/'release/ai-020.json').read_text()),'AI manifest is not current.'
