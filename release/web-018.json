@@ -25,8 +25,8 @@
     },
     {
       "path": "studio/workbench/bil-runtime.js",
-      "bytes": 81044,
-      "sha256": "089cb5791eef2b77582051f5ccb254468e7f7467ab8334b2b5a3542b6bd6bafb"
+      "bytes": 81189,
+      "sha256": "95655b32b1fe73c640e898c41e86e54fcc80b6896d56f7f6705a05cc8e67ce1e"
     },
     {
       "path": "studio/workbench/clea-core.js",
@@ -40,8 +40,8 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 17043,
-      "sha256": "e9e3163c7c1578c8fa6c489f2855250980cf9e4b03961d20fe81a058abba932b"
+      "bytes": 17127,
+      "sha256": "acfee468e6bfe7fa5c9f581e0bed5bbb6254f8407ce175e191ace8c9d291096e"
     },
     {
       "path": "studio/workbench/package.js",

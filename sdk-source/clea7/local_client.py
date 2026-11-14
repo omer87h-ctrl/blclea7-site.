@@ -79,24 +79,25 @@ def ask(question, *, language='auto', web_query=None,authoring=None):
     return result
 
 
-def verify_bil_reply(reply, *, metadata=None, checks=()):
+def verify_bil_reply(reply, *, metadata=None, checks=(), source=None):
     """Model text stays untrusted until the shared compiler/SHADOW protocol passes."""
     if not isinstance(reply,str) or len(reply)>12000:
         raise UserError('Model nije vratio ograničen BIL prijedlog.')
     if not isinstance(checks,(tuple,list)) or len(checks)>20:
         raise UserError('Provjera prihvata najviše 20 eksplicitnih slučajeva.')
     from .bil import request
-    return request({'action':'verify-reply','reply':reply,'metadata':metadata or {},'checks':list(checks)})
+    if source is not None and (not isinstance(source,str) or len(source.encode('utf-8'))>131072):
+        raise UserError('Prevelik ili neispravan izvor projekta.')
+    return request({'action':'verify-reply','reply':reply,'metadata':metadata or {},'checks':list(checks),'source':source})
 
 
 def propose_bil(intent, *, metadata=None, checks=()):
     """One explicit owner-local generation; never reads or replaces a project."""
     if not isinstance(intent,str) or not 1<=len(intent.strip())<=900:
         raise UserError('Opis aplikacije treba 1–900 znakova.')
-    prompt=('Napiši potpun BIL program za sljedeći zahtjev. Vrati jedan zatvoren ```bil blok. '
-            'Koristi dokumentovanu BIL sintaksu, stvarne događaje i promjenjivo stanje. '
-            'Ne dodaj JavaScript, izmišljene servise ili nenavedene lične podatke.\n'+intent.strip())
-    answer=ask(intent.strip(),language='bs',authoring={'format':'bil.author/1','mode':'create','representation':'plan'})
+    selected=status()
+    representation='tools' if selected.get('capabilities',{}).get('studioTools')=='clea7.studio-tools/1' else 'plan'
+    answer=ask(intent.strip(),language='bs',authoring={'format':'bil.author/1','mode':'create','representation':representation})
     verified=verify_bil_reply(answer['reply'],metadata=metadata,checks=checks)
     return {'format':'clea7.ai-bil-proposal/1','source':verified['application']['bil']['source'],
             'verification':verified,'requiresReview':True,'modelProfile':PROFILE,

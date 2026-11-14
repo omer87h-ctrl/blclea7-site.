@@ -1,6 +1,6 @@
 {
   "format": "clea7.sdk.inventory/1",
-  "version": "0.40.0-test",
+  "version": "0.41.0-test",
   "status": "development-test",
   "referenceSha256": "e622ecb98a7d60999ce686b052bab09ef9db645d0e211526e9986e0060061b8c",
   "licencePreserved": true,
@@ -19,17 +19,17 @@
     {
       "path": "NOTICE.txt",
       "bytes": 469,
-      "sha256": "b87119338d6a55006c46ac754db3180b717e27146d593094b68de79ebf591962"
+      "sha256": "1be376858c52250ce7f66e53b12738978f8730b22c281577d93a38daa304d407"
     },
     {
       "path": "README.md",
       "bytes": 2880,
-      "sha256": "23d6754879a455af37df7c09ea1d1c5800462f7fd26f41ec1348a677dd3215ac"
+      "sha256": "64d888cda563f88f96b0cde1bd1e8b1ec8d874ff2c40e3975dd00709c4d25290"
     },
     {
       "path": "clea7/__init__.py",
       "bytes": 96,
-      "sha256": "0d360a008b698b9135638dacabe6a35224e27abf3a6676ec6ab30fc462529c6a"
+      "sha256": "3b77e43ac41307ff886454914436d2a2e496be008a0c9aa6d4f492fd89a57b4e"
     },
     {
       "path": "clea7/__main__.py",
@@ -43,8 +43,8 @@
     },
     {
       "path": "clea7/authoring_contract.py",
-      "bytes": 3988,
-      "sha256": "8453650ced45caef9fdab465a1f2d6af01ede64c8771712c0b844bcbea684d29"
+      "bytes": 4012,
+      "sha256": "5ee50fcb9cff3116a4239269af5fcef4e29435b0c3fa2a6500d1fa5266b75dd0"
     },
     {
       "path": "clea7/bil.py",
@@ -63,8 +63,8 @@
     },
     {
       "path": "clea7/local_client.py",
-      "bytes": 5508,
-      "sha256": "226e8d9b76d01560f3bd354007a40e76de00cd72c6a896197862963f07003667"
+      "bytes": 5556,
+      "sha256": "c6b0c0f916d9e880295a8a95637601215c8a49ffb49187652226b7107396e5c6"
     },
     {
       "path": "clea7/package.py",
@@ -237,6 +237,11 @@
       "sha256": "9f83865739077386e0fc7ff0c00a580c64c0f3ade98a0eba080bb692dab18c3f"
     },
     {
+      "path": "docs/STUDIO-OPERATOR-041.md",
+      "bytes": 3956,
+      "sha256": "d4ab8952f82abce60c7b883e58ba076ff9791f1e39814044977d1492b8f7154e"
+    },
+    {
       "path": "docs/STUDIO-TESTS-039.md",
       "bytes": 1418,
       "sha256": "6d8850d8b67b2145fead0dcda9e8c38ff4b0278ded3ab395e4313ad7a9c591a1"
@@ -253,8 +258,8 @@
     },
     {
       "path": "sdk/bil-cli.cjs",
-      "bytes": 11182,
-      "sha256": "0ecb6727098a059daa63c97ce386f9fc24e69dc224b361c0ace4b6a7e51533e3"
+      "bytes": 11593,
+      "sha256": "cb32e85d4da52b397e59078d409abb0dadf27bde1f8208fb60a813ab90ef13e8"
     },
     {
       "path": "sdk/examples/bil/cards-learning.bil",
@@ -448,8 +453,8 @@
     },
     {
       "path": "web/workbench/ai-authoring.js",
-      "bytes": 13985,
-      "sha256": "6ba7d8ab755b09dc4ad58a78f6020ea615fc7c4d68c347f79ec832d15b597b70"
+      "bytes": 16225,
+      "sha256": "1824d37a0180bb238855df0bd5fdef361e8776168df4880aae74805ed128b57e"
     },
     {
       "path": "web/workbench/android-backend.js",
@@ -462,9 +467,14 @@
       "sha256": "c0ca314e113232ebc96f13b8fa84be93389481e19322c6a23ff79b98388a602d"
     },
     {
+      "path": "web/workbench/bil-elements.js",
+      "bytes": 19835,
+      "sha256": "513ad2097b80c3b12627907d814ecdddc5bfb04fe3a088fb6290a4296dfae05c"
+    },
+    {
       "path": "web/workbench/bil-runtime.js",
-      "bytes": 81044,
-      "sha256": "089cb5791eef2b77582051f5ccb254468e7f7467ab8334b2b5a3542b6bd6bafb"
+      "bytes": 81189,
+      "sha256": "95655b32b1fe73c640e898c41e86e54fcc80b6896d56f7f6705a05cc8e67ce1e"
     },
     {
       "path": "web/workbench/clea-core.js",
@@ -473,8 +483,8 @@
     },
     {
       "path": "web/workbench/clea-draw.js",
-      "bytes": 24939,
-      "sha256": "3e8921de771474e308e47eaa8271183baf385bb7b3fd24d58bb8c868c3e9fbfe"
+      "bytes": 29243,
+      "sha256": "ed695517b28e8dd47b91421aaeda6cb2ad30cf61e90399f4ecbcef1f8d3bd4a0"
     },
     {
       "path": "web/workbench/consumer.js",
@@ -560,6 +570,11 @@
       "path": "web/workbench/sense-sdk.js",
       "bytes": 6647,
       "sha256": "8a7c43f6b9fa8e2b60d69b74e9376033b18319e7de5f00fdb2d4a7b80fe02e7d"
+    },
+    {
+      "path": "web/workbench/studio-operator.js",
+      "bytes": 12719,
+      "sha256": "d3604548931124932288d8c01f86cdbdd86747536f01eb00c6732052cd5887f7"
     },
     {
       "path": "web/workbench/working-cache.js",

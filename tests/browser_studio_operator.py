@@ -1,0 +1,40 @@
+"""Actual one-Studio authoring/operator/Draw/Runtime/package flow, no model fixture."""
+import argparse,functools,http.server,json,os,threading
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+
+def main():
+    p=argparse.ArgumentParser();p.add_argument('--site',type=Path);p.add_argument('--output',type=Path,required=True);a=p.parse_args();a.output.mkdir(parents=True,exist_ok=True)
+    project=Path(__file__).resolve().parents[1];root=a.site or project/'web';prefix='studio/' if a.site else '';checks=[];errors=[]
+    class Quiet(http.server.SimpleHTTPRequestHandler):
+        def log_message(self,*args):pass
+    server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Quiet,directory=str(root)));threading.Thread(target=server.serve_forever,daemon=True).start();base=f'http://127.0.0.1:{server.server_port}/'
+    try:
+        with sync_playwright() as pw:
+            browser=pw.chromium.launch(executable_path=os.environ.get('CLEA7_CHROME','/usr/bin/chromium'),headless=True,args=['--no-sandbox']);context=browser.new_context(viewport={'width':1440,'height':1100},accept_downloads=True);page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.on('dialog',lambda d:d.accept())
+            page.goto(base+prefix+'workbench/',wait_until='networkidle');page.wait_for_function('()=>globalThis.CLEA7Workbench&&globalThis.CLEA7StudioTools');page.locator('#guided-start').click();page.wait_for_function('()=>!document.querySelector("#draw").hidden');assert page.locator('#draw-bil-working-elements').count()==1
+            page.locator('[data-panel="clea-chat"]').click();page.locator('#chat-question').fill('Napravi novu aplikaciju sa igračem i vratima koja se otvaraju kad priđe');page.locator('#chat-send').click();page.locator('[data-ai-app-proposal]').last.wait_for();proposal=page.locator('[data-ai-app-proposal]').last
+            assert 'bez neuronskog modela' in proposal.inner_text();assert proposal.locator('[data-ai-app-apply]').is_disabled();assert page.evaluate('CLEA7Workbench.project.bil.ir.ui.format')!='bil.ui/3'
+            proposal.locator('[data-ai-app-reviewed]').check();proposal.locator('[data-ai-app-apply]').click();page.wait_for_function('()=>!document.querySelector("#draw").hidden&&document.querySelector("#draw-live-runtime #player")&&CLEA7Workbench.engine?.state.bilValues.draw7_player_x===80');identity=page.evaluate('CLEA7Workbench.project.id');assert page.locator('#player').count()==1
+            for x in (96,112,128):page.locator('#draw-live-runtime').get_by_role('button',name='Igrač · Desno',exact=True).click();page.wait_for_function('(x)=>CLEA7Workbench.engine.state.bilValues.draw7_player_x===x',arg=x)
+            assert page.evaluate('CLEA7Workbench.engine.state.bilValues.draw7_door_open') is True
+            checks.append('A real conversation command invokes registered Studio tools, passes real compiler/behavior/restart checks, requires review and runs in the one Draw workspace without a neural or response fixture')
+            page.locator('#draw-ai-intent').fill('Dodaj napredak');page.locator('#draw-studio').get_by_role('button',name='Predloži i provjeri promjenu',exact=True).click();page.wait_for_function('()=>document.querySelectorAll("[data-ai-app-proposal]").length===2');proposal=page.locator('[data-ai-app-proposal]').last;proposal.locator('[data-ai-app-reviewed]').check();proposal.locator('[data-ai-app-apply]').click();page.wait_for_function('()=>document.querySelectorAll("[data-ai-app-status]")[1]?.textContent.startsWith("Aplikacija je stvarno pokrenuta")');page.wait_for_function('()=>CLEA7Workbench.engine?.persisted?.state.bilValues.progress===0');assert page.evaluate('CLEA7Workbench.project.id')==identity;assert page.evaluate('CLEA7Workbench.engine.state.bilValues.draw7_player_x')==128
+            page.locator('#draw-live-runtime').get_by_role('button',name='Povećaj',exact=True).click();page.wait_for_function('()=>CLEA7Workbench.engine.state.bilValues.progress===10');assert page.locator('#player').count()==1
+            checks.append('Draw request uses the same conversation/operator, adds a real component and preserves current project identity and saved movement')
+            page.locator('#draw-studio').get_by_role('button',name='Oblikuj',exact=True).click();page.locator('#draw-bil-card-collections > summary').click();page.locator('#draw-bil-cards-id').fill('library');page.locator('#draw-bil-cards-label').fill('Moji zapisi');page.locator('#draw-bil-cards-add').click();page.locator('#draw-run').click();page.wait_for_function('()=>CLEA7Workbench.engine?.state.bilValues.library_items?.length===0')
+            live=page.locator('#draw-live-runtime');live.get_by_label('Naziv stavke',exact=True).fill('Originalni zapis');live.get_by_label('Sadržaj stavke',exact=True).fill('Stvaran sadržaj');live.get_by_role('button',name='Dodaj stavku',exact=True).click();page.wait_for_function('()=>CLEA7Workbench.engine.state.bilValues.library_items.length===1');live.get_by_role('button',name='Otvori detalje · Originalni zapis',exact=True).click();page.wait_for_function('()=>CLEA7Workbench.engine.state.bilValues.library_shown_detail==="Stvaran sadržaj"');assert page.evaluate('CLEA7Workbench.engine.state.bilValues.progress')==10
+            checks.append('Components and typed collections are authored and executed directly in Draw; one existing Runtime mount preserves unrelated saved values')
+            page.locator('[data-panel="test"]').click();assert page.locator('#test #player').count()==1;page.locator('[data-panel="draw"]').click();assert page.locator('#draw-live-runtime #player').count()==1
+            duplicate_ids=page.evaluate('(()=>{const ids=[...document.querySelectorAll("[id]")].map(n=>n.id);return ids.filter((x,i)=>ids.indexOf(x)!==i)})()');assert duplicate_ids==[],duplicate_ids
+            page.locator('#draw-studio').get_by_role('button',name='Izvezi aplikaciju',exact=True).click()
+            with page.expect_download() as downloading:page.locator('#export-package').click()
+            data=Path(downloading.value.path()).read_bytes();(a.output/'unified-app.clea7').write_bytes(data);page.goto(base+prefix+'launcher/');page.wait_for_function('()=>globalThis.CLEA7Library');page.locator('#package-file').set_input_files({'name':'unified.clea7','mimeType':'application/json','buffer':data});page.get_by_role('button',name='Instaliraj',exact=True).click()
+            with context.expect_page() as opening:page.locator('[data-app="'+identity+'"] .primary').click()
+            app=opening.value;app.on('pageerror',lambda e:errors.append(str(e)));app.wait_for_function('()=>globalThis.CLEA7RuntimeApp?.engine');app.locator('#application').get_by_role('button',name='Povećaj',exact=True).click();app.wait_for_function('()=>CLEA7RuntimeApp.engine.state.bilValues.progress===10');app.reload();app.wait_for_function('()=>globalThis.CLEA7RuntimeApp?.engine?.state.bilValues.progress===10');app.set_viewport_size({'width':390,'height':844});assert app.evaluate('document.documentElement.scrollWidth<=innerWidth+2');app.screenshot(path=str(a.output/'independent-runtime.png'),full_page=True)
+            checks.append('The same exported combined Draw/UI/collection package executes and persists in independent Runtime; one mount and unique DOM IDs survive panel changes and390px layout')
+            assert errors==[],errors
+            result={'format':'clea7.unified-studio-browser/1','passed':True,'checks':checks,'errors':errors,'actualNeuralInference':False,'modelTransportFixture':False,'physicalDeviceTested':False};(a.output/'browser.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n');print(json.dumps(result,ensure_ascii=False));browser.close()
+    finally:server.shutdown();server.server_close()
+
+if __name__=='__main__':main()

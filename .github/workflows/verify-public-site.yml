@@ -38,6 +38,9 @@ jobs:
       - run: CLEA7_SOURCE_WEB=studio node tests/test_bil_working_elements.cjs
       - run: CLEA7_SOURCE_WEB=studio node tests/test_bil_cards.cjs
       - run: CLEA7_SOURCE_WEB=studio node tests/test_clea_draw.cjs
+      - run: CLEA7_SOURCE_WEB=studio node tests/test_studio_operator.cjs
+      - run: node tests/test_ai_capacity_queue.cjs
+      - run: node tests/test_tech_monitor.cjs
       - name: Independently execute curated public SDK
         working-directory: sdk-source
         run: |
@@ -70,6 +73,7 @@ jobs:
           python tests/browser_working_elements.py --site . --output test-evidence/working-elements || browser_failed=1
           python tests/browser_bil_cards.py --site . --output test-evidence/cards-040 || browser_failed=1
           python tests/browser_clea_draw.py --site . --output test-evidence/draw-040 || browser_failed=1
+          python tests/browser_studio_operator.py --site . --output test-evidence/studio-041 || browser_failed=1
           node tests/test_model_app_authoring_browser.cjs || browser_failed=1
           node tests/test_clea_lab_browser.cjs || browser_failed=1
           node tests/test_public_site.cjs || browser_failed=1
