@@ -103,13 +103,13 @@
     },
     {
       "path": "sense/index.html",
-      "bytes": 26301,
-      "sha256": "d1d2342caa0ffcad464e27462d8b74e7a0c8a0b5cc3a1a3b2d0afaf3ecdd674c"
+      "bytes": 26430,
+      "sha256": "278213d8e73ef2c88457619e1ed58f19193307a6dbdb9acd7582d17bfaabcfc8"
     },
     {
       "path": "sense/offline-assets.js",
       "bytes": 4094,
-      "sha256": "555a05e9052828885e550893f501899b55436ce7c2dc41f37023cd9c50fc1093"
+      "sha256": "6584d78e7e159336b90078eec705f6ad3374244145fb3e269f172971b62b99cb"
     },
     {
       "path": "sense/sense-authoring.js",
@@ -263,8 +263,8 @@
     },
     {
       "path": "studio/index.html",
-      "bytes": 713,
-      "sha256": "385a5cc28ddebcf093222f245fd2a40b47a21d8454e057946190b9bc9a238f34"
+      "bytes": 2199,
+      "sha256": "c1c6d215498ed8c6cdbf3402842843260cbf4657a20ecd85fd0a2af6ebac411e"
     },
     {
       "path": "studio/launcher/index.html",
@@ -478,8 +478,8 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 16750,
-      "sha256": "aedc5bfc7c7633fcc3a6cd02772406baabf7c0f2ee90871320291a1250dda357"
+      "bytes": 17043,
+      "sha256": "e9e3163c7c1578c8fa6c489f2855250980cf9e4b03961d20fe81a058abba932b"
     },
     {
       "path": "studio/workbench/intelligence.js",
