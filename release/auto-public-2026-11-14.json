@@ -1,0 +1,392 @@
+{
+  "format": "clea7.auto-public-delivery/1",
+  "sourceBaseCommit": "2dc18e802cdaf9f0c6054725b0f4ddc3a0485398",
+  "sourceWorkingTreeModified": true,
+  "source": "existing owner CLEA Auto0.2 worktree; no rewrite",
+  "url": "https://clea7.brzoilokalno.com/auto/",
+  "audience": "public web app; previous Sites access unchanged",
+  "sourceFiles": [
+    {
+      "path": "assets/brand.svg",
+      "bytes": 1052,
+      "sha256": "12ac59487b37a644cb5f9dc41ef65842a6ab121e4bba0b511722731676834ccd"
+    },
+    {
+      "path": "assets/ecosystem.svg",
+      "bytes": 14403,
+      "sha256": "7d3e2adbf548b27fa64a55dca88e1dd305ac30d7233ac35325a0fed28eea59d7"
+    },
+    {
+      "path": "assets/investigation-map.svg",
+      "bytes": 14113,
+      "sha256": "406c2e0474bf9e54995d85d1c44e55309a395b7002cd6c7f36b3c151fc0dde69"
+    },
+    {
+      "path": "auto-advanced.css",
+      "bytes": 5412,
+      "sha256": "9d6fcebab9118f155e30197b05625c48fd261a6c799d47e8aced17dc97dadf30"
+    },
+    {
+      "path": "auto-connection.css",
+      "bytes": 3201,
+      "sha256": "ee5baca643b4e212b45bc1be4154d1129be05b01fca0f4ec13011db23c15286a"
+    },
+    {
+      "path": "auto-home.css",
+      "bytes": 14318,
+      "sha256": "7d6d236e8dea936a6801e48eabc4817b0e488066983782e8768777dfc5c60b3d"
+    },
+    {
+      "path": "bil-lab.css",
+      "bytes": 7008,
+      "sha256": "4ccd7c4a579d4e07d310ce2d95d5cd7fa083c9b8202958db9bbe07d878834f05"
+    },
+    {
+      "path": "composer.css",
+      "bytes": 9722,
+      "sha256": "6107793e61063b2f33c36c94120a1421fb18f63f99869f9089896ad227f69cce"
+    },
+    {
+      "path": "device.css",
+      "bytes": 12261,
+      "sha256": "ecdda748afbcc41ce97a8826ac6101ea7027dfdf63ce4f60203151e6cdc06611"
+    },
+    {
+      "path": "diagnostic.css",
+      "bytes": 9049,
+      "sha256": "119c004ff1108591652781c1000554e626a41a92863b4639d5aeb793774d4a2c"
+    },
+    {
+      "path": "downloads/CLEA-Auto-0.1.0-test.apk",
+      "bytes": 357187,
+      "sha256": "a566316f0b4e5755ddf4dc84eb8928e48a4126c849fb9ff21f94d5e92a001bb2"
+    },
+    {
+      "path": "downloads/CLEA-Auto-0.1.0-test.json",
+      "bytes": 640,
+      "sha256": "0682698e2e58fa4c1332d94731a3f9bd83a958ef60eb6e38f41a10acb391d222"
+    },
+    {
+      "path": "downloads/CLEA-Auto-0.1.0-test.sha256",
+      "bytes": 91,
+      "sha256": "af953507fe56adc10504414540b858e81adb094fb12c75993d949762b81816ac"
+    },
+    {
+      "path": "downloads/CLEA-Auto-0.2.0-test.apk",
+      "bytes": 398770,
+      "sha256": "8a98e6af6fff9865536d3ffaac9b18715f2793740f4a86918ce831a4d5d64351"
+    },
+    {
+      "path": "downloads/CLEA-Auto-0.2.0-test.json",
+      "bytes": 706,
+      "sha256": "e22ecb7d0f90c5066ae230e30bce5960eda9aa24ab135c07af1e716e7fb73b3f"
+    },
+    {
+      "path": "downloads/CLEA-Auto-0.2.0-test.sha256",
+      "bytes": 91,
+      "sha256": "e9ad19243872f494cbe8ef69ce52183fd3487cd35e36198f9a1303ba5a7a836e"
+    },
+    {
+      "path": "index.html",
+      "bytes": 11162,
+      "sha256": "cc6b39b0a1dffcad650f2f0a4d72d970564ca1541e5438df7d29b77745a07527"
+    },
+    {
+      "path": "investigation.css",
+      "bytes": 9009,
+      "sha256": "d2d84d55f6287463324863af443d11a9f5cd0429282e768e47cd778f600e08b2"
+    },
+    {
+      "path": "js/app.js",
+      "bytes": 56034,
+      "sha256": "9d0e41f12d60d4c7c458ec37bcf9dc9dd355b3cad9476747afe389fd7fea8a55"
+    },
+    {
+      "path": "js/auto-bridge-factory.js",
+      "bytes": 1266,
+      "sha256": "95dc8283d8064d0e3a7cbb5a395e9692911c84018097a5fb18b98e901c4e044b"
+    },
+    {
+      "path": "js/auto-comparison-ui.js",
+      "bytes": 12999,
+      "sha256": "1e5583d940c45211a591cfd34b39bd0ebe2e72038e06a4b5a8baf8f57c319551"
+    },
+    {
+      "path": "js/auto-comparison.js",
+      "bytes": 8889,
+      "sha256": "b16e8c8f76c375c0d040f391f7def7361d221d2d39ce4aa058b7e1bb49ac6bb3"
+    },
+    {
+      "path": "js/auto-connection-scene.js",
+      "bytes": 4542,
+      "sha256": "30aa967964a243e7c9dd9f9f180f9dee039abcef3efe259e2963c46a35af4af2"
+    },
+    {
+      "path": "js/auto-freeze-frame.js",
+      "bytes": 14788,
+      "sha256": "5f470e1aae73f65bfb97fe52dab1804c7506607fb1a0b453bcbfd7b89a3d3bad"
+    },
+    {
+      "path": "js/auto-freeze-ui.js",
+      "bytes": 23894,
+      "sha256": "88e339d86c42304872aa5754680b26d41cc09a1f86915766011e3251e8d5d37c"
+    },
+    {
+      "path": "js/auto-investigation.js",
+      "bytes": 27260,
+      "sha256": "0b298c59ee92d58ec430b6d14b300726c79217d0683dcecb462308273f630b4e"
+    },
+    {
+      "path": "js/auto-series-ui.js",
+      "bytes": 22303,
+      "sha256": "3ca5bd3d34edc010908216b93a86a6078bcd0cbdb88338155030818abfc9703c"
+    },
+    {
+      "path": "js/auto-series.js",
+      "bytes": 20877,
+      "sha256": "89abcc56f7543e8c79a609e7b9b6e3abde18041310fc40a5eaa4f28785a3de71"
+    },
+    {
+      "path": "js/auto-software-profile.js",
+      "bytes": 8880,
+      "sha256": "3ab7885f0c000481a7a5c3ff535ac1eb94f4f8fde2e49466413b263236a47b03"
+    },
+    {
+      "path": "js/auto-vault.js",
+      "bytes": 18467,
+      "sha256": "630c690796fce1cdf1be62ef95ef388385c94c12d2efbf22b0b3b6401818d8b4"
+    },
+    {
+      "path": "js/bil-lab-ui.js",
+      "bytes": 26990,
+      "sha256": "3ae4479eba8836354c9bb0262109ad763c378caf11ab140ce85bc6b5e2adc87a"
+    },
+    {
+      "path": "js/bil-tools-bridge.js",
+      "bytes": 9000,
+      "sha256": "0c6c013207636a95d53ed05ba292f117930d290d7227182a3d18b6e43c5d06a1"
+    },
+    {
+      "path": "js/bil-tools-worker.js",
+      "bytes": 909,
+      "sha256": "41f20d9b78a84ff0557dfc53e529cc998b57d66d6fb68c4cf3103b5a34d20443"
+    },
+    {
+      "path": "js/ble-motion.js",
+      "bytes": 3609,
+      "sha256": "f8e822a2781d0f9e49a4a53c2141e988a0dabec30c97d46e8b6433fba7b8c7fd"
+    },
+    {
+      "path": "js/case-link.js",
+      "bytes": 6872,
+      "sha256": "6ea877add09c42803fccd02773827fffa4a957f24b2b6108ef7073f65236a3bd"
+    },
+    {
+      "path": "js/catalog.js",
+      "bytes": 34514,
+      "sha256": "eb7a6e6657464802389d0c70f8889222f0ccde96c7aeb2ee07fb94eb29e214d3"
+    },
+    {
+      "path": "js/clea7/bil-compiler.js",
+      "bytes": 64117,
+      "sha256": "64149f57f57300e533321e1d8583143753fd112d3f9b33eb738140c7eeb22a77"
+    },
+    {
+      "path": "js/clea7/bil-runtime.js",
+      "bytes": 61990,
+      "sha256": "65aea48bba2ab38a92400b3f11659d9cf6f2ed3589d41e2bf0412aa79a5abc73"
+    },
+    {
+      "path": "js/composer-ui.js",
+      "bytes": 28606,
+      "sha256": "2b5ce8ec6e8ea0de0448201f4f4329d5e7479ab38615a856c5f558522ed8075e"
+    },
+    {
+      "path": "js/device-access.js",
+      "bytes": 7944,
+      "sha256": "b7b3c10200642891f0979c63c0ef3a6d257c8983c1afc4abf31ceee5772dd8d1"
+    },
+    {
+      "path": "js/device-audio.js",
+      "bytes": 5585,
+      "sha256": "1445784b236ecaa17ad2a113cad4fbc8588d8ba0b3f7d047960709811eba4164"
+    },
+    {
+      "path": "js/device-bridges.js",
+      "bytes": 26294,
+      "sha256": "5b3a767e65a5e2284d987ad47be230cd7714da8f961a0a44059b7fcff6111afc"
+    },
+    {
+      "path": "js/device-core.js",
+      "bytes": 20773,
+      "sha256": "579dc58b5e67b9e1166b757e4d55ba65395ee8d097b78b803c1c59950ee26255"
+    },
+    {
+      "path": "js/device-ui.js",
+      "bytes": 32968,
+      "sha256": "0130b599f01b42710554f4d5d6b48c8b186a27cff92ac1c9dbc6182989b5e9a9"
+    },
+    {
+      "path": "js/diagnostic-profiles.js",
+      "bytes": 24998,
+      "sha256": "889d0ca8115a68881eef7c2ab685acc5e6bc82c2a2b27400b39f914aaa4be8db"
+    },
+    {
+      "path": "js/diagnostic-report.js",
+      "bytes": 1916,
+      "sha256": "fff072e8b04f084f43976cc1238c57d245b9435537a66ec5a5728745fbafc32e"
+    },
+    {
+      "path": "js/diagnostic-scene.js",
+      "bytes": 22112,
+      "sha256": "1fc8f836a6312f82f4b9dfa59da1cf4b72ada49b2bd502953bebd5b1162e4abe"
+    },
+    {
+      "path": "js/diagnostic-ui.js",
+      "bytes": 29000,
+      "sha256": "c82144cfa350b87d10df9ba85fe287351dc96e24fd5f545504ca64ffec8f0872"
+    },
+    {
+      "path": "js/diagnostics.js",
+      "bytes": 59263,
+      "sha256": "f7e9925852a54432407dfd63ef5a921353dc42926871086dad69cae7e6c87254"
+    },
+    {
+      "path": "js/display.js",
+      "bytes": 868,
+      "sha256": "ea6bfc9a734255892ada1ffb30cf19c886d197a1678b2da146f65ca0da61d111"
+    },
+    {
+      "path": "js/evidence-engine.js",
+      "bytes": 34504,
+      "sha256": "02acf547590b6d3b8e992e02d5a087078cafe0d91df8c4ae3b5d958cb0a20d96"
+    },
+    {
+      "path": "js/icons.js",
+      "bytes": 3473,
+      "sha256": "3d17dd9f54ee01a66963354d4d05832c2a152754aea46650044cecdc60457e4d"
+    },
+    {
+      "path": "js/investigation-capture.js",
+      "bytes": 1848,
+      "sha256": "c51b73a8cd15071a3755f3916cdf0a2fb05e4b40a7bcd57696328586d71d9984"
+    },
+    {
+      "path": "js/investigation-engine.js",
+      "bytes": 33782,
+      "sha256": "d37d4ad5b5505adce2de1f85ce13e0643f0fdd66d34315f3cab0acd04eebbadc"
+    },
+    {
+      "path": "js/investigation-plot.js",
+      "bytes": 14166,
+      "sha256": "85b1b1f00b7d979a612ac62b80b8a877079dc26b9ca5d4ffbbf2b45d103d172b"
+    },
+    {
+      "path": "js/investigation-ui.js",
+      "bytes": 35224,
+      "sha256": "5586127f7d0ace820d7069ce729260bfd5a35cc39d9b3e6a852f1e634afb860f"
+    },
+    {
+      "path": "js/investigation-vault.js",
+      "bytes": 8881,
+      "sha256": "44914f46583a269f0f78eaaeb0870485bdb20d2bb4b25d2d74fb930b27f820c1"
+    },
+    {
+      "path": "js/link-session.js",
+      "bytes": 13698,
+      "sha256": "27a8d7933d82612ba2a76dc8adb1ae8f90a4fc63d5bd7cf68a5d3d6ab2d23442"
+    },
+    {
+      "path": "js/native-files.js",
+      "bytes": 5677,
+      "sha256": "a989ece892e63f4e0141023611d10fc494d57c7bf173399137366541a5c8669f"
+    },
+    {
+      "path": "js/native-obd.js",
+      "bytes": 4679,
+      "sha256": "2b8bd649ec5fbc5f1f365b8eada3f3af51545eafd5781280cc8d3e327347526c"
+    },
+    {
+      "path": "js/runtime.js",
+      "bytes": 25699,
+      "sha256": "a3f8820268331da3d91481db2f9e069dbd63b7fda3da4932b4bbabb655e6fd81"
+    },
+    {
+      "path": "js/sensors.js",
+      "bytes": 16228,
+      "sha256": "664f15824513a7cb7992c528285de074c62232abc88cf219ba8bde8884dd45d3"
+    },
+    {
+      "path": "js/session-view.js",
+      "bytes": 584,
+      "sha256": "ff97b8ec70489bcb84a43d569de88f89ec1aeb8b441baf71d5979064f4719640"
+    },
+    {
+      "path": "js/source-roles.js",
+      "bytes": 950,
+      "sha256": "1c640547dc968796a90bb9b432eb77412d114d34cacb57497f762c3e5e893643"
+    },
+    {
+      "path": "js/tool-composer.js",
+      "bytes": 29297,
+      "sha256": "cfa451129af6823a986b1ea6188d5881edbf09a41ca5b386e07cf68fcaa9e784"
+    },
+    {
+      "path": "js/tool-library.js",
+      "bytes": 7552,
+      "sha256": "dfd9d08d616819e9ff3716e12f977eed53a699934c6aa94937dc4d8f8cc3e5e7"
+    },
+    {
+      "path": "js/vehicle-ui.js",
+      "bytes": 25870,
+      "sha256": "e7d0ec3321f6614ac84d7d5776506d1f1929c2a12ff8982acf404722b818bea7"
+    },
+    {
+      "path": "manifest.webmanifest",
+      "bytes": 272,
+      "sha256": "0907e11d12f0a33332f5bb0afe476a19652f4463119558378c7d0b29ac506355"
+    },
+    {
+      "path": "styles.css",
+      "bytes": 25443,
+      "sha256": "b324b837d9f07f41df1f2fba8a16a2bb68c69509169951cd2b0e30bb8bb9bcb2"
+    },
+    {
+      "path": "sw.js",
+      "bytes": 2503,
+      "sha256": "76502a30cf7213ac49cb9adae031545713be8071ac64a582aa979dcec21b62c6"
+    },
+    {
+      "path": "vehicle.css",
+      "bytes": 4024,
+      "sha256": "8dd6b90f43a42ac677505111075e90e96c9c715917850cb09c0c51352836d810"
+    }
+  ],
+  "sourceRedistribution": "Frontend assets required to run the owner-requested web app only; no core licence changed",
+  "physicalAdapterVerified": false,
+  "apk": {
+    "format": "blclea.android-artifact/1",
+    "name": "CLEA Auto",
+    "version": "0.2.0-test",
+    "applicationId": "com.brzoilokalno.clea.auto",
+    "file": "CLEA-Auto-0.2.0-test.apk",
+    "sha256": "8a98e6af6fff9865536d3ffaac9b18715f2793740f4a86918ce831a4d5d64351",
+    "bytes": 398770,
+    "minSDK": 26,
+    "targetSDK": 35,
+    "signing": "local test certificate; not an owner production release",
+    "artifactVerified": true,
+    "androidGUIVerified": false,
+    "physicalAdapterVerified": false,
+    "internetPermission": false,
+    "sdkOrPrivateKeysBundled": false,
+    "features": [
+      "obd-snapshot",
+      "BIL-profiles",
+      "recorded-series",
+      "report-comparison",
+      "mode02-frame0",
+      "local-JSON-BIL-files"
+    ]
+  }
+}

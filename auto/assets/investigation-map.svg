@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="590" viewBox="0 0 720 590" fill="none" role="img" aria-labelledby="map-title map-desc">
+  <title id="map-title">CLEA7 — od izvora do obrazloženog nalaza</title>
+  <desc id="map-desc">Izvorna prostorna shema rada. Instrumenti predaju izvore zajedničkoj jezgri CLEA7. Povezani dokazi vode prema provjerama objašnjenja i dokumentiranom nalazu. Ilustracija prikazuje postupak, bez stvarnih mjerenja ili rezultata.</desc>
+  <defs>
+    <radialGradient id="map-ambient"><stop stop-color="#28496C" stop-opacity=".5"/><stop offset="1" stop-color="#0B1628" stop-opacity="0"/></radialGradient>
+    <radialGradient id="map-gold-halo"><stop stop-color="#D8B66F" stop-opacity=".19"/><stop offset="1" stop-color="#D8B66F" stop-opacity="0"/></radialGradient>
+    <linearGradient id="map-face" x1="235" y1="260" x2="398" y2="434" gradientUnits="userSpaceOnUse"><stop stop-color="#29465F"/><stop offset="1" stop-color="#0B1C30"/></linearGradient>
+    <linearGradient id="map-top" x1="223" y1="288" x2="421" y2="358" gradientUnits="userSpaceOnUse"><stop stop-color="#304F69"/><stop offset=".55" stop-color="#1A354F"/><stop offset="1" stop-color="#152C44"/></linearGradient>
+    <linearGradient id="map-gold" x1="215" y1="280" x2="461" y2="382" gradientUnits="userSpaceOnUse"><stop stop-color="#F0D69D"/><stop offset=".45" stop-color="#D3B477"/><stop offset="1" stop-color="#9D7E49"/></linearGradient>
+    <linearGradient id="map-glass" x1="248" y1="165" x2="414" y2="316" gradientUnits="userSpaceOnUse"><stop stop-color="#294F6A" stop-opacity=".88"/><stop offset="1" stop-color="#0E263F" stop-opacity=".95"/></linearGradient>
+    <linearGradient id="map-device" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#47677F"/><stop offset=".5" stop-color="#28465E"/><stop offset="1" stop-color="#10283F"/></linearGradient>
+    <linearGradient id="map-paper" x1="495" y1="342" x2="591" y2="454" gradientUnits="userSpaceOnUse"><stop stop-color="#34546E"/><stop offset="1" stop-color="#18344D"/></linearGradient>
+    <filter id="map-shadow" x="-45%" y="-45%" width="190%" height="210%"><feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#020A17" flood-opacity=".65"/></filter>
+    <filter id="map-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="4"/></filter>
+    <pattern id="map-grid" width="52" height="30" patternUnits="userSpaceOnUse"><path d="m0 15 26-15 26 15-26 15ZM0 15h52" stroke="#5C85A1" stroke-width=".6" opacity=".13"/></pattern>
+    <g id="map-socket"><circle r="5" fill="#172D42" stroke="#BFA66F"/><circle r="1.8" fill="#E8D198"/></g>
+    <g id="map-node"><circle r="6" fill="#1C3B55" stroke="#A0C5D3" stroke-width="1.1"/><circle r="2.1" fill="#C2E0E4"/></g>
+    <g id="map-small-node"><circle r="3.5" fill="#10283F" stroke="#92B7CA"/><circle r="1" fill="#B8D9E0"/></g>
+  </defs>
+
+  <!-- The scene is a conceptual working model, never a live dashboard. -->
+  <ellipse cx="357" cy="300" rx="346" ry="278" fill="url(#map-ambient)"/>
+  <ellipse cx="353" cy="359" rx="287" ry="151" fill="url(#map-gold-halo)"/>
+  <path d="m49 332 301-174 319 184-300 173Z" fill="url(#map-grid)"/>
+  <path d="m49 332 301-174 319 184-300 173Z" stroke="#5A7A94" stroke-opacity=".18"/>
+  <path d="m85 353 265-153 280 162M126 377l224-130 239 139M168 401l182-105 197 113" stroke="#63839A" stroke-opacity=".1"/>
+
+  <!-- Inlaid routes follow the same spatial plane as the instruments. -->
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <path d="m165 230 65 38 35-20M198 325l53 30M416 266l87-50M432 329l69 40M550 269v50l-28 16" stroke="#C6A96F" stroke-opacity=".12" stroke-width="9" filter="url(#map-glow)"/>
+    <path d="m165 230 65 38 35-20M198 325l53 30M416 266l87-50M432 329l69 40M550 269v50l-28 16" stroke="#BCA36E" stroke-width="1.2"/>
+    <path d="m162 239 67 38 39-23M198 334l48 28M420 276l87-50M431 339l65 38M560 272v51l-28 16" stroke="#5E8EA7" stroke-width=".8" stroke-dasharray="3 6" opacity=".65"/>
+    <path d="m208 256 12 7-1-7M474 233l12-7-7-2M470 351l12 7-1-7M550 303v12l-5-5" stroke="#E2C88E" stroke-width="1.2"/>
+  </g>
+
+  <!-- Sources: an original handheld instrument, probe, and optical module. -->
+  <g filter="url(#map-shadow)">
+    <path d="m65 227 84-49 78 45-84 49Z" fill="#0B1B2E" stroke="#3D5E79"/>
+    <path d="m65 227 78 45v12l-78-45Z" fill="#0D2035" stroke="#29485F"/>
+    <path d="m143 272 84-49v12l-84 49Z" fill="#19334A" stroke="#375771"/>
+    <path d="m74 227 75-43 69 39-75 44Z" stroke="#9F8C62" stroke-opacity=".65"/>
+    <path d="m97 173 32-19 42 24v61l-32 19-42-24Z" fill="url(#map-device)" stroke="#7F9FB3"/>
+    <path d="m97 173 42 24 32-19M139 197v61" stroke="#7F9FB3" stroke-width=".8"/>
+    <path d="m104 180 28 16v31l-28-16Z" fill="#0D2439" stroke="#5A7F96" stroke-width=".8"/>
+    <path d="m109 195 5 3 4-5 5 15 5-1" stroke="#B4D8DE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="m110 185 17 10M109 213l18 10" stroke="#557B94"/>
+    <ellipse cx="118" cy="232" rx="7" ry="10" transform="rotate(-29 118 232)" fill="#10283D" stroke="#BCA36E"/>
+    <path d="m118 225 1 5" stroke="#E5CD94" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="m147 201 16-9m-16 15 16-9m-16 15 16-9m-16 15 16-9" stroke="#6F93AA" stroke-width="1.5"/>
+    <path d="M106 246v9l-15 9-15-8v-42l12-7" stroke="#B99E66" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="m81 199 8 5v14l-8-5Z" fill="#D6BC83" stroke="#E8D09A"/>
+    <path d="m85 192 0 9" stroke="#9FBAC8" stroke-width="1.2"/>
+    <path d="m172 234 13-8v-32" stroke="#719CB1" stroke-width="1.5"/>
+    <path d="m180 180 8-5 9 5v18l-8 5-9-5Z" fill="#26475F" stroke="#A1BDC9"/>
+    <path d="m180 180 9 5 8-5m-8 5v18" stroke="#7194AA" stroke-width=".8"/>
+    <circle cx="185" cy="189" r="2" fill="#D8C28C"/>
+    <use href="#map-socket" x="196" y="239"/>
+  </g>
+
+  <g filter="url(#map-shadow)">
+    <path d="m105 323 51-29 59 34-51 29Z" fill="#11273C" stroke="#466B85"/>
+    <path d="m105 323 59 34v10l-59-34Z" fill="#0C2034" stroke="#2C4A61"/>
+    <path d="m164 357 51-29v10l-51 29Z" fill="#1D3C52" stroke="#456780"/>
+    <path d="m125 293 25-15 42 24-25 15Z" fill="#52758C" stroke="#9AB4C2" stroke-width=".8"/>
+    <path d="m125 293 42 24v29l-42-24Z" fill="#26465F" stroke="#6E91A7" stroke-width=".8"/>
+    <path d="m167 317 25-15v29l-25 15Z" fill="#15354E" stroke="#5B8099" stroke-width=".8"/>
+    <ellipse cx="145" cy="316" rx="11" ry="14" transform="rotate(-29 145 316)" fill="#0C2339" stroke="#90AFBF"/>
+    <ellipse cx="145" cy="316" rx="6" ry="8" transform="rotate(-29 145 316)" fill="#224C67" stroke="#D2BA81"/>
+    <path d="m174 321 11-6m-11 12 11-6" stroke="#7BA1B6" stroke-width="1.2"/>
+    <use href="#map-socket" x="197" y="341"/>
+  </g>
+
+  <!-- The seven-sided shared core carries the evidence graph. -->
+  <g filter="url(#map-shadow)">
+    <path d="m227 317 37-53 106-18 84 34 18 57-70 58-109-4Z" fill="#0A1D32" stroke="#476C86"/>
+    <path d="m227 317 66 74 109 4 70-58v23l-70 58-109-4-66-74Z" fill="url(#map-face)" stroke="#42647D"/>
+    <path d="m227 317 37-53 106-18 84 34 18 57-70 58-109-4Z" fill="url(#map-top)" stroke="#8DA9B9" stroke-width="1.1"/>
+    <path d="m240 317 33-44 95-16 76 31 16 46-62 50-99-4Z" fill="#132F48" stroke="url(#map-gold)" stroke-width="1.7"/>
+    <path d="m252 318 29-36 85-15 68 28 14 36-54 42-90-4Z" stroke="#456D87" stroke-width=".8"/>
+    <path d="m231 341 64 64 105 4 68-55" stroke="#7698AD" stroke-opacity=".45"/>
+    <path d="m286 399 0-15m125 17v-15" stroke="#BFA36B" stroke-width="1.6"/>
+    <path d="m280 336 55-32 66 38-55 32Z" fill="#0E243B" stroke="#4A718B"/>
+    <path d="m280 336 66 38v10l-66-38Z" fill="#10273E"/>
+    <path d="m346 374 55-32v10l-55 32Z" fill="#1C3B55"/>
+    <g fill="#142B41" stroke="#D0B57A" stroke-width="1.2">
+      <circle cx="254" cy="315" r="4"/><circle cx="282" cy="278" r="4"/><circle cx="364" cy="264" r="4"/>
+      <circle cx="435" cy="291" r="4"/><circle cx="450" cy="330" r="4"/><circle cx="395" cy="374" r="4"/><circle cx="302" cy="370" r="4"/>
+    </g>
+    <g fill="#E6CE93"><circle cx="254" cy="315" r="1.2"/><circle cx="282" cy="278" r="1.2"/><circle cx="364" cy="264" r="1.2"/><circle cx="435" cy="291" r="1.2"/><circle cx="450" cy="330" r="1.2"/><circle cx="395" cy="374" r="1.2"/><circle cx="302" cy="370" r="1.2"/></g>
+  </g>
+
+  <!-- An upright, translucent graph makes relationships visible. -->
+  <g filter="url(#map-shadow)">
+    <path d="m264 185 11-6 142 82v87l-11 6-142-82Z" fill="#142D45" stroke="#7498AE"/>
+    <path d="m264 185 142 82v87l-142-82Z" fill="url(#map-glass)" stroke="#86AABD"/>
+    <path d="m264 185 142 82 11-6M406 267v87" stroke="#A5BDCA" stroke-width=".8"/>
+    <path d="m273 199 125 72M273 263l125 72" stroke="#5D84A0" stroke-opacity=".4" stroke-width=".7"/>
+    <path d="m280 250 24-24 31 39 31-6 25 43M280 250l35 38 20-23 30 52 26-15M304 226l62 33M315 288l50 29" stroke="#8CB9CB" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="m304 226 31 39 31-6 25 43" stroke="#E3C88B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <use href="#map-small-node" x="280" y="250"/><use href="#map-node" x="304" y="226"/>
+    <use href="#map-node" x="335" y="265"/><use href="#map-small-node" x="315" y="288"/>
+    <use href="#map-node" x="366" y="259"/><use href="#map-small-node" x="365" y="317"/><use href="#map-node" x="391" y="302"/>
+    <circle cx="335" cy="265" r="10" stroke="#D9BF83" stroke-opacity=".4"/>
+    <path d="m283 281 0 40m101 18v20" stroke="#6089A2" stroke-width="2"/>
+  </g>
+
+  <!-- Tested explanations: alternatives and an explicit verification gate. -->
+  <g filter="url(#map-shadow)">
+    <path d="m464 239 83-48 92 53-83 48Z" fill="#10253A" stroke="#52758E"/>
+    <path d="m464 239 92 53v14l-92-53Z" fill="#0C2035" stroke="#36556F"/>
+    <path d="m556 292 83-48v14l-83 48Z" fill="#1D3B52" stroke="#466B83"/>
+    <path d="m474 239 73-42 82 47-73 42Z" stroke="#B79E69" stroke-opacity=".7"/>
+    <path d="m496 168 51-30 58 34v86l-51 30-58-34Z" fill="#10283E" stroke="#799CB1"/>
+    <path d="m496 168 58 34 51-30M554 202v86" stroke="#7EA2B7" stroke-width=".8"/>
+    <path d="m503 180 43 25v63l-43-25Z" fill="#1B3B55" stroke="#466F89" stroke-width=".7"/>
+    <path d="m511 218 10 6 13-14m-13 14 13 29m-13-29 13 8" stroke="#7498AE" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="m511 218 10 6 13-14" stroke="#D9C087" stroke-width="1.7" stroke-linecap="round"/>
+    <ellipse cx="511" cy="218" rx="3" ry="4" transform="rotate(-28 511 218)" fill="#ADCBD4"/>
+    <path d="m531 207 6 3v7l-6-3Z" fill="#D7BD82"/>
+    <path d="m531 229 6 3v7l-6-3Zm0 21 6 3v7l-6-3Z" stroke="#7294A9" stroke-width=".8"/>
+    <path d="m565 210 29-17m-29 28 29-17m-29 28 29-17m-29 28 29-17" stroke="#658AA2" stroke-width="1.1"/>
+    <path d="m573 246 6 2 11-18" stroke="#DCC58E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <use href="#map-socket" x="480" y="246"/>
+    <use href="#map-socket" x="618" y="258"/>
+  </g>
+
+  <!-- A document, with traceable structure, is the final object. -->
+  <g filter="url(#map-shadow)">
+    <path d="m462 424 76-44 95 55-76 44Z" fill="#12283E" stroke="#54758C"/>
+    <path d="m462 424 95 55v12l-95-55Z" fill="#102338" stroke="#36536C"/>
+    <path d="m557 479 76-44v12l-76 44Z" fill="#1B354D" stroke="#42627B"/>
+    <path d="m472 424 66-38 85 49-66 38Z" stroke="#A18C60" stroke-opacity=".6"/>
+    <path d="m492 336 60 34 27 45v44l-87-50Z" fill="#10273E" stroke="#557B95"/>
+    <path d="m499 329 61 35 27 44v44l-88-51Z" fill="url(#map-paper)" stroke="#94B1C2"/>
+    <path d="m560 364 0 29 27 15" fill="#46657B" stroke="#A5BDCA" stroke-width=".8" stroke-linejoin="round"/>
+    <path d="m510 354 35 20" stroke="#D7BF87" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="m510 365 23 13" stroke="#7EA2B8" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="m511 383 4 5 6-5m-10 16 4 5 6-5m-10 16 4 5 6-5" stroke="#D9C48D" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="m529 395 32 18m-32-2 21 12m-21 4 32 18" stroke="#91B1C3" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="m511 432 27 15" stroke="#718FA5" stroke-width="1.1" stroke-linecap="round"/>
+    <path d="m563 438 10 6 0 11-10-6Z" fill="#18354B" stroke="#D0B779"/>
+    <path d="m566 444 2 3 3-2" stroke="#DCC68F" stroke-width=".9" stroke-linecap="round" stroke-linejoin="round"/>
+    <use href="#map-socket" x="481" y="435"/>
+  </g>
+
+  <!-- Human-readable stage labels are deliberately outside the objects. -->
+  <g font-family="sans-serif">
+    <path d="M68 100h31" stroke="#D3B77C" stroke-width="1.5"/>
+    <text x="110" y="104" fill="#C6B58E" font-size="10" font-weight="500" letter-spacing="2.5">SHEMA RADA</text>
+    <text x="104" y="143" fill="#D7BF89" font-size="10" letter-spacing="1.8">01</text>
+    <text x="129" y="143" fill="#D6E2E8" font-size="11" font-weight="600" letter-spacing="2">IZVORI</text>
+    <path d="M316 160v14" stroke="#698DA6"/>
+    <text x="300" y="148" fill="#D7BF89" font-size="10" letter-spacing="1.8">02</text>
+    <text x="326" y="148" fill="#D6E2E8" font-size="11" font-weight="600" letter-spacing="2">DOKAZI</text>
+    <text x="497" y="117" fill="#D7BF89" font-size="10" letter-spacing="1.8">03</text>
+    <text x="523" y="117" fill="#D6E2E8" font-size="11" font-weight="600" letter-spacing="2">PROVJERE</text>
+    <text x="521" y="518" fill="#D7BF89" font-size="10" letter-spacing="1.8">04</text>
+    <text x="547" y="518" fill="#D6E2E8" font-size="11" font-weight="600" letter-spacing="2">NALAZ</text>
+    <text x="346" y="440" text-anchor="middle" fill="#E7D1A0" font-size="23" font-weight="600" letter-spacing="4">CLEA7</text>
+    <text x="346" y="462" text-anchor="middle" fill="#93AFC2" font-size="9" letter-spacing="1.8">ZAJEDNIČKA JEZGRA</text>
+  </g>
+  <path d="M317 479h58" stroke="#708EA5" stroke-opacity=".5"/>
+  <circle cx="346" cy="479" r="2" fill="#D4BA80"/>
+  <g fill="#7595AD" opacity=".5"><circle cx="76" cy="388" r="1.5"/><circle cx="224" cy="456" r="1.5"/><circle cx="642" cy="333" r="1.5"/></g>
+</svg>

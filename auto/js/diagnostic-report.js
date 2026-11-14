@@ -1,0 +1,9 @@
+import { formatNumber } from './display.js';
+import { EvidenceEngine } from './evidence-engine.js';
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=v=>v===null||v===undefined?'—':typeof v==='number'?formatNumber(v):String(v);
+export function diagnosticReportHTML(session){
+  if(!session)return '';
+  const report=new EvidenceEngine().replay(session);
+  return `<h2>CLEA mjerni snimak</h2><p>Izvor zapisa: ${session.origin==='imported'?'uvezen iz datoteke':'zabilježen u ovoj aplikaciji'}. ${report.summary.frameCount} okvira, ${report.summary.sourceCount} izvora. Referentni zapis: ${session.baseline?session.baseline.frames.length+' okvira':'nije sačuvan'}. Obrađeno pravilima ${esc(report.rulesVersion)}.</p><table><thead><tr><th>Kanal / jedinica</th><th>Broj očitanja</th><th>Medijan</th><th>Min / max</th><th>Razlika od reference</th></tr></thead><tbody>${report.metrics.map(m=>`<tr><td>${esc(m.label)} · ${esc(m.unit)}</td><td>${m.count}</td><td>${esc(fmt(m.median))}</td><td>${esc(fmt(m.min))} / ${esc(fmt(m.max))}</td><td>${esc(fmt(m.baseline?.delta))}</td></tr>`).join('')}</tbody></table>${report.decisions.map(d=>`<h3>${esc(d.kind==='source-disagreement'?'Razlika između izvora':'Promjena u odnosu na referencu')}</h3><p>${esc(d.conclusion)}</p><p>Moguća objašnjenja: ${(d.candidates||[]).map(esc).join('; ')}</p><p>Podaci koji nedostaju: ${(d.missingContext||[]).map(esc).join('; ')}</p>`).join('')}<h3>Predložene sljedeće provjere</h3><ul>${report.nextChecks.slice(0,8).map(n=>`<li>${esc(n.title)} — ${esc(n.reason)}</li>`).join('')}</ul><p>Izvor i kalibracija nisu kriptografski potvrđeni. Očitanja su vremenski označena; to ne znači da su različiti uređaji hardverski sinhronizovani. Stručni zaključak nije automatski utvrđen. Za ponovno izvršavanje analize sačuvajte i JSON mjerni snimak.</p>`;
+}

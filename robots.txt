@@ -1,5 +1,5 @@
 User-agent: *
-Allow: /
-Disallow: /studio/
 Disallow: /sdk-source/
+Disallow: /studio/launcher/player.html
+Allow: /
 Sitemap: https://clea7.brzoilokalno.com/sitemap.xml

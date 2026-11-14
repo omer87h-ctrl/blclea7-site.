@@ -1,0 +1,18 @@
+{
+  "format": "blclea.android-artifact/1",
+  "name": "CLEA Auto",
+  "version": "0.1.0-test",
+  "applicationId": "com.brzoilokalno.clea.auto",
+  "file": "CLEA-Auto-0.1.0-test.apk",
+  "sha256": "a566316f0b4e5755ddf4dc84eb8928e48a4126c849fb9ff21f94d5e92a001bb2",
+  "bytes": 357187,
+  "minSDK": 26,
+  "targetSDK": 35,
+  "signing": "local test certificate; not an owner production release",
+  "certificateSHA256": "a7e5132da4e1fe434778d200c8881af8e1eca20d14e08abd25014c53ce3791b0",
+  "artifactVerified": true,
+  "androidGUIVerified": false,
+  "physicalAdapterVerified": false,
+  "internetPermission": false,
+  "sdkOrPrivateKeysBundled": false
+}
