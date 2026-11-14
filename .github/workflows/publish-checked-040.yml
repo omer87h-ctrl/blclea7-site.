@@ -8,7 +8,7 @@ on:
       target:
         description: Exact checked artifact family
         type: choice
-        options: [windows]
+        options: [windows, android]
         default: windows
       transfer_url:
         description: Short-lived HTTPS transfer of the exact approved artifact
@@ -40,5 +40,10 @@ jobs:
           CLEA_CHECKED_TARGET: ${{ inputs.target }}
           CLEA_CHECKED_VARIANT: draw-040
         run: |
-          test "$CLEA_CHECKED_TARGET" = windows
-          python -m scripts.publish_checked_038
+          if [ "$CLEA_CHECKED_TARGET" = android ]; then
+            python -m scripts.publish_checked_android_040
+          elif [ "$CLEA_CHECKED_TARGET" = windows ]; then
+            python -m scripts.publish_checked_038
+          else
+            exit 1
+          fi
