@@ -1,7 +1,7 @@
 {
   "format": "clea7.connected-web-delivery/1",
   "version": "0.41.0-test",
-  "sourceCommit": "8ec69a606eec4b91ff32e738b7a5800e482fd4c1",
+  "sourceCommit": "ae85ea55d6547b8a798112936f3b9cb351dc7c3a",
   "actualBrowserFlow": {
     "format": "clea7.unified-studio-browser/1",
     "passed": true,
@@ -9,6 +9,7 @@
       "A real conversation command invokes registered Studio tools, passes real compiler/behavior/restart checks, requires review and runs in the one Draw workspace without a neural or response fixture",
       "Draw request uses the same conversation/operator, adds a real component and preserves current project identity and saved movement",
       "Components and typed collections are authored and executed directly in Draw; one existing Runtime mount preserves unrelated saved values",
+      "Reviewed apply/run adds no duplicate history entry; one AI Undo restores the exact previous complete project",
       "The same exported combined Draw/UI/collection package executes and persists in independent Runtime; one mount and unique DOM IDs survive panel changes and390px layout"
     ],
     "errors": [],

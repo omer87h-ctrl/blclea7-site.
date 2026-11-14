@@ -730,6 +730,6 @@
   "web_current": {
     "version": "0.41.0-test",
     "scope": "Studio/Draw/operator/shared AI client/TECH monitor/SDK; native installers retain their verified versions",
-    "source_commit": "8ec69a606eec4b91ff32e738b7a5800e482fd4c1"
+    "source_commit": "ae85ea55d6547b8a798112936f3b9cb351dc7c3a"
   }
 }

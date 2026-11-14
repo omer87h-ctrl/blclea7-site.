@@ -353,8 +353,8 @@
     },
     {
       "path": "studio/workbench/bil-studio.js",
-      "bytes": 13991,
-      "sha256": "c9b08b918a961868586264dcfade4122e932119b3d21fde0fcbfbc6146a8d274"
+      "bytes": 14057,
+      "sha256": "8d4f47095b79ddd2a6b2963162b1ba569ad6b943036d97c0ae7a667d940f5496"
     },
     {
       "path": "studio/workbench/business.js",
@@ -484,7 +484,7 @@
     {
       "path": "studio/workbench/index.html",
       "bytes": 17127,
-      "sha256": "acfee468e6bfe7fa5c9f581e0bed5bbb6254f8407ce175e191ace8c9d291096e"
+      "sha256": "cc32431bd5350327206ac124918139a4126f2d444bcee6d534f526dc5c6e65aa"
     },
     {
       "path": "studio/workbench/intelligence.js",
