@@ -36,7 +36,7 @@ for forbidden in ['main.py','runtime_main.py','clea7/desktop.py','clea7/host.py'
 catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610'
 download_page=(ROOT/'preuzimanja.html').read_text()
 for page in ROOT.glob('*.html'):
- assert 'Web Studio i SDK 0.40-test · Windows 0.39-test · Android 0.39-test' in page.read_text(),(page,'stale visible release version')
+ assert 'Web Studio i SDK 0.40-test · Windows 0.40-test · Android 0.39-test' in page.read_text(),(page,'stale visible release version')
 for entry in catalog['published']:
  p=ROOT/entry['url'];data=p.read_bytes();assert p.is_relative_to(ROOT) and len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],p
  if entry['key'] in ('sdk','preview'):
@@ -84,12 +84,12 @@ for a in current['assets']:
 print('PUBLIC_CHECKED_037 current installer, Android and universal package release metadata verified')
 
 windows=catalog["windows_current"]
-assert windows["state"]=="published" and windows["publication_run"]==42869786543
-assert windows["source_commit"]=="9092f01f2034454f692c634066f9ed0bd39d0de9"
+assert windows["state"]=="published" and windows["publication_run"]==43600140921
+assert windows["source_commit"]=="980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610"
 asset=windows["assets"][0]
-assert asset["size_bytes"]==249726161 and asset["sha256"]=="d181418bf3551eca54b57d5786822b4d75eb522c77041101bcc55f58f4242393"
+assert asset["size_bytes"]==249769336 and asset["sha256"]=="486a3abeed9fc0a8f3a044942a54b3c493901ed17b975bfab82faea191fcebd7"
 assert asset["url"] in download_page and asset["sha256"] in download_page
-print("PUBLIC_CHECKED_WINDOWS039 exact installed binary and anonymous release link verified")
+print("PUBLIC_CHECKED_WINDOWS040 exact installed binary and anonymous release link verified")
 
 android=catalog['android_current']
 assert android['state']=='published' and android['version']=='0.39.0-test'
