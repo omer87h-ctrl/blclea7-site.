@@ -12,7 +12,7 @@ const {chromium}=createRequire('/tmp/clea7-qa/package.json')('playwright');
   assert.equal(await page.locator('[data-panel="clea-ai"]').count(),0);
   assert.equal(await page.locator('[data-panel="assistant"]').count(),0);
   await page.locator('[data-panel="clea-chat"]').click();
-  assert((await page.locator('#chat-ready').innerText()).includes('nije povezan'));assert(await page.locator('#chat-send').isDisabled());assert(await page.locator('#clea-connect-model').isVisible());
+  assert((await page.locator('#chat-ready').innerText()).includes('Server u doradi'));assert(await page.locator('#chat-send').isEnabled());assert(await page.locator('#clea-connect-model').isVisible());
   await page.locator('#clea-ai-settings>summary').click();await page.locator('#clea-offline-options>summary').click();await page.locator('#clea-offline-help').check();await page.waitForFunction(()=>document.getElementById('chat-ready').textContent.includes('je provjeren'));
   console.log('PASS ONE CLEA AI NAV: one AI entry and dispatcher, honest disconnected state, explicit offline help');
 
