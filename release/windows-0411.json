@@ -1,0 +1,22 @@
+{
+  "format": "clea7.checked-windows-delivery/1",
+  "version": "0.41.1-test",
+  "sourceCommit": "7f81e42b739c3e80555644cf86212d05baf7cdf9",
+  "buildAndInstallationRun": 43718650265,
+  "publicationRun": 43720197247,
+  "asset": {
+    "key": "installer",
+    "name": "BLclea7-Setup-Windows-x64.exe",
+    "size_bytes": 249865806,
+    "sha256": "df52c0928a8235199df8c88b4df4e15db854f9b25ad285bb4c0fbde3665fe06e",
+    "url": "https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-windows-0.41.1-test/BLclea7-Setup-Windows-x64.exe"
+  },
+  "actualFrozenWebView2Checks": 19,
+  "actualInstallerExecuted": true,
+  "actualUninstallerExecuted": true,
+  "userFilesPreserved": true,
+  "installedFilesVerified": 981,
+  "productionSigned": false,
+  "neuralModelIncluded": false,
+  "ownerHPTested": false
+}

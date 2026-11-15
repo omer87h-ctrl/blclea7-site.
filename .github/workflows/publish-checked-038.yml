@@ -1,4 +1,4 @@
-name: Publish exact owner-approved Windows0.38 installer
+name: Publish exact owner-approved Windows installer
 on:
   push:
     branches: [work/clea-qwen-unified-027]
@@ -8,8 +8,8 @@ on:
       variant:
         description: Exact checked installer build
         type: choice
-        options: [initial, single-ai]
-        default: initial
+        options: [local-gateway-0411, initial, single-ai]
+        default: local-gateway-0411
       transfer_url:
         description: Short-lived HTTPS transfer of the exact approved installer artifact
         type: string
