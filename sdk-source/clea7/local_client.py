@@ -45,8 +45,12 @@ def status():
             value = exchange(port, '/health')
         except UserError:
             continue
+        profile=value.get('modelProfile')
+        # Current public-ai/1 health uses the versioned profile object. Keep
+        # the previous string contract readable without accepting other models.
+        profile_id=profile.get('id') if isinstance(profile,dict) else profile
         if (value.get('brand') == 'BL CLEA AI' and value.get('mode') == 'local'
-                and value.get('ready') is True and value.get('modelProfile') == PROFILE
+                and value.get('ready') is True and profile_id == PROFILE
                 and value.get('apiVersion') == 'clea7.public-ai/1'):
             return {'available': True, 'port': port, 'modelProfile': PROFILE, 'provider': 'clea',
                     'capabilities': value.get('capabilities',{}), 'message': 'BL CLEA AI 9B je spreman na ovom računaru.'}

@@ -1,0 +1,14 @@
+{
+  "format": "clea7.sdk.distribution/1",
+  "version": "0.41.1-test",
+  "status": "development-test",
+  "archive": "sense/downloads/BL-CLEA7-Core-SDK-0.41.1-test.zip",
+  "bytes": 1042712,
+  "sha256": "ef8ddb6e6653af2994bbca12beb528633810112fac41505218771022487891e3",
+  "entries": 116,
+  "referenceSha256": "e622ecb98a7d60999ce686b052bab09ef9db645d0e211526e9986e0060061b8c",
+  "licencePreserved": true,
+  "nativeBuildIncluded": false,
+  "signed": false,
+  "sourceCommit": "7f81e42b739c3e80555644cf86212d05baf7cdf9"
+}

@@ -1,6 +1,6 @@
 {
   "format": "clea7.sdk.inventory/1",
-  "version": "0.41.0-test",
+  "version": "0.41.1-test",
   "status": "development-test",
   "referenceSha256": "e622ecb98a7d60999ce686b052bab09ef9db645d0e211526e9986e0060061b8c",
   "licencePreserved": true,
@@ -19,17 +19,17 @@
     {
       "path": "NOTICE.txt",
       "bytes": 469,
-      "sha256": "1be376858c52250ce7f66e53b12738978f8730b22c281577d93a38daa304d407"
+      "sha256": "c44228855f0350541fcbefb92a7b7a82147bdc47609e81460defa85eac88677d"
     },
     {
       "path": "README.md",
       "bytes": 2880,
-      "sha256": "64d888cda563f88f96b0cde1bd1e8b1ec8d874ff2c40e3975dd00709c4d25290"
+      "sha256": "b59adbecacc6420f14772c741643bfc2e9b5a425b3131c06823b8e2456680907"
     },
     {
       "path": "clea7/__init__.py",
       "bytes": 96,
-      "sha256": "3b77e43ac41307ff886454914436d2a2e496be008a0c9aa6d4f492fd89a57b4e"
+      "sha256": "5f852a06631cecbecf09ee2429aba3413c0afc7f2f3605e20bd139408387aedb"
     },
     {
       "path": "clea7/__main__.py",
@@ -63,8 +63,8 @@
     },
     {
       "path": "clea7/local_client.py",
-      "bytes": 5556,
-      "sha256": "c6b0c0f916d9e880295a8a95637601215c8a49ffb49187652226b7107396e5c6"
+      "bytes": 5818,
+      "sha256": "719652496358a2ff9b8948e9a1c262e91497a2944897dddfdccc0ef8b7afa173"
     },
     {
       "path": "clea7/package.py",
