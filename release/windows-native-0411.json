@@ -1,0 +1,29 @@
+{
+  "format": "clea7.windows-native-gui/1",
+  "passed": true,
+  "sourceCommit": "7f81e42b739c3e80555644cf86212d05baf7cdf9",
+  "verificationRun": 43718650265,
+  "actualFrozenWebView2": true,
+  "checks": [
+    "actual frozen app-local WebView2 GUI",
+    "Studio bootstrap",
+    "generated component click",
+    "application/2 flow and persistence",
+    "application/3 authored app actual controls",
+    "guarded machine event and trace",
+    "original browser-Studio-authored BIL UI2 scene",
+    "Windows BIL navigation and actual button execution",
+    "custom record persistence and restart",
+    "shared guided authoring module available",
+    "bounded additive BIL state extension preserves existing Windows data",
+    "nine working visual elements available",
+    "actual added progress handler preserves existing frozen Windows data",
+    "actual typed card collection fields and record creation",
+    "actual per-card handler preserves previous Windows data",
+    "functional Draw SVG scene from the same BIL compiler",
+    "actual Draw controller and proximity door preserve previous application data",
+    "single Studio operator reviewed apply/Draw run preserves native data and one Runtime",
+    "one operator Undo restores exact prior native project"
+  ],
+  "limits": "Download dialogs, physical interaction and AI inference are separate checks."
+}
