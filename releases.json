@@ -6,11 +6,11 @@
   "published": [
     {
       "key": "sdk",
-      "name": "BL-CLEA7-Core-SDK-0.40.0-test.zip",
-      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.41.1-test.zip",
-      "size_bytes": 1042712,
-      "sha256": "ef8ddb6e6653af2994bbca12beb528633810112fac41505218771022487891e3",
-      "version": "0.41.1-test"
+      "name": "BL-CLEA7-Core-SDK-0.42.0-test.zip",
+      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.42.0-test.zip",
+      "size_bytes": 5746832,
+      "sha256": "0a7a8b9787e73ec66af5110e07e626b5b92e0b9d6bfcc5411623a36cbe406f59",
+      "version": "0.42.0-test"
     },
     {
       "key": "preview",
@@ -754,5 +754,21 @@
       ],
       "verified_ui": "functional_Draw_UI3_typed_collections_and_single_AI_workspace"
     }
-  ]
+  ],
+  "universal042": {
+    "version": "0.42.0-test",
+    "source": "27d22417f2873c5201bb3e120adacc72c088ed9a",
+    "coreFeatures": 4,
+    "packageBackwardCompatible": true,
+    "sdkEntries": 155,
+    "features": [
+      "shared Draw scene/operator",
+      "fixed-step2D collisions",
+      "clock/pad/camera/keyframe sampling",
+      "project-scoped incremental compilation",
+      "reviewed local OCR and offline recognition"
+    ],
+    "modelQuality70BVerified": false,
+    "native042Verified": false
+  }
 }

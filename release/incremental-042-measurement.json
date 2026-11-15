@@ -1,0 +1,35 @@
+{
+  "format": "bil.incremental-benchmark/1",
+  "environment": {
+    "platform": "linux",
+    "arch": "x64",
+    "node": "v24.19.0",
+    "cpus": 3
+  },
+  "trials": 35,
+  "sourceBytes": 16579,
+  "functions": 55,
+  "comparison": "same compiler, edit of screen label; source/AST/IR/package output checked byte for byte",
+  "coldMedianMs": 35.20795699999985,
+  "editedMedianMs": 32.23195099999998,
+  "last": {
+    "format": "bil.incremental/1",
+    "scope": "benchmark",
+    "parsedUnits": 1,
+    "reusedUnits": 57,
+    "recheckedFunctions": 0,
+    "reusedTypeFunctions": 55,
+    "loweredFunctions": 0,
+    "reusedLoweredFunctions": 55,
+    "lexedTokens": 6788,
+    "fullResultHit": false,
+    "passed": true,
+    "retainedBytes": 5271084,
+    "parseMs": 8.348075999999764,
+    "typeMs": 6.293210000000272,
+    "lowerMs": 3.7196469999998953,
+    "totalMs": 27.280561999999918
+  },
+  "physicalOwnerHP": false,
+  "speedRatio": 1.0923309296418287
+}

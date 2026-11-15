@@ -1,0 +1,13 @@
+{
+  "format": "clea7.living-scene-browser/1",
+  "passed": true,
+  "checks": [
+    "Existing conversation invokes the same scene.add transformation as Draw; real compiler/SHADOW checks run before source approval; no neural-authoring claim",
+    "Real retained SVG clock and keyboard events move the body until the static wall blocks it; stopping the clock halts updates; camera changes the actual SVG viewBox",
+    "Actual BIL editor uses a project-scoped incremental compiler; unchanged source hits its result cache and edited source reuses checked units",
+    "Same universal package installs in independent Runtime, runs pointer control at390px, persists actual position and starts paused after restart"
+  ],
+  "actualNeuralInference": false,
+  "physicalDevice": false,
+  "3DClaimed": false
+}

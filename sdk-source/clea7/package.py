@@ -7,7 +7,7 @@ from .application import validate
 from .schema import UserError
 
 FORMAT='clea7.package/1'
-RUNTIME='0.40.0'
+RUNTIME='0.42.0'
 MAX_PACKAGE=2*1024*1024
 MAX_APPLICATION=1024*1024
 TARGETS={'browser','windows','android'}
@@ -23,6 +23,7 @@ def minimum_runtime(app,targets):
     return floor
 
 def _application_minimum_runtime(app,targets):
+    if any(b.get('adapter')=='sense.local/1' and 'document.ocr' in b.get('operations',[]) for b in app.get('remote',{}).get('backends',{}).values()):return '0.42.0'
     if app.get('bil',{}).get('ir',{}).get('ui',{}).get('format')=='bil.ui/3':return '0.40.0'
     if any(b['adapter']=='sense.local/1' for b in app.get('remote',{}).get('backends',{}).values()):return '0.37.0'
     if any(b['adapter']=='firebase.development/4' for b in app.get('remote',{}).get('backends',{}).values()):return '0.16.0'
@@ -77,6 +78,7 @@ def decode(raw,target=None):
         app=validate(json.loads(payload))
         backends=app.get('remote',{}).get('backends',{})
         if backends and 'windows' in manifest['targets'] and not all(b['adapter']=='sense.local/1' for b in backends.values()):raise UserError('Windows udaljeni broker nije podržan; Sense lokalni adapter je zaseban ugovor.')
+        if any(b['adapter']=='sense.local/1' and 'document.ocr' in b['operations'] for b in backends.values()) and tuple(map(int,manifest['runtime'].split('.'))) < (0,42,0):raise UserError('Lokalni OCR zahtijeva Runtime 0.42.0.')
         if any(b['adapter']=='sense.local/1' for b in backends.values()) and tuple(map(int,manifest['runtime'].split('.'))) < (0,37,0):raise UserError('Sense lokalne mogućnosti zahtijevaju Runtime 0.37.0.')
         if app.get('bil'):
             from .bil import core_features

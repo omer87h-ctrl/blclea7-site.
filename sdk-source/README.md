@@ -1,4 +1,4 @@
-# BL CLEA7 SDK 0.41.1-test — shared Core and dependency cache
+# BL CLEA7 SDK 0.42.0-test — shared Core and dependency cache
 
 Development/test distribution by Brzo i Lokalno. The authoritative BIL compiler,
 bounded interpreter, shared Core, project CLI and original dependency/result cache
@@ -10,6 +10,9 @@ The SDK contains its client, not a model server or weights. `ai propose` require
 review and passes the actual compiler/isolated Runtime before writing a new file.
 Sense contracts require Runtime0.37 and a host implementing those capabilities;
 this compiler/Core archive does not contain native host binaries/build templates.
+Runtime0.42 adds bounded2D scenes, clock/pad/camera and local OCR with review.
+Project-scoped incremental compilation and source/IR compatibility are documented
+in docs/BIL-INCREMENTAL-COMPILER.md; examples are in sdk/examples/bil.
 
 From the extracted SDK directory:
 

@@ -18,34 +18,38 @@ function nativeSend(method,data,{signal}={}){
  });
 }
 function receive(data){const finish=data&&pending.get(data.id);if(!finish)return;const code=['Denied','Cancelled','Timeout','Invalid','Unavailable','Conflict','Budget','Uncertain'].includes(data.code)?data.code:'Unavailable';finish(data.ok===true,data.ok===true?data.value:fault(code,'Native Sense nije završio radnju.',data.uncertain===true));}
-const labels={'speech.speak':'Izgovori potvrđeni tekst','speech.listen':'Pretvori govor u tekst','speech.stop':'Zaustavi govor','document.docx':'Pripremi DOCX preuzimanje','haptic.cue':'Taktilni signal'};
+const labels={'speech.speak':'Izgovori potvrđeni tekst','speech.listen':'Pretvori govor u tekst','speech.stop':'Zaustavi govor','document.docx':'Pripremi DOCX preuzimanje','document.ocr':'Pročitaj tekst slike lokalno','document.ocr.review':'Pregledaj prepoznati tekst','haptic.cue':'Taktilni signal'};
 function ask(operation,text,signal){
  const d=scope.document;if(!d?.createElement)return Promise.reject(fault('Unavailable','Ova mogućnost zahtijeva interaktivni preglednik.'));
  return new Promise((resolve,reject)=>{
   const el=(tag,text)=>{const n=d.createElement(tag);if(text!==undefined)n.textContent=text;return n;},dialog=el('dialog'),title=el('h2',labels[operation]),description=el('p');dialog.className='clea7-review';dialog.setAttribute('aria-label',labels[operation]);
-  description.textContent=operation==='document.docx'?'Preuzimanje sadrži samo prikazani tekst. Pregledaj ga prije potvrde.':operation==='speech.listen'?'Mikrofon se uključuje tek kada potvrdiš. Prepoznati tekst treba pregledati.':'Radnja se izvršava na ovom uređaju tek nakon tvoje potvrde.';
+  description.textContent=operation==='document.ocr'?'Odaberi PNG ili JPEG sliku. Tekst se prepoznaje lokalno; slika se ne šalje AI serveru. Prije prijenosa u aplikaciju pregledat ćeš rezultat.':operation==='document.ocr.review'?'OCR može pogriješiti. Pregledaj i ispravi tekst prije potvrde. Aplikacija još nije dobila ovaj sadržaj.':operation==='document.docx'?'Preuzimanje sadrži samo prikazani tekst. Pregledaj ga prije potvrde.':operation==='speech.listen'?'Mikrofon se uključuje tek kada potvrdiš. Prepoznati tekst treba pregledati.':'Radnja se izvršava na ovom uređaju tek nakon tvoje potvrde.';
   const preview=el('pre',text),voiceLabel=el('label','Lokalni glas uređaja'),voice=el('select'),systemLabel=el('label'),system=el('input');voiceLabel.append(voice);system.type='checkbox';systemLabel.append(system,d.createTextNode(' Biram sistemsko prepoznavanje i dopuštam da zvuk napusti uređaj prema pravilima preglednika.'));
   const approve=el('button','Potvrdi ovu radnju'),cancel=el('button','Odustani');approve.type=cancel.type='button';approve.dataset.senseApprove='true';cancel.dataset.senseCancel='true';
   let settled=false;const finish=(value,error)=>{if(settled)return;settled=true;signal?.removeEventListener('abort',abort);scope.speechSynthesis?.removeEventListener?.('voiceschanged',voices);dialog.close();dialog.remove();error?reject(error):resolve(value);};
   const abort=()=>finish(null,fault('Cancelled','Sense radnja je otkazana.'));
   const voices=()=>{const previous=voice.value;voice.replaceChildren();for(const row of scope.CLEA7SenseSDK.speaker().voices()){const option=el('option',row.name+' · '+row.language);option.value=row.name;voice.append(option);}if([...voice.options].some(row=>row.value===previous))voice.value=previous;approve.disabled=operation==='speech.speak'&&!voice.value;};
   dialog.append(title,description);if(operation!=='speech.listen')dialog.append(preview);if(operation==='speech.speak'){dialog.append(voiceLabel);voices();scope.speechSynthesis?.addEventListener?.('voiceschanged',voices);}if(operation==='speech.listen')dialog.append(systemLabel);
-  approve.onclick=()=>finish({voiceName:voice.value,allowSystemService:system.checked});cancel.onclick=abort;dialog.addEventListener('cancel',event=>{event.preventDefault();abort();});dialog.append(approve,cancel);d.body.append(dialog);signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted){abort();return;}dialog.showModal();cancel.focus();
+  const image=el('input'),review=el('textarea');
+  if(operation==='document.ocr'){preview.remove();image.type='file';image.accept='.png,.jpg,.jpeg,image/png,image/jpeg';image.setAttribute('aria-label','Slika za lokalni OCR');approve.disabled=true;image.onchange=()=>approve.disabled=!image.files?.length;dialog.append(image);}
+  if(operation==='document.ocr.review'){preview.remove();review.value=text;review.maxLength=30000;review.rows=12;review.setAttribute('aria-label','Prepoznati tekst za pregled');dialog.append(review);}
+  approve.onclick=()=>{if(operation==='document.ocr.review'&&(!review.value.trim()||review.value.includes('\0')))return;finish({voiceName:voice.value,allowSystemService:system.checked,...(operation==='document.ocr'?{file:image.files?.[0]}:{}),...(operation==='document.ocr.review'?{text:review.value}:{})});};cancel.onclick=abort;dialog.addEventListener('cancel',event=>{event.preventDefault();abort();});dialog.append(approve,cancel);d.body.append(dialog);signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted){abort();return;}dialog.showModal();cancel.focus();
  });
 }
 function download(bytes){const d=scope.document,url=scope.URL.createObjectURL(new scope.Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})),a=d.createElement('a');a.href=url;a.download='CLEA-CV.docx';d.body.append(a);a.click();a.remove();setTimeout(()=>scope.URL.revokeObjectURL(url),3000);}
-function create({application,backend,operations,prompt=ask,save=download}={}){
+function create({application,backend,operations,prompt=ask,save=download,localOnly=false}={}){
  const contracts=scope.CLEA7BIL.SENSE_CONTRACTS;
  if(!scope.CLEA7BIL.safe(application)||!Array.isArray(operations)||new Set(operations).size!==operations.length||operations.some(op=>!Object.hasOwn(contracts,op))||!scope.CLEA7SenseSDK||!scope.CLEA7SenseDocument)throw fault('Denied','Neispravan Sense ugovor.');
- if(profile()){
+ if(profile()&&!localOnly){
   if(profile().application!==application||!scope.CLEA7BIL.safe(backend))throw fault('Denied','Native Sense pripada drugoj aplikaciji.');
-  let configured=null,closed=false;const active=new Set();
+  let configured=null,closed=false;const active=new Set(),localOCR=operations.includes('document.ocr')?create({application,backend,operations:['document.ocr'],prompt,save,localOnly:true}):null;
   return Object.freeze({version:VERSION,async execute(request,{signal}={}){
    if(closed||signal?.aborted)throw fault('Cancelled','Sense kontekst je zatvoren.');if(!operations.includes(request.operation)||!Array.isArray(request.args)||request.args.length!==contracts[request.operation].arguments||request.args.some(value=>typeof value!=='string'))throw fault('Denied','Sense operacija nije odobrena.');if(request.args.some(value=>value.length>(request.operation==='document.docx'?30000:3000)))throw fault('Budget','Sense tekst prelazi budžet.');
+   if(request.operation==='document.ocr')return await localOCR.execute(request,{signal});
    const controller=new AbortController(),cancel=()=>controller.abort();signal?.addEventListener('abort',cancel,{once:true});active.add(controller);
    try{if(!configured)configured=nativeSend('configure',{application,backend,operations},{signal:controller.signal}).catch(error=>{configured=null;throw error;});await configured;if(closed||controller.signal.aborted)throw fault('Cancelled','Sense kontekst je zatvoren.');return await nativeSend('request',{application,backend,operation:request.operation,args:request.args},{signal:controller.signal});}
    finally{active.delete(controller);signal?.removeEventListener('abort',cancel);}
-  },close(){closed=true;for(const controller of active)controller.abort();configured=null;}});
+  },close(){closed=true;localOCR?.close();for(const controller of active)controller.abort();configured=null;}});
  }
  let closed=false,current=null;const speaker=scope.CLEA7SenseSDK.speaker();
  return Object.freeze({version:VERSION,async execute(request,{signal}={}){
@@ -54,11 +58,19 @@ function create({application,backend,operations,prompt=ask,save=download}={}){
   if(request.operation==='speech.stop'){if(owner&&owner!==application)throw fault('Denied','Govor pripada drugoj aplikaciji.');current?.abort();speaker.stop();return true;}
   if(current||owner)throw fault('Conflict','Druga Sense radnja još traje.');
   const controller=new AbortController(),cancel=()=>controller.abort();current=controller;owner=application;signal?.addEventListener('abort',cancel,{once:true});let began=false,listener=null;
-  const abort=()=>{speaker.stop();listener?.abort();};controller.signal.addEventListener('abort',abort,{once:true});const timer=setTimeout(cancel,120000);
+  const abort=()=>{speaker.stop();listener?.abort();};controller.signal.addEventListener('abort',abort,{once:true});const timer=setTimeout(cancel,request.operation==='document.ocr'?600000:120000);
   try{
    const text=request.args[0]||'';if(text.length>(request.operation==='document.docx'?30000:3000))throw fault('Budget','Sense tekst prelazi budžet.');
    if(request.operation==='speech.stop'){speaker.stop();return true;}
+   if(request.operation==='document.ocr'&&!['bos','eng'].includes(text))throw fault('Invalid','OCR jezik mora biti bos ili eng.');
    const permission=await prompt(request.operation,text,controller.signal);if(controller.signal.aborted)throw fault('Cancelled','Sense radnja je otkazana.');
+   if(request.operation==='document.ocr'){
+    if(!scope.CLEA7SenseOCR?.capabilities().configured)throw fault('Unavailable','Ovaj host nema lokalni OCR.');
+    const result=await scope.CLEA7SenseOCR.read(permission.file,{approved:true,language:text,signal:controller.signal});
+    const review=await prompt('document.ocr.review',result.text,controller.signal);
+    if(controller.signal.aborted)throw fault('Cancelled','Pregled teksta je otkazan.');
+    if(typeof review.text!=='string'||!review.text.trim()||review.text.length>30000||review.text.includes('\0'))throw fault('Invalid','Potvrđeni OCR tekst nije ispravan.');return review.text;
+   }
    if(request.operation==='document.docx'){const data=scope.CLEA7SenseDocument.renderDOCX(text);began=true;save(data);return true;}
    if(request.operation==='speech.speak'){began=true;const result=await speaker.speak(text,{approved:true,voiceName:permission.voiceName});return result.spoken===true;}
    if(request.operation==='haptic.cue'){const patterns={confirm:[100],error:[90,80,30],complete:[35,60,35,60,100]};if(!Object.hasOwn(patterns,text))throw fault('Invalid','Nepoznat taktilni signal.');began=true;return scope.CLEA7SenseSDK.vibrate(patterns[text],{approved:true}).accepted;}

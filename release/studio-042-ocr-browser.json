@@ -1,0 +1,13 @@
+{
+  "format": "clea7.studio-ocr-browser/1",
+  "passed": true,
+  "checks": [
+    "One existing conversation invokes the real registered OCR tool; compiler/SHADOW and review run before source apply; explicit scoped operation grant is required",
+    "Actual nested-worker WASM recognition returns typed Text only after a separate editable content approval; no recognition response fixture",
+    "The same0.42 package excludes imported CV data, installs in independent Runtime, performs real OCR and preserves its separately approved local state after restart"
+  ],
+  "actualWasmRecognition": true,
+  "neuralAuthoringInvoked": false,
+  "recognitionFixture": false,
+  "errors": []
+}

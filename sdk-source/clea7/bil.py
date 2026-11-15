@@ -18,7 +18,7 @@ def safe(value):
 
 NATIVE_TYPES={'NativeMedia':{'handle':'Text','mime':'Text','width':'Number','height':'Number','bytes':'Number'},'NativeLocation':{'latitude':'Number','longitude':'Number','accuracy':'Number','timestamp':'Number'},'NativeReceipt':{'posted':'Boolean','id':'Number'}}
 NATIVE_OPS={'camera.capture':(0,'NativeMedia'),'media.pick':(0,'NativeMedia'),'media.list':(0,'NativeMediaList'),'media.inspect':(1,'NativeMedia'),'media.remove':(1,'Boolean'),'location.current':(0,'NativeLocation'),'notification.post':(1,'NativeReceipt')}
-SENSE_OPS={'speech.speak':(1,'Boolean'),'speech.listen':(1,'Text'),'speech.stop':(0,'Boolean'),'document.docx':(1,'Boolean'),'haptic.cue':(1,'Boolean')}
+SENSE_OPS={'speech.speak':(1,'Boolean'),'speech.listen':(1,'Text'),'speech.stop':(0,'Boolean'),'document.docx':(1,'Boolean'),'document.ocr':(1,'Text'),'haptic.cue':(1,'Boolean')}
 IMAGE_OPS={'image.choose':(0,'NativeMedia'),'image.upload':(2,'RemoteImage'),'image.load':(1,'NativeMedia'),'image.remove':(1,'Boolean'),'image.discard':(1,'Boolean')}
 IMAGE_TYPES={**NATIVE_TYPES,'RemoteImage':{'path':'Text'}}
 REMOTE_OPS=frozenset(('auth.register','auth.session','auth.signIn','auth.signOut','document.delete','document.get','document.set','document.add','query.list','query.documents','observe.query.documents','observe.document.get','observe.query.list'))
@@ -46,17 +46,19 @@ def core_features(project):
         elif isinstance(value,dict):
             if value.get('op')=='CALL' and value.get('call') in CORE2_OPERATIONS:used.add(value['call'])
             if value.get('op')=='CALL' and value.get('call') in CORE3_OPERATIONS:used.add(value['call'])
+            if value.get('op')=='CALL' and str(value.get('call','')).startswith('scene.'):used.add(value['call'])
+            if value.get('type') in ('clock','pad') or value.get('type')=='space' and value.get('camera'):used.add('scene.ui')
             if value.get('op')=='STORE_NEW' and value.get('coreFeature')=='derive':used.add('derive')
             if value.get('op')=='LOOP_WHILE':used.add('while')
             for child in value.values():
                 if isinstance(child,(list,dict)):inspect(child)
     # validate_program bounds this structure before packaging uses this helper.
-    for value in (ir.get('main',[]),ir.get('functions',{}),ir.get('handlers',{})):inspect(value)
+    for value in (ir.get('main',[]),ir.get('functions',{}),ir.get('handlers',{}),ir.get('ui',{})):inspect(value)
     for item in ir.get('sourceMap',[]):
         if isinstance(item,dict) and item.get('coreFeature') in ('guard','derive','while'):used.add(item['coreFeature'])
-    version=3 if used & (CORE3_OPERATIONS|{'derive','while'}) else 2 if used else 1
+    version=4 if any(x.startswith('scene.') for x in used) else 3 if used & (CORE3_OPERATIONS|{'derive','while'}) else 2 if used else 1
     return {'format':'bil.core.features/1','version':version,
-            'minimumRuntime':'0.18.0' if version==3 else '0.17.0' if used else '0.6.0','used':sorted(used)}
+            'minimumRuntime':'0.42.0' if version==4 else '0.18.0' if version==3 else '0.17.0' if used else '0.6.0','used':sorted(used)}
 
 def validate_derive_markers(ir):
     """Check the new bounded native metadata, not a second source compiler.
@@ -211,13 +213,29 @@ def validate_cards_node(node,ir):
         if not isinstance(photo,dict) or photo.get('record')!=NATIVE_TYPES['NativeMedia'] or not any(b['adapter'] in ('android.native/1','firebase.development/4') for b in ir.get('remote',{}).get('backends',{}).values()):
             raise UserError('Fotografija kartice treba NativeMedia i podržani adapter.')
 
+def validate_scene_node(node,ir):
+    base={'id','type','loc','label','entry'}
+    extra={'interval','handler'} if node['type']=='clock' else {'directions'}
+    if ir['ui']['format']!='bil.ui/3' or set(node)!=base|extra:raise UserError('Neispravan ugovor kontrole scene.')
+    if not isinstance(node['label'],str) or not node['label'].strip() or len(node['label'])>160 or node['entry']!='ui_'+node['id']:raise UserError('Neispravna kontrola scene.')
+    if node['type']=='clock':
+        if type(node['interval']) is not int or not 50<=node['interval']<=1000:raise UserError('Takt scene treba50–1000ms.')
+        handlers=[node['handler']]
+    else:
+        if not isinstance(node['directions'],dict) or set(node['directions'])!={'left','right','up','down','release'}:raise UserError('Upravljanje treba pet smjerova.')
+        handlers=list(node['directions'].values())
+    if any(not safe(h) or h not in ir['handlers'] or h.startswith('ui_') or h in ir.get('events',{}).get('handlers',{}) for h in handlers):raise UserError('Scena treba obične BIL radnje.')
+    code=ir['handlers'].get(node['entry'])
+    if not isinstance(code,list) or len(code)!=1 or code[0].get('op')!='UI_EVENT' or code[0].get('control')!=node['id']:raise UserError('Kontrola scene nema odgovarajući izvršni ulaz.')
+
 def validate_draw_node(node,ir):
     if ir['ui']['format']!='bil.ui/3':raise UserError('Draw zahtijeva bil.ui/3.')
     base={'id','type','loc','label'}
     extra={'spaceSize','children'} if node['type']=='space' else {'points','role','closed','fill','ink','weight'}
-    if not base|extra <= set(node) or set(node)-base-extra-{'style','motion','gestures'}:raise UserError('Neispravan Draw objekat.')
+    if not base|extra <= set(node) or set(node)-base-extra-{'style','motion','gestures','camera'}:raise UserError('Neispravan Draw objekat.')
     if not isinstance(node['label'],str) or not node['label'].strip() or len(node['label'])>160:raise UserError('Draw objekat treba naziv1–160 znakova.')
     if node['type']=='space':
+        if 'camera' in node and (not isinstance(node['camera'],list) or len(node['camera'])!=3 or any(not isinstance(k,str) or ir['globals'].get(k,{}).get('type')!='Number' for k in node['camera'])):raise UserError('Kamera treba tri Number vrijednosti.')
         size=node['spaceSize']
         if not isinstance(size,list) or len(size)!=2 or any(type(x) not in (int,float) or not 64<=x<=4096 for x in size) or not isinstance(node['children'],list) or any(not isinstance(n,dict) or n.get('type')!='drawing' for n in node['children']):raise UserError('Draw prostor treba dimenzije64–4096 i objekte crteža.')
         return
@@ -240,7 +258,7 @@ def validate_program(project):
     rich_ui=isinstance(ir.get('ui'),dict) and ir['ui'].get('format') in ('bil.ui/2','bil.ui/3')
     for key in ('globals','records','functions','handlers'):
         if not isinstance(ir[key],dict) or len(ir[key])>(4224 if rich_ui and key=='handlers' else 128 if rich_ui and key in ('globals','functions') else 192 if extended and key=='handlers' else 64) or any(not safe(k) for k in ir[key]):raise UserError('Neispravni BIL simboli.')
-    if not isinstance(ir['imports'],list) or len(ir['imports'])>4 or any(x not in ('math','text','collections','json') for x in ir['imports']):raise UserError('Nedozvoljen BIL modul.')
+    if not isinstance(ir['imports'],list) or len(ir['imports'])>5 or any(x not in ('math','text','collections','json','scene') for x in ir['imports']):raise UserError('Nedozvoljen BIL modul.')
     if not isinstance(ir['main'],list) or not isinstance(ir['sourceMap'],list) or len(ir['sourceMap'])>8000 or not isinstance(ir['controls'],list) or len(ir['controls'])>64:raise UserError('Neispravan BIL plan.')
     count=0
     def walk(value,depth=0):
@@ -356,8 +374,9 @@ def validate_program(project):
         def nodes(items,depth=0):
             if not isinstance(items,list) or depth>8:raise UserError('Neispravan BIL raspored.')
             for n in items:
-                if not isinstance(n,dict) or not safe(n.get('id')) or n['id'] in node_ids or n.get('type') not in (('row','card','heading','text','input','select','toggle','table','view','button','image','shape','cards','drawing','space') if rich_ui else ('row','card','heading','text','input','select','toggle','table','view','button','image')):raise UserError('Neispravna BIL komponenta.')
+                if not isinstance(n,dict) or not safe(n.get('id')) or n['id'] in node_ids or n.get('type') not in (('row','card','heading','text','input','select','toggle','table','view','button','image','shape','cards','drawing','space','clock','pad') if rich_ui else ('row','card','heading','text','input','select','toggle','table','view','button','image')):raise UserError('Neispravna BIL komponenta.')
                 if n['type']=='cards':validate_cards_node(n,ir)
+                if n['type'] in ('clock','pad'):validate_scene_node(n,ir)
                 if n['type'] in ('drawing','space'):validate_draw_node(n,ir)
                 if rich_ui:validate_presentation_node(n,ir)
                 elif any(key in n for key in ('style','motion','geometry','gestures')):raise UserError('Napredni prikaz zahtijeva bil.ui/2.')

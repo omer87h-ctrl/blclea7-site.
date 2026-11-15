@@ -4,7 +4,7 @@
  * No DOM, filesystem, shell, networking or second evaluator lives here.
  */
 (function(scope){
-const VERSION='0.40.0',FORMAT='clea7.core/1';
+const VERSION='0.42.0',FORMAT='clea7.core/1';
 const own=(value,key)=>Object.prototype.hasOwnProperty.call(value,key);
 const clone=value=>JSON.parse(JSON.stringify(value));
 const frozen=value=>{if(value&&typeof value==='object'){for(const child of Object.values(value))frozen(child);Object.freeze(value);}return value;};
@@ -17,12 +17,14 @@ function maximum(values){return values.reduce((a,b)=>compare(a,b)>=0?a:b,'0.0.0'
 function application(value){const app=value?.application||value?.app||value;if(!app||typeof app!=='object'||Array.isArray(app)||typeof app.format!=='string')fault('CoreApplication','A checked application or compilation is required.');return app;}
 function validateApplication(value){const app=application(value);if(scope.CLEA7Format?.validate)return scope.CLEA7Format.validate(app);if(!app.bil)fault('CoreApplication','This Core fallback validates BIL applications only.');compiler().validateApplication(app);return clone(app);}
 function compile(source,metadata={}){return compiler().compile(source,metadata);}
+function createCompiler(options={}){if(typeof compiler().createSession!=='function')fault('CoreUnavailable','Incremental compilation is unavailable.');return compiler().createSession(options);}
 function featuresFor(value){return compiler().featuresFor(value);}
 function minimumRuntime(raw,targets=[]){
  if(!Array.isArray(targets)||targets.some(x=>!['browser','windows','android'].includes(x)))fault('CoreTarget','Use explicit supported host target identifiers.');
  const app=application(raw),floors=[({'clea7.application/2':'0.3.0','clea7.application/3':'0.4.0','clea7.application/4':'0.5.0','clea7.application/5':'0.6.0','clea7.application/6':'0.7.0','clea7.application/7':targets.includes('android')?'0.9.0':'0.8.0','clea7.application/8':'0.10.0','clea7.application/9':'0.11.0'})[app.format]];
  if(!floors[0])fault('CoreApplication','Unsupported application contract.');
  if(Object.values(app.remote?.backends||{}).some(b=>b.adapter==='sense.local/1'))floors.push('0.37.0');
+ if(Object.values(app.remote?.backends||{}).some(b=>b.adapter==='sense.local/1'&&b.operations.includes('document.ocr')))floors.push('0.42.0');
  if(app.bil){compiler().validateApplication(app);floors.push(featuresFor(app.bil.source).minimumRuntime);if(app.bil.ir.ui?.format==='bil.ui/2')floors.push('0.14.0');if(app.bil.ir.ui?.format==='bil.ui/3')floors.push('0.40.0');}
  for(const backend of Object.values(app.remote?.backends||{})){
   if(backend.adapter==='firebase.development/3')floors.push('0.12.0');
@@ -80,5 +82,5 @@ function publicResult(result,mode='development'){
  if(result.features)out.features={format:result.features.format,version:result.features.version,minimumRuntime:result.features.minimumRuntime,used:[...(result.features.used||[])]};
  return frozen(out);
 }
-scope.CLEA7Core=Object.freeze({FORMAT,VERSION,compile,check,featuresFor,validateApplication,minimumRuntime,describe,profile,negotiate,execute,reconcileDerived,createCache,publicResult});
+scope.CLEA7Core=Object.freeze({FORMAT,VERSION,compile,createCompiler,check,featuresFor,validateApplication,minimumRuntime,describe,profile,negotiate,execute,reconcileDerived,createCache,publicResult});
 })(globalThis);

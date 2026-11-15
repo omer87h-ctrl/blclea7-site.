@@ -4,7 +4,7 @@
 const fault=(code,message)=>Object.assign(Error(message),{code});
 const recognitionClass=()=>scope.SpeechRecognition||scope.webkitSpeechRecognition;
 const localVoices=()=>{try{return (scope.speechSynthesis?.getVoices()||[]).filter(voice=>voice.localService===true);}catch{return [];}};
-function capabilities(){return {format:'sense.capabilities/1',speechInputAPI:typeof recognitionClass()==='function',localSpeechInputVerified:false,localVoiceCount:localVoices().length,haptics:typeof scope.navigator?.vibrate==='function',ocrConfigured:false,brailleDirectAdapter:false};}
+function capabilities(){return {format:'sense.capabilities/1',speechInputAPI:typeof recognitionClass()==='function',localSpeechInputVerified:false,localVoiceCount:localVoices().length,haptics:typeof scope.navigator?.vibrate==='function',ocrConfigured:scope.CLEA7SenseOCR?.capabilities?.().configured===true,brailleDirectAdapter:false};}
 function speaker({onState=()=>{}}={}){
  let active=null,timer=null,serial=0;
  const stop=()=>{serial++;if(timer)clearTimeout(timer);timer=null;try{scope.speechSynthesis?.cancel();}catch{}if(active){active.reject(fault('Cancelled','Govor je zaustavljen.'));active=null;}onState('stopped');};

@@ -2,7 +2,7 @@
 // Executes only the repository's compiler/Core/interpreter. BIL input is data.
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),{webcrypto}=require('node:crypto');
 const root=path.resolve(__dirname,'..'),scope={crypto:webcrypto,performance,TextEncoder,TextDecoder,URL,Blob,AbortController,setTimeout,clearTimeout,Date,console};scope.globalThis=scope;vm.createContext(scope);
-for(const f of ['runtime','workbench/living','workbench/bil-compiler','workbench/bil-runtime','workbench/working-cache','workbench/clea-core','workbench/format','workbench/plan','workbench/review','workbench/consumer','workbench/engine','workbench/intelligence','workbench/bil-elements','workbench/clea-draw','workbench/studio-operator','workbench/ai-authoring'])vm.runInContext(fs.readFileSync(path.join(root,'web',f+'.js'),'utf8'),scope);
+for(const f of ['runtime','workbench/living','workbench/bil-compiler','workbench/bil-runtime','workbench/working-cache','workbench/clea-core','workbench/format','workbench/plan','workbench/review','workbench/consumer','workbench/engine','workbench/intelligence','workbench/bil-elements','workbench/clea-draw','workbench/remote-studio','workbench/studio-operator','workbench/ai-authoring'])vm.runInContext(fs.readFileSync(path.join(root,'web',f+'.js'),'utf8'),scope);
 const own=(value,key)=>Object.prototype.hasOwnProperty.call(value,key),copy=value=>JSON.parse(JSON.stringify(value));
 function options(request){
  if(request.cache!==undefined&&!['enabled','off'].includes(request.cache))throw Error('Use cache enabled or off.');

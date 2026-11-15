@@ -1,0 +1,26 @@
+{
+  "format": "clea7.release-verification/1",
+  "version": "0.42.0-test",
+  "privateSource": "27d22417f2873c5201bb3e120adacc72c088ed9a",
+  "browser": {
+    "scene": true,
+    "studioOcr": true,
+    "sensePngScannedPdfDocx": true,
+    "standaloneOfflineOcr": true,
+    "physicalDevice": false
+  },
+  "python": {
+    "privateRun": 391,
+    "privateSkipped": 2,
+    "publicRun": 67,
+    "failed": 0
+  },
+  "sdk": {
+    "entries": 155,
+    "version": "0.42.0-test"
+  },
+  "newNative042Passed": false,
+  "actualOwner9B": false,
+  "quality70B": false,
+  "originalBrzoProductionChanged": false
+}

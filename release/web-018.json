@@ -5,13 +5,13 @@
   "files": [
     {
       "path": "studio/launcher/index.html",
-      "bytes": 3503,
-      "sha256": "7fb764ef29e1400588da82b3b608453428974e2c261be241f83e5e0afda66ad3"
+      "bytes": 3707,
+      "sha256": "ab8b1c34fbe812e2bfab7ee61e7b83df5fdc5e58e143b61e3b536e99ecac9f3e"
     },
     {
       "path": "studio/launcher/player.html",
-      "bytes": 3724,
-      "sha256": "7e976236015f2922c9f7d96385f91db3c40b85d92a3d7a8cd77cb25d64c00ba6"
+      "bytes": 3928,
+      "sha256": "db380f45b161c0613f2c0c267480fc11644e4c9f6d478ab037a169af1f06c221"
     },
     {
       "path": "studio/launcher/player.js",
@@ -20,18 +20,18 @@
     },
     {
       "path": "studio/workbench/bil-compiler.js",
-      "bytes": 79363,
-      "sha256": "c0ca314e113232ebc96f13b8fa84be93389481e19322c6a23ff79b98388a602d"
+      "bytes": 89715,
+      "sha256": "dd3745f3cc1e93058d761b830438a6f5d460747f2552b243cf24e06686c36601"
     },
     {
       "path": "studio/workbench/bil-runtime.js",
-      "bytes": 81189,
-      "sha256": "95655b32b1fe73c640e898c41e86e54fcc80b6896d56f7f6705a05cc8e67ce1e"
+      "bytes": 91646,
+      "sha256": "ca7a8e34f7031b37de9825d8b64683e1d1f99bf168b121e9ac10b2889a51e371"
     },
     {
       "path": "studio/workbench/clea-core.js",
-      "bytes": 8709,
-      "sha256": "271f0702b2af3d8e86580f7aecefac209b95cf38f088fce1bdb92b0edcb43ebc"
+      "bytes": 9061,
+      "sha256": "40d7d6c36151894dfb03ebd73ed1a0b9cc5a7638157e575b62bb65447a7a9a70"
     },
     {
       "path": "studio/workbench/engine.js",
@@ -40,13 +40,13 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 17127,
-      "sha256": "cc32431bd5350327206ac124918139a4126f2d444bcee6d534f526dc5c6e65aa"
+      "bytes": 17305,
+      "sha256": "1bc41760cfdb03ebe57216bfd8dc66e9551755ff1f3d80c0eb70155b242a5f00"
     },
     {
       "path": "studio/workbench/package.js",
-      "bytes": 17663,
-      "sha256": "7232e9d5e2e228ec63812afa336e96ad0aefdee85970b0546928b318c4844b87"
+      "bytes": 17996,
+      "sha256": "1b78b2eac6668680606b01a94b19ccfa19ae23e22437db52b81ae486fb61fca0"
     },
     {
       "path": "studio/workbench/working-cache.js",
