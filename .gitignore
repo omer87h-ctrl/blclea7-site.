@@ -1,0 +1,5 @@
+
+# Generated verification files are not public product source.
+__pycache__/
+*.py[cod]
+test-evidence/
