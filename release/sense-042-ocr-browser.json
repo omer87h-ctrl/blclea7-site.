@@ -1,0 +1,18 @@
+{
+  "format": "clea7.sense-local-ocr-browser/1",
+  "passed": true,
+  "checks": [
+    "No OCR engine/model downloads or device access on load; image bytes require explicit approval",
+    "Actual Tesseract WASM and pinned Bosnian weights recognize a synthetic PNG; rejecting review preserves the current CV",
+    "Actual image-only PDF renders locally, uses real OCR and exports confirmed recognized content as a real DOCX",
+    "Oversized decoded dimensions are rejected before image decoding or OCR execution"
+  ],
+  "actualWasmRecognition": true,
+  "recognitionFixture": false,
+  "syntheticImageOnly": true,
+  "privateUploads": 0,
+  "externalRequests": 0,
+  "elapsedSeconds": 3.481,
+  "physicalDeviceTested": false,
+  "errors": []
+}

@@ -1,6 +1,6 @@
 {
   "format": "clea7.sdk.inventory/1",
-  "version": "0.41.1-test",
+  "version": "0.42.0-test",
   "status": "development-test",
   "referenceSha256": "e622ecb98a7d60999ce686b052bab09ef9db645d0e211526e9986e0060061b8c",
   "licencePreserved": true,
@@ -18,18 +18,18 @@
     },
     {
       "path": "NOTICE.txt",
-      "bytes": 469,
-      "sha256": "c44228855f0350541fcbefb92a7b7a82147bdc47609e81460defa85eac88677d"
+      "bytes": 673,
+      "sha256": "0ad1cce4a06375d98521dfec17c6b65402fda021548ff3e4f0ce87e7634f6e12"
     },
     {
       "path": "README.md",
-      "bytes": 2880,
-      "sha256": "b59adbecacc6420f14772c741643bfc2e9b5a425b3131c06823b8e2456680907"
+      "bytes": 3112,
+      "sha256": "ca1646e3e8bae88c4ae57bcced1ea78bff61f4115c92ec0ac4accc0d6199272c"
     },
     {
       "path": "clea7/__init__.py",
       "bytes": 96,
-      "sha256": "5f852a06631cecbecf09ee2429aba3413c0afc7f2f3605e20bd139408387aedb"
+      "sha256": "b437fc6e71366662f6d2d3ff91456d767c940dc23a730af0898c38c454c07049"
     },
     {
       "path": "clea7/__main__.py",
@@ -38,8 +38,8 @@
     },
     {
       "path": "clea7/application.py",
-      "bytes": 21364,
-      "sha256": "aee8d655818f584894c8634a87d3438d64806fea0972f39f864becea22e01a76"
+      "bytes": 21995,
+      "sha256": "5fd035d1ba99bf00842a6099dd0765d9bdd946bee763f4b2897312cac87290e6"
     },
     {
       "path": "clea7/authoring_contract.py",
@@ -48,8 +48,8 @@
     },
     {
       "path": "clea7/bil.py",
-      "bytes": 39181,
-      "sha256": "57afe6d0f42f104671bec7307a0117b5bec9e53af227ef0ee6fe6fc21d2948f9"
+      "bytes": 41198,
+      "sha256": "f1697e64a817d2765e48dfd5aaa1012aaf48445f302048c8c82be0e6d78bb577"
     },
     {
       "path": "clea7/doctor.py",
@@ -67,9 +67,14 @@
       "sha256": "719652496358a2ff9b8948e9a1c262e91497a2944897dddfdccc0ef8b7afa173"
     },
     {
+      "path": "clea7/ocr_assets.py",
+      "bytes": 3749,
+      "sha256": "1db0d8980756ff5f67c865e198fbd7058d5c20d509438e4400e6cd477fb50238"
+    },
+    {
       "path": "clea7/package.py",
-      "bytes": 9842,
-      "sha256": "7b67fe69f31a68d03efecb4957ccb9aee20073471f9025acf02af0751a572eb4"
+      "bytes": 10237,
+      "sha256": "103729df8a308f94c09918eb58a25065c774e3bdb53bcfce1613b71f66090d8a"
     },
     {
       "path": "clea7/project.py",
@@ -142,6 +147,11 @@
       "sha256": "a2f2fbb06ad2597085a99eae72be147da2494ef7b9281776306f17a834b0f650"
     },
     {
+      "path": "docs/BIL-INCREMENTAL-COMPILER.md",
+      "bytes": 1384,
+      "sha256": "e3b33e1ad8c8ca59eb943cc4fd21c0ccdf489e792391579de0f14d9b0699bfc5"
+    },
+    {
       "path": "docs/BIL-INTENT-RUNTIME.md",
       "bytes": 3302,
       "sha256": "a992ffdd5c16fc9c05dd2db6679849b4cb57d2490ad7346e9059613601ba49be"
@@ -160,6 +170,11 @@
       "path": "docs/BIL-PRESENTATION.md",
       "bytes": 2204,
       "sha256": "4b47917620558c22e483246aa69abe5be7118123b4e907988bacff2c9bd0597c"
+    },
+    {
+      "path": "docs/BIL-SCENE.md",
+      "bytes": 3308,
+      "sha256": "e743ea8ae75b06b1c32841bb94a43a7cdeaa93afb7bd176dedfc0d0d96046a38"
     },
     {
       "path": "docs/BIL-SECURITY.md",
@@ -185,6 +200,11 @@
       "path": "docs/FIREBASE-DEVELOPMENT.md",
       "bytes": 9720,
       "sha256": "91322c5c67eefcef34dd764cb8cc62b89049bfdbbb17c87c1cab8bfb11f9bae6"
+    },
+    {
+      "path": "docs/KNOWLEDGE-CACHE-042.md",
+      "bytes": 1692,
+      "sha256": "19e907a42cdd9b4529b66d44b2bf46215ff5f41a00c3a0216fc2691806320f7e"
     },
     {
       "path": "docs/LIVE-DATA.md",
@@ -215,6 +235,11 @@
       "path": "docs/SENSE-DOCUMENT-IMPORT.md",
       "bytes": 2019,
       "sha256": "c326df26d5fe4dbce421a27cef3528a11e0fa153710f0edaa5829f5150597ee2"
+    },
+    {
+      "path": "docs/SENSE-OCR.md",
+      "bytes": 2218,
+      "sha256": "a589005b04a657c0033f6bdf421bb09d0d010eab23c55103c57d0f05bd8cfcf3"
     },
     {
       "path": "docs/SENSE-SDK.md",
@@ -258,8 +283,8 @@
     },
     {
       "path": "sdk/bil-cli.cjs",
-      "bytes": 11593,
-      "sha256": "cb32e85d4da52b397e59078d409abb0dadf27bde1f8208fb60a813ab90ef13e8"
+      "bytes": 11619,
+      "sha256": "538f708ff22fb26860cc61c033e059c87c41fa6da354be2c82ce16e384626ff6"
     },
     {
       "path": "sdk/examples/bil/cards-learning.bil",
@@ -315,6 +340,16 @@
       "path": "sdk/examples/bil/inventory.bil",
       "bytes": 3672,
       "sha256": "3fca5a22e01bf6c80db1e49b87b2fefcc0c9fa5e7d27eeb40dfd3b0e6b1df4d3"
+    },
+    {
+      "path": "sdk/examples/bil/living-scene.bil",
+      "bytes": 2183,
+      "sha256": "daf4ff296a0ac85e830e87684f1ff20dd57fc6ef68ce13133a717e666062e65c"
+    },
+    {
+      "path": "sdk/examples/bil/local-ocr.bil",
+      "bytes": 1142,
+      "sha256": "69dc51b8a386edccc6732fdabdd1028767d85cefcabfef39d8563d6760c75d16"
     },
     {
       "path": "sdk/examples/bil/motion-scene.bil",
@@ -418,8 +453,8 @@
     },
     {
       "path": "web/sense/sense-import.js",
-      "bytes": 8506,
-      "sha256": "cd4b2e62df72db12e190468fb86c3ebf19ffb389c5b65130420f2d6d888cfe5a"
+      "bytes": 10712,
+      "sha256": "557f85b393589efd9128ad0b35e1c6d06e058a1c6f9e03461489b5818a52a833"
     },
     {
       "path": "web/sense/sense-lexicon.js",
@@ -427,9 +462,159 @@
       "sha256": "9f40c83cb87504280694479bdd6f1b259477ac89a99bd8ae9638bf73f20e2db0"
     },
     {
+      "path": "web/sense/sense-ocr-policy.js",
+      "bytes": 2081,
+      "sha256": "e128be0ea06bda0fe09d17977fc803a5cacaf037353c475de55d0fe85cfa82db"
+    },
+    {
+      "path": "web/sense/sense-ocr-worker.js",
+      "bytes": 2867,
+      "sha256": "ecfbf55ee14d1d10e0032187850e85fd467abcbf1a927349eb6826625ef6bc1a"
+    },
+    {
+      "path": "web/sense/sense-ocr.js",
+      "bytes": 4801,
+      "sha256": "8a5e302e5d819e14e2fc5a37b0d970db7b3f46e05f4d82e5e02a7c833aeb890c"
+    },
+    {
       "path": "web/sense/sense-policy.bil",
       "bytes": 3348,
       "sha256": "e941367b25b96a2ec9e355e48fb5abd6d50c2543d48ae8472928bb404f0cf30f"
+    },
+    {
+      "path": "web/sense/vendor/ocr/bos.traineddata.gz",
+      "bytes": 1146143,
+      "sha256": "91bd93692051c8a6c33f21117ca1687cf93a759825f255e5821178189f214855"
+    },
+    {
+      "path": "web/sense/vendor/ocr/eng.traineddata.gz",
+      "bytes": 1967599,
+      "sha256": "f1c22599ed6fd3eb821d87fdb43e09f98b61179a4abe38c43cfca2cdcb9f5ec2"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-bmp-js-LICENSE.txt",
+      "bytes": 1077,
+      "sha256": "9f165f5bd2b462122cacb8c6dc32028be1abb4d8ad0322e9a332f30b2ebdb833"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-buffer-LICENSE.txt",
+      "bytes": 1106,
+      "sha256": "06bafa45fdad2579ba0e43b0c9b2c6290287c99c4203c300254a462b38a307f6"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-giflib-LICENSE.txt",
+      "bytes": 1088,
+      "sha256": "0c9b7990ecdca88b676db232c226548ac408b279f550d424d996f0d83591dd8e"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-idb-keyval-LICENSE.txt",
+      "bytes": 555,
+      "sha256": "20c27d6339619eeb3113cb865d4e98a3f559e52964fc75caea9cb5fa72674565"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-ieee754-LICENSE.txt",
+      "bytes": 1465,
+      "sha256": "18d45466ba3253deae04667e267a91ea8de8548f18c1125264d1c9db28194cc1"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-leptonica-LICENSE.txt",
+      "bytes": 1521,
+      "sha256": "87829abb5bbb00b55a107365da89e9a33f86c4250169e5a1e5588505be7d5806"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-libjpeg-LICENSE.txt",
+      "bytes": 19110,
+      "sha256": "c791da525733040e622ed257c7b096b8f5191b332604ead0c6bc2b54cbd8e0d1"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-libpng-LICENSE.txt",
+      "bytes": 5345,
+      "sha256": "33ba4e187d8b0c8d7ab2bc2e522bb095219e03089e9aa0122b4fb9eb2b7de82b"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-libtiff-LICENSE.txt",
+      "bytes": 1146,
+      "sha256": "fbd6fed7938541d2c809c0826225fc85e551fdbfa8732b10f0c87e0847acafd7"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-libwebp-LICENSE.txt",
+      "bytes": 1496,
+      "sha256": "5aec868f669e384a22372a4e8a1a6cd7d44c64cd451f960ca69cc170d1e13acf"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-openlibm-LICENSE.txt",
+      "bytes": 5857,
+      "sha256": "b1843fbf5b03f519a5f0a44fce751bdd1022ae7148614923f9d6293e17a18b17"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-regenerator-runtime-LICENSE.txt",
+      "bytes": 1080,
+      "sha256": "51887a3d47051ac2fce1210562e5b9fe0830a8a8fabeb272c2d586eeb18a05fd"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-tesseract-LICENSE.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-wasm-feature-detect-LICENSE.txt",
+      "bytes": 11542,
+      "sha256": "45286bffeeb04f5707bb3cd7e079bf7f0db91d17596fb7401736e03e516500cf"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-zlib-LICENSE.txt",
+      "bytes": 5368,
+      "sha256": "fc2c3368901700f0acdeb1d8afeaca5923296768ec6824ecdf627aac396001fd"
+    },
+    {
+      "path": "web/sense/vendor/ocr/notice-zlibjs-LICENSE.txt",
+      "bytes": 1222,
+      "sha256": "131afe3f7bdce1698beb292fb8de1a968de01bce876122a60ef5db230471c866"
+    },
+    {
+      "path": "web/sense/vendor/ocr/provenance.json",
+      "bytes": 11605,
+      "sha256": "913d608ead9e85e66c6b9dc2e86e07ef7d67ad60d6fb084d94ec8cf596450337"
+    },
+    {
+      "path": "web/sense/vendor/ocr/tessdata-LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "web/sense/vendor/ocr/tesseract-core-lstm.wasm.js",
+      "bytes": 3954181,
+      "sha256": "775a35df6f2ae100e02609443e6bd5cafcd07983dd6175454ca4a432a7730687"
+    },
+    {
+      "path": "web/sense/vendor/ocr/tesseract.js-LICENSE.md",
+      "bytes": 11357,
+      "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1"
+    },
+    {
+      "path": "web/sense/vendor/ocr/tesseract.js-core-LICENSE",
+      "bytes": 11358,
+      "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08"
+    },
+    {
+      "path": "web/sense/vendor/ocr/tesseract.min.js",
+      "bytes": 62961,
+      "sha256": "10fff78484067759c43028a02a72d76d0b90eb17302bb23b58a9ec5410bc928b"
+    },
+    {
+      "path": "web/sense/vendor/ocr/tesseract.min.js.LICENSE.txt",
+      "bytes": 149,
+      "sha256": "cdf963ced7d25a0f98901a547647b4d6e2dbe0197fd78c87a059a87b0e542fe2"
+    },
+    {
+      "path": "web/sense/vendor/ocr/worker.min.js",
+      "bytes": 111162,
+      "sha256": "38645599043239c0eb6db08a6504a92dcdc292200535f3e9339cd77c4443b842"
+    },
+    {
+      "path": "web/sense/vendor/ocr/worker.min.js.LICENSE.txt",
+      "bytes": 466,
+      "sha256": "45f54171aeaa1d10c0c1a66f374b7bba1f02472b1487fbe892eec04f840002ac"
     },
     {
       "path": "web/sense/vendor/pdfjs/LICENSE",
@@ -463,8 +648,8 @@
     },
     {
       "path": "web/workbench/bil-compiler.js",
-      "bytes": 79363,
-      "sha256": "c0ca314e113232ebc96f13b8fa84be93389481e19322c6a23ff79b98388a602d"
+      "bytes": 89715,
+      "sha256": "dd3745f3cc1e93058d761b830438a6f5d460747f2552b243cf24e06686c36601"
     },
     {
       "path": "web/workbench/bil-elements.js",
@@ -473,18 +658,18 @@
     },
     {
       "path": "web/workbench/bil-runtime.js",
-      "bytes": 81189,
-      "sha256": "95655b32b1fe73c640e898c41e86e54fcc80b6896d56f7f6705a05cc8e67ce1e"
+      "bytes": 91646,
+      "sha256": "ca7a8e34f7031b37de9825d8b64683e1d1f99bf168b121e9ac10b2889a51e371"
     },
     {
       "path": "web/workbench/clea-core.js",
-      "bytes": 8709,
-      "sha256": "271f0702b2af3d8e86580f7aecefac209b95cf38f088fce1bdb92b0edcb43ebc"
+      "bytes": 9061,
+      "sha256": "40d7d6c36151894dfb03ebd73ed1a0b9cc5a7638157e575b62bb65447a7a9a70"
     },
     {
       "path": "web/workbench/clea-draw.js",
-      "bytes": 29243,
-      "sha256": "ed695517b28e8dd47b91421aaeda6cb2ad30cf61e90399f4ecbcef1f8d3bd4a0"
+      "bytes": 33754,
+      "sha256": "98fb635d7065691b477c8b2c7ef0991c150e3a5723ac6f5e79443f73fb22739c"
     },
     {
       "path": "web/workbench/consumer.js",
@@ -528,8 +713,8 @@
     },
     {
       "path": "web/workbench/package.js",
-      "bytes": 17663,
-      "sha256": "7232e9d5e2e228ec63812afa336e96ad0aefdee85970b0546928b318c4844b87"
+      "bytes": 17996,
+      "sha256": "1b78b2eac6668680606b01a94b19ccfa19ae23e22437db52b81ae486fb61fca0"
     },
     {
       "path": "web/workbench/plan.js",
@@ -543,8 +728,8 @@
     },
     {
       "path": "web/workbench/remote-studio.js",
-      "bytes": 28992,
-      "sha256": "d72832521e86c97589c8c129639cfc55b3ddd5e0eabf4c5453853f90bbdbe6aa"
+      "bytes": 29078,
+      "sha256": "d0216dbb272bddb0de307d40f1a3820ee553895eb50791f3c7783d3bf77e2bc7"
     },
     {
       "path": "web/workbench/remote.js",
@@ -558,8 +743,8 @@
     },
     {
       "path": "web/workbench/sense-backend.js",
-      "bytes": 10534,
-      "sha256": "e46d425d478887d0fb33e4052e708caaf9c5b3b9d9dac2d80458411bbd07a951"
+      "bytes": 12788,
+      "sha256": "b04b79eac99c50e7e6d9a784ce9a0a64d6e7ada19f434a927948201de2cfbbae"
     },
     {
       "path": "web/workbench/sense-document.js",
@@ -567,14 +752,24 @@
       "sha256": "149921f07f00c6e4f00103f5764f5bad7b00f32563b1b765118ba797247bf44f"
     },
     {
+      "path": "web/workbench/sense-ocr-policy.js",
+      "bytes": 2081,
+      "sha256": "e128be0ea06bda0fe09d17977fc803a5cacaf037353c475de55d0fe85cfa82db"
+    },
+    {
+      "path": "web/workbench/sense-ocr.js",
+      "bytes": 4801,
+      "sha256": "8a5e302e5d819e14e2fc5a37b0d970db7b3f46e05f4d82e5e02a7c833aeb890c"
+    },
+    {
       "path": "web/workbench/sense-sdk.js",
-      "bytes": 6647,
-      "sha256": "8a7c43f6b9fa8e2b60d69b74e9376033b18319e7de5f00fdb2d4a7b80fe02e7d"
+      "bytes": 6697,
+      "sha256": "cfac98c54be426442b5cc0220cb4fce4f8d82a80e156cad109a4cbbd25371316"
     },
     {
       "path": "web/workbench/studio-operator.js",
-      "bytes": 12719,
-      "sha256": "d3604548931124932288d8c01f86cdbdd86747536f01eb00c6732052cd5887f7"
+      "bytes": 15679,
+      "sha256": "ddc0d5e56b0fd3338dbc07f1c3513288b1a6d0c8c359ecba823c679a52e62e4b"
     },
     {
       "path": "web/workbench/working-cache.js",

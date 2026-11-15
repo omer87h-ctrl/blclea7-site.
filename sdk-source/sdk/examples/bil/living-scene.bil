@@ -1,0 +1,43 @@
+# Original CLEA scene: fixed-step physics, keyed motion, camera and accessible controls.
+import scene
+import collections
+let world = [scene.body("player", 80, 100, 40, 40, 1), scene.body("wall", 350, 100, 40, 180, 0)]
+let playerX = 80
+let playerY = 100
+let phase = 0
+let beacon = 40
+let cameraX = 0
+let cameraY = 0
+let zoom = 1
+let steps = 0
+on frameTick {
+    world = scene.step(world, 0.05, 0, 800, 450)
+    playerX = scene.item(world, "player").x
+    playerY = scene.item(world, "player").y
+    phase = (phase + 0.05) % 4
+    beacon = scene.sample([0, 2, 4], [40, 650, 40], phase, "smooth")
+    steps = steps + 1
+}
+on moveLeft { world = scene.replace(world, scene.motion(scene.item(world, "player"), -120, 0)) }
+on moveRight { world = scene.replace(world, scene.motion(scene.item(world, "player"), 120, 0)) }
+on moveUp { world = scene.replace(world, scene.motion(scene.item(world, "player"), 0, -120)) }
+on moveDown { world = scene.replace(world, scene.motion(scene.item(world, "player"), 0, 120)) }
+on rest { world = scene.replace(world, scene.motion(scene.item(world, "player"), 0, 0)) }
+on zoomIn { zoom = 1.5 }
+on zoomOut { zoom = 1 }
+screen home "Živa CLEA scena" {
+    text "Pokreni scenu, zatim drži smjer ili koristi strelice. Zid stvarno zaustavlja objekat."
+    space "Interaktivni svijet" size [800, 450] camera [cameraX, cameraY, zoom] {
+        drawing "Igrač" points [[0,0], [1000,0], [1000,1000], [0,1000]] role actor closed fill "#ffac77" style { x playerX; y playerY; width 40; height 40 } key player
+        drawing "Čvrsti zid" points [[0,0], [1000,0], [1000,1000], [0,1000]] role solid closed fill "#4d6688" style { x 350; y 100; width 40; height 180 } key wall
+        drawing "Vremenska putanja" points [[0,500], [500,0], [1000,500], [500,1000]] closed fill "#45d3b0" style { x beacon; y 340; width 32; height 32 } key beacon
+    }
+    clock "Tok scene · 20 koraka/s" every 50 runs frameTick key sceneClock
+    pad "Kretanje" left moveLeft right moveRight up moveUp down moveDown release rest key movement
+    row {
+        button "Približi" runs zoomIn key zoomIn
+        button "Puna scena" runs zoomOut key zoomOut
+    }
+    show steps
+}
+start home

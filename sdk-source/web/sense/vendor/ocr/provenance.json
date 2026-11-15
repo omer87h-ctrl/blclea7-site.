@@ -1,0 +1,265 @@
+{
+  "format": "clea7.ocr-dependencies/1",
+  "runtime": "Tesseract.js",
+  "inference": "local-WebAssembly",
+  "trainedByCLEA": false,
+  "files": [
+    {
+      "path": "tesseract.min.js",
+      "package": "tesseract.js",
+      "version": "6.0.1",
+      "source": "https://registry.npmjs.org/tesseract.js/-/tesseract.js-6.0.1.tgz",
+      "npmIntegrity": "sha512-/sPvMvrCtgxnNRCjbTYbr7BRu0yfWDsMZQ2a/T5aN/L1t8wUQN6tTWv6p6FwzpoEBA0jrN2UD2SX4QQFRdoDbA==",
+      "bytes": 62961,
+      "sha256": "10fff78484067759c43028a02a72d76d0b90eb17302bb23b58a9ec5410bc928b",
+      "license": "Apache-2.0"
+    },
+    {
+      "path": "worker.min.js",
+      "package": "tesseract.js",
+      "version": "6.0.1",
+      "source": "https://registry.npmjs.org/tesseract.js/-/tesseract.js-6.0.1.tgz",
+      "npmIntegrity": "sha512-/sPvMvrCtgxnNRCjbTYbr7BRu0yfWDsMZQ2a/T5aN/L1t8wUQN6tTWv6p6FwzpoEBA0jrN2UD2SX4QQFRdoDbA==",
+      "bytes": 111162,
+      "sha256": "38645599043239c0eb6db08a6504a92dcdc292200535f3e9339cd77c4443b842",
+      "license": "Apache-2.0"
+    },
+    {
+      "path": "tesseract.js-LICENSE.md",
+      "package": "tesseract.js",
+      "version": "6.0.1",
+      "source": "https://registry.npmjs.org/tesseract.js/-/tesseract.js-6.0.1.tgz",
+      "npmIntegrity": "sha512-/sPvMvrCtgxnNRCjbTYbr7BRu0yfWDsMZQ2a/T5aN/L1t8wUQN6tTWv6p6FwzpoEBA0jrN2UD2SX4QQFRdoDbA==",
+      "bytes": 11357,
+      "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1",
+      "license": "Apache-2.0"
+    },
+    {
+      "path": "tesseract-core-lstm.wasm.js",
+      "package": "tesseract.js-core",
+      "version": "6.1.2",
+      "source": "https://registry.npmjs.org/tesseract.js-core/-/tesseract.js-core-6.1.2.tgz",
+      "npmIntegrity": "sha512-pv4GjmramjdObhDyR1q85Td8X60Puu/lGQn7Kw2id05LLgHhAcWgnz6xSdMCSxBMWjQDmMyDXPTC2aqADdpiow==",
+      "bytes": 3954181,
+      "sha256": "775a35df6f2ae100e02609443e6bd5cafcd07983dd6175454ca4a432a7730687",
+      "license": "Apache-2.0"
+    },
+    {
+      "path": "tesseract.js-core-LICENSE",
+      "package": "tesseract.js-core",
+      "version": "6.1.2",
+      "source": "https://registry.npmjs.org/tesseract.js-core/-/tesseract.js-core-6.1.2.tgz",
+      "npmIntegrity": "sha512-pv4GjmramjdObhDyR1q85Td8X60Puu/lGQn7Kw2id05LLgHhAcWgnz6xSdMCSxBMWjQDmMyDXPTC2aqADdpiow==",
+      "bytes": 11358,
+      "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+      "license": "Apache-2.0"
+    },
+    {
+      "path": "tesseract.min.js.LICENSE.txt",
+      "package": "tesseract.js",
+      "version": "6.0.1",
+      "source": "https://registry.npmjs.org/tesseract.js/-/tesseract.js-6.0.1.tgz",
+      "bytes": 149,
+      "sha256": "cdf963ced7d25a0f98901a547647b4d6e2dbe0197fd78c87a059a87b0e542fe2",
+      "license": "bundled-third-party-notices"
+    },
+    {
+      "path": "worker.min.js.LICENSE.txt",
+      "package": "tesseract.js",
+      "version": "6.0.1",
+      "source": "https://registry.npmjs.org/tesseract.js/-/tesseract.js-6.0.1.tgz",
+      "bytes": 466,
+      "sha256": "45f54171aeaa1d10c0c1a66f374b7bba1f02472b1487fbe892eec04f840002ac",
+      "license": "bundled-third-party-notices"
+    },
+    {
+      "path": "bos.traineddata.gz",
+      "package": "tessdata_fast",
+      "version": "4.1.0",
+      "source": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/4.1.0/bos.traineddata",
+      "gitBlobSha1": "95bed5c32e3759347db0471569303f06e3485f42",
+      "originalBytes": 2498242,
+      "originalSha256": "6cc8cc87cf1afbfa6a41febb725dbadb14bed96a46685906440a6eb8a7892f04",
+      "bytes": 1146143,
+      "sha256": "91bd93692051c8a6c33f21117ca1687cf93a759825f255e5821178189f214855",
+      "license": "Apache-2.0",
+      "modification": "lossless gzip compression; original model bytes unchanged"
+    },
+    {
+      "path": "eng.traineddata.gz",
+      "package": "tessdata_fast",
+      "version": "4.1.0",
+      "source": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/4.1.0/eng.traineddata",
+      "gitBlobSha1": "bbef4675053b5b468cdb477053e28b1c698ba08e",
+      "originalBytes": 4113088,
+      "originalSha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+      "bytes": 1967599,
+      "sha256": "f1c22599ed6fd3eb821d87fdb43e09f98b61179a4abe38c43cfca2cdcb9f5ec2",
+      "license": "Apache-2.0",
+      "modification": "lossless gzip compression; original model bytes unchanged"
+    },
+    {
+      "path": "tessdata-LICENSE",
+      "package": "tessdata_fast",
+      "version": "4.1.0",
+      "source": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/4.1.0/LICENSE",
+      "gitBlobSha1": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+      "originalBytes": 11358,
+      "originalSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "license": "Apache-2.0",
+      "modification": "none"
+    },
+    {
+      "path": "notice-leptonica-LICENSE.txt",
+      "package": "leptonica",
+      "version": "4af068b56a9674da915debea4ed7e1b9885b17e8",
+      "source": "https://raw.githubusercontent.com/DanBloomberg/leptonica/4af068b56a9674da915debea4ed7e1b9885b17e8/leptonica-license.txt",
+      "bytes": 1521,
+      "sha256": "87829abb5bbb00b55a107365da89e9a33f86c4250169e5a1e5588505be7d5806",
+      "license": "upstream-full-notice"
+    },
+    {
+      "path": "notice-libjpeg-LICENSE.txt",
+      "package": "libjpeg",
+      "version": "6c0fcb8ddee365e7abc4d332662b06900612e923",
+      "source": "https://raw.githubusercontent.com/LuaDist/libjpeg/6c0fcb8ddee365e7abc4d332662b06900612e923/README",
+      "bytes": 19110,
+      "sha256": "c791da525733040e622ed257c7b096b8f5191b332604ead0c6bc2b54cbd8e0d1",
+      "license": "upstream-full-notice"
+    },
+    {
+      "path": "notice-giflib-LICENSE.txt",
+      "package": "giflib",
+      "version": "fa37672085ce4b3d62c51627ab3c8cf2dda8009a",
+      "source": "https://raw.githubusercontent.com/mirrorer/giflib/fa37672085ce4b3d62c51627ab3c8cf2dda8009a/COPYING",
+      "bytes": 1088,
+      "sha256": "0c9b7990ecdca88b676db232c226548ac408b279f550d424d996f0d83591dd8e",
+      "license": "upstream-full-notice"
+    },
+    {
+      "path": "notice-libpng-LICENSE.txt",
+      "package": "libpng",
+      "version": "a37d4836519517bdce6cb9d956092321eca3e73b",
+      "source": "https://raw.githubusercontent.com/glennrp/libpng/a37d4836519517bdce6cb9d956092321eca3e73b/LICENSE",
+      "bytes": 5345,
+      "sha256": "33ba4e187d8b0c8d7ab2bc2e522bb095219e03089e9aa0122b4fb9eb2b7de82b",
+      "license": "upstream-full-notice"
+    },
+    {
+      "path": "notice-libwebp-LICENSE.txt",
+      "package": "libwebp",
+      "version": "20ef03ee351d4ff03fc5ff3ec4804a879d1b9d5c",
+      "source": "https://raw.githubusercontent.com/webmproject/libwebp/20ef03ee351d4ff03fc5ff3ec4804a879d1b9d5c/COPYING",
+      "bytes": 1496,
+      "sha256": "5aec868f669e384a22372a4e8a1a6cd7d44c64cd451f960ca69cc170d1e13acf",
+      "license": "upstream-full-notice"
+    },
+    {
+      "path": "notice-tesseract-LICENSE.txt",
+      "package": "tesseract",
+      "version": "5a21eebeacd77dd181eec17317de7e3a20b7b9fb",
+      "source": "https://raw.githubusercontent.com/Balearica/tesseract/5a21eebeacd77dd181eec17317de7e3a20b7b9fb/LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "license": "upstream-full-notice"
+    },
+    {
+      "path": "notice-openlibm-LICENSE.txt",
+      "package": "openlibm",
+      "version": "ae2d91698508701c83cab83714d42a1146dccf85",
+      "source": "https://raw.githubusercontent.com/JuliaMath/openlibm/ae2d91698508701c83cab83714d42a1146dccf85/LICENSE.md",
+      "bytes": 5857,
+      "sha256": "b1843fbf5b03f519a5f0a44fce751bdd1022ae7148614923f9d6293e17a18b17",
+      "license": "upstream-full-notice"
+    },
+    {
+      "path": "notice-buffer-LICENSE.txt",
+      "package": "buffer",
+      "version": "6.0.3",
+      "source": "https://registry.npmjs.org/buffer/-/buffer-6.0.3.tgz",
+      "bytes": 1106,
+      "sha256": "06bafa45fdad2579ba0e43b0c9b2c6290287c99c4203c300254a462b38a307f6",
+      "license": "MIT",
+      "scope": "full notice for bundled dependency; no claim that this replaces the bundle attribution"
+    },
+    {
+      "path": "notice-ieee754-LICENSE.txt",
+      "package": "ieee754",
+      "version": "1.2.1",
+      "source": "https://registry.npmjs.org/ieee754/-/ieee754-1.2.1.tgz",
+      "bytes": 1465,
+      "sha256": "18d45466ba3253deae04667e267a91ea8de8548f18c1125264d1c9db28194cc1",
+      "license": "BSD-3-Clause",
+      "scope": "full notice for bundled dependency; no claim that this replaces the bundle attribution"
+    },
+    {
+      "path": "notice-bmp-js-LICENSE.txt",
+      "package": "bmp-js",
+      "version": "0.1.0",
+      "source": "https://registry.npmjs.org/bmp-js/-/bmp-js-0.1.0.tgz",
+      "bytes": 1077,
+      "sha256": "9f165f5bd2b462122cacb8c6dc32028be1abb4d8ad0322e9a332f30b2ebdb833",
+      "license": "MIT",
+      "scope": "full notice for bundled dependency; no claim that this replaces the bundle attribution"
+    },
+    {
+      "path": "notice-regenerator-runtime-LICENSE.txt",
+      "package": "regenerator-runtime",
+      "version": "0.13.3",
+      "source": "https://registry.npmjs.org/regenerator-runtime/-/regenerator-runtime-0.13.3.tgz",
+      "bytes": 1080,
+      "sha256": "51887a3d47051ac2fce1210562e5b9fe0830a8a8fabeb272c2d586eeb18a05fd",
+      "license": "MIT",
+      "scope": "full notice for bundled dependency; no claim that this replaces the bundle attribution"
+    },
+    {
+      "path": "notice-zlibjs-LICENSE.txt",
+      "package": "zlibjs",
+      "version": "0.3.1",
+      "source": "https://registry.npmjs.org/zlibjs/-/zlibjs-0.3.1.tgz",
+      "bytes": 1222,
+      "sha256": "131afe3f7bdce1698beb292fb8de1a968de01bce876122a60ef5db230471c866",
+      "license": "MIT",
+      "scope": "full notice for bundled dependency; no claim that this replaces the bundle attribution"
+    },
+    {
+      "path": "notice-wasm-feature-detect-LICENSE.txt",
+      "package": "wasm-feature-detect",
+      "version": "1.2.11",
+      "source": "https://registry.npmjs.org/wasm-feature-detect/-/wasm-feature-detect-1.2.11.tgz",
+      "bytes": 11542,
+      "sha256": "45286bffeeb04f5707bb3cd7e079bf7f0db91d17596fb7401736e03e516500cf",
+      "license": "Apache-2.0",
+      "scope": "full notice for bundled dependency; no claim that this replaces the bundle attribution"
+    },
+    {
+      "path": "notice-zlib-LICENSE.txt",
+      "package": "zlib",
+      "version": "21767c654d31d2dccdde4330529775c6c5fd5389",
+      "source": "https://raw.githubusercontent.com/madler/zlib/21767c654d31d2dccdde4330529775c6c5fd5389/README",
+      "bytes": 5368,
+      "sha256": "fc2c3368901700f0acdeb1d8afeaca5923296768ec6824ecdf627aac396001fd",
+      "license": "upstream-full-notice"
+    },
+    {
+      "path": "notice-libtiff-LICENSE.txt",
+      "package": "libtiff",
+      "version": "b51bb157123264e26d34c09cc673d213aea61fc7",
+      "source": "https://raw.githubusercontent.com/libsdl-org/libtiff/b51bb157123264e26d34c09cc673d213aea61fc7/COPYRIGHT",
+      "bytes": 1146,
+      "sha256": "fbd6fed7938541d2c809c0826225fc85e551fdbfa8732b10f0c87e0847acafd7",
+      "license": "upstream-full-notice"
+    },
+    {
+      "path": "notice-idb-keyval-LICENSE.txt",
+      "package": "idb-keyval",
+      "version": "6.2.0",
+      "source": "https://registry.npmjs.org/idb-keyval/-/idb-keyval-6.2.0.tgz",
+      "bytes": 555,
+      "sha256": "20c27d6339619eeb3113cb865d4e98a3f559e52964fc75caea9cb5fa72674565",
+      "license": "Apache-2.0"
+    }
+  ]
+}

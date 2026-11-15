@@ -1,0 +1,25 @@
+# Original CLEA local OCR application. Runtime0.42; no network endpoint.
+backend assist using "sense.local/1"
+let scanned = ""
+let exported = false
+let failure: RemoteFailure? = null
+let status = "Odaberi svoju sliku; rezultat pregledaj prije prijenosa."
+on read_image {
+    request assist.document.ocr("bos") into scanned catch failure then recognized else failed
+}
+on recognized(value: Text, context: RemoteCompletion) {
+    status = "Potvrđeni tekst je spreman. Provjeri podatke prije izvoza."
+}
+on export_document {
+    request assist.document.docx(scanned) into exported catch failure then saved else failed
+}
+on saved(value: Boolean, context: RemoteCompletion) { status = "Dokument je pripremljen." }
+on failed(problem: RemoteFailure, context: RemoteCompletion) { status = problem.code }
+screen home "Moje lokalno čitanje slike" {
+    heading "Slika postaje tekst pod tvojom kontrolom" key title
+    button "Odaberi sliku i pročitaj lokalno" runs read_image key read
+    input scanned label "Pregledani tekst slike" multiline key text
+    button "Preuzmi DOCX" runs export_document key export
+    show status key status
+}
+start home

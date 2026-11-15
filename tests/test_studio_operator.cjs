@@ -1,11 +1,15 @@
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),{webcrypto}=require('node:crypto');
 const web=process.env.CLEA7_SOURCE_WEB||'web',s={crypto:webcrypto,performance,TextEncoder,TextDecoder,URL,Blob,AbortController,setTimeout,clearTimeout,Date,console};s.globalThis=s;vm.createContext(s);
-for(const f of ['runtime','workbench/living','workbench/bil-compiler','workbench/bil-runtime','workbench/working-cache','workbench/clea-core','workbench/bil-elements','workbench/clea-draw','workbench/studio-operator','workbench/format','workbench/plan','workbench/review','workbench/consumer','workbench/engine','workbench/intelligence','workbench/ai-authoring'])vm.runInContext(fs.readFileSync(web+'/'+f+'.js','utf8'),s);
+for(const f of ['runtime','workbench/living','workbench/bil-compiler','workbench/bil-runtime','workbench/working-cache','workbench/clea-core','workbench/bil-elements','workbench/clea-draw','workbench/remote-studio','workbench/studio-operator','workbench/format','workbench/plan','workbench/review','workbench/consumer','workbench/engine','workbench/intelligence','workbench/ai-authoring'])vm.runInContext(fs.readFileSync(web+'/'+f+'.js','utf8'),s);
 const O=s.CLEA7StudioTools,A=s.CLEA7AppAuthoring,B=s.CLEA7BIL,D=s.CLEA7Draw,base='# Owner source must survive\nlet previous = 7\nfn own(n: Number) -> Number { return n * 3 }\nscreen home "Home" {show previous key original}\nstart home\n';
 const app=B.compile(base,{id:'same_project',name:'My original'}).application;
 let passed=0;async function check(name,fn){await fn();passed++;console.log('PASS Studio operator '+name);}
 (async()=>{
+ await check('a new live scene retains saved existing record state and reopens its actual screen',async()=>{const source=fs.readFileSync('sdk-source/sdk/examples/bil/orbitavo.bil','utf8');const vault=new s.CLEA7.MemoryVault(),id='scene_additive',app=s.CLEA7BIL.compile(source,{id}).application;let e=new s.CLEA7Engine.Engine(app,{vault});await e.open();await e.dispatch('bil_advance');const previous=e.state.bilValues.offset;e.close();const extended=s.CLEA7Draw.addScene(source,{screen:'play',id:'nativeWorld'}).source;e=new s.CLEA7Engine.Engine(s.CLEA7BIL.compile(extended,{id}).application,{vault});try{await e.open();assert.equal(e.state.bilValues.offset,previous);assert.equal(e.state.bilValues.nativeWorld_steps,0);await e.dispatch('bil_nativeWorld_moveRight');await e.dispatch('bil_nativeWorld_frameTick');assert.equal(e.state.bilValues.nativeWorld_playerX,86);}finally{e.close();}});
+
+ await check('scene operator uses real shared Draw source transformation and physics checks',async()=>{const plan=s.CLEA7StudioTools.resolve('Napravi živu 2D scenu sa fizikom',null);assert(plan);const result=await s.CLEA7AppAuthoring.operate(plan.plan,{mode:'create'});assert(result);});
+
  await check('one registered operator emits real UI, Draw, collection and independent BIL logic',()=>{
   const plan={format:O.FORMAT,operations:[{tool:'project.create',screen:'home',title:'Original world'},{tool:'screen.add',screen:'details',title:'Details'},
    {tool:'ui.add',spec:{screen:'home',id:'progress',label:'Progress',kind:'progress'}},{tool:'ui.collection',spec:{screen:'details',id:'library',label:'Library'}},
@@ -38,6 +42,11 @@ let passed=0;async function check(name,fn){await fn();passed++;console.log('PASS
  });
  await check('Sense CV uses the byte-exact original accessible BIL example and real review/navigation checks',async()=>{
   const resolved=O.resolve('Napravi novu aplikaciju za CV',null);assert(resolved.createsProject);const source=O.emit(resolved.plan).source;assert.equal(source,fs.readFileSync('sdk-source/sdk/examples/bil/sense-cv.bil','utf8'));const p=await A.operate(resolved.plan,{mode:'create'});assert(p.receipt.results.s3.checks.length>=3);assert.equal(p.modelInvoked,false);assert(source.includes('sense.local/1'));assert(!source.includes('Omer'));
+ });
+ await check('local OCR is the same typed source-preserving Studio tool and never runs image recognition in SHADOW',async()=>{
+  const resolved=O.resolve('Napravi novu aplikaciju za OCR skeniranog CV-a',base);assert(resolved.createsProject);const source=O.emit(resolved.plan).source,c=B.compile(source);assert(c.ir.remote.backends.scan_assist.operations.includes('document.ocr'));assert.equal(c.ir.globals.scan_text.type,'Text');
+  const p=await A.operate(resolved.plan,{mode:'create'});assert.equal(p.modelInvoked,false);await A.recheck(p,null);
+  const edited=O.emit({format:O.FORMAT,operations:[{tool:'sense.ocr',screen:'home',id:'scan'}]},{source:base}).source;assert(edited.includes('# Owner source must survive'));assert(edited.includes('fn own(n: Number)'));assert.throws(()=>O.emit({format:O.FORMAT,operations:[{tool:'sense.ocr',screen:'home',id:'scan',language:'unknown'}]},{source:base}));
  });
  await check('unknown tools, replacement, declaration injection, oversized geometry and failing checks cannot change the project',async()=>{
   for(const operations of [[{tool:'shell',command:'whoami'}],[{tool:'project.create',screen:'other',title:'overwrite'}],[{tool:'bil.declaration',source:'let x = 1\non hidden {previous = 0}'}],[{tool:'draw.add',spec:{screen:'home',id:'bad',role:'actor',label:'Bad',points:[[0,0],[2000,0]]}}]])assert.throws(()=>O.emit({format:O.FORMAT,operations},{source:base}));

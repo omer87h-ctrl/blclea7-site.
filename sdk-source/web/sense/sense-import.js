@@ -50,32 +50,49 @@ async function library(){
  })().catch(error=>{pdfModule=null;throw fault('Unavailable','Lokalni PDF čitač nije dostupan. Koristi TXT/DOCX ili osvježi preuzetu aplikaciju.');});
  return pdfModule;
 }
-async function pdf(bytes,signal){
+async function ocrImage(file,{signal,language,onProgress}){
+ if(!scope.CLEA7SenseOCR)throw fault('Unavailable','Ovaj host nema lokalni OCR. Postojeći CV je sačuvan.');
+ const result=await scope.CLEA7SenseOCR.read(file,{approved:true,signal,language,onProgress});
+ return {text:checkedText(result.text),format:'image',ocrUsed:true,confidence:result.confidence,warnings:['Tekst je prepoznat lokalnim OCR-om i može sadržavati greške. Provjeri imena, brojeve, znakove i redoslijed prije potvrde.']};
+}
+async function pdf(bytes,signal,options){
  const reader=await library();if(signal?.aborted)throw fault('Cancelled','Uvoz je otkazan.');
- const task=reader.getDocument({data:bytes,isEvalSupported:false,disableAutoFetch:true,disableStream:true,disableFontFace:true,useSystemFonts:false,useWasm:false,stopAtErrors:true});
+ const task=reader.getDocument({data:bytes,isEvalSupported:false,disableAutoFetch:true,disableStream:true,disableFontFace:true,useSystemFonts:false,useWasm:false,maxImageSize:8000000,canvasMaxAreaInBytes:32000000,stopAtErrors:true});
  const abort=()=>task.destroy();signal?.addEventListener('abort',abort,{once:true});let document;
  try{
   document=await task.promise;if(document.numPages>25)throw fault('Budget','Za CV je podržano najviše 25 PDF stranica.');
-  const lines=[];let size=0;
+  const lines=[],warnings=[];let size=0,scanned=0;
   for(let i=1;i<=document.numPages;i++){
    if(signal?.aborted)throw fault('Cancelled','Uvoz je otkazan.');
    const page=await document.getPage(i),content=await page.getTextContent();let text='';for(const item of content.items)if(typeof item.str==='string')text+=item.str+(item.hasEOL?'\n':' ');
+   if(!text.trim()&&options.ocr===true){
+    if(++scanned>3)throw fault('Budget','Za jedan uvoz podržane su najviše tri skenirane PDF stranice. Izdvoji ostatak u zaseban dokument.');
+    const initial=page.getViewport({scale:1}),scale=Math.min(2,Math.sqrt(2600000/(initial.width*initial.height))),viewport=page.getViewport({scale});
+    const canvas=scope.document.createElement('canvas');canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
+    const rendering=page.render({canvasContext:canvas.getContext('2d',{alpha:false}),viewport}),stop=()=>rendering.cancel();signal?.addEventListener('abort',stop,{once:true});
+    try{
+     await rendering.promise;if(signal?.aborted)throw fault('Cancelled','Uvoz je otkazan.');const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+     if(!blob)throw fault('Invalid','PDF stranica nije pripremljena za lokalno čitanje.');
+     try{text=(await ocrImage(blob,{...options,signal})).text;}catch(error){if(error.code!=='NoText')throw error;warnings.push('Stranica '+i+': tekst nije prepoznat.');}
+    }finally{signal?.removeEventListener('abort',stop);canvas.width=canvas.height=0;}
+   }
    size+=text.length;if(size>MAX_TEXT)throw fault('Budget','PDF tekst prelazi 30.000 znakova.');lines.push(text);page.cleanup();
   }
   const text=lines.join('\n\n');if(!text.trim())throw fault('Unavailable','PDF nema izdvojiv tekst. Skenirana slika zahtijeva OCR; ova funkcija ga ne izmišlja.');
-  return {text:checkedText(text),format:'pdf',warnings:['Tekst je izdvojen lokalno. Provjeri redoslijed kolona i znakove. Skenirane slike se ne pretvaraju u tekst.']};
+  return {text:checkedText(text),format:'pdf',ocrUsed:scanned>0,warnings:[scanned?'Skenirane stranice su pročitane lokalnim OCR-om. Provjeri prepoznata imena, brojeve i znakove.':'Tekst je izdvojen lokalno. Provjeri redoslijed kolona i znakove.',...warnings]};
  }finally{signal?.removeEventListener('abort',abort);await task.destroy();}
 }
-async function read(file,{approved=false,signal}={}){
+async function read(file,{approved=false,signal,ocr=false,language='bos',onProgress=()=>{}}={}){
  if(approved!==true)throw fault('Permission','Prvo sam odaberi datoteku za lokalni uvoz.');
  if(!file||typeof file.arrayBuffer!=='function'||!Number.isInteger(file.size)||file.size<1||file.size>MAX_FILE)throw fault('Budget','Datoteka mora imati najviše 5 MiB. Postojeći CV je sačuvan.');
  if(signal?.aborted)throw fault('Cancelled','Uvoz je otkazan.');const bytes=new Uint8Array(await file.arrayBuffer());if(bytes.length!==file.size)throw fault('Invalid','Veličina dokumenta se promijenila.');
  const name=String(file.name||'').toLowerCase();let result;
  if(name.endsWith('.txt'))result={text:checkedText(new TextDecoder('utf-8',{fatal:true}).decode(bytes)),format:'txt',warnings:[]};
  else if(name.endsWith('.docx'))result=await docx(bytes,signal);
- else if(name.endsWith('.pdf'))result=await pdf(bytes,signal);
- else throw fault('Invalid','Odaberi TXT, DOCX ili PDF. Izvorna datoteka se ne izvršava.');
- if(signal?.aborted)throw fault('Cancelled','Uvoz je otkazan.');return Object.freeze({...result,local:true,aiUsed:false});
+ else if(name.endsWith('.pdf'))result=await pdf(bytes,signal,{ocr,language,onProgress});
+ else if(/\.(?:png|jpe?g)$/.test(name)){if(ocr!==true)throw fault('Permission','Za sliku uključi lokalno prepoznavanje teksta prije uvoza.');result=await ocrImage(new Blob([bytes]),{signal,language,onProgress});}
+ else throw fault('Invalid','Odaberi TXT, DOCX, PDF, PNG ili JPEG. Izvorna datoteka se ne izvršava.');
+ if(signal?.aborted)throw fault('Cancelled','Uvoz je otkazan.');return Object.freeze({...result,local:true,aiUsed:result.ocrUsed===true,generativeAIUsed:false,cloudAIUsed:false});
 }
 scope.CLEA7SenseDocumentImport=Object.freeze({format:'sense.document-import/1',read,limits:Object.freeze({fileBytes:MAX_FILE,textCharacters:MAX_TEXT,pdfPages:25}),pdfLibrary:Object.freeze({name:'PDF.js',version:'6.5.438',license:'Apache-2.0'})});
 })(globalThis);

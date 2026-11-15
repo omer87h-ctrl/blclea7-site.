@@ -15,6 +15,8 @@ const TOOLS=Object.freeze({
  'project.create':'Novi BIL projekt; samo pri izričitoj izradi novog projekta.',
  'screen.add':'Dodaj ekran u isti projekt.',
  'sense.cv':'Kreiraj originalnu pristupačnu CV aplikaciju s praznim podacima i lokalnim Sense ugovorima.',
+ 'scene.add':'Dodaj provjerenu živu 2D scenu, fiziku, kameru, vremenske tačke i kontrole u isti BIL projekt.',
+ 'sense.ocr':'Dodaj lokalno čitanje slike, pregled prije prijenosa i tipizirani tekst u isti projekt.',
  'ui.add':'Dodaj radni element sa stvarnim stanjem i događajima.',
  'ui.collection':'Dodaj tipiziranu kolekciju i događaje stavki.',
  'draw.add':'Dodaj originalni vektorski objekat, igrača, vrata ili prepreku.',
@@ -43,7 +45,15 @@ function emit(plan,{source=null}={}){
    projectName=text(op.title,100);next='screen '+name(op.screen)+' '+q(text(op.title,160))+' {\n}\nstart '+op.screen+'\n';
   }else{
    if(next===null)fail('Novi Studio plan mora prvo kreirati projekt.');
-   if(op.tool==='screen.add'){
+   if(op.tool==='scene.add'){shape(op,['tool','screen','id']);next=scope.CLEA7Draw.addScene(next,{screen:name(op.screen),id:name(op.id)}).source;}else if(op.tool==='sense.ocr'){
+    shape(op,['tool','screen','id'],['language','label']);name(op.id);name(op.screen);const language=op.language||'bos';if(!['bos','eng'].includes(language))fail('Nepodržan OCR jezik.');
+    const c=B.compile(next),prefix=op.id;if(!c.ast.body.some(n=>n.kind==='screen'&&n.name===op.screen))fail('OCR ekran ne postoji.');
+    if(Object.keys(c.ir.globals).some(k=>k===prefix+'_text'||k===prefix+'_failure')||Object.hasOwn(c.ir.handlers,prefix+'_read')||Object.hasOwn(c.ir.remote?.backends||{},prefix+'_assist'))fail('OCR identitet već pripada postojećem kodu.');
+    if(!scope.CLEA7RemoteStudio)fail('Host nema zajednički autor mogućnosti.');
+    next=scope.CLEA7RemoteStudio.addRequest(next,{backend:prefix+'_assist',operation:'document.ocr',value:q(language),handler:prefix+'_read',resultTarget:prefix+'_text',errorTarget:prefix+'_failure',screen:op.screen,buttonLabel:op.label?text(op.label,100):'Pročitaj sliku lokalno'});
+    const page=B.parse(next).body.find(n=>n.kind==='screen'&&n.name===op.screen),at=page.childrenEnd??page.loc.end-1;
+    next=next.slice(0,at)+'\ninput '+prefix+'_text label "Pregledani tekst slike" multiline key '+prefix+'_output\n'+next.slice(at);
+   }else if(op.tool==='screen.add'){
     shape(op,['tool','screen','title']);name(op.screen);if(B.parse(next).body.some(n=>n.name===op.screen))fail('Ekran ili simbol već postoji.');
     next+='\nscreen '+op.screen+' '+q(text(op.title,160))+' {\n}\n';
    }else if(['ui.add','ui.collection','draw.add'].includes(op.tool)){
@@ -78,10 +88,22 @@ function emit(plan,{source=null}={}){
 function resolve(question,source,{selected=null,screen=null}={}){
  if(typeof question!=='string'||!question.trim()||question.length>1200)return null;
  const words=question.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),c=source?context(source):null;
- if(/\b(napravi|kreiraj|izradi|create|build|make)\b/.test(words)&&/\b(cv|zivotopis|resume)\b/.test(words))return {plan:{format:FORMAT,operations:[{tool:'sense.cv'}],checks:[{flow:'review',screen:'preview',expect:{}},{flow:'back',screen:'editor',expect:{name:'',experience:'',education:'',skills:''}}]},resolution:'original-Sense-program',createsProject:true};
+ if(/\b(napravi|kreiraj|izradi|create|build|make)\b/.test(words)&&/\b(cv|zivotopis|resume)\b/.test(words)&&!/(ocr|skeniran|scanned)/.test(words))return {plan:{format:FORMAT,operations:[{tool:'sense.cv'}],checks:[{flow:'review',screen:'preview',expect:{}},{flow:'back',screen:'editor',expect:{name:'',experience:'',education:'',skills:''}}]},resolution:'original-Sense-program',createsProject:true};
  const first=c?.screens.find(s=>s.id===screen)?.id||c?.screens[0]?.id||'home';
  const findObject=()=>{if(selected)return c?.objects.find(o=>o.key===selected);const found=c?.objects.filter(o=>words.includes(o.label.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase())||words.includes(o.key.toLowerCase()));return found?.length===1?found[0]:null;};
  const operations=[],fresh=prefix=>{let n=1,id=prefix;while(c&&(c.state.some(s=>s.id===id||s.id.startsWith('draw7_'+id+'_'))||c.objects.some(o=>o.key==='draw7_'+id)))id=prefix+'_'+n++;return id;};
+ if(/^(napravi|kreiraj|izradi|dodaj|create|build|make|add)\b/.test(words)&&/\b(scena|scenu|scene|fizik[a-z]*|physics)\b/.test(words)){
+  const create=/^(napravi|kreiraj|izradi|create|build|make)\b/.test(words)||!source;if(create)operations.push({tool:'project.create',screen:'home',title:'Moj živi interaktivni svijet'});
+  let id='world',n=1;while(!create&&c?.state.some(s=>s.id.startsWith(id+'_')))id='world'+n++;
+  operations.push({tool:'scene.add',screen:create?'home':first,id});return {plan:{format:FORMAT,operations,checks:[{flow:id+'_moveRight',expect:{}},{flow:id+'_frameTick',expect:{[id+'_playerX']:86,[id+'_steps']:1}}]},resolution:'documented-local-rule',createsProject:create};
+ }
+ if(/^(napravi|kreiraj|izradi|dodaj|create|build|make|add)\b/.test(words)&&/\b(ocr|skeniran[a-z]*|scanned)\b/.test(words)){
+  const create=/^(napravi|kreiraj|izradi|create|build|make)\b/.test(words)||!source;
+  if(create)operations.push({tool:'project.create',screen:'home',title:'Moje lokalno čitanje slike'});
+  let id='scan',n=1;while(!create&&c?.state.some(s=>s.id.startsWith(id+'_')))id='scan'+n++;
+  operations.push({tool:'sense.ocr',screen:create?'home':first,id,language:/\b(englesk[a-z]*|english)\b/.test(words)?'eng':'bos'});
+  return {plan:{format:FORMAT,operations},resolution:'documented-local-rule',createsProject:create};
+ }
  if(/^(napravi|kreiraj|izradi|create|build|make)\b/.test(words)&&/\b(igrac[a-z]*|player)\b/.test(words)&&/\b(vrat[a-z]*|door)\b/.test(words)&&/(prid|blizi|near|approach|otvar|open)/.test(words)){
   const create=/\b(nov[aui]?|new|aplikacij[au]|game|igru)\b/.test(words)||!source;
   if(create)operations.push({tool:'project.create',screen:'home',title:'Moj interaktivni svijet'});

@@ -137,7 +137,7 @@ def source_files(root,project):
         'settings.gradle','build.gradle','gradle.properties','runtime/build.gradle',
         'runtime/src/main/AndroidManifest.xml','runtime/src/main/assets/index.html',
         'runtime/src/main/assets/boot.js','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Runtime.java',
-        'runtime/src/main/java/com/brzoilokalno/clea7/Clea7Backend.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Sense.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Modules.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Camera.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Media.java',
+        'runtime/src/main/java/com/brzoilokalno/clea7/Clea7Backend.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Sense.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7FileChooser.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Modules.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Camera.java','runtime/src/main/java/com/brzoilokalno/clea7/Clea7Media.java',
         'app/build.gradle','app/src/main/AndroidManifest.xml',
         'app/src/main/java/com/brzoilokalno/clea7/demo/MainActivity.java',
         'app/src/main/res/xml/clea7_network.xml','app/src/main/res/drawable/clea7_icon.xml','app/src/main/res/values/styles.xml')
@@ -151,6 +151,13 @@ def source_files(root,project):
     files['android/settings.gradle']=re.sub(r'^include\b.*$',"include ':runtime', ':app'",files['android/settings.gradle'].decode(),flags=re.MULTILINE).encode()
     for rel in ('runtime.js','workbench/living.js','workbench/bil-compiler.js','workbench/bil-runtime.js','workbench/working-cache.js','workbench/clea-core.js','workbench/format.js','workbench/plan.js','workbench/publisher.js','workbench/package.js','workbench/review.js','workbench/consumer.js','workbench/image-store.js','workbench/firebase-development.js','workbench/android-backend.js','workbench/remote.js','workbench/remote-studio.js','workbench/engine.js','workbench/sense-sdk.js','workbench/sense-document.js','workbench/sense-backend.js','workbench/device.js','workbench/studio.css','launcher/index.html','launcher/launcher.css','launcher/library.js','launcher/player.html','launcher/player.js'):
         files['web/'+rel]=(root/'web'/rel).read_bytes()
+    for rel in ('workbench/sense-ocr-policy.js','workbench/sense-ocr.js'):
+        files['web/'+rel]=(root/'web'/rel).read_bytes()
+    if any(b.get('adapter')=='sense.local/1' and 'document.ocr' in b.get('operations',[]) for b in p.get('remote',{}).get('backends',{}).values()):
+        for rel in ('sense/sense-ocr-policy.js','sense/sense-ocr-worker.js'):
+            files['web/'+rel]=(root/'web'/rel).read_bytes()
+        from .ocr_assets import files as ocr_files
+        files.update({'web/'+name:data for name,data in ocr_files(root/'web/sense').items()})
     files['android/app/src/main/assets/application/project.json']=json.dumps(p,ensure_ascii=False,allow_nan=False).encode()
     files['android/gradle.properties']+=('\nclea7Package='+p['package']+'\n'+('clea7DevelopmentBackend=true\n' if any(b['adapter'].startswith('firebase.development/') for b in p.get('remote',{}).get('backends',{}).values()) else '')).encode()
     # App label comes from validated XML-escaped user content; no source injection.

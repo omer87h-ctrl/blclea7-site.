@@ -1,0 +1,10 @@
+{
+  "format": "sense.ocr-offline-browser/1",
+  "passed": true,
+  "actualRecognition": true,
+  "browserNetworkOffline": true,
+  "networkRequestsAfterLoad": 0,
+  "source": "synthetic public fixture",
+  "fileSchemeTested": false,
+  "physicalAndroid": false
+}

@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: python -m pip install playwright==1.62.0
+      - run: python -m pip install playwright==1.62.0 Pillow==12.0.0
       - run: python scripts/check_public.py
       - run: python scripts/check_search_visibility.py
       - run: python -m unittest discover -s tests -v
@@ -39,6 +39,8 @@ jobs:
       - run: CLEA7_SOURCE_WEB=studio node tests/test_bil_cards.cjs
       - run: CLEA7_SOURCE_WEB=studio node tests/test_clea_draw.cjs
       - run: CLEA7_SOURCE_WEB=studio node tests/test_studio_operator.cjs
+      - run: CLEA7_SOURCE_WEB=studio node tests/test_bil_scene.cjs
+      - run: CLEA7_SOURCE_WEB=studio node tests/test_bil_incremental.cjs
       - run: node tests/test_ai_capacity_queue.cjs
       - run: node tests/test_tech_monitor.cjs
       - name: Independently execute curated public SDK
@@ -73,6 +75,10 @@ jobs:
           python tests/browser_working_elements.py --site . --output test-evidence/working-elements || browser_failed=1
           python tests/browser_bil_cards.py --site . --output test-evidence/cards-040 || browser_failed=1
           python tests/browser_clea_draw.py --site . --output test-evidence/draw-040 || browser_failed=1
+          python tests/browser_living_scene.py --site . --output test-evidence/living-scene-042 || browser_failed=1
+          python tests/browser_sense_ocr.py --site . --output test-evidence/sense-ocr-042 || browser_failed=1
+          python tests/browser_studio_ocr.py --site . --output test-evidence/studio-ocr-042 || browser_failed=1
+          python tests/browser_ocr_offline.py --root sense --output test-evidence/offline-ocr-042 || browser_failed=1
           python tests/browser_studio_operator.py --site . --output test-evidence/studio-041 || browser_failed=1
           node tests/test_model_app_authoring_browser.cjs || browser_failed=1
           node tests/test_clea_lab_browser.cjs || browser_failed=1
