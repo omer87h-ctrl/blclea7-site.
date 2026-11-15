@@ -1,0 +1,18 @@
+{
+  "format": "clea7.web-patch-verification/1",
+  "version": "0.42.1-test",
+  "source": "f309c7f5eefd9be246d255994172848861b77771",
+  "checks": {
+    "pythonRan": 391,
+    "pythonPassed": 389,
+    "pythonSkipped": 2,
+    "actualOperatorBrowserGroups": 5,
+    "realCoreVaultArchiveGroups": 5,
+    "fullNativeFixtureInChromium": true
+  },
+  "actualNeuralInference": false,
+  "newWindowsOrAndroidAcceptance": false,
+  "immutableSdk": "0.42.0-test",
+  "immutableSenseBundle": "0.42-test",
+  "masterComplete": false
+}

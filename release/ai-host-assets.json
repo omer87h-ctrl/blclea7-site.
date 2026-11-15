@@ -439,7 +439,7 @@
     {
       "path": "studio/launcher/index.html",
       "bytes": 3707,
-      "sha256": "ab8b1c34fbe812e2bfab7ee61e7b83df5fdc5e58e143b61e3b536e99ecac9f3e"
+      "sha256": "336915cf8effaa59ef7024736f53cc5b227698262e84fc9f344ce1b370f85315"
     },
     {
       "path": "studio/launcher/launcher.css",
@@ -454,7 +454,7 @@
     {
       "path": "studio/launcher/player.html",
       "bytes": 3928,
-      "sha256": "db380f45b161c0613f2c0c267480fc11644e4c9f6d478ab037a169af1f06c221"
+      "sha256": "1c27177b916198446419f89046d75bc7cba4bc7d6fafc4e2b9b9066be7810f5a"
     },
     {
       "path": "studio/launcher/player.js",
@@ -568,8 +568,8 @@
     },
     {
       "path": "studio/workbench/chat/ui.js",
-      "bytes": 64174,
-      "sha256": "40b76f846a941a0e7a8561547afc140c801b977f80f58785e153b11643fe1dec"
+      "bytes": 64239,
+      "sha256": "dd89a6626561f17e6233632782b5cfe9ae7ac383b4b93ff91e161375d40f48ec"
     },
     {
       "path": "studio/workbench/chat/worker.js",
@@ -623,8 +623,8 @@
     },
     {
       "path": "studio/workbench/engine.js",
-      "bytes": 55886,
-      "sha256": "c0cd09230e9bac178911a45f9a2d84cac75a693fbad5c145570f63f4bd2fcd82"
+      "bytes": 55908,
+      "sha256": "050d162ee8c57fed56a0e259394e95e5e6765e25d288e83b28efe598978cdffb"
     },
     {
       "path": "studio/workbench/firebase-development.js",
@@ -648,8 +648,8 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 17305,
-      "sha256": "1bc41760cfdb03ebe57216bfd8dc66e9551755ff1f3d80c0eb70155b242a5f00"
+      "bytes": 17365,
+      "sha256": "ee5912dc677cb1cb747dfc6985c34829cfc6e41ff4ee6297063433e194bbad77"
     },
     {
       "path": "studio/workbench/intelligence.js",
@@ -710,6 +710,11 @@
       "path": "studio/workbench/review.js",
       "bytes": 5974,
       "sha256": "3fa569240b5abff134b2cc320af56101b2dd42665a2d6cb4da418de2c4534b37"
+    },
+    {
+      "path": "studio/workbench/schema-history.js",
+      "bytes": 5112,
+      "sha256": "bfdce6716a7ce48847ca868d43241a7eeb3a3e887640c1de34bf88fd1bc54c6f"
     },
     {
       "path": "studio/workbench/sense-backend.js",
@@ -783,8 +788,8 @@
     },
     {
       "path": "studio/workbench/studio.js",
-      "bytes": 53264,
-      "sha256": "2a59bcdc18e3c8df6eed81fa56d7d3209cc9ade19a995ad63264edc3d56fbee9"
+      "bytes": 56585,
+      "sha256": "9ca9bdc3c755971173a9496bdcf3449a19c4c81685682ec5099b8a6fc42c75e1"
     },
     {
       "path": "studio/workbench/toolchain-ui.js",

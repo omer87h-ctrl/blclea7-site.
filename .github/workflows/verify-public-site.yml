@@ -39,6 +39,7 @@ jobs:
       - run: CLEA7_SOURCE_WEB=studio node tests/test_bil_cards.cjs
       - run: CLEA7_SOURCE_WEB=studio node tests/test_clea_draw.cjs
       - run: CLEA7_SOURCE_WEB=studio node tests/test_studio_operator.cjs
+      - run: CLEA7_SOURCE_WEB=studio node tests/test_schema_history.cjs
       - run: CLEA7_SOURCE_WEB=studio node tests/test_bil_scene.cjs
       - run: CLEA7_SOURCE_WEB=studio node tests/test_bil_incremental.cjs
       - run: node tests/test_ai_capacity_queue.cjs

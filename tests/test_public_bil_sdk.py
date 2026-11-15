@@ -1,5 +1,5 @@
 """Exercise the curated public SDK independently of the private native host."""
-import hashlib,json,subprocess,sys,tempfile,unittest,zipfile
+import hashlib,json,re,subprocess,sys,tempfile,unittest,zipfile
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -10,6 +10,18 @@ def cli(*args):
                           text=True,capture_output=True,timeout=30)
 
 class PublicBILSDKTests(unittest.TestCase):
+    def test_primary_sdk_label_size_hash_and_target_match_the_actual_archive(self):
+        release=next(x for x in json.loads((ROOT/'releases.json').read_text())['published'] if x['key']=='sdk')
+        data=(ROOT/release['url']).read_bytes()
+        page=(ROOT/'preuzimanja.html').read_text()
+        card=next(c for c in re.findall(r'<article\b[^>]*>.*?</article>',page,re.S) if 'SDK za nezavisne autore' in c)
+        self.assertIn('href="'+release['url']+'"',card)
+        self.assertIn(hashlib.sha256(data).hexdigest(),card)
+        self.assertIn(f'{len(data)/1000000:.2f} MB',card)
+        with zipfile.ZipFile(ROOT/release['url']) as archive:
+            version=json.loads(archive.read('SDK-INVENTORY.json'))['version']
+        self.assertIn('SDK '+version,card)
+
     def test_real_core_record_and_function_program(self):
         result=cli('bil','run','sdk/examples/bil/core.bil')
         self.assertEqual(result.returncode,0,result.stderr)
