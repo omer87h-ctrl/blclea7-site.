@@ -1,0 +1,21 @@
+Public release changes since 05e08b0d6513dca3cdc5497ffacea2bd334246ad
+.github/workflows/publish-checked-038.yml
+ai.html
+bil.html
+dokumentacija.html
+index.html
+model-licence.html
+novosti.html
+preuzimanja.html
+privatnost.html
+proizvodi.html
+release/0411-DELIVERY.md
+release/0411-FILES.txt
+release/0411-WINDOWS-NOTES.md
+release/windows-0411.json
+release/windows-installed-connected-0411.json
+release/windows-native-0411.json
+releases.json
+scripts/check_public.py
+scripts/publish_checked_038.py
+vizija.html
