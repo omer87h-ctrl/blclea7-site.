@@ -149,3 +149,6 @@ assert (ROOT/'studio/workbench/personal-workspace.bil').is_file()
 for row in json.loads((ROOT/'proba/deliveries.json').read_text())['entries']:
  data=(ROOT/'proba'/row['path']).read_bytes();assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
 print('PUBLIC_COLLABORATION shared identity, real checked exports, hidden public gate and exact delivery catalog verified')
+
+assert "Mila" not in (ROOT/"proba/index.html").read_text()
+assert '<fieldset id="request-fields" disabled>' in (ROOT/"proba/index.html").read_text()

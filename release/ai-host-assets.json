@@ -618,8 +618,8 @@
     },
     {
       "path": "studio/workbench/collaboration.js",
-      "bytes": 4474,
-      "sha256": "eb09c6e6484c4c2c59d454397e572247a18b7c22f464f736bdf828ba65001da5"
+      "bytes": 4363,
+      "sha256": "01b972d741ba39f3e87d2113ceac3a732d993bf6293bfb086aa0cd899903e9fb"
     },
     {
       "path": "studio/workbench/consumer.js",
@@ -664,7 +664,7 @@
     {
       "path": "studio/workbench/index.html",
       "bytes": 17561,
-      "sha256": "ebced346b5c0d0bd113f00db148426f0f8af7533245e617abc671097681bed35"
+      "sha256": "3af30590d615b7798d6eeaf31f373cb8aa5c3da5768912cc49cf089172d6d999"
     },
     {
       "path": "studio/workbench/intelligence.js",
