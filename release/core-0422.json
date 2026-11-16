@@ -1,0 +1,11 @@
+{
+  "format": "clea7.web-core-patch/1",
+  "version": "0.42.2-test",
+  "sdkBytes": 5751111,
+  "sdkSha256": "f4798604330d115f59413d69fd5ca5e139730101ed03c8ee58b1672a1c9b5ddd",
+  "sdkEntries": 157,
+  "actualSdkDistributionTests": 4,
+  "actualSceneBrowserChecks": 5,
+  "actualOwner9BInference": false,
+  "masterComplete": false
+}

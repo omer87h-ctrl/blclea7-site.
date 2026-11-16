@@ -37,7 +37,7 @@ for forbidden in ['main.py','runtime_main.py','clea7/desktop.py','clea7/host.py'
 catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610'
 download_page=(ROOT/'preuzimanja.html').read_text()
 for page in ROOT.glob('*.html'):
- assert 'Web Studio 0.42.1-test · SDK 0.42.1-test · Windows 0.42.0-test · Android 0.40-test' in page.read_text(),(page,'stale visible release version')
+ assert 'Web Studio 0.42.2-test · SDK 0.42.2-test · Windows 0.42.2-test · Android 0.42.2-test' in page.read_text(),(page,'stale visible release version')
 for entry in catalog['published']:
  p=ROOT/entry['url'];data=p.read_bytes();assert p.is_relative_to(ROOT) and len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],p
  if entry['key'] in ('sdk','preview'):
@@ -85,28 +85,36 @@ for a in current['assets']:
 print('PUBLIC_CHECKED_037 current installer, Android and universal package release metadata verified')
 
 windows=catalog['windows_current']
-assert windows['state']=='published' and windows['publication_run']==43779544569
-assert windows['source_commit']=='f309c7f5eefd9be246d255994172848861b77771' and windows['windows_install_run']==43758466479
+assert windows['state']=='published' and windows['publication_run']==43793066841 and windows['version']=='0.42.2-test'
+assert windows['source_commit']=='0db40117ddc96238a1a1d1b54eb4f57e7e18a6e6' and windows['windows_install_run']==43791225579
 asset=windows['assets'][0]
-assert asset['size_bytes']==253968135 and asset['sha256']=='62bcdb91c0e811c2a9b1880065a39df78daff42b253eb4779abf9632504d5e4d'
+assert asset['size_bytes']==253938700 and asset['sha256']=='6c50c1a6efb75a508c8a1f2d5e052eeb8dc40dac65d730ec92848b08f0108ab1'
 assert asset['url'] in download_page and asset['sha256'] in download_page
-receipt=json.loads((ROOT/'release/windows-installed-scenes-042.json').read_text())
-assert receipt['passed'] and receipt['verificationRun']==43758466479 and receipt['installerSource']==windows['source_commit']
+receipt=json.loads((ROOT/'release/windows-installed-scenes-0422.json').read_text())
+assert receipt['passed'] and receipt['verificationRun']==43791225579 and receipt['installerSource']==windows['source_commit']
 assert receipt['installerSha256']==asset['sha256'] and receipt['installedManifestVerified']=={'verified':True,'product':'studio','files':1048}
 assert all(receipt[k] for k in ('actualInstallerExecuted','actualUninstallerExecuted','userFilesPreserved'))
-native=json.loads((ROOT/'release/windows-native-042.json').read_text())
+native=json.loads((ROOT/'release/windows-native-0422.json').read_text())
 assert native['passed'] and len(native['checks'])==21 and native['sourceCommit']==windows['source_commit']
 assert any(x['tag']=='clea7-windows-0.41.1-test' for x in catalog['windows_history'])
+assert any(x['tag']=='clea7-windows-0.42.0-test' for x in catalog['windows_history'])
 print('PUBLIC_CHECKED_WINDOWS042 exact installed binary,21 native checks and anonymous release link verified')
 
 android=catalog['android_current']
-assert android['state']=='published' and android['version']=='0.40.0-test'
-assert android['source_commit']=='9c319ff92c9e8df223aff7274b922cce5baef616' and android['verification_run']==43600739763
-assert android['publication_run']==43601702005 and android['production_signed'] is False
-proof=json.loads((ROOT/'release/android-040.json').read_text())
-assert len(android['assets'])==6 and proof['actualAndroidEmulatorSenseTest'] is True
+assert android['state']=='published' and android['version']=='0.42.2-test'
+assert android['source_commit']=='0db40117ddc96238a1a1d1b54eb4f57e7e18a6e6' and android['verification_run']==43791225576
+assert android['publication_run']==43793069538 and android['production_signed'] is False
+proof=json.loads((ROOT/'release/android-0422.json').read_text())
+assert len(android['assets'])==7 and proof['actualAndroidEmulatorSenseTest'] is True
 for asset,expected in zip(android['assets'],proof['publicAssets']):
  assert all(asset[k]==expected[k] for k in ('name','size_bytes','sha256'))
- assert asset['url']=='https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-android-0.40-test/'+asset['name']
-assert android['assets'][2]['url'] in download_page
-print('PUBLIC_CHECKED_ANDROID040 exact source, emulator evidence and published downloads verified')
+ assert asset['url']=='https://github.com/omer87h-ctrl/blclea7-site./releases/download/clea7-android-0.42.2-test/'+asset['name']
+assert android['assets'][0]['url'] in download_page
+scene=proof['scene'];required={'package-opened','touchscreen-finger','physics-wall','native-svg','activity-restart'}
+assert scene['actualAndroidExecuted'] and set(scene['embeddedChecks'])==required and set(scene['independentChecks'])==required
+assert proof['nativeOcrRecognition'] and set(scene['nativeOcrChecks'])=={'local-worker-result','fixture-text-recognized'}
+assert proof['nativeOcrSystemPickerTested'] is False and len(proof['ocrAssets']['models'])==2
+for row in proof['ocrAssets']['core']:
+ assert hashlib.sha256((ROOT/'studio/workbench'/Path(row['path']).name).read_bytes()).hexdigest()==row['sha256']
+assert any(x['version']=='0.40.0-test' for x in catalog['android_history'])
+print('PUBLIC_CHECKED_ANDROID0422 exact Core/model assets, completed native touch/OCR observations and published downloads verified')

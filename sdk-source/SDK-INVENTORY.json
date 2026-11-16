@@ -1,6 +1,6 @@
 {
   "format": "clea7.sdk.inventory/1",
-  "version": "0.42.1-test",
+  "version": "0.42.2-test",
   "status": "development-test",
   "referenceSha256": "e622ecb98a7d60999ce686b052bab09ef9db645d0e211526e9986e0060061b8c",
   "licencePreserved": true,
@@ -18,18 +18,18 @@
     },
     {
       "path": "NOTICE.txt",
-      "bytes": 673,
-      "sha256": "53e6fea44f2b8b21cc437b9bc01e8e4369e8a387e67edc136565b06bf3b3c1b7"
+      "bytes": 688,
+      "sha256": "14d64abb56e62af8322ebbcc048397b88edd84ba8201b461d198bbae248911ae"
     },
     {
       "path": "README.md",
-      "bytes": 3112,
-      "sha256": "c1b6b844fbb4e8289d444b5b9b782febc97b3a215e39d398dba0ce77970e5bb9"
+      "bytes": 3182,
+      "sha256": "9f1b7f5d3bdb74d32728a74f644be3dd7136151a30cb04336869ff8387875f4d"
     },
     {
       "path": "clea7/__init__.py",
       "bytes": 96,
-      "sha256": "9cd54121afb15e5077a0916b1f441a1b43b51e59b301647f99aa6c08993353d6"
+      "sha256": "b962c110641ce6111f6a67747940e98376a48b15fdac54d3cd69c2ff31f9e252"
     },
     {
       "path": "clea7/__main__.py",
@@ -663,8 +663,8 @@
     },
     {
       "path": "web/workbench/bil-runtime.js",
-      "bytes": 91646,
-      "sha256": "ca7a8e34f7031b37de9825d8b64683e1d1f99bf168b121e9ac10b2889a51e371"
+      "bytes": 91759,
+      "sha256": "bd3a6ac6c537960c5ce466af82917b668b2c7594446eb5579a6df13c6522b340"
     },
     {
       "path": "web/workbench/clea-core.js",
@@ -718,8 +718,8 @@
     },
     {
       "path": "web/workbench/package.js",
-      "bytes": 17996,
-      "sha256": "1b78b2eac6668680606b01a94b19ccfa19ae23e22437db52b81ae486fb61fca0"
+      "bytes": 18599,
+      "sha256": "4ffed4f56a0adf773c01b7d2dc17df3cdc4e5d9bd114fe0bbe9062c408876f96"
     },
     {
       "path": "web/workbench/plan.js",
