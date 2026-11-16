@@ -8,7 +8,7 @@
  if(config.format!=='clea7.collaboration-service/1'||config.active!==true)return;
  const email=typeof config.requestTo==='string'&&/^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(config.requestTo)?config.requestTo:null;
  if(!email){$('collaboration-state').textContent='Prijem zahtjeva još nije otvoren.';return;}
- $('zahtjev').hidden=$('preuzimanje').hidden=false;$('collaboration-state').textContent='Opiši potrebe, dogovorimo izradu, pa ovdje preuzmi svoju gotovu aplikaciju.';
+ $('zahtjev').hidden=$('preuzimanje').hidden=false;$('request-fields').disabled=false;$('request-opening').hidden=true;$('collaboration-state').textContent='Opiši potrebe, dogovorimo izradu, pa ovdje preuzmi svoju gotovu aplikaciju.';
  let brief=null;
  $('request-form').onsubmit=event=>{event.preventDefault();try{
   const form=new FormData(event.currentTarget);brief=P.validate({format:'clea7.personal-brief/1',person:form.get('person'),needs:form.get('needs'),palette:form.get('palette'),layout:form.get('layout')});

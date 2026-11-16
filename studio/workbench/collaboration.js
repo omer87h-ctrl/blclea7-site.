@@ -14,7 +14,7 @@
   for(const [value,label]of [['copper','CLEA · tamna podloga i bakar'],['forest','Svijetla podloga i šumska zelena']]){const o=el('option',label);o.value=value;palette.append(o);}
   for(const [value,label]of [['row','Pokazatelji u redu'],['column','Pokazatelji jedan ispod drugog']]){const o=el('option',label);o.value=value;layout.append(o);}
   function fill(b){person.value=b.person;needs.value=b.needs;palette.value=b.palette;layout.value=b.layout;}
-  fill({person:'Mila',needs:'Projekti s klijentima, rokovi, sljedeći zadatak i označavanje završenog. Podaci ostaju nakon zatvaranja.',palette:'copper',layout:'row'});
+  fill({person:'',needs:'',palette:'copper',layout:'row'});
   try{const saved=sessionStorage.getItem(P.KEY);if(saved)fill(P.validate(JSON.parse(saved)));}catch{message.textContent='Sačuvani zahtjev nije dostupan. Možeš ga unijeti ili učitati iz datoteke.';}
   const file=field('Učitaj sačuvani zahtjev','brief','input');file.type='file';file.accept='.json,application/json';
   file.onchange=async()=>{try{const f=file.files[0];if(!f)return;if(f.size>16384)throw Error('Zahtjev prelazi16 KiB.');fill(P.validate(JSON.parse(await f.text())));message.textContent='Zahtjev je učitan. Pregledaj ga prije kreiranja.';}catch(e){message.textContent=e.message;}finally{file.value='';}};
