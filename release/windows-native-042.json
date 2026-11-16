@@ -1,0 +1,146 @@
+{
+  "passed": true,
+  "renderer": {
+    "bundled": true,
+    "mode": "app-local",
+    "path": "D:\\a\\BL-Clea7-by-brzoilokalno\\BL-Clea7-by-brzoilokalno\\dist\\BL_CLEA7\\RuntimeConsumer\\WebView2",
+    "version": "155.0.4283.45",
+    "architecture": "x64"
+  },
+  "rendererProcesses": [
+    {
+      "pid": 5688,
+      "parent": 5732,
+      "path": "D:\\a\\BL-Clea7-by-brzoilokalno\\BL-Clea7-by-brzoilokalno\\dist\\BL_CLEA7\\RuntimeConsumer\\WebView2\\msedgewebview2.exe"
+    },
+    {
+      "pid": 6736,
+      "parent": 5688,
+      "path": "D:\\a\\BL-Clea7-by-brzoilokalno\\BL-Clea7-by-brzoilokalno\\dist\\BL_CLEA7\\RuntimeConsumer\\WebView2\\msedgewebview2.exe"
+    },
+    {
+      "pid": 3824,
+      "parent": 6736,
+      "path": "D:\\a\\BL-Clea7-by-brzoilokalno\\BL-Clea7-by-brzoilokalno\\dist\\BL_CLEA7\\RuntimeConsumer\\WebView2\\msedgewebview2.exe"
+    },
+    {
+      "pid": 7032,
+      "parent": 5688,
+      "path": "D:\\a\\BL-Clea7-by-brzoilokalno\\BL-Clea7-by-brzoilokalno\\dist\\BL_CLEA7\\RuntimeConsumer\\WebView2\\msedgewebview2.exe"
+    },
+    {
+      "pid": 7872,
+      "parent": 5688,
+      "path": "D:\\a\\BL-Clea7-by-brzoilokalno\\BL-Clea7-by-brzoilokalno\\dist\\BL_CLEA7\\RuntimeConsumer\\WebView2\\msedgewebview2.exe"
+    },
+    {
+      "pid": 7952,
+      "parent": 5688,
+      "path": "D:\\a\\BL-Clea7-by-brzoilokalno\\BL-Clea7-by-brzoilokalno\\dist\\BL_CLEA7\\RuntimeConsumer\\WebView2\\msedgewebview2.exe"
+    },
+    {
+      "pid": 5496,
+      "parent": 5688,
+      "path": "D:\\a\\BL-Clea7-by-brzoilokalno\\BL-Clea7-by-brzoilokalno\\dist\\BL_CLEA7\\RuntimeConsumer\\WebView2\\msedgewebview2.exe"
+    }
+  ],
+  "processMemory": {
+    "format": "clea7.windows-process-snapshot/1",
+    "processes": [
+      {
+        "pid": 5732,
+        "role": "host",
+        "status": "measured",
+        "workingSetBytes": 121548800,
+        "privateCommitBytes": 77996032,
+        "peakWorkingSetBytes": 121847808
+      },
+      {
+        "pid": 5688,
+        "role": "bundled-renderer",
+        "status": "measured",
+        "workingSetBytes": 124444672,
+        "privateCommitBytes": 45850624,
+        "peakWorkingSetBytes": 125333504
+      },
+      {
+        "pid": 6736,
+        "role": "bundled-renderer",
+        "status": "measured",
+        "workingSetBytes": 10952704,
+        "privateCommitBytes": 2613248,
+        "peakWorkingSetBytes": 10952704
+      },
+      {
+        "pid": 3824,
+        "role": "bundled-renderer",
+        "status": "measured",
+        "workingSetBytes": 9633792,
+        "privateCommitBytes": 2383872,
+        "peakWorkingSetBytes": 9637888
+      },
+      {
+        "pid": 7032,
+        "role": "bundled-renderer",
+        "status": "measured",
+        "workingSetBytes": 37621760,
+        "privateCommitBytes": 12697600,
+        "peakWorkingSetBytes": 37621760
+      },
+      {
+        "pid": 7872,
+        "role": "bundled-renderer",
+        "status": "measured",
+        "workingSetBytes": 57323520,
+        "privateCommitBytes": 15806464,
+        "peakWorkingSetBytes": 57503744
+      },
+      {
+        "pid": 7952,
+        "role": "bundled-renderer",
+        "status": "measured",
+        "workingSetBytes": 19714048,
+        "privateCommitBytes": 7700480,
+        "peakWorkingSetBytes": 19714048
+      },
+      {
+        "pid": 5496,
+        "role": "bundled-renderer",
+        "status": "measured",
+        "workingSetBytes": 287916032,
+        "privateCommitBytes": 228438016,
+        "peakWorkingSetBytes": 314204160
+      }
+    ],
+    "coverage": "complete",
+    "sumWorkingSetBytes": 669155328,
+    "sumPrivateCommitBytes": 393486336,
+    "limits": "One QA snapshot of host and discovered bundled renderer descendants. Working-set sums can double-count shared pages. Private commit is not private resident RAM. Excludes unrelated processes, GPU allocations and energy. No competitor baseline or memory-saving conclusion."
+  },
+  "checks": [
+    "actual frozen app-local WebView2 GUI",
+    "Studio bootstrap",
+    "generated component click",
+    "application/2 flow and persistence",
+    "application/3 authored app actual controls",
+    "guarded machine event and trace",
+    "original browser-Studio-authored BIL UI2 scene",
+    "Windows BIL navigation and actual button execution",
+    "custom record persistence and restart",
+    "shared guided authoring module available",
+    "bounded additive BIL state extension preserves existing Windows data",
+    "nine working visual elements available",
+    "actual added progress handler preserves existing frozen Windows data",
+    "actual typed card collection fields and record creation",
+    "actual per-card handler preserves previous Windows data",
+    "functional Draw SVG scene from the same BIL compiler",
+    "actual Draw controller and proximity door preserve previous application data",
+    "single Studio operator reviewed apply/Draw run preserves native data and one Runtime",
+    "one operator Undo restores exact prior native project",
+    "real Core4 clock, keyboard controls and scene physics preserve native data",
+    "frozen local OCR host capability available"
+  ],
+  "limits": "Download dialogs, physical interaction and AI inference are separate checks.",
+  "sourceCommit": "f309c7f5eefd9be246d255994172848861b77771",
+  "verificationRun": 43758466479
+}
