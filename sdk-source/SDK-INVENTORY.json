@@ -1,6 +1,6 @@
 {
   "format": "clea7.sdk.inventory/1",
-  "version": "0.42.0-test",
+  "version": "0.42.1-test",
   "status": "development-test",
   "referenceSha256": "e622ecb98a7d60999ce686b052bab09ef9db645d0e211526e9986e0060061b8c",
   "licencePreserved": true,
@@ -19,17 +19,17 @@
     {
       "path": "NOTICE.txt",
       "bytes": 673,
-      "sha256": "0ad1cce4a06375d98521dfec17c6b65402fda021548ff3e4f0ce87e7634f6e12"
+      "sha256": "53e6fea44f2b8b21cc437b9bc01e8e4369e8a387e67edc136565b06bf3b3c1b7"
     },
     {
       "path": "README.md",
       "bytes": 3112,
-      "sha256": "ca1646e3e8bae88c4ae57bcced1ea78bff61f4115c92ec0ac4accc0d6199272c"
+      "sha256": "c1b6b844fbb4e8289d444b5b9b782febc97b3a215e39d398dba0ce77970e5bb9"
     },
     {
       "path": "clea7/__init__.py",
       "bytes": 96,
-      "sha256": "b437fc6e71366662f6d2d3ff91456d767c940dc23a730af0898c38c454c07049"
+      "sha256": "9cd54121afb15e5077a0916b1f441a1b43b51e59b301647f99aa6c08993353d6"
     },
     {
       "path": "clea7/__main__.py",
@@ -183,8 +183,8 @@
     },
     {
       "path": "docs/CLEA-CORE.md",
-      "bytes": 3895,
-      "sha256": "e1952457089e0d9fcbab18fa8a71b558b92fde96360596d21939ea16629b5332"
+      "bytes": 4556,
+      "sha256": "a989053d2f2f5123304d377201c31bd2879b29e74bc4d9393fb5021630c4f7e2"
     },
     {
       "path": "docs/CLEA7-DRAW.md",
@@ -265,6 +265,11 @@
       "path": "docs/STUDIO-OPERATOR-041.md",
       "bytes": 3956,
       "sha256": "d4ab8952f82abce60c7b883e58ba076ff9791f1e39814044977d1492b8f7154e"
+    },
+    {
+      "path": "docs/STUDIO-SCHEMA-HISTORY.md",
+      "bytes": 2063,
+      "sha256": "68915463a6694c673d680efa532a546ec5ddae63088dde603c55b53827cea902"
     },
     {
       "path": "docs/STUDIO-TESTS-039.md",
@@ -683,8 +688,8 @@
     },
     {
       "path": "web/workbench/engine.js",
-      "bytes": 55886,
-      "sha256": "c0cd09230e9bac178911a45f9a2d84cac75a693fbad5c145570f63f4bd2fcd82"
+      "bytes": 55908,
+      "sha256": "050d162ee8c57fed56a0e259394e95e5e6765e25d288e83b28efe598978cdffb"
     },
     {
       "path": "web/workbench/firebase-development.js",
@@ -740,6 +745,11 @@
       "path": "web/workbench/review.js",
       "bytes": 5974,
       "sha256": "3fa569240b5abff134b2cc320af56101b2dd42665a2d6cb4da418de2c4534b37"
+    },
+    {
+      "path": "web/workbench/schema-history.js",
+      "bytes": 5112,
+      "sha256": "bfdce6716a7ce48847ca868d43241a7eeb3a3e887640c1de34bf88fd1bc54c6f"
     },
     {
       "path": "web/workbench/sense-backend.js",

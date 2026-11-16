@@ -301,7 +301,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   const download=document.createElement('button');download.type='button';download.textContent='Preuzmi BIL izvor';download.onclick=()=>downloadSource(proposal.source);
   let applied=null;
   const undo=document.createElement('button');undo.type='button';undo.textContent='Poništi ovu AI izmjenu';undo.hidden=true;
-  undo.onclick=()=>{try{const studio=globalThis.CLEA7Workbench;if(CLEA7.stable(studio.snapshot())!==applied)throw Error('Nakon primjene je napravljen novi rad. Koristi Studio historiju da ga sačuvaš.');document.getElementById('undo').click();undo.disabled=true;result.textContent='Vraćen je prethodni projekt kroz stvarnu Studio historiju.';}catch(error){result.textContent=error.message;}};
+  undo.onclick=async()=>{try{const studio=globalThis.CLEA7Workbench;if(CLEA7.stable(studio.snapshot())!==applied)throw Error('Nakon primjene je napravljen novi rad. Koristi Studio historiju da ga sačuvaš.');if(typeof studio.undo==='function')await studio.undo();else document.getElementById('undo').click();undo.disabled=true;result.textContent='Vraćen je prethodni projekt kroz stvarnu Studio historiju.';}catch(error){result.textContent=error.message;}};
   apply.onclick=async()=>{if(!review.checked)return;apply.disabled=true;try{
    const studio=globalThis.CLEA7Workbench;
    if(!studio){const id=CLEA7Format.newId('handoff'),value={format:'clea7.authoring-handoff/1',source:proposal.source};sessionStorage.setItem(id,JSON.stringify(value));location.assign('/studio/workbench/?workspace=clea-chat&proposal='+encodeURIComponent(id));return;}

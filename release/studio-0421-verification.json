@@ -1,0 +1,25 @@
+{
+  "format": "clea7.web-patch-verification/1",
+  "version": "0.42.1-test",
+  "source": "f309c7f5eefd9be246d255994172848861b77771",
+  "checks": {
+    "pythonRan": 391,
+    "pythonPassed": 389,
+    "pythonSkipped": 2,
+    "actualOperatorBrowserGroups": 5,
+    "realCoreVaultArchiveGroups": 5,
+    "fullNativeFixtureInChromium": true
+  },
+  "actualNeuralInference": false,
+  "newWindowsOrAndroidAcceptance": false,
+  "immutableSenseBundle": "0.42-test",
+  "masterComplete": false,
+  "sdk": {
+    "version": "0.42.1-test",
+    "bytes": 5750819,
+    "sha256": "65336d597d1b87c770b6caf974c7dcd1eef05df9d78a4e64659ba0e52129aea1",
+    "entries": 157,
+    "actualDistributionTests": 4
+  },
+  "publicPythonTests": 68
+}

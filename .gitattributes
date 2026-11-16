@@ -7,6 +7,8 @@
 *.svg text eol=lf
 *.md text eol=lf
 sense/vendor/pdfjs/LICENSE text eol=lf
+# Preserve exact upstream OCR distribution and licence bytes on Windows too.
+sense/vendor/ocr/** -text
 *.png binary
 *.jpg binary
 *.webp binary
