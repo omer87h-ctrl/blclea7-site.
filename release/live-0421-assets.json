@@ -1,0 +1,49 @@
+{
+  "format": "clea7.public-byte-verification/1",
+  "publicCommit": "e4c93450d42b42875f1416936082737765753251",
+  "tlsVerified": true,
+  "assets": [
+    {
+      "path": "studio/workbench/",
+      "status": 200,
+      "bytes": 17365,
+      "sha256": "ee5912dc677cb1cb747dfc6985c34829cfc6e41ff4ee6297063433e194bbad77",
+      "matchesVerifiedCheckout": true
+    },
+    {
+      "path": "studio/workbench/studio.js",
+      "status": 200,
+      "bytes": 56585,
+      "sha256": "9ca9bdc3c755971173a9496bdcf3449a19c4c81685682ec5099b8a6fc42c75e1",
+      "matchesVerifiedCheckout": true
+    },
+    {
+      "path": "studio/workbench/schema-history.js",
+      "status": 200,
+      "bytes": 5112,
+      "sha256": "bfdce6716a7ce48847ca868d43241a7eeb3a3e887640c1de34bf88fd1bc54c6f",
+      "matchesVerifiedCheckout": true
+    },
+    {
+      "path": "studio/workbench/engine.js",
+      "status": 200,
+      "bytes": 55908,
+      "sha256": "050d162ee8c57fed56a0e259394e95e5e6765e25d288e83b28efe598978cdffb",
+      "matchesVerifiedCheckout": true
+    },
+    {
+      "path": "preuzimanja.html",
+      "status": 200,
+      "bytes": 18869,
+      "sha256": "007af85a50b2c0fd5dc72840fcfb0679cf5fc95e5d7acb8ed8a516601626cd97",
+      "matchesVerifiedCheckout": true
+    },
+    {
+      "path": "sense/downloads/BL-CLEA7-Core-SDK-0.42.1-test.zip",
+      "status": 200,
+      "bytes": 5750819,
+      "sha256": "65336d597d1b87c770b6caf974c7dcd1eef05df9d78a4e64659ba0e52129aea1",
+      "matchesVerifiedCheckout": true
+    }
+  ]
+}

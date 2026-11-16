@@ -37,7 +37,7 @@ for forbidden in ['main.py','runtime_main.py','clea7/desktop.py','clea7/host.py'
 catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610'
 download_page=(ROOT/'preuzimanja.html').read_text()
 for page in ROOT.glob('*.html'):
- assert 'Web Studio 0.42.1-test · SDK 0.42.1-test · Windows 0.41.1-test · Android 0.40-test' in page.read_text(),(page,'stale visible release version')
+ assert 'Web Studio 0.42.1-test · SDK 0.42.1-test · Windows 0.42.0-test · Android 0.40-test' in page.read_text(),(page,'stale visible release version')
 for entry in catalog['published']:
  p=ROOT/entry['url'];data=p.read_bytes();assert p.is_relative_to(ROOT) and len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],p
  if entry['key'] in ('sdk','preview'):
@@ -84,19 +84,20 @@ for a in current['assets']:
  assert a['url'] in download_page or ('downloads/'+a['name']) in download_page
 print('PUBLIC_CHECKED_037 current installer, Android and universal package release metadata verified')
 
-windows=catalog["windows_current"]
-assert windows["state"]=="published" and windows["publication_run"]==43720197247
-assert windows["source_commit"]=="7f81e42b739c3e80555644cf86212d05baf7cdf9" and windows["windows_install_run"]==43718650265
-asset=windows["assets"][0]
-assert asset["size_bytes"]==249865806 and asset["sha256"]=="df52c0928a8235199df8c88b4df4e15db854f9b25ad285bb4c0fbde3665fe06e"
-assert asset["url"] in download_page and asset["sha256"] in download_page
-from scripts.publish_checked_038 import release_spec,install_receipt
-receipt=install_receipt(ROOT,release_spec('local-gateway-0411'))
-assert receipt['verificationRun']==43718650265 and receipt['installedManifestVerified']['files']==981
-native=json.loads((ROOT/'release/windows-native-0411.json').read_text())
-assert native['passed'] and len(native['checks'])==19 and native['sourceCommit']==windows['source_commit']
-assert any(x['tag']=='clea7-windows-0.40-test' for x in catalog['windows_history'])
-print("PUBLIC_CHECKED_WINDOWS0411 exact installed binary,19 native checks and anonymous release link verified")
+windows=catalog['windows_current']
+assert windows['state']=='published' and windows['publication_run']==43779544569
+assert windows['source_commit']=='f309c7f5eefd9be246d255994172848861b77771' and windows['windows_install_run']==43758466479
+asset=windows['assets'][0]
+assert asset['size_bytes']==253968135 and asset['sha256']=='62bcdb91c0e811c2a9b1880065a39df78daff42b253eb4779abf9632504d5e4d'
+assert asset['url'] in download_page and asset['sha256'] in download_page
+receipt=json.loads((ROOT/'release/windows-installed-scenes-042.json').read_text())
+assert receipt['passed'] and receipt['verificationRun']==43758466479 and receipt['installerSource']==windows['source_commit']
+assert receipt['installerSha256']==asset['sha256'] and receipt['installedManifestVerified']=={'verified':True,'product':'studio','files':1048}
+assert all(receipt[k] for k in ('actualInstallerExecuted','actualUninstallerExecuted','userFilesPreserved'))
+native=json.loads((ROOT/'release/windows-native-042.json').read_text())
+assert native['passed'] and len(native['checks'])==21 and native['sourceCommit']==windows['source_commit']
+assert any(x['tag']=='clea7-windows-0.41.1-test' for x in catalog['windows_history'])
+print('PUBLIC_CHECKED_WINDOWS042 exact installed binary,21 native checks and anonymous release link verified')
 
 android=catalog['android_current']
 assert android['state']=='published' and android['version']=='0.40.0-test'

@@ -1,0 +1,19 @@
+{
+  "format": "clea7.android-live-verification/1",
+  "run": 43778089298,
+  "source": "97e4763e2ec45304eda648023a05534917e73f51",
+  "passed": true,
+  "actualSimultaneousAndroidEmulators": 2,
+  "embeddedAndIndependentRuntime": true,
+  "studioAuthoredApplication": true,
+  "authenticationAndDistinctAccounts": true,
+  "privateMessaging": true,
+  "serverPermissionDenials": true,
+  "disconnectionAndRecovery": true,
+  "activityRestartAndServerPersistence": true,
+  "actualBrowserChecks": 12,
+  "physicalDevicesTested": false,
+  "pushNotificationsClaimed": false,
+  "productionBackendTouched": false,
+  "services": "isolated demo Firebase Auth and Firestore emulators"
+}
