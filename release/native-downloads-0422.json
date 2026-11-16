@@ -1,0 +1,68 @@
+{
+  "format": "clea7.public-native-availability/1",
+  "date": "2026-11-16",
+  "tlsVerified": true,
+  "windowsPublicationRun": 43793066841,
+  "androidPublicationRun": 43793069538,
+  "checks": [
+    {
+      "name": "BL-CLEA7-Runtime-Android-0.42.2-debug.apk",
+      "status": 200,
+      "bytes": 5195655,
+      "sha256": "d49dc44c77d3561c9221a1a3d3fd349f4dedab6fb8c0d4e50ba0863dde1ead58",
+      "exactMatch": true
+    },
+    {
+      "name": "BL-CLEA-Sense-CV-0.42.2-debug.apk",
+      "status": 200,
+      "bytes": 276969,
+      "sha256": "af4a88d502fdd8e6e2044232678cdfaed4fc18fd0da472d386bb1165d67364e9",
+      "exactMatch": true
+    },
+    {
+      "name": "BL-CLEA-Sense-CV-0.42.2-unsigned.aab",
+      "status": 200,
+      "bytes": 235919,
+      "sha256": "ece42356f3f3be0501addd823e0309e962d72324df056ba1a77020657d8d4e11",
+      "exactMatch": true
+    },
+    {
+      "name": "BL-CLEA7-Draw-0.42.2-debug.apk",
+      "status": 200,
+      "bytes": 280013,
+      "sha256": "b892e15a6d7d07a6b64749eaf3a7b0fda787d58d738dbeeb417522b323e0dfb9",
+      "exactMatch": true
+    },
+    {
+      "name": "BL-CLEA7-Scene-0.42.2-debug.apk",
+      "status": 200,
+      "bytes": 277313,
+      "sha256": "2e57bd1be52255cb998ebb1d69e7af3fb355cc1e0ab28ea24dba2e412fec54cf",
+      "exactMatch": true
+    },
+    {
+      "name": "BL-CLEA-Sense-CV-0.42.2.clea7",
+      "status": 200,
+      "bytes": 54193,
+      "sha256": "bfdc60224fc199c2056438f99ba9df6603254c353f91c54c9a7df7b40afa8a5d",
+      "exactMatch": true
+    },
+    {
+      "name": "BL-CLEA7-Draw-0.42.2.clea7",
+      "status": 200,
+      "bytes": 59740,
+      "sha256": "2b475978577db1670c09308d8fa90055f9ccb9f5028ddf6736113f452bd5b102",
+      "exactMatch": true
+    },
+    {
+      "name": "BLclea7-Setup-Windows-x64.exe",
+      "status": 206,
+      "expectedBytes": 253938700,
+      "rangeBytes": 32,
+      "mzHeader": true,
+      "publishedChecksumMatches": true,
+      "fullLocalArtifactHashVerified": true
+    }
+  ],
+  "privateSourceOrLogsIncluded": false
+}
