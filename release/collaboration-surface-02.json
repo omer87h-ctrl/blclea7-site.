@@ -2,7 +2,7 @@
   "format": "clea7.collaboration-surface-proof/1",
   "passed": true,
   "checks": [
-    "Shipped public configuration keeps homepage collaboration section, intake and delivery field hidden; URL query cannot activate; preview and390px layout work",
+    "Shipped public configuration keeps homepage collaboration section, intake disabled with blank name and delivery field hidden; URL query cannot activate; no fictional person in the page; preview and390px layout work",
     "Activation-fixture-only form creates a valid local portable brief, renders untrusted wishes as text and never reports it received or sent; no email sent",
     "Activation-fixture-only delivery field resolves a real published artifact and downloads exact hash-checked standalone application bytes",
     "Unknown delivery references and corrupted application bytes are rejected; no arbitrary external download path or success link"
