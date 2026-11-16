@@ -6,11 +6,11 @@
   "published": [
     {
       "key": "sdk",
-      "name": "BL-CLEA7-Core-SDK-0.42.1-test.zip",
-      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.42.1-test.zip",
-      "size_bytes": 5750819,
-      "sha256": "65336d597d1b87c770b6caf974c7dcd1eef05df9d78a4e64659ba0e52129aea1",
-      "version": "0.42.1-test"
+      "name": "BL-CLEA7-Core-SDK-0.42.2-test.zip",
+      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.42.2-test.zip",
+      "size_bytes": 5751111,
+      "sha256": "f4798604330d115f59413d69fd5ca5e139730101ed03c8ee58b1672a1c9b5ddd",
+      "version": "0.42.2-test"
     },
     {
       "key": "preview",

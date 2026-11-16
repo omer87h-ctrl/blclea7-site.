@@ -3,14 +3,14 @@ import hashlib,json,zipfile
 from pathlib import Path,PurePosixPath
 
 ROOT=Path(__file__).resolve().parents[1]
-NAME='BL-CLEA7-Core-SDK-0.42.1-test.zip'
-SIZE=5750819
-SHA='65336d597d1b87c770b6caf974c7dcd1eef05df9d78a4e64659ba0e52129aea1'
+NAME='BL-CLEA7-Core-SDK-0.42.2-test.zip'
+SIZE=5751111
+SHA='f4798604330d115f59413d69fd5ca5e139730101ed03c8ee58b1672a1c9b5ddd'
 
 def build(root=ROOT):
     source=root/'sdk-source';output=root/'sense/downloads'/NAME
     inventory=json.loads((source/'SDK-INVENTORY.json').read_text())
-    if inventory.get('version')!='0.42.1-test' or len(inventory['files'])!=156:
+    if inventory.get('version')!='0.42.2-test' or len(inventory['files'])!=156:
         raise ValueError('Wrong reviewed SDK inventory')
     files={}
     for row in inventory['files']:
@@ -41,4 +41,4 @@ def build(root=ROOT):
     return True
 
 if __name__=='__main__':
-    changed=build();print(json.dumps({'version':'0.42.1-test','bytes':SIZE,'sha256':SHA,'created':changed}))
+    changed=build();print(json.dumps({'version':'0.42.2-test','bytes':SIZE,'sha256':SHA,'created':changed}))

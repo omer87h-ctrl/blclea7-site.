@@ -1,4 +1,4 @@
-name: Rebuild exact verified SDK 0.42.1 on the existing work branch
+name: Rebuild exact verified SDK 0.42.2 on the existing work branch
 on:
   push:
     branches: [work/clea-qwen-unified-027]
@@ -25,9 +25,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add -- sense/downloads/BL-CLEA7-Core-SDK-0.42.1-test.zip
+          git add -- sense/downloads/BL-CLEA7-Core-SDK-0.42.2-test.zip
           if git diff --cached --quiet; then exit 0; fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'Add exact independently verified SDK 0.42.1 archive'
+          git commit -m 'Add exact independently verified SDK 0.42.2 archive'
           git push origin HEAD:work/clea-qwen-unified-027

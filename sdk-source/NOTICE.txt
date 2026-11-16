@@ -1,6 +1,6 @@
-BL CLEA7 SDK0.42.1-test by Brzo i Lokalno. Public compiler/interpreter/Core,
+BL CLEA7 SDK0.42.2-test by Brzo i Lokalno. Public compiler/interpreter/Core,
 checked project CLI and bounded dependency-cache distribution only. Existing licences
-retained exactly. No private native host, credentials, identity, user content, model
+retained exactly. No private native host, credentials, identity, user content, conversational model
 weights or telemetry. Native builds and physical-device verification are separate.
 Tesseract.js6.0.1, core6.1.2, tessdata_fast4.1.0 and their dependencies:
 full licences/notices/provenance in web/sense/vendor/ocr. Upstream OCR weights

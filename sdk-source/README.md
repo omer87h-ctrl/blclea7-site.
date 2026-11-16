@@ -1,10 +1,11 @@
-# BL CLEA7 SDK 0.42.1-test — shared Core and dependency cache
+# BL CLEA7 SDK 0.42.2-test — shared Core and dependency cache
 
 Development/test distribution by Brzo i Lokalno. The authoritative BIL compiler,
 bounded interpreter, shared Core, project CLI and original dependency/result cache
 are included. This archive is not an Android/iOS/Windows installer or a claim of
 native platform parity. Python3.12+ and Node22+ are development prerequisites.
-No model, telemetry, cloud service or automatic dependency download is required.
+No conversational model, telemetry, cloud service or automatic dependency download is required.
+The licensed local OCR models retain their provenance.
 Optional `ai status/ask/propose` uses a separately running owner-local9B gateway.
 The SDK contains its client, not a model server or weights. `ai propose` requires
 review and passes the actual compiler/isolated Runtime before writing a new file.
