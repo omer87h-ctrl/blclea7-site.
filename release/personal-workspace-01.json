@@ -1,0 +1,100 @@
+{
+  "format": "clea7.personal-trial-release/1",
+  "webVersion": "0.42.3-test",
+  "sdkAndNativeVersionsUnchanged": "0.42.2-test",
+  "proof": {
+    "format": "clea7.personal-workspace-proof/1",
+    "passed": true,
+    "checks": [
+      "Real Studio import keeps identity; Draw changes name; palette/layout controls change checked source while all function/handler source bytes stay identical; actual HTML/project/package downloads captured",
+      "Same Studio project creates a second personal application with a new ID/package and the identical business logic; initial exported records are empty",
+      "Delivered Studio project reopens with the same identity and its real live Runtime",
+      "Standalone exported HTML rejects an impossible date, adds a real fictional client project, stores deadline/next step and completes the task idempotently through real UI events",
+      "Full Chromium process closes/relaunches twice with a clean persistent profile; both personal applications retain their own distinct records and completion state; real app-scoped backup and390px layout pass"
+    ],
+    "applications": {
+      "Mila": "cowonder_personal_trial",
+      "Armin": "app_3d40fb78cc07721f9e8b25621976df98"
+    },
+    "sameBusinessLogicSha256": "954a377616265734f40e04eb58c2760a4e900cd30eaa3ba72dfce8cd823f9693",
+    "initialData": "empty; fictional entries created by real UI in disposable QA profile only",
+    "browser": "actual Chromium, clean persistent profile, complete process restart",
+    "transport": "exact exported single HTML files served over local HTTP; no separate runtime server API",
+    "fileProtocol": "not claimed: managed Chromium policy blocks file:// navigation",
+    "physicalAndroidTested": false,
+    "cowonderPartnershipConfirmed": false,
+    "designAuthorship": "original technical proposal, not an Ivana-approved design",
+    "errors": []
+  },
+  "files": {
+    "format": "clea7.personal-delivery/1",
+    "version": "1",
+    "applications": {
+      "Mila": "cowonder_personal_trial",
+      "Armin": "app_3d40fb78cc07721f9e8b25621976df98"
+    },
+    "businessLogicSha256": "954a377616265734f40e04eb58c2760a4e900cd30eaa3ba72dfce8cd823f9693",
+    "files": [
+      {
+        "path": "Armin.bil",
+        "bytes": 11255,
+        "sha256": "6c668d2efa3030eab172ded254869bdfae53e2c0a7f83ec24fde2d9b7c977db7"
+      },
+      {
+        "path": "Armin.html",
+        "bytes": 481221,
+        "sha256": "f0bfe6f140fca048d4aa45cb3ca3d94e73c61a6b90d78a3498f466da2cf4656e"
+      },
+      {
+        "path": "Armin.package.clea7",
+        "bytes": 151661,
+        "sha256": "76f5cbf3aa6b2e4b4eddcf9f17fe9a035fa9128705e7522137147d4f1efaf943"
+      },
+      {
+        "path": "Armin.studio.clea7",
+        "bytes": 297888,
+        "sha256": "9052614d622c480f6a4dbd67e5beee4e215e5ea437f325b9c48fbb8efc492095"
+      },
+      {
+        "path": "Mila-desktop.png",
+        "bytes": 89513,
+        "sha256": "55edbea82be447f5c87b5ad286c385b7948eac6b7eff5ef8dc29185268b7f81a"
+      },
+      {
+        "path": "Mila-mobile.png",
+        "bytes": 82649,
+        "sha256": "488b9acc7e3239227cd124fe79946996191e69a0316b4b5fcbc67075315e95b5"
+      },
+      {
+        "path": "Mila.bil",
+        "bytes": 11255,
+        "sha256": "6c668d2efa3030eab172ded254869bdfae53e2c0a7f83ec24fde2d9b7c977db7"
+      },
+      {
+        "path": "Mila.html",
+        "bytes": 481192,
+        "sha256": "9aa9031cb8b7b047bac1694ddf96f185e9597b69b25717b3d6c6fcb7787abc5d"
+      },
+      {
+        "path": "Mila.package.clea7",
+        "bytes": 151611,
+        "sha256": "34dbba286550a5835969eceee351ad0ad1bd4b421e45141aa92e186a995dd138"
+      },
+      {
+        "path": "Mila.studio.clea7",
+        "bytes": 297861,
+        "sha256": "e02a8c9bf196226d60088d31330b78bbf6e41d2a810e7554da8b5f1091521285"
+      },
+      {
+        "path": "PROCITAJ.txt",
+        "bytes": 3077,
+        "sha256": "e5d0f8c3dd2836af88e1382abbf52773f0f2e12b178db49ac96dada9a75cb832"
+      },
+      {
+        "path": "verification.json",
+        "bytes": 1693,
+        "sha256": "839689034fb76ec517a06c1dcc40c71679860967da8fd9aa0d53f1a333e32ea3"
+      }
+    ]
+  }
+}

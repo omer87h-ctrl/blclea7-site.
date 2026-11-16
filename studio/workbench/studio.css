@@ -71,3 +71,6 @@ body.studio-shell{margin:0;background:#080e16;font-size:13px;min-width:0}.studio
 .draw-stage [hidden]{display:none!important}#draw-live-runtime{width:100%;min-height:450px;overflow:auto}.draw-palette details{margin:12px 0}.draw-palette input,.draw-palette select,.draw-palette textarea{max-width:100%;min-width:0}#draw-live-runtime #player{width:100%;max-width:100%;min-height:420px}.draw-stage>button{margin:4px}.draw-workspace{align-items:start}
 
 @media(min-width:1000px){.draw-palette,.draw-inspector{max-height:calc(100vh - 240px);overflow:auto;scrollbar-gutter:stable}.draw-stage{position:sticky;top:90px}}
+
+/* Personalisation uses the same checked source and existing visual editor. */
+.draw-personal{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:0 0 16px}.draw-personal label{flex:1;min-width:180px;margin:0}.draw-personal button{flex:0 1 auto}
