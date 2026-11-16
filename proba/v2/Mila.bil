@@ -1,0 +1,212 @@
+# CLEA DESIGN BRIEF /1 {"format":"clea7.personal-brief/1","brand":"Brzo i Lokalno × COWONDER","person":"Mila","needs":"Projekti s klijentima, rokovi i sljedeći zadaci. Zajednički dogovoriti dizajn.","palette":"copper","layout":"row"}
+# Original personal workspace — BL CLEA7 by Brzo i Lokalno.
+# Personal application, prepared for collaborative design. Sample names are fictional.
+# Visual styles and screen arrangement are separate from the handlers below.
+import collections
+import text
+import json
+
+record Project { id: Text, name: Text, client: Text, deadline: Text, nextTask: Text, done: Boolean }
+let projects: List<Project> = []
+let nextId = 1
+let selected = ""
+let selectedName = ""
+let selectedClient = ""
+let selectedDeadline = ""
+let selectedTask = ""
+let selectedDone = false
+let draftName = ""
+let draftClient = ""
+let draftDeadline = ""
+let draftTask = ""
+let removalConfirmed = false
+
+fn pending(items: List<Project>) -> Number {
+    let count = 0
+    for item in items { if not item.done { count = count + 1 } }
+    return count
+}
+fn findProject(items: List<Project>, key: Text) -> Number {
+    let index = 0
+    for item in items {
+        if item.id == key { return index }
+        index = index + 1
+    }
+    return -1
+}
+fn taskStatus(done: Boolean) -> Text {
+    if done { return "Zadatak je završen. Vrijeme je za sljedeći korak." }
+    return "Sljedeći korak čeka na tebe."
+}
+fn decimal(value: Text) -> Number {
+    let result = 0
+    for character in text.split(value, "") {
+        let found = false
+        for digit in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] {
+            if character == json.encode(digit) { result = result * 10 + digit; found = true }
+        }
+        if not found { return -1 }
+    }
+    return result
+}
+fn validDeadline(value: Text) -> Boolean {
+    let parts = text.split(value, "-")
+    if text.length(value) != 10 or collections.length(parts) != 3 { return false }
+    if text.length(parts[0]) != 4 or text.length(parts[1]) != 2 or text.length(parts[2]) != 2 { return false }
+    let year = decimal(parts[0])
+    let month = decimal(parts[1])
+    let day = decimal(parts[2])
+    if year < 1900 or year > 2200 or month < 1 or month > 12 or day < 1 { return false }
+    let days = 31
+    if month == 4 or month == 6 or month == 9 or month == 11 { days = 30 }
+    if month == 2 {
+        days = 28
+        if year % 400 == 0 or (year % 4 == 0 and year % 100 != 0) { days = 29 }
+    }
+    return day <= days
+}
+derive projectCount = collections.length(projects)
+derive pendingCount = pending(projects)
+derive completedCount = projectCount - pendingCount
+derive selectedStatus = taskStatus(selectedDone)
+
+screen overview "Moj radni pregled" {
+    row {
+        row {
+            card "BRZO I LOKALNO × COWONDER" {
+                heading "Manje rasutih bilješki. Više jasnih koraka." style { fontSize 38; fontWeight 700; font "serif"; color "#f5f3f0" } key intro_title
+                text "Klijenti, projekti i ono što radiš sljedeće — na jednom mjestu." style { color "#b9bdc6"; fontSize 16 } key intro_text
+            } style { background "transparent"; borderWidth 0; padding 0; maxWidth 640 } key intro
+            button "+ Novi projekat" runs begin_new style { background "#ffad75"; color "#151d28"; radius 12; padding 16; fontWeight 700; width 190 } key new_project
+        } style { align "center"; justify "space-between"; gap 32; wrap "wrap" } key hero
+        row {
+            card "PROJEKTI" { show projectCount style { fontSize 38; fontWeight 700; color "#f5f3f0" } key projects_count } style { background "#151d28"; borderColor "#303944"; radius 16; padding 22 } key metric_projects
+            card "SLJEDEĆI KORACI" { show pendingCount style { fontSize 38; fontWeight 700; color "#ffc59e" } key pending_count } style { background "#292019"; borderColor "#69442c"; radius 16; padding 22 } key metric_pending
+            card "ZAVRŠENI ZADACI" { show completedCount style { fontSize 38; fontWeight 700; color "#ffad75" } key completed_count } style { background "#1c2924"; borderColor "#344c3e"; radius 16; padding 22 } key metric_completed
+        } style { gap 16; wrap "wrap"
+ direction "row"
+} key metrics
+        cards projects label "Projekti s klijentima" fields [name: "Projekat", client: "Klijent", deadline: "Rok", nextTask: "Sljedeći korak"] identity id select selected action "Otvori projekat" runs open_project empty "Prvi projekat počinje jednim jasnim korakom. Dodaj ga dugmetom iznad." style { color "#f5f3f0" } key project_cards
+    } style { background "#0c1119"; color "#f5f3f0"; borderWidth 0; padding 32; radius 24; gap 30; direction "column" } key overview_surface
+}
+
+screen editor "Podaci projekta" {
+    card "SLOŽI SVOJ SLJEDEĆI KORAK" {
+        heading "Dovoljno detalja da znaš šta slijedi." style { font "serif"; fontSize 32; color "#f5f3f0" } key editor_title
+        text "Jedan projekat, jedan naredni zadatak. Sve kasnije možeš urediti." style { color "#b9bdc6" } key editor_intro
+        row {
+            input draftName label "Naziv projekta" required style { width "fill" } key project_name
+            input draftClient label "Klijent" required style { width "fill" } key project_client
+        } style { gap 20; wrap "wrap" } key identity_fields
+        input draftDeadline label "Rok · GGGG-MM-DD" required key project_deadline
+        input draftTask label "Sljedeći zadatak" required multiline key project_task
+        row {
+            button "Sačuvaj projekat" runs save_project validate style { background "#ffad75"; color "#151d28"; radius 12; fontWeight 700; padding 14 } key save_project
+            button "Odustani" opens overview style { background "#151d28"; color "#f5f3f0"; borderColor "#303944"; radius 12 } key cancel_editor
+        } style { gap 14; wrap "wrap" } key editor_actions
+    } style { background "#0c1119"; color "#f5f3f0"; borderWidth 0; padding 32; radius 24; gap 18; maxWidth 900 } key editor_surface
+}
+
+screen detail "Moj projekat" {
+    card "JEDAN PROJEKAT. JASAN NAREDNI KORAK." {
+        show selectedName style { font "serif"; fontSize 36; fontWeight 700; color "#f5f3f0" } key detail_title
+        row {
+            card "KLIJENT" { show selectedClient style { fontSize 19; fontWeight 600 } key detail_client } style { background "#151d28"; borderColor "#303944"; radius 14; padding 20 } key client_card
+            card "ROK" { show selectedDeadline style { fontSize 19; fontWeight 600 } key detail_deadline } style { background "#292019"; borderColor "#69442c"; radius 14; padding 20 } key deadline_card
+        } style { gap 16; wrap "wrap" } key detail_meta
+        card "SADA JE NA REDU" {
+            show selectedTask style { fontSize 24; color "#f5f3f0" } key detail_task
+            show selectedStatus style { fontSize 14; color "#ffad75" } key detail_status
+        } style { background "#1c2924"; borderColor "#344c3e"; radius 18; padding 26 } key next_step
+        row {
+            button "Zadatak je završen" runs complete_task style { background "#ffad75"; color "#151d28"; radius 12; fontWeight 700; padding 14 } key complete_task
+            button "Ponovo otvori zadatak" runs reopen_task style { background "#151d28"; color "#f5f3f0"; borderColor "#303944"; radius 12 } key reopen_task
+            button "Uredi projekat" runs begin_edit style { background "#151d28"; color "#f5f3f0"; borderColor "#303944"; radius 12 } key edit_project
+            button "Svi projekti" opens overview style { background "#151d28"; color "#f5f3f0"; borderColor "#303944"; radius 12 } key all_projects
+        } style { gap 12; wrap "wrap" } key detail_actions
+        card "Uklanjanje projekta" {
+            toggle removalConfirmed label "Potvrđujem uklanjanje samo ovog projekta" key removal_confirmation
+            button "Ukloni projekat" runs remove_project style { background "#30201e"; color "#ffb6a0"; borderColor "#6e4438"; radius 10 } key remove_project
+        } style { background "transparent"; borderColor "#303944"; radius 14; padding 18 } key removal
+    } style { background "#0c1119"; color "#f5f3f0"; borderWidth 0; padding 32; radius 24; gap 22; maxWidth 1000 } key detail_surface
+}
+start overview
+
+on begin_new {
+    selected = ""
+    draftName = ""
+    draftClient = ""
+    draftDeadline = ""
+    draftTask = ""
+    open editor
+}
+on open_project {
+    let index = findProject(projects, selected)
+    if index < 0 { raise "Selection", "Otvori postojeći projekat iz pregleda." }
+    selectedName = projects[index].name
+    selectedClient = projects[index].client
+    selectedDeadline = projects[index].deadline
+    selectedTask = projects[index].nextTask
+    selectedDone = projects[index].done
+    removalConfirmed = false
+    open detail
+}
+on begin_edit {
+    let index = findProject(projects, selected)
+    if index < 0 { raise "Selection", "Projekat više ne postoji." }
+    draftName = projects[index].name
+    draftClient = projects[index].client
+    draftDeadline = projects[index].deadline
+    draftTask = projects[index].nextTask
+    open editor
+}
+on save_project {
+    draftName = text.trim(draftName)
+    draftClient = text.trim(draftClient)
+    draftDeadline = text.trim(draftDeadline)
+    draftTask = text.trim(draftTask)
+    if text.length(draftName) < 1 or text.length(draftName) > 100 { raise "Name", "Naziv projekta treba1–100 znakova." }
+    if text.length(draftClient) < 1 or text.length(draftClient) > 120 { raise "Client", "Klijent treba1–120 znakova." }
+    if text.length(draftTask) < 1 or text.length(draftTask) > 500 { raise "Task", "Sljedeći zadatak treba1–500 znakova." }
+    if not validDeadline(draftDeadline) { raise "Deadline", "Upiši stvarni datum roka u obliku GGGG-MM-DD, npr.2026-11-30." }
+    let done = false
+    if selected == "" {
+        if collections.length(projects) >= 200 { raise "Capacity", "Ovaj lični prostor podržava do200 projekata." }
+        selected = text.concat("project_", json.encode(nextId))
+        nextId = nextId + 1
+        projects = collections.append(projects, new Project { id: selected, name: draftName, client: draftClient, deadline: draftDeadline, nextTask: draftTask, done: false })
+    } else {
+        let index = findProject(projects, selected)
+        if index < 0 { raise "Selection", "Projekat više ne postoji." }
+        done = projects[index].done and projects[index].nextTask == draftTask
+        projects = collections.replace(projects, index, new Project { id: selected, name: draftName, client: draftClient, deadline: draftDeadline, nextTask: draftTask, done: done })
+    }
+    selectedName = draftName
+    selectedClient = draftClient
+    selectedDeadline = draftDeadline
+    selectedTask = draftTask
+    selectedDone = done
+    removalConfirmed = false
+    open detail
+}
+on complete_task {
+    let index = findProject(projects, selected)
+    if index < 0 { raise "Selection", "Projekat više ne postoji." }
+    projects[index].done = true
+    selectedDone = true
+}
+on reopen_task {
+    let index = findProject(projects, selected)
+    if index < 0 { raise "Selection", "Projekat više ne postoji." }
+    projects[index].done = false
+    selectedDone = false
+}
+on remove_project {
+    if not removalConfirmed { raise "Confirmation", "Prvo potvrdi da želiš ukloniti odabrani projekat." }
+    let index = findProject(projects, selected)
+    if index < 0 { raise "Selection", "Projekat više ne postoji." }
+    projects = collections.remove(projects, index)
+    selected = ""
+    removalConfirmed = false
+    open overview
+}

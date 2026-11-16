@@ -1,0 +1,37 @@
+BRZO I LOKALNO × COWONDER — LIČNA APLIKACIJA / 02
+
+Pregled za Ivanu: https://clea7.brzoilokalno.com/proba/
+Studio za zajedničku izradu:
+https://clea7.brzoilokalno.com/studio/workbench/?collaboration=cowonder
+
+Korisnik opiše potrebe; tim dogovara funkcije i vizuelizacije, oblikuje i
+izrađuje aplikaciju u BL CLEA Studiju. Korisnik preuzima gotovu aplikaciju.
+Ivana bi oblikovala dizajn ako prihvati saradnju. Prikaz nije njen odobren dizajn.
+
+Javna sekcija, zahtjevi i polje za preuzimanje OSTAJU SKRIVENI dok vlasnik
+izričito ne odobri vidljivost nakon Ivaninog pristanka. Pregled je bez indeksiranja,
+ali direktan link nije privatna stranica ili kontrola pristupa.
+
+U Studiju upiši ime, pregledaj zahtjev i izaberi boje i raspored. Početni radni
+prostor stvarno podržava projekte, klijente, rokove i zadatke. Dodatne želje
+ostaju zahtjev za izradu; opis ne implementira proizvoljne dodatne funkcije.
+Zahtjev ostaje u BIL komentaru uz projekt. Izgled uređuj kroz Draw / Uredi boje
+i raspored. Funkcije i događaje uređuj u BIL-u. Izgradi / Preuzmi web aplikaciju
+daje samostalni HTML, a Preuzmi projekt daje uredljivu .clea7 datoteku.
+
+Mila.html i Armin.html su stvarni izvozi sa zajedničkim nazivom i različitim
+identitetima. Počinju prazni. Zapis, rok, zadatak i završavanje rade lokalno.
+Izvršeni su stvarni unosi, potpuni restarti Chromiuma i provjera odvojenosti.
+Koristi Moji podaci za kopije. To nije zajednička udaljena timska baza.
+Datoteke su provjerene preko HTTP-a; file:// je blokiran pravilom testnog
+okruženja, pa dvoklik na HTML ovdje nije proglašen provjerenim.
+
+Kada usluga bude javno odobrena, zahtjev se priprema u korisnikovoj e-pošti
+upućenoj odobrenom kontaktu; slanje potvrđuje korisnik. Nema lažne potvrde
+da je tim primio zahtjev. Gotova aplikacija se registruje u deliveries.json;
+polje Broj isporuke provjerava stvarne bajtove i SHA-256 prije preuzimanja.
+Broj nije lozinka. Objavljuju se prazne aplikacije, bez privatnih zapisa korisnika.
+MILA-02 i ARMIN-02 su primjeri isporuka za izmišljene osobe, ne stvarne narudžbe.
+
+Nisu pokrenuti privatni GitHub Actions, HP, modeli, trening ili plaćeni servisi.
+Nova APK/EXE izgradnja i cijeli Master nisu predstavljeni završenim ovim radom.
