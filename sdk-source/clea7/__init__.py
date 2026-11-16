@@ -1,3 +1,3 @@
 """BL CLEA7: original application runtime and Studio implementation."""
-__version__ = '0.42.0'
+__version__ = '0.42.1'
 

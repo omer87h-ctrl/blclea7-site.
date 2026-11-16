@@ -1,0 +1,33 @@
+name: Rebuild exact verified SDK 0.42.1 on the existing work branch
+on:
+  push:
+    branches: [work/clea-qwen-unified-027]
+    paths: [.github/workflows/build-checked-sdk0421.yml, sdk-source/SDK-INVENTORY.json]
+permissions:
+  contents: read
+jobs:
+  checked-sdk:
+    if: github.repository == 'omer87h-ctrl/blclea7-site.'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/clea-qwen-unified-027
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify all curated source bytes and recreate the exact tested archive
+        run: python scripts/build_checked_sdk0421.py
+      - name: Record this immutable artifact on the same work branch for PR review
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- sense/downloads/BL-CLEA7-Core-SDK-0.42.1-test.zip
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Add exact independently verified SDK 0.42.1 archive'
+          git push origin HEAD:work/clea-qwen-unified-027
