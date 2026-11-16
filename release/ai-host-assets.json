@@ -464,7 +464,7 @@
     {
       "path": "studio/launcher/player.html",
       "bytes": 3928,
-      "sha256": "292cecdb9dc456b7ef6c97a61ba8fda33bd6b5725290a096964bfbadc9194e3c"
+      "sha256": "27e4936d676ff81d9d223bc952bfdc77befba6909ef3df4bb7b79b68b6e7b432"
     },
     {
       "path": "studio/launcher/player.js",
@@ -513,8 +513,8 @@
     },
     {
       "path": "studio/workbench/bil-designer.js",
-      "bytes": 32894,
-      "sha256": "764bf8778bf11aef9c06001404f4c54a3e5f043ad8002df0d2d83518e6c26de1"
+      "bytes": 35207,
+      "sha256": "6df438b2fec103a59a8607209ee3c0334fadba5a58786763ee4eb97467c047f4"
     },
     {
       "path": "studio/workbench/bil-elements.js",
@@ -603,8 +603,8 @@
     },
     {
       "path": "studio/workbench/clea-draw.js",
-      "bytes": 33754,
-      "sha256": "98fb635d7065691b477c8b2c7ef0991c150e3a5723ac6f5e79443f73fb22739c"
+      "bytes": 34519,
+      "sha256": "d431092d735fbe4d568c270415cb6d55ca7b470a44c244367cf1d9518693a712"
     },
     {
       "path": "studio/workbench/clea-intent-model.js",
@@ -658,8 +658,8 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 17365,
-      "sha256": "123669451a1790e5b5f547678f39be5100cb620ba014e23c6cca0656e13209d2"
+      "bytes": 17441,
+      "sha256": "709882ed42dd689b20b41e2372a90606974363f8438fa7a8762d6c1eb806f031"
     },
     {
       "path": "studio/workbench/intelligence.js",
@@ -772,6 +772,11 @@
       "sha256": "18ef7798fc0bc368fef2d0e0bbec769b991ba09f0ba82c4b2f69b566878623ba"
     },
     {
+      "path": "studio/workbench/standalone.js",
+      "bytes": 10065,
+      "sha256": "95c5aa4467152ac67b10b2319ed1be6a55bec46f05553b4552a5fe8d9a0bb3ba"
+    },
+    {
       "path": "studio/workbench/starters.js",
       "bytes": 3988,
       "sha256": "025fae1eeb706580fa13b46272aa229bbe8194d4214c5ac4c3537373fb756f56"
@@ -793,13 +798,13 @@
     },
     {
       "path": "studio/workbench/studio.css",
-      "bytes": 35283,
-      "sha256": "9a88360599d1c49b7ddbb2f891db27e53639e4627ff121a2dc1ce1c679356c45"
+      "bytes": 35537,
+      "sha256": "71f8518b9d74d73f82e05c87acc16b8bf693f30e28cd2a80a90c0a9d7bf8c2cb"
     },
     {
       "path": "studio/workbench/studio.js",
-      "bytes": 56585,
-      "sha256": "9ca9bdc3c755971173a9496bdcf3449a19c4c81685682ec5099b8a6fc42c75e1"
+      "bytes": 56609,
+      "sha256": "9188a19f51efa77c782ee047b73ed4dfaa1283fd82f6401248047e5f9815a842"
     },
     {
       "path": "studio/workbench/toolchain-ui.js",

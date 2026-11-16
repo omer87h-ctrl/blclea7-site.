@@ -37,7 +37,7 @@ for forbidden in ['main.py','runtime_main.py','clea7/desktop.py','clea7/host.py'
 catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610'
 download_page=(ROOT/'preuzimanja.html').read_text()
 for page in ROOT.glob('*.html'):
- assert 'Web Studio 0.42.2-test · SDK 0.42.2-test · Windows 0.42.2-test · Android 0.42.2-test' in page.read_text(),(page,'stale visible release version')
+ assert 'Web Studio 0.42.3-test · SDK 0.42.2-test · Windows 0.42.2-test · Android 0.42.2-test' in page.read_text(),(page,'stale visible release version')
 for entry in catalog['published']:
  p=ROOT/entry['url'];data=p.read_bytes();assert p.is_relative_to(ROOT) and len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],p
  if entry['key'] in ('sdk','preview'):
@@ -118,3 +118,16 @@ for row in proof['ocrAssets']['core']:
  assert hashlib.sha256((ROOT/'studio/workbench'/Path(row['path']).name).read_bytes()).hexdigest()==row['sha256']
 assert any(x['version']=='0.40.0-test' for x in catalog['android_history'])
 print('PUBLIC_CHECKED_ANDROID0422 exact Core/model assets, completed native touch/OCR observations and published downloads verified')
+
+# The collaboration proposal is an actual exported app and editable project.
+trial=json.loads((ROOT/'release/personal-workspace-01.json').read_text())
+assert trial['proof']['passed'] and len(set(trial['proof']['applications'].values()))==2
+for row in trial['files']['files']:
+ p=(ROOT/'proba/v1'/row['path']);assert p.is_relative_to(ROOT/'proba/v1') and p.is_file()
+ data=p.read_bytes();assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256'],row['path']
+for person,identity in trial['proof']['applications'].items():
+ app=json.loads((ROOT/'proba/v1'/(person+'.studio.clea7')).read_text());assert app['id']==identity and app['state']['bilValues']['projects']==[]
+ html=(ROOT/'proba/v1'/(person+'.html')).read_text();assert "connect-src 'none'" in html and 'class="phone"' not in html and 'standalone-content' in html
+assert 'proba/' in (ROOT/'index.html').read_text()
+assert 'standalone.js?v=' in (ROOT/'studio/workbench/index.html').read_text()
+print('PUBLIC_PERSONAL_TRIAL exact exported artifacts, empty initial records, distinct application identities and shared Studio export verified')
