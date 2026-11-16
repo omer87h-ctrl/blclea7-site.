@@ -1,4 +1,4 @@
-name: Publish exact verified CLEA0.40 native artifacts
+name: Publish exact verified CLEA native artifacts
 on:
   push:
     branches: [work/clea-qwen-unified-027]
@@ -38,7 +38,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           CLEA_APPROVED_TRANSFER_URL: ${{ inputs.transfer_url }}
           CLEA_CHECKED_TARGET: ${{ inputs.target }}
-          CLEA_CHECKED_VARIANT: draw-040
+          CLEA_CHECKED_VARIANT: scenes-042
         run: |
           if [ "$CLEA_CHECKED_TARGET" = android ]; then
             python -m scripts.publish_checked_android_040
