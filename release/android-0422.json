@@ -1,0 +1,148 @@
+{
+  "format": "clea7.android-artifacts/1",
+  "source": "0db40117ddc96238a1a1d1b54eb4f57e7e18a6e6",
+  "actualGradleBuild": true,
+  "actualAndroidEmulatorSenseTest": true,
+  "independentRuntimeInstallAndSenseTest": true,
+  "actualAndroidEmulatorDrawTest": true,
+  "application": "actual keyboard-authored BIL Sense CV and Draw UI3",
+  "signedForPlay": false,
+  "physicalDeviceTested": false,
+  "speechHardwareTested": false,
+  "releaseTargetSdk": 36,
+  "policySource": "https://support.google.com/googleplay/android-developer/answer/11926878",
+  "actualAndroidEmulatorSceneTest": true,
+  "independentRuntimeSceneTest": true,
+  "nativeOcrRecognition": true,
+  "nativeOcrSystemPickerTested": false,
+  "version": "0.42.2-test",
+  "verificationRun": 43791225576,
+  "scene": {
+    "format": "clea7.android-scene-result/1",
+    "package": "com.brzoilokalno.bil.app",
+    "packageSha256": "47e10b97a39321d2230eed6f490c01875d1aa0009819c42b11f5fe28137a36ed",
+    "sourceSha256": "503cda6efba00542227dc0c6dd1979b6d17bb2e16a6b9345c756a75219913a05",
+    "actualStudioBrowserPassed": true,
+    "actualAndroidExecuted": true,
+    "passed": true,
+    "embeddedChecks": [
+      "package-opened",
+      "touchscreen-finger",
+      "physics-wall",
+      "native-svg",
+      "activity-restart"
+    ],
+    "independentChecks": [
+      "package-opened",
+      "touchscreen-finger",
+      "physics-wall",
+      "native-svg",
+      "activity-restart"
+    ],
+    "embeddedRuntimePassed": true,
+    "independentRuntimePassed": true,
+    "activityRestartPassed": true,
+    "nativeInput": "SOURCE_TOUCHSCREEN with TOOL_TYPE_FINGER",
+    "nativeKeyboardClaimed": false,
+    "physicalDeviceTested": false,
+    "nativeOcrChecks": [
+      "local-worker-result",
+      "fixture-text-recognized"
+    ],
+    "nativeOcrRecognition": true,
+    "nativeOcrSystemPickerTested": false,
+    "logSha256": {
+      "embedded": "36dabd195b8056e05548682bda379fbc0617524a0234e98ba79b83019bdf492a",
+      "independent": "e112970b2450f81a82173fefec8279a176fce1a77f54ad7386673ecd14f09f53"
+    }
+  },
+  "ocrAssets": {
+    "format": "clea7.android-ocr-assets/1",
+    "apkSha256": "d49dc44c77d3561c9221a1a3d3fd349f4dedab6fb8c0d4e50ba0863dde1ead58",
+    "models": [
+      {
+        "path": "assets/sense/vendor/ocr/bos.traineddata.gz.clea",
+        "bytes": 1146143,
+        "sha256": "91bd93692051c8a6c33f21117ca1687cf93a759825f255e5821178189f214855"
+      },
+      {
+        "path": "assets/sense/vendor/ocr/eng.traineddata.gz.clea",
+        "bytes": 1967599,
+        "sha256": "f1c22599ed6fd3eb821d87fdb43e09f98b61179a4abe38c43cfca2cdcb9f5ec2"
+      }
+    ],
+    "core": [
+      {
+        "path": "assets/clea7/bil-compiler.js",
+        "bytes": 89715,
+        "sha256": "dd3745f3cc1e93058d761b830438a6f5d460747f2552b243cf24e06686c36601"
+      },
+      {
+        "path": "assets/clea7/bil-runtime.js",
+        "bytes": 91759,
+        "sha256": "bd3a6ac6c537960c5ce466af82917b668b2c7594446eb5579a6df13c6522b340"
+      },
+      {
+        "path": "assets/clea7/clea-core.js",
+        "bytes": 9061,
+        "sha256": "40d7d6c36151894dfb03ebd73ed1a0b9cc5a7638157e575b62bb65447a7a9a70"
+      },
+      {
+        "path": "assets/clea7/working-cache.js",
+        "bytes": 13568,
+        "sha256": "3cc36cc7794f62c771bc1ed662158547b17032b5bc9d6d31454fe77383166f08"
+      }
+    ],
+    "actualRecognitionTestedByThisScript": false
+  },
+  "draw": {
+    "format": "clea7.android-draw-input/1",
+    "package": "com.brzoilokalno.bil.app066a7d58b86a3fce",
+    "packageSha256": "2b475978577db1670c09308d8fa90055f9ccb9f5028ddf6736113f452bd5b102",
+    "sourceSha256": "fffb999c2f9a4ebd524889da6ec35a4e5687c12ab33aba4b9b16ecccccca964f",
+    "actualStudioBrowserPassed": true,
+    "actualAndroidExecuted": true,
+    "embeddedRuntimePassed": true,
+    "independentRuntimePassed": true,
+    "activityRestartPassed": true,
+    "physicalDeviceTested": false
+  },
+  "publicAssets": [
+    {
+      "name": "BL-CLEA7-Runtime-Android-0.42.2-debug.apk",
+      "size_bytes": 5195655,
+      "sha256": "d49dc44c77d3561c9221a1a3d3fd349f4dedab6fb8c0d4e50ba0863dde1ead58"
+    },
+    {
+      "name": "BL-CLEA-Sense-CV-0.42.2-debug.apk",
+      "size_bytes": 276969,
+      "sha256": "af4a88d502fdd8e6e2044232678cdfaed4fc18fd0da472d386bb1165d67364e9"
+    },
+    {
+      "name": "BL-CLEA-Sense-CV-0.42.2-unsigned.aab",
+      "size_bytes": 235919,
+      "sha256": "ece42356f3f3be0501addd823e0309e962d72324df056ba1a77020657d8d4e11"
+    },
+    {
+      "name": "BL-CLEA7-Draw-0.42.2-debug.apk",
+      "size_bytes": 280013,
+      "sha256": "b892e15a6d7d07a6b64749eaf3a7b0fda787d58d738dbeeb417522b323e0dfb9"
+    },
+    {
+      "name": "BL-CLEA7-Scene-0.42.2-debug.apk",
+      "size_bytes": 277313,
+      "sha256": "2e57bd1be52255cb998ebb1d69e7af3fb355cc1e0ab28ea24dba2e412fec54cf"
+    },
+    {
+      "name": "BL-CLEA-Sense-CV-0.42.2.clea7",
+      "size_bytes": 54193,
+      "sha256": "bfdc60224fc199c2056438f99ba9df6603254c353f91c54c9a7df7b40afa8a5d"
+    },
+    {
+      "name": "BL-CLEA7-Draw-0.42.2.clea7",
+      "size_bytes": 59740,
+      "sha256": "2b475978577db1670c09308d8fa90055f9ccb9f5028ddf6736113f452bd5b102"
+    }
+  ],
+  "receiptProcessing": "Observed completed scene and OCR logs reprocessed; replaces only inherited pre-execution actualAndroidExecuted flag."
+}

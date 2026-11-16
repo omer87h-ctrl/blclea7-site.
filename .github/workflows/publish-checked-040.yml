@@ -38,10 +38,10 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           CLEA_APPROVED_TRANSFER_URL: ${{ inputs.transfer_url }}
           CLEA_CHECKED_TARGET: ${{ inputs.target }}
-          CLEA_CHECKED_VARIANT: scenes-042
+          CLEA_CHECKED_VARIANT: scenes-0422
         run: |
           if [ "$CLEA_CHECKED_TARGET" = android ]; then
-            python -m scripts.publish_checked_android_040
+            python -m scripts.publish_checked_android_0422
           elif [ "$CLEA_CHECKED_TARGET" = windows ]; then
             python -m scripts.publish_checked_038
           else
