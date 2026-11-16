@@ -131,3 +131,21 @@ for person,identity in trial['proof']['applications'].items():
 assert 'proba/' in (ROOT/'index.html').read_text()
 assert 'standalone.js?v=' in (ROOT/'studio/workbench/index.html').read_text()
 print('PUBLIC_PERSONAL_TRIAL exact exported artifacts, empty initial records, distinct application identities and shared Studio export verified')
+
+# Collaboration remains gated until the owner explicitly approves visibility.
+collaboration=json.loads((ROOT/'release/personal-workspace-02.json').read_text())
+assert collaboration['proof']['passed'] and len(collaboration['proof']['checks'])==6
+assert collaboration['publicIntakeActive'] is False and collaboration['homepageSectionVisible'] is False
+for row in collaboration['files']['files']:
+ p=ROOT/'proba/v2'/row['path'];data=p.read_bytes();assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
+for person in ('Mila','Armin'):
+ app=json.loads((ROOT/'proba/v2'/(person+'.studio.clea7')).read_text());assert app['name']=='Brzo i Lokalno × COWONDER · '+person and app['state']['bilValues']['projects']==[]
+config=json.loads((ROOT/'proba/service.json').read_text());assert config['active'] is False and config['requestTo']==''
+assert 'id="cowonder" data-collaboration="cowonder" hidden' in (ROOT/'index.html').read_text()
+assert 'Isprobaj ličnu aplikaciju</a>' not in (ROOT/'index.html').read_text()
+assert 'noindex,nofollow' in (ROOT/'proba/index.html').read_text()
+assert 'https://clea7.brzoilokalno.com/proba/' not in (ROOT/'sitemap.xml').read_text()
+assert (ROOT/'studio/workbench/personal-workspace.bil').is_file()
+for row in json.loads((ROOT/'proba/deliveries.json').read_text())['entries']:
+ data=(ROOT/'proba'/row['path']).read_bytes();assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
+print('PUBLIC_COLLABORATION shared identity, real checked exports, hidden public gate and exact delivery catalog verified')

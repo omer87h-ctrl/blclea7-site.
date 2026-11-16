@@ -871,12 +871,26 @@
     }
   ],
   "personal_workspace": {
-    "version": "1",
+    "version": "2",
     "url": "proba/",
-    "package": "proba/v1/BL-CLEA7-Licni-radni-prostor-01.zip",
+    "package": "proba/v2/BL-CLEA7-Licni-radni-prostor-02.zip",
     "webVersion": "0.42.3-test",
     "actualBrowserRestartAndIsolationVerified": true,
+    "homepageVisible": false,
+    "publicIntakeActive": false,
+    "ivanaDesignApproved": false,
     "privateActionsStarted": false,
     "nativeRebuilt": false
-  }
+  },
+  "personal_workspace_history": [
+    {
+      "version": "1",
+      "url": "proba/",
+      "package": "proba/v1/BL-CLEA7-Licni-radni-prostor-01.zip",
+      "webVersion": "0.42.3-test",
+      "actualBrowserRestartAndIsolationVerified": true,
+      "privateActionsStarted": false,
+      "nativeRebuilt": false
+    }
+  ]
 }

@@ -1,0 +1,104 @@
+{
+  "format": "clea7.collaboration-release/1",
+  "publicIntakeActive": false,
+  "homepageSectionVisible": false,
+  "ivanaDesignApproved": false,
+  "privateActionsStarted": false,
+  "nativeRebuilt": false,
+  "proof": {
+    "format": "clea7.personal-workspace-proof/1",
+    "passed": true,
+    "checks": [
+      "Actual collaboration entry compiles a named BIL application through the existing reviewed Studio path; requirements remain in the source and project is saved locally",
+      "Real Studio import keeps identity; Draw changes name; palette/layout controls change checked source while all function/handler source bytes stay identical; actual HTML/project/package downloads captured",
+      "Same Studio project creates a second personal application with a new ID/package and the identical business logic; initial exported records are empty",
+      "Delivered Studio project reopens with the same identity and its real live Runtime",
+      "Standalone exported HTML rejects an impossible date, adds a real fictional client project, stores deadline/next step and completes the task idempotently through real UI events",
+      "Full Chromium process closes/relaunches twice with a clean persistent profile; both personal applications retain their own distinct records and completion state; real app-scoped backup and390px layout pass"
+    ],
+    "applications": {
+      "Mila": "app_0db82bf4af17dda996c3245aabdf63be",
+      "Armin": "app_74affb5be8e0f3bfd293c3e772a3b406"
+    },
+    "sameBusinessLogicSha256": "954a377616265734f40e04eb58c2760a4e900cd30eaa3ba72dfce8cd823f9693",
+    "initialData": "empty; fictional entries created by real UI in disposable QA profile only",
+    "browser": "actual Chromium, clean persistent profile, complete process restart",
+    "transport": "exact exported single HTML files served over local HTTP; no separate runtime server API",
+    "fileProtocol": "not claimed: managed Chromium policy blocks file:// navigation",
+    "physicalAndroidTested": false,
+    "cowonderPartnershipConfirmed": false,
+    "designAuthorship": "original shared CLEA palette; Ivana may supply design after accepting collaboration",
+    "errors": []
+  },
+  "files": {
+    "format": "clea7.personal-delivery/1",
+    "version": "2",
+    "applications": {
+      "Mila": "app_0db82bf4af17dda996c3245aabdf63be",
+      "Armin": "app_74affb5be8e0f3bfd293c3e772a3b406"
+    },
+    "businessLogicSha256": "954a377616265734f40e04eb58c2760a4e900cd30eaa3ba72dfce8cd823f9693",
+    "files": [
+      {
+        "path": "Armin.bil",
+        "bytes": 11507,
+        "sha256": "c29441491a7be833fe945bb38acdeb9bea3148c8895773bee25d2f397d4cd314"
+      },
+      {
+        "path": "Armin.html",
+        "bytes": 482447,
+        "sha256": "cfcb9e17eb821b1d69ac40ad8a623c72b23a7f4c84adb0d7ce2d024754cdfffb"
+      },
+      {
+        "path": "Armin.package.clea7",
+        "bytes": 152210,
+        "sha256": "dff04a614d022400b8a7bd046011abf318e5c028dfad7a490bdc93cf2c18af22"
+      },
+      {
+        "path": "Armin.studio.clea7",
+        "bytes": 298294,
+        "sha256": "15c1c2d81d2d36480edd9d0b9a3b8f88e9bb2e56163105316ff45e3feb497078"
+      },
+      {
+        "path": "Mila-desktop.png",
+        "bytes": 92635,
+        "sha256": "fe91ace4cb3c86dbc22212cd794f512ec4f632d0388fb815686a4693d5046268"
+      },
+      {
+        "path": "Mila-mobile.png",
+        "bytes": 86608,
+        "sha256": "2945e547685366e8922a73b01723032f203201d0c8b85958dbcbfc080b760700"
+      },
+      {
+        "path": "Mila.bil",
+        "bytes": 11507,
+        "sha256": "c29441491a7be833fe945bb38acdeb9bea3148c8895773bee25d2f397d4cd314"
+      },
+      {
+        "path": "Mila.html",
+        "bytes": 482461,
+        "sha256": "31103bdd5feca46d8a885d02320076196e7fb9c4733dccbd43d6f4e349973733"
+      },
+      {
+        "path": "Mila.package.clea7",
+        "bytes": 152229,
+        "sha256": "bfcceca0ae2ae18ddd475ebf2af56847a36c8ab94e96ed4237b8e4de91738039"
+      },
+      {
+        "path": "Mila.studio.clea7",
+        "bytes": 298310,
+        "sha256": "a3bb5551568707e1e83f1dfa4fd2a9c9f86c1bca7004a97146352712f62d5b00"
+      },
+      {
+        "path": "PROCITAJ.txt",
+        "bytes": 2243,
+        "sha256": "00806c7a1259fb691cfda405865aeadbd072531de7df1397bbd8d1f7546869a6"
+      },
+      {
+        "path": "verification.json",
+        "bytes": 1905,
+        "sha256": "cf15c2d549b94c48161a88ae3ce404021a6c904d54023f257ae34d6c94d22e28"
+      }
+    ]
+  }
+}

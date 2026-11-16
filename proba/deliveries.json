@@ -1,0 +1,19 @@
+{
+  "format": "clea7.personal-deliveries/1",
+  "entries": [
+    {
+      "code": "MILA-02",
+      "label": "Mila · lična aplikacija",
+      "path": "v2/Mila.html",
+      "bytes": 482461,
+      "sha256": "31103bdd5feca46d8a885d02320076196e7fb9c4733dccbd43d6f4e349973733"
+    },
+    {
+      "code": "ARMIN-02",
+      "label": "Armin · lična aplikacija",
+      "path": "v2/Armin.html",
+      "bytes": 482447,
+      "sha256": "cfcb9e17eb821b1d69ac40ad8a623c72b23a7f4c84adb0d7ce2d024754cdfffb"
+    }
+  ]
+}
