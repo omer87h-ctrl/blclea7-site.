@@ -617,11 +617,6 @@
       "sha256": "b9571a112c3718e0d75132e9f888ccbfc14100a13638336bb52910210d495e0b"
     },
     {
-      "path": "studio/workbench/collaboration.js",
-      "bytes": 4363,
-      "sha256": "01b972d741ba39f3e87d2113ceac3a732d993bf6293bfb086aa0cd899903e9fb"
-    },
-    {
       "path": "studio/workbench/consumer.js",
       "bytes": 2683,
       "sha256": "0a53a62faeef6057b091a9510d7c86a1c6cfad80d86b14843b563b52e9facf18"
@@ -663,8 +658,8 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 17561,
-      "sha256": "3af30590d615b7798d6eeaf31f373cb8aa5c3da5768912cc49cf089172d6d999"
+      "bytes": 17441,
+      "sha256": "1b08fa452158a39adcd7b2734a6b2152d7c4a794c4d2d228baf8a6bd89780548"
     },
     {
       "path": "studio/workbench/intelligence.js",
@@ -685,16 +680,6 @@
       "path": "studio/workbench/package.js",
       "bytes": 18599,
       "sha256": "4ffed4f56a0adf773c01b7d2dc17df3cdc4e5d9bd114fe0bbe9062c408876f96"
-    },
-    {
-      "path": "studio/workbench/personal-workspace.bil",
-      "bytes": 11253,
-      "sha256": "139763f870014b7e88d2ce7431f52070584b67db67fedd745053e9a7d9dbffd0"
-    },
-    {
-      "path": "studio/workbench/personalisation.js",
-      "bytes": 2257,
-      "sha256": "7650182cc832f4c0c31f4ad9bb8ae7acd1826605e71647a4862c3c2eede57282"
     },
     {
       "path": "studio/workbench/plan.js",

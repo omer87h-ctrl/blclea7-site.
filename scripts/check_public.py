@@ -119,36 +119,11 @@ for row in proof['ocrAssets']['core']:
 assert any(x['version']=='0.40.0-test' for x in catalog['android_history'])
 print('PUBLIC_CHECKED_ANDROID0422 exact Core/model assets, completed native touch/OCR observations and published downloads verified')
 
-# The collaboration proposal is an actual exported app and editable project.
-trial=json.loads((ROOT/'release/personal-workspace-01.json').read_text())
-assert trial['proof']['passed'] and len(set(trial['proof']['applications'].values()))==2
-for row in trial['files']['files']:
- p=(ROOT/'proba/v1'/row['path']);assert p.is_relative_to(ROOT/'proba/v1') and p.is_file()
- data=p.read_bytes();assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256'],row['path']
-for person,identity in trial['proof']['applications'].items():
- app=json.loads((ROOT/'proba/v1'/(person+'.studio.clea7')).read_text());assert app['id']==identity and app['state']['bilValues']['projects']==[]
- html=(ROOT/'proba/v1'/(person+'.html')).read_text();assert "connect-src 'none'" in html and 'class="phone"' not in html and 'standalone-content' in html
-assert 'proba/' in (ROOT/'index.html').read_text()
-assert 'standalone.js?v=' in (ROOT/'studio/workbench/index.html').read_text()
-print('PUBLIC_PERSONAL_TRIAL exact exported artifacts, empty initial records, distinct application identities and shared Studio export verified')
-
-# Collaboration remains gated until the owner explicitly approves visibility.
-collaboration=json.loads((ROOT/'release/personal-workspace-02.json').read_text())
-assert collaboration['proof']['passed'] and len(collaboration['proof']['checks'])==6
-assert collaboration['publicIntakeActive'] is False and collaboration['homepageSectionVisible'] is False
-for row in collaboration['files']['files']:
- p=ROOT/'proba/v2'/row['path'];data=p.read_bytes();assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
-for person in ('Mila','Armin'):
- app=json.loads((ROOT/'proba/v2'/(person+'.studio.clea7')).read_text());assert app['name']=='Brzo i Lokalno × COWONDER · '+person and app['state']['bilValues']['projects']==[]
-config=json.loads((ROOT/'proba/service.json').read_text());assert config['active'] is False and config['requestTo']==''
-assert 'id="cowonder" data-collaboration="cowonder" hidden' in (ROOT/'index.html').read_text()
-assert 'Isprobaj ličnu aplikaciju</a>' not in (ROOT/'index.html').read_text()
-assert 'noindex,nofollow' in (ROOT/'proba/index.html').read_text()
-assert 'https://clea7.brzoilokalno.com/proba/' not in (ROOT/'sitemap.xml').read_text()
-assert (ROOT/'studio/workbench/personal-workspace.bil').is_file()
-for row in json.loads((ROOT/'proba/deliveries.json').read_text())['entries']:
- data=(ROOT/'proba'/row['path']).read_bytes();assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
-print('PUBLIC_COLLABORATION shared identity, real checked exports, hidden public gate and exact delivery catalog verified')
-
-assert "Mila" not in (ROOT/"proba/index.html").read_text()
-assert '<fieldset id="request-fields" disabled>' in (ROOT/"proba/index.html").read_text()
+# Keep the preview unpublished until the owner requests publication.
+assert not (ROOT/'proba').exists()
+assert 'proba/' not in (ROOT/'index.html').read_text()
+assert 'proba/' not in (ROOT/'sitemap.xml').read_text()
+assert 'personal_workspace' not in catalog and 'personal_workspace_history' not in catalog
+workbench=(ROOT/'studio/workbench/index.html').read_text()
+assert 'collaboration.js' not in workbench
+assert 'standalone.js?v=' in workbench
