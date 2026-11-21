@@ -71,5 +71,13 @@
     "passed": true,
     "actualNeuralInference": false
   },
-  "sdkSourceMirrorFiles": 128
+  "sdkSourceMirrorFiles": 128,
+  "webLayoutPatch": {
+    "sourceCommit": "2f5fca38f274821b34cd57fcba0218026b990c35",
+    "drawFillsParent": true,
+    "actualBrowserGroups": 4,
+    "publicRegressionTestsPassed": 73,
+    "immutableSdkUnchanged": true,
+    "neuralInference": false
+  }
 }

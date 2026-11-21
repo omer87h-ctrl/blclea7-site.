@@ -11,7 +11,7 @@
     {
       "path": "studio/launcher/player.html",
       "bytes": 3928,
-      "sha256": "bdd343e36a3dc19ba0791c2759820491198d454e96bcfbe44d0d539f9024eee8"
+      "sha256": "68b6e3a3c83c89e7d5a3eed287b331dcd1bdb5fdceb286043d090dca3d356289"
     },
     {
       "path": "studio/launcher/player.js",
@@ -41,7 +41,7 @@
     {
       "path": "studio/workbench/index.html",
       "bytes": 17443,
-      "sha256": "d4ebf43eb1aaf71fdc7794955887a63c4960b36ab9aafb42d4d0ea3769993dc7"
+      "sha256": "c18168a1c02418bcee004231bc9a1ac7072d1fff841bbd0c7ba4412cbcf53e37"
     },
     {
       "path": "studio/workbench/package.js",
