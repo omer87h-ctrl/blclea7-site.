@@ -1,0 +1,14 @@
+BIL "Moja funkcionalna aplikacija".
+
+posao pamti naslov kao tekst "Moja radionica".
+
+posao pamti gotov kao logiku ne.
+
+posao izvodi status iz gotov:
+    ne daje "U toku";
+    da daje "Završeno".
+
+zavrsi nad posao postavlja gotov na da.
+posao nudi "Dovrši posao" kao zavrsi.
+
+posao prikazuje naslov kao "Naziv posla".

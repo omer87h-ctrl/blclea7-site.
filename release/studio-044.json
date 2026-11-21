@@ -1,0 +1,75 @@
+{
+  "format": "clea7.core5-acceptance/1",
+  "webVersion": "0.44.0-test",
+  "coreVersion": 5,
+  "python": {
+    "run": 410,
+    "passed": 408,
+    "skipped": 2,
+    "skipReason": "Windows DPAPI checks on Linux"
+  },
+  "node": {
+    "objectGrammarGroups": 12,
+    "core3Groups": 31,
+    "operatorGroups": 10,
+    "compositionGroups": 6,
+    "variedCompositionPrograms": 20
+  },
+  "actualBrowser": {
+    "objectGrammarGroups": 4,
+    "freeCompositionGroups": 4,
+    "fullProcessRestart": true,
+    "independentClea7Runtime": true,
+    "standaloneHtml": true,
+    "neuralResponsesUsed": false
+  },
+  "sdk": {
+    "version": "0.44.0-test",
+    "entries": 160,
+    "bytes": 5780401,
+    "sha256": "1e9e66e6a50281652d10f24352a441313cb6d7531464c22785e65d310d7e9c3e",
+    "extractedCliVerified": true,
+    "sourceLicencesPreserved": true
+  },
+  "nativeRebuilt": false,
+  "hpInferenceVerified": false,
+  "newWeightsTrained": false,
+  "quality70BVerified": false,
+  "wholeMasterCompleted": false,
+  "privateActionsStarted": false,
+  "collaborationPreviewRestored": false,
+  "sourceCommit": "8ae1eb1164925c2e68ce5dfdfcc765935723d508",
+  "preservedPublicBase": "212ab26842608abad43b13b2273027d13287aaef",
+  "publicAIEnabled": false,
+  "tools": 23,
+  "toolsRevision": 3,
+  "example": [
+    {
+      "path": "downloads/BIL-Recenice-0.44.bil",
+      "bytes": 319,
+      "sha256": "8aa73a84e0ad33bc0dce3c0090e9d5d46cf478e49644c11871b53ca060bf4827"
+    },
+    {
+      "path": "downloads/BIL-Recenice-0.44.clea7",
+      "bytes": 9727,
+      "sha256": "8a87034e37a59b9373b54bd3c3f897de1b67eb9a814b5fe39dfa83b738e8f2bf"
+    },
+    {
+      "path": "downloads/BIL-Recenice-0.44.html",
+      "bytes": 392464,
+      "sha256": "1a41e8235a054a14efc71c21969b020c8bef1ea5b0a480b75034a230feebbde8"
+    }
+  ],
+  "publicPython": {
+    "run": 73,
+    "passed": 73,
+    "skipped": 0
+  },
+  "stagedPublicBrowser": {
+    "objectGrammarGroups": 4,
+    "existingOperatorGroups": 5,
+    "passed": true,
+    "actualNeuralInference": false
+  },
+  "sdkSourceMirrorFiles": 128
+}

@@ -4,7 +4,7 @@
  * No DOM, filesystem, shell, networking or second evaluator lives here.
  */
 (function(scope){
-const VERSION='0.42.0',FORMAT='clea7.core/1';
+const VERSION='0.44.0',FORMAT='clea7.core/1';
 const own=(value,key)=>Object.prototype.hasOwnProperty.call(value,key);
 const clone=value=>JSON.parse(JSON.stringify(value));
 const frozen=value=>{if(value&&typeof value==='object'){for(const child of Object.values(value))frozen(child);Object.freeze(value);}return value;};

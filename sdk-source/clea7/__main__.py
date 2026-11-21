@@ -36,7 +36,7 @@ def main():
     bil=commands.add_parser('bil');bil.add_argument('action',choices=['check','features','compile','run','verify','package']);bil.add_argument('input');bil.add_argument('--output');bil.add_argument('--id',default='bil_program');bil.add_argument('--name',default='Moja BIL aplikacija');bil.add_argument('--flow',default='main');bil.add_argument('--target',choices=['auto','application2','application5','application6','application7'],default='auto',help='auto selects the checked ABI; application2 requests lossless lowering; old format labels remain auto aliases');bil.add_argument('--targets',default=None)
     projects=commands.add_parser('project',help='Lokalni projekt: new, check, info, build, run i test.')
     project_actions=projects.add_subparsers(dest='project_action',required=True)
-    create=project_actions.add_parser('new');create.add_argument('directory');create.add_argument('--template',choices=['quote','derived'],default='quote')
+    create=project_actions.add_parser('new');create.add_argument('directory');create.add_argument('--template',choices=['quote','derived','objects'],default='quote')
     for action in ('check','info','build','run','test'):
         command=project_actions.add_parser(action);command.add_argument('directory',nargs='?',default='.')
         if action=='build':command.add_argument('--output')

@@ -10,6 +10,18 @@ def cli(*args):
                           text=True,capture_output=True,timeout=30)
 
 class PublicBILSDKTests(unittest.TestCase):
+    def test_current_sentence_source_and_package_execute_independently(self):
+        result=cli('bil','run','sdk/examples/bil/object-sentences.bil','--flow','zavrsavanje')
+        self.assertEqual(result.returncode,0,result.stderr)
+        value=json.loads(result.stdout)
+        self.assertEqual(value['state']['zadatak']['status'],'Završeno')
+        self.assertEqual(value['features']['minimumRuntime'],'0.44.0')
+        with tempfile.TemporaryDirectory() as folder:
+            output=Path(folder)/'objects.clea7'
+            result=cli('bil','package','sdk/examples/bil/object-sentences.bil','--targets','browser','--output',str(output))
+            self.assertEqual(result.returncode,0,result.stderr)
+            self.assertEqual(json.loads(output.read_text())['manifest']['runtime'],'0.44.0')
+
     def test_primary_sdk_label_size_hash_and_target_match_the_actual_archive(self):
         release=next(x for x in json.loads((ROOT/'releases.json').read_text())['published'] if x['key']=='sdk')
         data=(ROOT/release['url']).read_bytes()

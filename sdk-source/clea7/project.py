@@ -161,8 +161,8 @@ def _request(project, action, **options):
 
 
 def create(value, template='quote'):
-    if template not in ('quote', 'derived'):
-        raise UserError('Podržani projektni primjeri su quote i derived.')
+    if template not in ('quote', 'derived', 'objects'):
+        raise UserError('Podržani projektni primjeri su quote, derived i objects.')
     target = Path(value).absolute()
     if target.exists() or target.is_symlink():
         raise UserError('Projekt već postoji; postojeće datoteke nisu promijenjene.')
@@ -173,8 +173,14 @@ def create(value, template='quote'):
         app_id = 'app_' + app_id
     manifest = {'format': FORMAT, 'id': app_id, 'name': target.name[:100], 'version': 1, 'entry': 'app.bil', 'targets': ['browser'], 'tests': 'tests.json', 'dependencies': []}
     steps = ([{'flow': 'calculate', 'expect': {'values': {'total': 40}, 'screen': 'quote'}}, {'flow': 'increase', 'expect': {'values': {'quantity': 3}}}, {'flow': 'calculate', 'expect': {'values': {'total': 60}}}, {'restart': True, 'expect': {'values': {'quantity': 3, 'total': 60}, 'screen': 'quote'}}] if template == 'quote' else [{'flow': 'increase', 'expect': {'values': {'quantity': 3, 'total': 60}, 'screen': 'quote'}}, {'restart': True, 'expect': {'values': {'quantity': 3, 'total': 60}, 'screen': 'quote'}}])
+    source = QUOTE if template == 'quote' else DERIVED
+    if template == 'objects':
+        source=(ROOT/'sdk/examples/bil/object-sentences.bil').read_text(encoding='utf-8')
+        source='BIL '+json.dumps(manifest['name'],ensure_ascii=False)+'.\n'+source.split('\n',1)[1]
+        state={'zadatak':{'naslov':'Pripremi ponudu','zavrsen':True,'status':'Završeno'}}
+        steps=[{'flow':'zavrsavanje','expect':{'values':state,'screen':'objects'}},{'restart':True,'expect':{'values':state,'screen':'objects'}}]
     suite = {'format': 'clea7.project-tests/1', 'cases': [{'name': 'Stvarni izračun i ponovno otvaranje', 'steps': steps}]}
-    files = {MANIFEST: json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', 'app.bil': QUOTE if template == 'quote' else DERIVED, 'tests.json': json.dumps(suite, ensure_ascii=False, indent=2) + '\n', 'README.md': '# ' + manifest['name'] + '\n\nOriginalni lokalni CLEA projekt.\n\npython -m clea7 project check .\npython -m clea7 project run .\npython -m clea7 project test .\npython -m clea7 project build . --output dist/' + app_id + '.clea7\n\nZa Python modul treba biti instaliran ili dostupan CLEA SDK. Nema automatskog preuzimanja zavisnosti.\n'}
+    files = {MANIFEST: json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', 'app.bil': source, 'tests.json': json.dumps(suite, ensure_ascii=False, indent=2) + '\n', 'README.md': '# ' + manifest['name'] + '\n\nOriginalni lokalni CLEA projekt.\n\npython -m clea7 project check .\npython -m clea7 project run .\npython -m clea7 project test .\npython -m clea7 project build . --output dist/' + app_id + '.clea7\n\nZa Python modul treba biti instaliran ili dostupan CLEA SDK. Nema automatskog preuzimanja zavisnosti.\n'}
     created = []
     try:
         target.mkdir()

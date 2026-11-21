@@ -202,8 +202,12 @@
     const body={question:question.trim(),history:authoring||isolateHistory?[]:history.slice(-8)};
     if(authoring!==undefined){
      if(capabilities.bilAuthoring!==true||!authoring||authoring.format!=='bil.author/1'||!['create','change'].includes(authoring.mode))throw fail('not_configured');
-     if(authoring.mode==='change'&&(authoring.sourceApproved!==true||typeof authoring.source!=='string'))throw fail('invalid_request');
-     if(authoring.mode==='create'&&('source' in authoring||'sourceApproved' in authoring))throw fail('invalid_request');
+     if(authoring.mode==='change'){
+      const source=typeof authoring.source==='string',structure=!!authoring.structure;
+      if(authoring.sourceApproved!==true||source===structure)throw fail('invalid_request');
+      if(structure&&(capabilities.studioProjectContext!=='clea7.studio-context/1'||authoring.representation!=='tools'||authoring.structure.format!=='clea7.studio-context/1'))throw fail('invalid_request');
+     }
+     if(authoring.mode==='create'&&('source' in authoring||'structure' in authoring||'sourceApproved' in authoring))throw fail('invalid_request');
      if(webQuery!==undefined)throw fail('invalid_request');
      body.authoring=JSON.parse(JSON.stringify(authoring));
     }

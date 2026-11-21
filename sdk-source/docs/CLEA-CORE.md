@@ -1,3 +1,5 @@
+> Current additive Core5 / Runtime0.44: [BIL sentence grammar](BIL-OBJECT-GRAMMAR.md). The older contract sections below retain their historical scope. Classic BIL remains supported.
+
 # CLEA Core 0.18
 
 Core je zajednički, platformski nezavisan ugovor `clea7.core/1`.

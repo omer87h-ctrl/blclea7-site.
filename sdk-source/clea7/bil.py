@@ -39,7 +39,7 @@ def core_features(project):
     markers are verified again by that authoritative compiler.
     """
     ir=project.get('bil',{}).get('ir',{}) if isinstance(project,dict) else {}
-    used=set()
+    used={'object.sentences'} if isinstance(ir.get('objects'),dict) else set()
     def inspect(value):
         if isinstance(value,list):
             for child in value:inspect(child)
@@ -56,9 +56,41 @@ def core_features(project):
     for value in (ir.get('main',[]),ir.get('functions',{}),ir.get('handlers',{}),ir.get('ui',{})):inspect(value)
     for item in ir.get('sourceMap',[]):
         if isinstance(item,dict) and item.get('coreFeature') in ('guard','derive','while'):used.add(item['coreFeature'])
-    version=4 if any(x.startswith('scene.') for x in used) else 3 if used & (CORE3_OPERATIONS|{'derive','while'}) else 2 if used else 1
+    version=5 if 'object.sentences' in used else 4 if any(x.startswith('scene.') for x in used) else 3 if used & (CORE3_OPERATIONS|{'derive','while'}) else 2 if used else 1
     return {'format':'bil.core.features/1','version':version,
-            'minimumRuntime':'0.42.0' if version==4 else '0.18.0' if version==3 else '0.17.0' if used else '0.6.0','used':sorted(used)}
+            'minimumRuntime':'0.44.0' if version==5 else '0.42.0' if version==4 else '0.18.0' if version==3 else '0.17.0' if used else '0.6.0','used':sorted(used)}
+
+def validate_objects(ir):
+    """Validate sentence-profile metadata; the shared JS compiler owns semantics."""
+    contract=ir.get('objects')
+    if contract is None:return
+    if not isinstance(contract,dict) or set(contract)!={'format','title','objects'} or contract['format']!='bil.objects/1' or not isinstance(contract['title'],str) or not 1<=len(contract['title'].strip())<=200 or not isinstance(contract['objects'],list) or not 0<=len(contract['objects'])<=24:
+        raise UserError('Neispravan ugovor BIL objekata.')
+    if ir['format']!='bil.ir/2' or ir['imports'] or ir['functions']:
+        raise UserError('Gramatika objekata zahtijeva vlastiti ograničeni profil.')
+    owners=set();symbols=set();actions=set()
+    for obj in contract['objects']:
+        if not isinstance(obj,dict) or set(obj)!={'name','fields','actions'} or not safe(obj['name']) or obj['name'] in owners or not isinstance(obj['fields'],list) or not 1<=len(obj['fields'])<=32 or not isinstance(obj['actions'],list):
+            raise UserError('Neispravan BIL objekat.')
+        owners.add(obj['name']);fields={};mutable=set()
+        for field in obj['fields']:
+            if not isinstance(field,dict) or set(field)!={'name','symbol','derived','label'} or not safe(field['name']) or field['name'] in fields or not safe(field['symbol']) or field['symbol'] in symbols or type(field['derived']) is not bool or not isinstance(field['label'],str) or not 1<=len(field['label'].strip())<=200:
+                raise UserError('Neispravno polje BIL objekta.')
+            symbol=ir['globals'].get(field['symbol'])
+            if not isinstance(symbol,dict) or symbol.get('mutable') is not (not field['derived']):
+                raise UserError('Polje objekta ne odgovara provjerenom stanju.')
+            fields[field['name']]=symbol.get('type');symbols.add(field['symbol'])
+            if not field['derived']:mutable.add(field['symbol'])
+        if ir['globals'].get(obj['name'])!={'type':{'record':fields},'mutable':False}:
+            raise UserError('Javni objekat mora biti provjeren izvedeni zapis.')
+        for action in obj['actions']:
+            if not safe(action) or action in actions or action not in ir['handlers']:
+                raise UserError('Neispravna imenovana radnja objekta.')
+            actions.add(action)
+            if any(not isinstance(node,dict) or node.get('op')!='STORE' or node.get('target',{}).get('op')!='LOAD' or node['target'].get('name') not in mutable for node in ir['handlers'][action]):
+                raise UserError('Radnja može mijenjati samo vlastita zapamćena polja.')
+    if owners & symbols or owners & actions or symbols & actions:
+        raise UserError('Identiteti objekata, polja i radnji moraju biti razdvojeni.')
 
 def validate_derive_markers(ir):
     """Check the new bounded native metadata, not a second source compiler.
@@ -118,6 +150,9 @@ def validate_derive_markers(ir):
         if isinstance(value,list):
             for child in value:inspect(child)
         elif isinstance(value,dict):
+            if value.get('op')=='SELECT':
+                if not ir.get('objects') or set(value)!={'op','type','condition','whenTrue','whenFalse','loc'} or not isinstance(value['condition'],dict) or value['condition'].get('type')!='Boolean' or not all(isinstance(value[k],dict) and value[k].get('type')==value['type'] for k in ('whenTrue','whenFalse')):
+                    raise UserError('Neispravan tipizirani izbor BIL objekta.')
             if 'op' in value and 'id' in value:
                 if value['op']=='LOOP_WHILE':
                     required={'op','id','loc','condition','limit','body','coreFeature'}
@@ -254,7 +289,7 @@ def validate_program(project):
     bundle=project.get('bil')
     if not isinstance(bundle,dict) or set(bundle)!={'format','source','ir'} or bundle['format']!='bil.program/'+str(version):raise UserError('Neispravna BIL omotnica.')
     source=bundle['source'];ir=bundle['ir']
-    if not isinstance(source,str) or len(source)>131072 or not isinstance(ir,dict) or set(ir)!=({'format','language','globals','records','imports','functions','handlers','main','controls','sourceMap'}|({'ui'} if extended else set())|({'remote'} if remote else set())|({'events'} if asynchronous else set())) or ir['format']!='bil.ir/'+str(version) or ir['language']!='bil/'+str(version):raise UserError('Nepodržan BIL ugovor.')
+    if not isinstance(source,str) or len(source)>131072 or not isinstance(ir,dict) or set(ir)!=({'format','language','globals','records','imports','functions','handlers','main','controls','sourceMap'}|({'ui'} if extended else set())|({'remote'} if remote else set())|({'events'} if asynchronous else set())|({'objects'} if 'objects' in ir else set())) or ir['format']!='bil.ir/'+str(version) or ir['language']!='bil/'+str(version):raise UserError('Nepodržan BIL ugovor.')
     rich_ui=isinstance(ir.get('ui'),dict) and ir['ui'].get('format') in ('bil.ui/2','bil.ui/3')
     for key in ('globals','records','functions','handlers'):
         if not isinstance(ir[key],dict) or len(ir[key])>(4224 if rich_ui and key=='handlers' else 128 if rich_ui and key in ('globals','functions') else 192 if extended and key=='handlers' else 64) or any(not safe(k) for k in ir[key]):raise UserError('Neispravni BIL simboli.')
@@ -274,6 +309,7 @@ def validate_program(project):
             for v in value:walk(v,depth+1)
         elif value is not None and type(value) not in (str,int,float,bool):raise UserError('BIL treba podatkovne vrijednosti.')
     walk(ir)
+    validate_objects(ir)
     validate_derive_markers(ir)
     completion_type={'record':{'requestId':'Text','sourceId':'Text','backend':'Text','operation':'Text'},'name':'RemoteCompletion'}
     remote_failure_type={'record':{'code':'Text','message':'Text','uncertain':'Boolean'},'name':'RemoteFailure'}

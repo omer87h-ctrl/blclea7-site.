@@ -14,3 +14,8 @@ sense/vendor/ocr/** -text
 *.webp binary
 *.woff2 binary
 *.zip binary
+
+# Hash-verified historical/source copies retain their exact final blank line.
+release/native-core-0422/bil-compiler.js whitespace=-blank-at-eof
+release/native-core-0422/bil-runtime.js whitespace=-blank-at-eof
+sdk-source/web/workbench/bil-designer.js whitespace=-blank-at-eof
