@@ -81,3 +81,6 @@ body.studio-shell{margin:0;background:#080e16;font-size:13px;min-width:0}.studio
 .studio-shell #draw.panel,#draw.panel{grid-template-columns:minmax(0,1fr)}
 #draw-object-composition{min-width:0}#draw-object-composition>label{display:grid;gap:7px;margin:14px 0}#draw-object-composition input,#draw-object-composition select{width:100%;min-width:0}#draw-object-composition>p{line-height:1.6;overflow-wrap:anywhere}
 #draw-object-preview{min-width:0;padding:16px}#draw-object-preview>p{color:var(--muted);font-size:12px}#draw-object-preview .bil-group{margin:16px 0}
+
+/* Auto margins otherwise shrink a grid-item Draw article to its content. */
+#draw-studio.clea-draw{width:100%;box-sizing:border-box}
