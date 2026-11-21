@@ -29,8 +29,9 @@ const scriptSafe=value=>value.replace(/<\/script/gi,'<\\/script');
 function themeCSS(app){
  const ui=app.bil?.ir?.ui,screen=ui?.screens.find(x=>x.id===ui.start),root=screen?.children?.[0];
  const hex=value=>typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value)?value:null;
- const bg=hex(root?.style?.background)||'#f5f4f0',ink=hex(root?.style?.color)||'#202b36';
+ const bg=hex(root?.style?.background)||'#f5f4f0';
  const rgb=[1,3,5].map(i=>parseInt(bg.slice(i,i+2),16)),dark=(rgb[0]*299+rgb[1]*587+rgb[2]*114)/1000<128;
+ const ink=hex(root?.style?.color)||(dark?'#f5f3f0':'#202b36');
  return ':root{color-scheme:'+(dark?'dark':'light')+';--bg:'+bg+';--ink:'+ink+';--surface:'+(dark?'#151d28':'#ffffff')+';--line:'+(dark?'#303944':'#dedfdc')+';--muted:'+(dark?'#b9bdc6':'#63707c')+';--accent:'+(dark?'#ff9b5d':'#214ed3')+'}'+
  '.standalone-tools summary,.standalone-tools>div,.standalone-content input,.standalone-content select,.standalone-content textarea,.standalone-content .bil-collection-card{background:var(--surface);color:var(--ink);border-color:var(--line)!important}'+
  '.standalone-content .bil-collection-card dt{color:var(--muted)}.standalone-content .bil-collection-card button,.standalone-tools button{background:var(--surface);color:var(--ink);border-color:var(--line)}'+

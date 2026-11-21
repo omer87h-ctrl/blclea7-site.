@@ -34,10 +34,12 @@ assert 'ILDuA90WSVz2FTZdmWleQ0lzbGCLmFndZ6wlT5V74Ow' in (ROOT/'index.html').read
 assert not list(ROOT.rglob('session.json')) and not list(ROOT.rglob('identity.json'))
 for forbidden in ['main.py','runtime_main.py','clea7/desktop.py','clea7/host.py','clea7/cloud_ai.py','clea7/ai.py']:
  assert not (ROOT/'sdk-source'/forbidden).exists(),forbidden
-catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['source_commit']=='980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610'
+catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['catalogue_baseline']['source_commit']=='980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610'
+assert catalog['version']==catalog['web_current']['version']==catalog['sdk_current']['version']=='0.44.0-test'
+assert catalog['source_commit']==catalog['web_current']['source_commit']==catalog['sdk_current']['source_commit']
 download_page=(ROOT/'preuzimanja.html').read_text()
 for page in ROOT.glob('*.html'):
- assert 'Web Studio 0.42.3-test · SDK 0.42.2-test · Windows 0.42.2-test · Android 0.42.2-test' in page.read_text(),(page,'stale visible release version')
+ assert 'Web Studio 0.44.0-test · SDK 0.44.0-test · Windows 0.42.2-test · Android 0.42.2-test' in page.read_text(),(page,'stale visible release version')
 for entry in catalog['published']:
  p=ROOT/entry['url'];data=p.read_bytes();assert p.is_relative_to(ROOT) and len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],p
  if entry['key'] in ('sdk','preview'):
@@ -75,7 +77,7 @@ assert 'href="razgovor/"' in (ROOT/'ai.html').read_text()
 assert 'studio.js' not in standalone and 'clea-chat' in standalone
 print('PUBLIC_ORIGINAL_CHAT model, Studio overlay and exact source hashes verified')
 
-current=catalog['native_current']
+current=catalog['legacy_native_037']
 assert current['state']=='published' and current['version']=='0.37.0-test'
 assert current['publication_run']==42505458540 and current['production_signed'] is False
 for a in current['assets']:
@@ -114,10 +116,15 @@ scene=proof['scene'];required={'package-opened','touchscreen-finger','physics-wa
 assert scene['actualAndroidExecuted'] and set(scene['embeddedChecks'])==required and set(scene['independentChecks'])==required
 assert proof['nativeOcrRecognition'] and set(scene['nativeOcrChecks'])=={'local-worker-result','fixture-text-recognized'}
 assert proof['nativeOcrSystemPickerTested'] is False and len(proof['ocrAssets']['models'])==2
+web_core_changes=[]
 for row in proof['ocrAssets']['core']:
- assert hashlib.sha256((ROOT/'studio/workbench'/Path(row['path']).name).read_bytes()).hexdigest()==row['sha256']
+ name=Path(row['path']).name;current=ROOT/'studio/workbench'/name
+ if hashlib.sha256(current.read_bytes()).hexdigest()!=row['sha256']:
+  web_core_changes.append(name);current=ROOT/'release/native-core-0422'/name
+ assert current.stat().st_size==row['bytes'] and hashlib.sha256(current.read_bytes()).hexdigest()==row['sha256']
+assert set(web_core_changes)=={'bil-compiler.js','bil-runtime.js','clea-core.js'}
 assert any(x['version']=='0.40.0-test' for x in catalog['android_history'])
-print('PUBLIC_CHECKED_ANDROID0422 exact Core/model assets, completed native touch/OCR observations and published downloads verified')
+print('PUBLIC_CHECKED_ANDROID0422 historical exact Core/model snapshots retained; new web Core5 is not new native verification')
 
 # Keep the preview unpublished until the owner requests publication.
 assert not (ROOT/'proba').exists()
@@ -127,3 +134,27 @@ assert 'personal_workspace' not in catalog and 'personal_workspace_history' not 
 workbench=(ROOT/'studio/workbench/index.html').read_text()
 assert 'collaboration.js' not in workbench
 assert 'standalone.js?v=' in workbench
+
+proof=json.loads((ROOT/'release/studio-044.json').read_text())
+assert proof['sourceCommit']==catalog['source_commit'] and proof['coreVersion']==5
+assert proof['python']=={'run':410,'passed':408,'skipped':2,'skipReason':'Windows DPAPI checks on Linux'}
+assert proof['actualBrowser']['objectGrammarGroups']==4 and proof['actualBrowser']['freeCompositionGroups']==4
+assert proof['hpInferenceVerified'] is False and proof['quality70BVerified'] is False and proof['nativeRebuilt'] is False
+sdk=catalog['sdk_current'];data=(ROOT/sdk['url']).read_bytes()
+assert len(data)==sdk['size_bytes']==5780401 and hashlib.sha256(data).hexdigest()==sdk['sha256']
+with zipfile.ZipFile(ROOT/sdk['url']) as archive:
+ assert len(archive.namelist())==160 and 'docs/BIL-OBJECT-GRAMMAR.md' in archive.namelist()
+ assert archive.testzip() is None
+for row in proof['example']:
+ data=(ROOT/row['path']).read_bytes();assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
+assert 'objectProgram()' in (ROOT/'studio/workbench/bil-compiler.js').read_text()
+assert "case'SELECT'" in (ROOT/'studio/workbench/bil-runtime.js').read_text()
+assert 'studio-start-grammar' in (ROOT/'studio/workbench/studio.js').read_text()
+print('PUBLIC_CORE5 actual source/SDK/example receipts and preserved public removal verified; no HP/70B/native claim')
+
+mirror=json.loads((ROOT/'sdk-source/SOURCE-STATUS.json').read_text())
+assert mirror['version']=='0.44.0-test' and mirror['archiveSha256']==sdk['sha256']
+for row in mirror['files']:
+ path=ROOT/'sdk-source'/row['path'];data=path.read_bytes()
+ assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
+print('PUBLIC_SDK_SOURCE current curated CLI source mirror hashes verified')

@@ -97,6 +97,11 @@
       "sha256": "f4798604330d115f59413d69fd5ca5e139730101ed03c8ee58b1672a1c9b5ddd"
     },
     {
+      "path": "sense/downloads/BL-CLEA7-Core-SDK-0.44.0-test.zip",
+      "bytes": 5780401,
+      "sha256": "1e9e66e6a50281652d10f24352a441313cb6d7531464c22785e65d310d7e9c3e"
+    },
+    {
       "path": "sense/downloads/SDK-CORE-2.md",
       "bytes": 4071,
       "sha256": "3c3ae2e21be65bc8cd01908bb817c6a3561923edd33af690182f13d24a13d9b5"
@@ -134,12 +139,12 @@
     {
       "path": "sense/index.html",
       "bytes": 26633,
-      "sha256": "22ee3a9f21f41699dee04afcff38e7707542a1422714781faeb4dbe00dcd46c6"
+      "sha256": "f88a828723ef1f66a445d766dd03d7603d85979a0c72e244b499c81733381b39"
     },
     {
       "path": "sense/offline-assets.js",
       "bytes": 7890,
-      "sha256": "b90de1cd34a67424bd6b6761874da1ac1722dd79a7aa0aa2f90f2678c6918613"
+      "sha256": "978248d5459ce5b12c7efe0277211cc22be58899d9d321b2a35524af0ce28b60"
     },
     {
       "path": "sense/sense-authoring.js",
@@ -449,7 +454,7 @@
     {
       "path": "studio/launcher/index.html",
       "bytes": 3707,
-      "sha256": "4a09f776723b6dbe2fce5f3e8f9bb027d7841c7b1a12f9bfc85f70ed36bb96c3"
+      "sha256": "8b6ebfe45a6a90d3a6cb209166a8f616279fbbeeb1f6d1ffc70498af797f54f7"
     },
     {
       "path": "studio/launcher/launcher.css",
@@ -464,7 +469,7 @@
     {
       "path": "studio/launcher/player.html",
       "bytes": 3928,
-      "sha256": "27e4936d676ff81d9d223bc952bfdc77befba6909ef3df4bb7b79b68b6e7b432"
+      "sha256": "bdd343e36a3dc19ba0791c2759820491198d454e96bcfbe44d0d539f9024eee8"
     },
     {
       "path": "studio/launcher/player.js",
@@ -488,8 +493,8 @@
     },
     {
       "path": "studio/workbench/ai-authoring.js",
-      "bytes": 16225,
-      "sha256": "1824d37a0180bb238855df0bd5fdef361e8776168df4880aae74805ed128b57e"
+      "bytes": 16671,
+      "sha256": "bd94be3e3582ddf82e2905e170a90fabe557edca391c9264c1d450189da7f353"
     },
     {
       "path": "studio/workbench/ai-controls.js",
@@ -508,8 +513,8 @@
     },
     {
       "path": "studio/workbench/bil-compiler.js",
-      "bytes": 89715,
-      "sha256": "dd3745f3cc1e93058d761b830438a6f5d460747f2552b243cf24e06686c36601"
+      "bytes": 104560,
+      "sha256": "672f3b0dc65e1f11f32e3725ff83fd729c2558ebca6701d8eec0b9343e7458e9"
     },
     {
       "path": "studio/workbench/bil-designer.js",
@@ -523,13 +528,13 @@
     },
     {
       "path": "studio/workbench/bil-runtime.js",
-      "bytes": 91759,
-      "sha256": "bd3a6ac6c537960c5ce466af82917b668b2c7594446eb5579a6df13c6522b340"
+      "bytes": 92771,
+      "sha256": "e12c6328b462ae7e1bb4c7be8cdc7584b630f04de6bc46183fd45a111dd20aae"
     },
     {
       "path": "studio/workbench/bil-studio.js",
-      "bytes": 14316,
-      "sha256": "c18e45550710303e602cbc887ebc902cfc7a4c3d1f760b2be0c13fb6c3e2671d"
+      "bytes": 14410,
+      "sha256": "a3ec7931b4e7641acd8061227e18d73b5fe0ce92c21a85725574459bd60231c1"
     },
     {
       "path": "studio/workbench/business.js",
@@ -578,8 +583,8 @@
     },
     {
       "path": "studio/workbench/chat/ui.js",
-      "bytes": 64239,
-      "sha256": "dd89a6626561f17e6233632782b5cfe9ae7ac383b4b93ff91e161375d40f48ec"
+      "bytes": 65634,
+      "sha256": "93625cb1b538e20de8bb14acfd6c3af8a777439890c2b806ceb4283d77b1c090"
     },
     {
       "path": "studio/workbench/chat/worker.js",
@@ -599,12 +604,12 @@
     {
       "path": "studio/workbench/clea-core.js",
       "bytes": 9061,
-      "sha256": "40d7d6c36151894dfb03ebd73ed1a0b9cc5a7638157e575b62bb65447a7a9a70"
+      "sha256": "79ca1128efb9436058f3a9f32b1307fa4eecda95300ad74c6d01d726e9c98c21"
     },
     {
       "path": "studio/workbench/clea-draw.js",
-      "bytes": 34519,
-      "sha256": "d431092d735fbe4d568c270415cb6d55ca7b470a44c244367cf1d9518693a712"
+      "bytes": 36575,
+      "sha256": "93cc7954f0bd76fba452cc4c4d35cf715baa97dcaa324c9fa24b316c46d841de"
     },
     {
       "path": "studio/workbench/clea-intent-model.js",
@@ -658,8 +663,8 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 17441,
-      "sha256": "1b08fa452158a39adcd7b2734a6b2152d7c4a794c4d2d228baf8a6bd89780548"
+      "bytes": 17443,
+      "sha256": "d4ebf43eb1aaf71fdc7794955887a63c4960b36ab9aafb42d4d0ea3769993dc7"
     },
     {
       "path": "studio/workbench/intelligence.js",
@@ -678,8 +683,8 @@
     },
     {
       "path": "studio/workbench/package.js",
-      "bytes": 18599,
-      "sha256": "4ffed4f56a0adf773c01b7d2dc17df3cdc4e5d9bd114fe0bbe9062c408876f96"
+      "bytes": 18640,
+      "sha256": "e9b54af8b07d511e2136c6d13e9d8ffe743c63c485f532c438f3be24ffe37f85"
     },
     {
       "path": "studio/workbench/plan.js",
@@ -773,8 +778,8 @@
     },
     {
       "path": "studio/workbench/standalone.js",
-      "bytes": 11439,
-      "sha256": "889b961ca4439206efc315aae082e784b39a2cf3319338047e11b2319464cda8"
+      "bytes": 11464,
+      "sha256": "d76176f3bb9cf830d10562de86a8c0a58ca2bf8b777bc8d234dc2c5738a3be00"
     },
     {
       "path": "studio/workbench/starters.js",
@@ -783,8 +788,8 @@
     },
     {
       "path": "studio/workbench/studio-operator.js",
-      "bytes": 15679,
-      "sha256": "ddc0d5e56b0fd3338dbc07f1c3513288b1a6d0c8c359ecba823c679a52e62e4b"
+      "bytes": 36262,
+      "sha256": "6150181a4c167e23a2370700769239c00faf1a2111d513a7b1d6e6e7a490d74c"
     },
     {
       "path": "studio/workbench/studio-sense.js",
@@ -798,13 +803,13 @@
     },
     {
       "path": "studio/workbench/studio.css",
-      "bytes": 35537,
-      "sha256": "71f8518b9d74d73f82e05c87acc16b8bf693f30e28cd2a80a90c0a9d7bf8c2cb"
+      "bytes": 36714,
+      "sha256": "d869af8068d226164544e185432d4b67140f792b0b959c682fde59caea6f106c"
     },
     {
       "path": "studio/workbench/studio.js",
-      "bytes": 56609,
-      "sha256": "9188a19f51efa77c782ee047b73ed4dfaa1283fd82f6401248047e5f9815a842"
+      "bytes": 60356,
+      "sha256": "4fbc0c5e62dc96f51bd641394745d3b020b232e57c2b75536d28663f67588644"
     },
     {
       "path": "studio/workbench/toolchain-ui.js",

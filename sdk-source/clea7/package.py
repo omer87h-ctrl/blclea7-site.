@@ -7,7 +7,7 @@ from .application import validate
 from .schema import UserError
 
 FORMAT='clea7.package/1'
-RUNTIME='0.42.0'
+RUNTIME='0.44.0'
 MAX_PACKAGE=2*1024*1024
 MAX_APPLICATION=1024*1024
 TARGETS={'browser','windows','android'}
@@ -39,6 +39,7 @@ def _application_minimum_runtime(app,targets):
 
 def encode(project,targets=None,publisher=''):
     app=validate(project)
+    if targets is None and app.get('bil',{}).get('ir',{}).get('objects'):targets=('browser',)
     if targets is None and any(b['adapter']=='android.native/1' for b in app.get('remote',{}).get('backends',{}).values()):targets=('android',)
     if targets is None and app.get('remote',{}).get('backends') and all(b['adapter']=='sense.local/1' for b in app['remote']['backends'].values()):targets=('browser','windows','android')
     if targets is None:targets=('browser',) if app['format'] in ('clea7.application/7','clea7.application/8','clea7.application/9') else ('browser','windows')

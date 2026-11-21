@@ -108,19 +108,22 @@ async function operate(plan,{project=null,mode='change',checks=[],signal,onEvent
 function create({generate,onEvent=()=>{},attempts=3}={}){
  if(typeof generate!=='function'||![1,2,3].includes(attempts))throw fault('Input','Nedostaje stvarni jezički transport.');
  let busy=false;
- async function propose(intent,{project=null,mode='create',sourceApproved=false,signal,onDelta=()=>{},checks=[],representation='plan'}={}){
+ async function propose(intent,{project=null,mode='create',sourceApproved=false,projectContext=false,signal,onDelta=()=>{},checks=[],representation='plan'}={}){
   if(busy)throw fault('Busy','Kreiranje aplikacije je već pokrenuto.');
   if(typeof intent!=='string'||!intent.trim()||intent.length>1200||!['create','change'].includes(mode))throw fault('Input','Napiši opis aplikacije do 1200 znakova.');
   if(mode==='change'&&(!project?.bil||sourceApproved!==true))throw fault('Permission','Za izmjenu izričito odobri slanje BIL izvora trenutnog projekta svom modelu.');
   const base=project?scope.CLEA7.stable(project):null;
   checks=clone(checks);if(!Array.isArray(checks)||checks.length>20)throw fault('Input','Previše ili neispravne lokalne provjere.');
-  if(mode==='change'&&new TextEncoder().encode(project.bil.source).length>10000)throw fault('Context','Projekt je veći od trenutnog modelskog prozora. Izvor nije skraćen niti poslan.');
+  const useStructure=mode==='change'&&representation==='tools'&&projectContext===true;
+  if(mode==='change'&&!useStructure&&new TextEncoder().encode(project.bil.source).length>10000)throw fault('Context','Ovom modelskom servisu treba ažurirani ugovor za izmjene većeg projekta. Izvor nije skraćen niti poslan.');
+  const structurePending=useStructure?scope.CLEA7StudioTools.modelContext(project.bil.source):null;
   const metadata=mode==='change'?Object.fromEntries(['id','name','package','version','licenses'].filter(k=>project[k]!==undefined).map(k=>[k,clone(project[k])])):{id:scope.CLEA7Format.newId('ai'),name:'Moja CLEA aplikacija'};
   const history=[];let previous=null,diagnostic=null;busy=true;
   const check=()=>{if(signal?.aborted)throw fault('Cancelled','Kreiranje je zaustavljeno. Projekt nije promijenjen.');};
   try{
+   const structure=structurePending?await structurePending:null;
    for(let attempt=1;attempt<=attempts;attempt++){
-    check();const contract={format:FORMAT,mode,...(['plan','tools'].includes(representation)&&(mode==='create'||representation==='tools')?{representation}:{}),...(mode==='change'?{source:project.bil.source,sourceApproved:true}:{}),...(previous!==null?{previous,diagnostic}:{} )};
+    check();const contract={format:FORMAT,mode,...(['plan','tools'].includes(representation)&&(mode==='create'||representation==='tools')?{representation}:{}),...(mode==='change'?{...(structure?{structure}:{source:project.bil.source}),sourceApproved:true}:{}),...(previous!==null?{previous,diagnostic}:{} )};
     onEvent({phase:'model',attempt,mode});
     const response=await generate(intent,{authoring:contract,signal,onDelta});check();
     let source=null;
@@ -138,7 +141,7 @@ function create({generate,onEvent=()=>{},attempts=3}={}){
      if(attempt===attempts){error.attempts=clone(history);error.failedProposal=source||response.reply;throw error;}
      // Retry only inference/compilation. No uncertain external effect is repeated.
      // An incomplete source is never auto-repaired by guessing its missing end.
-     previous=source||'';diagnostic=(String(error.message)+' '+JSON.stringify(error.diagnostic||error.location||error.loc||{})).slice(0,600);
+     previous=representation==='tools'?response.reply:source||'';if(new TextEncoder().encode(previous).length>10000)previous='';diagnostic=(String(error.message)+' '+JSON.stringify(error.diagnostic||error.location||error.loc||{})).slice(0,600);
      onEvent({phase:'repair',attempt,diagnostic});
     }
    }

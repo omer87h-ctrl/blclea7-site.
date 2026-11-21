@@ -1,0 +1,11 @@
+BIL "Moj rad".
+
+zadatak pamti naslov kao tekst "Pripremi ponudu".
+zadatak pamti zavrsen kao logiku ne.
+zadatak izvodi status iz zavrsen:
+    ne daje "U toku";
+    da daje "Završeno".
+zadatak prikazuje naslov kao "Naziv zadatka".
+zadatak prikazuje zavrsen kao "Zadatak je završen".
+zadatak nudi "Završi" kao zavrsavanje.
+zavrsavanje nad zadatak postavlja zavrsen na da.

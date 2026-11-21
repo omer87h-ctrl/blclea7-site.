@@ -1,4 +1,8 @@
-# BL CLEA7 SDK 0.42.2-test — shared Core and dependency cache
+Source mirror of BL CLEA SDK0.44.0-test. The full downloadable ZIP includes
+optional OCR/PDF vendor assets omitted from this source mirror. CLI BIL/Core
+execution and project tools work locally with Python3.12+ and Node22+.
+
+# BL CLEA7 SDK 0.44.0-test — shared Core and dependency cache
 
 Development/test distribution by Brzo i Lokalno. The authoritative BIL compiler,
 bounded interpreter, shared Core, project CLI and original dependency/result cache
@@ -15,11 +19,17 @@ Runtime0.42 adds bounded2D scenes, clock/pad/camera and local OCR with review.
 Project-scoped incremental compilation and source/IR compatibility are documented
 in docs/BIL-INCREMENTAL-COMPILER.md; examples are in sdk/examples/bil.
 
+Core5 adds the original sentence-object grammar. See docs/BIL-OBJECT-GRAMMAR.md.
+It requires Runtime0.44 and includes real remembered fields, reactive relations,
+owned actions, typed lazy SELECT and the shared Studio object tools.
+
 From the extracted SDK directory:
 
 ```sh
 python -m clea7 doctor
 python -m clea7 project new MyApp
+python -m clea7 project new MyObjects --template objects
+python -m clea7 project test MyObjects
 python -m clea7 project check MyApp
 python -m clea7 project run MyApp --flow calculate
 python -m clea7 project test MyApp

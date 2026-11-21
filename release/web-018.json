@@ -6,12 +6,12 @@
     {
       "path": "studio/launcher/index.html",
       "bytes": 3707,
-      "sha256": "4a09f776723b6dbe2fce5f3e8f9bb027d7841c7b1a12f9bfc85f70ed36bb96c3"
+      "sha256": "8b6ebfe45a6a90d3a6cb209166a8f616279fbbeeb1f6d1ffc70498af797f54f7"
     },
     {
       "path": "studio/launcher/player.html",
       "bytes": 3928,
-      "sha256": "27e4936d676ff81d9d223bc952bfdc77befba6909ef3df4bb7b79b68b6e7b432"
+      "sha256": "bdd343e36a3dc19ba0791c2759820491198d454e96bcfbe44d0d539f9024eee8"
     },
     {
       "path": "studio/launcher/player.js",
@@ -20,18 +20,18 @@
     },
     {
       "path": "studio/workbench/bil-compiler.js",
-      "bytes": 89715,
-      "sha256": "dd3745f3cc1e93058d761b830438a6f5d460747f2552b243cf24e06686c36601"
+      "bytes": 104560,
+      "sha256": "672f3b0dc65e1f11f32e3725ff83fd729c2558ebca6701d8eec0b9343e7458e9"
     },
     {
       "path": "studio/workbench/bil-runtime.js",
-      "bytes": 91759,
-      "sha256": "bd3a6ac6c537960c5ce466af82917b668b2c7594446eb5579a6df13c6522b340"
+      "bytes": 92771,
+      "sha256": "e12c6328b462ae7e1bb4c7be8cdc7584b630f04de6bc46183fd45a111dd20aae"
     },
     {
       "path": "studio/workbench/clea-core.js",
       "bytes": 9061,
-      "sha256": "40d7d6c36151894dfb03ebd73ed1a0b9cc5a7638157e575b62bb65447a7a9a70"
+      "sha256": "79ca1128efb9436058f3a9f32b1307fa4eecda95300ad74c6d01d726e9c98c21"
     },
     {
       "path": "studio/workbench/engine.js",
@@ -40,13 +40,13 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 17441,
-      "sha256": "1b08fa452158a39adcd7b2734a6b2152d7c4a794c4d2d228baf8a6bd89780548"
+      "bytes": 17443,
+      "sha256": "d4ebf43eb1aaf71fdc7794955887a63c4960b36ab9aafb42d4d0ea3769993dc7"
     },
     {
       "path": "studio/workbench/package.js",
-      "bytes": 18599,
-      "sha256": "4ffed4f56a0adf773c01b7d2dc17df3cdc4e5d9bd114fe0bbe9062c408876f96"
+      "bytes": 18640,
+      "sha256": "e9b54af8b07d511e2136c6d13e9d8ffe743c63c485f532c438f3be24ffe37f85"
     },
     {
       "path": "studio/workbench/working-cache.js",

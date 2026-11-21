@@ -1,3 +1,5 @@
+> Current additive Core5 / Runtime0.44: [BIL sentence grammar](BIL-OBJECT-GRAMMAR.md). The older contract sections below retain their historical scope. Classic BIL remains supported.
+
 # CLEA Core 0.18
 
 Core je zajednički, platformski nezavisan ugovor `clea7.core/1`.
@@ -71,3 +73,14 @@ izvozni recepti uključuju zajedničke datoteke, ali promjena recepta nije dokaz
 izgrađenog ili testiranog novog APK/EXE paketa. iOS, macOS i Linux samostalni
 izvozi nisu proglašeni dostupnim ovim ugovorom. `.clea7` zahtijeva kompatibilan
 host; nije samostalan univerzalni OS izvršni fajl.
+
+## Additive Runtime0.42 / Core4
+
+The implemented scene module, clock/pad/camera grammar, typed physics and keyframe
+semantics are specified in [BIL-SCENE.md](BIL-SCENE.md). The actual editor now uses
+[project-scoped incremental compilation](BIL-INCREMENTAL-COMPILER.md); full lexing
+and permission/event/UI checks remain. [Local OCR](SENSE-OCR.md) is a separately
+licensed, consent-controlled Sense capability, not arbitrary image understanding.
+Older source/IR/package contracts keep their true minimum runtime. See matching
+release receipts for actual browser/native scope; no3D, physical-device or model
+quality acceptance is implied by source compilation.
