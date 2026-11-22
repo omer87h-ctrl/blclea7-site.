@@ -1,0 +1,23 @@
+{
+  "format": "clea7500.public-android-download/1",
+  "version": "0.1.5-test",
+  "artifact": "downloads/BL-CLEA-AI-7500-0.1.5-test.apk",
+  "sha256": "2cba5bdf09de24ce131fee52e5a62c03c0d19f962e7e00fe2db20beaa53ba0b4",
+  "bytes": 243959,
+  "package": "com.brzoilokalno.clea7500",
+  "sourceRepository": "omer87h-ctrl/BL-Clea7-by-brzoilokalno",
+  "sourceCommit": "2b3a1edb0a4e163b008042296fa834b481519485",
+  "builtWith": "CLEA BIL / shared Core / CLEA Android Runtime; Android SDK35",
+  "androidMinimum": 26,
+  "apkSignatureVerified": true,
+  "physicalDeviceVerified": false,
+  "privateServerRequired": true,
+  "trainedWeightsBundled": false,
+  "credentialsBundled": false,
+  "neural70BClaim": false,
+  "licenses": "THIRD_PARTY.md and LICENSE-STATUS.md included in APK assets/notices",
+  "pairing": "Existing Android Keystore pairing retained on update; same package ID and signer. New users need a private HP connection.",
+  "phoneConnectionVerified": false,
+  "createdApplicationRuntime": "Original standalone CLEA BIL/Core Runtime; verified SHA256 before Android opening; separate WebView without owner token",
+  "legacyServerCompatibility": "Chat retained on older owner service; new creation stays disabled until HP server0.1.5 update is confirmed."
+}
