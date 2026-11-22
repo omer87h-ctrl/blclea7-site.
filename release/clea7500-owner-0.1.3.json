@@ -1,0 +1,13 @@
+{
+  "format": "clea7500.encrypted-owner-apk/1",
+  "file": "downloads/CLEA7500-owner-50e9d6a314a7face.bin",
+  "cipher": "AES-256-GCM",
+  "iv": "qWHvW1Bs6IP3ERPK",
+  "encryptedBytes": 235856,
+  "encryptedSHA256": "50e9d6a314a7face73fc99e89dacc17236964fd069eb371c18c26461f0418b2a",
+  "apkBytes": 235840,
+  "apkSHA256": "9efc046ddb8d558a212e88511681a39b9c13caa2c16d62efd828cbd68d738599",
+  "activationExpiresAt": 1795457080.6909933,
+  "secretIncluded": false,
+  "physicalAndroidVerified": false
+}
