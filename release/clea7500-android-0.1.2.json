@@ -1,0 +1,21 @@
+{
+  "format": "clea7500.public-android-download/1",
+  "version": "0.1.2-test",
+  "artifact": "downloads/BL-CLEA-AI-7500-0.1.2-test.apk",
+  "sha256": "368d97e47c1fa2d36b8145e3fa790f42c413c4ec16d82692c52d3f6e10080101",
+  "bytes": 231671,
+  "package": "com.brzoilokalno.clea7500",
+  "sourceRepository": "omer87h-ctrl/BL-Clea7-by-brzoilokalno",
+  "sourceCommit": "829d98b8d63c10e9307334d2d031ee5fe5750dea",
+  "builtWith": "CLEA BIL / shared Core / CLEA Android Runtime; Android SDK35",
+  "androidMinimum": 26,
+  "apkSignatureVerified": true,
+  "physicalDeviceVerified": false,
+  "privateServerRequired": true,
+  "trainedWeightsBundled": false,
+  "credentialsBundled": false,
+  "neural70BClaim": false,
+  "licenses": "THIRD_PARTY.md and LICENSE-STATUS.md included in APK assets/notices",
+  "pairing": "one-use private QR/deep link; no manual copying",
+  "phoneConnectionVerified": false
+}

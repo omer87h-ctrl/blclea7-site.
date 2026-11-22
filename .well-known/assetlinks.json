@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.brzoilokalno.clea7500",
+      "sha256_cert_fingerprints": [
+        "62:48:43:0F:1B:09:2C:4F:D5:85:D3:F9:63:22:74:D0:90:46:CC:D6:09:18:45:23:72:8F:82:C0:A4:30:46:94"
+      ]
+    }
+  }
+]
