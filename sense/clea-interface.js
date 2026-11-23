@@ -23,7 +23,7 @@
     if(status)status.textContent='Sense vodič nije dostupan. Pokušaj ponovo učitati stranicu.';
     return;
    }
-   if(guide.isOpen?.())guide.close();
+   if(guide.isActive?.())guide.close();
    else guide.open(button);
   });
   document.addEventListener('sense:navigation-changed',event=>update(event.detail?.active===true));
