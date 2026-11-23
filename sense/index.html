@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#111d29">
+  <meta name="theme-color" content="#10262a">
   <meta name="referrer" content="no-referrer">
-  <meta name="description" content="Besplatan BL CLEA Sense 7 by Brzo i Lokalno: pripremi CV, lokalno pregledaj dokumente, koristi pristupačni vodič i izvezi svoj DOCX.">
+  <meta name="description" content="BL CLEA Sense 7: pristupačna komunikacija, tekst i titlovi, vođenje kroz ekran i lokalna provjera CV-a uz tvoju potvrdu.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' http://127.0.0.1:8765; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src https://challenges.cloudflare.com">
-  <title>BL CLEA Sense 7 — Pristupačna izrada CV-a</title>
+  <title>BL CLEA Sense 7 — Komunikacija, pristupačnost i CV</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css?v=664e01ae1d0dd8e7">
   <link rel="stylesheet" href="sense-spatial.css?v=7fcdce781c5b514b">
@@ -29,8 +29,8 @@
   <script defer src="../clea-ai-client.js?v=47b369297c0f8f1e"></script>
   <script defer src="ai-bridge.js?v=cd21c89a16ae0af7"></script>
 <link rel="manifest" href="manifest.webmanifest"><script defer src="cv-offline.js?v=081b73c7435b52db"></script><script defer src="sense-sdk.js?v=voice-clarity-20261123"></script><script defer src="sense-import.js?v=557f85b393589efd"></script><script defer src="sense-authoring.js?v=3389639f688c70bc"></script><script defer src="sense-communication.js?v=b2c8e1dae0160a7f"></script><link rel="stylesheet" href="sense-navigation.css?v=8549f22bba58ddc2">
-<meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="https://clea7.brzoilokalno.com/sense/"><script defer src="sense-ocr-policy.js?v=e128be0ea06bda0f"></script><script defer src="sense-ocr.js?v=8a5e302e5d819e14" data-ocr-assets="vendor/ocr/"></script><link rel="stylesheet" href="clea-theme.css?v=2df8e16b7a6080b4" data-clea-theme-sheet></head>
-<body>
+<meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="https://clea7.brzoilokalno.com/sense/"><script defer src="sense-ocr-policy.js?v=e128be0ea06bda0f"></script><script defer src="sense-ocr.js?v=8a5e302e5d819e14" data-ocr-assets="vendor/ocr/"></script><link rel="stylesheet" href="clea-theme.css?v=2df8e16b7a6080b4" data-clea-theme-sheet><link rel="stylesheet" href="sense-experience.css?v=20261123-redesign-1"></head>
+<body class="sense-experience sense-entered">
   <a class="skip-link" href="#main">Preskoči na radni prostor</a>
   <svg class="svg-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
     <symbol id="i-document" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6zM14 3v5h4M9 12h6M9 16h6"/></symbol>
@@ -43,7 +43,7 @@
     <symbol id="i-source" viewBox="0 0 24 24"><path d="m8 7-5 5 5 5m8-10 5 5-5 5M14 4l-4 16"/></symbol>
     <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 2 2.6 7.4L22 12l-7.4 2.6L12 22l-2.6-7.4L2 12l7.4-2.6z"/></symbol>
   </defs></svg>
-  <div class="test-banner" role="note"><span class="test-dot" aria-hidden="true"></span><strong>TESTNA VERZIJA</strong><span class="test-description">Sense olakšava pripremu prijave. Nalazi mogu biti nepotpuni ili pogrešni; važne podatke potvrdi.</span><button type="button" id="about-test" class="banner-link" aria-label="O testnoj verziji, mogućim greškama i granicama provjere">O provjerama</button></div>
+  <div class="test-banner" role="note"><span class="test-dot" aria-hidden="true"></span><strong>TESTNA VERZIJA</strong><span class="test-description">Komunikacija, pristupačno vođenje i CV provjera su u razvoju. Važne informacije i izgovor provjeri.</span><button type="button" id="about-test" class="banner-link" aria-label="O testnoj verziji, mogućim greškama i granicama provjere">O provjerama</button></div>
   <div class="shell">
     <aside class="sidebar" aria-label="Navigacija radnog prostora">
       <a class="brand" href="#workspace" aria-label="BL CLEA Sense 7, radni prostor"><img src="icon.svg" width="45" height="45" alt=""><span><strong>BL CLEA <b>SENSE 7</b></strong><small>BY BRZO I LOKALNO</small></span></a>
@@ -58,9 +58,35 @@
       <div class="sidebar-bottom"><span class="local-label"><span></span> Obrada na ovom uređaju</span><button id="privacy-open" type="button" class="quiet-button">Privatnost i način rada</button></div>
     </aside>
     <div class="app-body">
-      <header class="topbar"><div class="topbar-left"><span class="workspace-marker" aria-hidden="true"></span><span>CV RADNI PROSTOR</span><span id="save-state" class="save-state">Samo u ovom prozoru</span></div><div class="topbar-actions"><button id="undo" type="button" class="icon-button" aria-label="Poništi posljednju promjenu" disabled>↶</button><button id="redo" type="button" class="icon-button" aria-label="Ponovi posljednju promjenu" disabled>↷</button><button id="settings-open" type="button" class="button subtle"><svg aria-hidden="true" focusable="false"><use href="#i-sliders"/></svg><span>Prikaz i kontrole</span></button><button id="stop" type="button" class="stop-button" disabled><span aria-hidden="true">■</span> Zaustavi</button></div></header>
-      <main id="main" tabindex="-1" aria-label="Sense CV radni prostor">
-        <div class="page-heading"><div><p class="eyebrow">BL CLEA SENSE 7 / CV</p><h1>Tvoja prijava.<br><span>Jasni dokazi.</span></h1><p class="intro">Poveži svoje iskustvo sa zahtjevima posla. Provjeri šta je potkrijepljeno i odluči šta želiš promijeniti.</p></div><div class="heading-art" aria-hidden="true"><svg viewBox="0 0 180 150"><path d="M16 76h33m85 0h29M90 12v20m0 89v18"/><circle cx="90" cy="76" r="48"/><circle cx="90" cy="76" r="35"/><path class="signal" d="m68 76 14 14 32-33"/><circle class="node" cx="16" cy="76" r="5"/><circle class="node" cx="163" cy="76" r="5"/><circle class="node warm" cx="90" cy="12" r="5"/><circle class="node warm" cx="90" cy="139" r="5"/></svg><span>ČINJENICE → ODLUKA</span></div></div>
+      <header class="topbar"><div class="topbar-left"><span class="workspace-marker" aria-hidden="true"></span><span>SENSE RADNI PROSTOR</span><span id="save-state" class="save-state">Samo u ovom prozoru</span></div><div class="topbar-actions"><button id="undo" type="button" class="icon-button" aria-label="Poništi posljednju promjenu" disabled>↶</button><button id="redo" type="button" class="icon-button" aria-label="Ponovi posljednju promjenu" disabled>↷</button><button id="settings-open" type="button" class="button subtle"><svg aria-hidden="true" focusable="false"><use href="#i-sliders"/></svg><span>Prikaz i kontrole</span></button><button id="stop" type="button" class="stop-button" disabled><span aria-hidden="true">■</span> Zaustavi</button></div></header>
+      <main id="main" tabindex="-1" aria-label="BL CLEA Sense radni prostor">
+        <section id="sense-home" class="sense-home" aria-labelledby="sense-home-title">
+          <div class="sense-home-copy">
+            <p class="sense-home-kicker"><span class="sense-home-indicator" aria-hidden="true"></span> BL CLEA SENSE 7 <span class="sense-home-separator" aria-hidden="true"></span> PRISTUPAČAN RADNI PROSTOR</p>
+            <h1 id="sense-home-title">Razumij. Izrazi se.<br><span>Odluči na svoj način.</span></h1>
+            <p class="sense-home-description">Piši poruke, koristi titlove i vođenje kroz ekran ili provjeri CV i oglas. Govor nije uslov da koristiš Sense.</p>
+            <div class="sense-home-actions" role="group" aria-label="Izaberi kako želiš početi">
+              <button type="button" class="sense-action sense-action-primary" data-sense-launch="communicate">Otvori komunikaciju <span aria-hidden="true">↗</span></button>
+              <button type="button" class="sense-action sense-action-secondary" data-sense-launch="cv">Radi na CV-u <span aria-hidden="true">→</span></button>
+            </div>
+            <p class="sense-home-trust">Tvoj izbor · Tekst i vizuelne upute · Dozvole samo uz tvoju potvrdu</p>
+          </div>
+          <div class="sense-home-art" aria-hidden="true">
+            <div class="sense-home-halo"><div class="sense-home-ring ring-outer"></div><div class="sense-home-ring ring-middle"></div><div class="sense-home-ring ring-inner"></div><div class="sense-home-core">7</div><i class="sense-home-point point-one"></i><i class="sense-home-point point-two"></i><i class="sense-home-point point-three"></i></div>
+            <span class="sense-home-art-label label-one">TEKST</span><span class="sense-home-art-label label-two">PRISTUP</span><span class="sense-home-art-label label-three">KONTROLA</span>
+          </div>
+        </section>
+        <section class="sense-mode-section" aria-labelledby="sense-mode-title">
+          <div class="sense-mode-heading"><div><p class="sense-mode-kicker">JEDNO OKRUŽENJE · VIŠE NAČINA</p><h2 id="sense-mode-title">Šta ti danas treba?</h2></div><p>Odaberi mogućnost. Svaka vodi u postojeći, funkcionalni dio Sensea.</p></div>
+          <div class="sense-modes">
+            <button type="button" class="sense-mode-card" data-sense-launch="communicate"><span class="sense-mode-icon" aria-hidden="true">↔</span><strong>Komunikacija</strong><span>Piši poruke, koristi dostupne titlove ili izgovori potvrđeni tekst lokalnim glasom.</span><span class="sense-mode-link">Otvori alat <span aria-hidden="true">↗</span></span></button>
+            <button type="button" class="sense-mode-card" data-sense-launch="guide"><span class="sense-mode-icon" aria-hidden="true">◎</span><strong>Vodič kroz ekran</strong><span>Pronađi stvarne kontrole dodirom ili tastaturom, uz tekstualne i dostupne zvučne upute.</span><span class="sense-mode-link">Pokreni vodič <span aria-hidden="true">↗</span></span></button>
+            <button type="button" class="sense-mode-card" data-sense-launch="cv"><span class="sense-mode-icon" aria-hidden="true">▤</span><strong>CV i prijava</strong><span>Uporedi iskustvo sa zahtjevima oglasa, provjeri navode i pripremi dokument.</span><span class="sense-mode-link">Otvori radni prostor <span aria-hidden="true">↗</span></span></button>
+          </div>
+          <p id="sense-mode-status" class="sr-only" role="status" aria-live="polite"></p>
+        </section>
+        <div class="sense-workspace-divider"><span>RADNI PROSTOR</span><strong>CV · oglas · dokazi</strong><span>Izvorni podaci ostaju pod tvojom kontrolom</span></div>
+        <div class="page-heading" aria-hidden="true"><div><p class="eyebrow">BL CLEA SENSE 7 / CV</p><h1>Tvoja prijava.<br><span>Jasni dokazi.</span></h1><p class="intro">Poveži svoje iskustvo sa zahtjevima posla. Provjeri šta je potkrijepljeno i odluči šta želiš promijeniti.</p></div><div class="heading-art" aria-hidden="true"><svg viewBox="0 0 180 150"><path d="M16 76h33m85 0h29M90 12v20m0 89v18"/><circle cx="90" cy="76" r="48"/><circle cx="90" cy="76" r="35"/><path class="signal" d="m68 76 14 14 32-33"/><circle class="node" cx="16" cy="76" r="5"/><circle class="node" cx="163" cy="76" r="5"/><circle class="node warm" cx="90" cy="12" r="5"/><circle class="node warm" cx="90" cy="139" r="5"/></svg><span>ČINJENICE → ODLUKA</span></div></div>
         <div id="status" class="status-bar" role="status" aria-live="polite" aria-atomic="true"><span id="status-dot" class="status-dot" aria-hidden="true"></span><span id="status-text">Počni od CV-a i jednog oglasa. Ime i kontakt nisu potrebni za analizu.</span></div>
 
         <section id="view-workspace" class="view" aria-labelledby="workspace-title">
@@ -92,5 +118,5 @@
   <div id="print-output" class="print-output"><p>BL CLEA Sense 7 · TESTNA VERZIJA · Korisnički nacrt; važne podatke potvrdi.</p><pre id="print-text"></pre></div>
   <noscript><div class="noscript">Za lokalnu analizu potreban je JavaScript. Sadržaj se obrađuje u tvom pregledniku.</div></noscript>
 <script defer src="sense-navigation.js?v=voice-clarity-20261123"></script>
-<script defer src="clea-interface.js?v=a802e85d6f5f9a6b"></script></body>
+<script defer src="clea-interface.js?v=a802e85d6f5f9a6b"></script><script defer src="sense-experience.js?v=20261123-redesign-1"></script></body>
 </html>
