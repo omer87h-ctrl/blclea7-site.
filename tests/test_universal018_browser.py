@@ -160,7 +160,7 @@ def main():
             studio.locator('#player').get_by_label('Količina', exact=True).press('Tab')
             studio.wait_for_function('() => CLEA7Workbench.engine.state.bilValues.total === 77600')
             checked('Studio imports, compiles and runs original BIL with reactive typed UI')
-            studio.locator('[data-panel="build"]').click()
+            studio.locator('.private-studio-tools>summary').click();studio.locator('[data-panel="build"]').click()
             with studio.expect_download() as download:
                 studio.locator('#export-package').click()
             studio_package = out/'StudioOriginal.clea7'
