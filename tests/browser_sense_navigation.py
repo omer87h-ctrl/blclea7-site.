@@ -9,9 +9,10 @@ from playwright.sync_api import sync_playwright
 
 FIXTURE="""(() => {
  window.__senseDeviceFixture={spoken:[],vibrations:[],clicks:0,voicesAvailable:true,voiceListeners:new Set()};
- const voice={name:'Local test voice',lang:'bs-BA',localService:true};
+ const voice={name:'Hrvatski lokalni glas',lang:'hr-HR',localService:true};
+ const bsVoice={name:'Bosanski lokalni glas',lang:'bs-BA',localService:true};
  Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
- getVoices:()=>__senseDeviceFixture.voicesAvailable?[voice]:[],cancel(){},addEventListener(type,fn){if(type==='voiceschanged')__senseDeviceFixture.voiceListeners.add(fn);},removeEventListener(type,fn){__senseDeviceFixture.voiceListeners.delete(fn);},
+ getVoices:()=>__senseDeviceFixture.voicesAvailable?[bsVoice,voice]:[],cancel(){},addEventListener(type,fn){if(type==='voiceschanged')__senseDeviceFixture.voiceListeners.add(fn);},removeEventListener(type,fn){__senseDeviceFixture.voiceListeners.delete(fn);},
  speak(u){__senseDeviceFixture.spoken.push(u.text);queueMicrotask(()=>u.onend?.());}}});
  window.SpeechSynthesisUtterance=class{constructor(text){this.text=text;}};
  Object.defineProperty(navigator,'vibrate',{configurable:true,value:p=>{__senseDeviceFixture.vibrations.push(p);return true;}});
@@ -36,6 +37,7 @@ def main():
    assert page.locator('#sense-interface-toggle').get_attribute('aria-pressed')=='true'
    assert page.locator('.sense-touch-console.is-exploring').is_visible()
    assert not page.locator('#sense-touch-voice').is_visible()
+   assert page.evaluate("document.querySelector('#sense-touch-voice').value")=='Hrvatski lokalni glas'
    assert any('Sense je uključen' in text for text in page.evaluate('__senseDeviceFixture.spoken'))
    page.locator('#sense-touch-close').click()
    assert not page.locator('#sense-touch-guide').is_visible()
@@ -111,7 +113,7 @@ def main():
    page.locator('#sense-cv-authoring [data-sense-touch-launch]').click()
    assert page.locator('#sense-touch-voice option').count()==0
    page.evaluate('()=>{__senseDeviceFixture.voicesAvailable=true;for(const fn of __senseDeviceFixture.voiceListeners)fn();}')
-   assert page.locator('#sense-touch-voice option').count()==1
+   assert page.locator('#sense-touch-voice option').count()==2
    assert 'Sense je uključen' in page.evaluate('__senseDeviceFixture.spoken.at(-1)')
    page.locator('#sense-touch-close').click()
    checks.append('A local voice that appears asynchronously speaks the current guidance instead of leaving the user with a silent initial session')
