@@ -46,22 +46,54 @@ const modeLabel=make('label','Način vođenja'),mode=make('select');mode.id='sen
 const targetLabel=make('label','Šta želiš pronaći?'),targets=make('select');targets.id='sense-touch-target';targetLabel.append(targets);
 const status=make('p');status.id='sense-touch-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');status.setAttribute('aria-atomic','true');
 const state=make('p');state.id='sense-touch-capabilities';const voiceLabel=make('label','Lokalni glas uređaja'),voices=make('select');voices.id='sense-touch-voice';voiceLabel.append(voices);
+const voiceHelp=make('p');voiceHelp.id='sense-touch-voice-help';
+const rateLabel=make('label','Brzina govora'),rate=make('select');rate.id='sense-touch-rate';
+for(const [value,label] of [['0.82','Sporije i jasnije'],['0.94','Umjereno'],['1','Normalno']]){const option=make('option',label);option.value=value;rate.append(option);}rate.value='0.94';rateLabel.append(rate);
+const previewVoice=make('button','Probaj odabrani glas');previewVoice.type='button';previewVoice.id='sense-touch-voice-preview';
 const speakLabel=make('label'),speak=make('input');speak.type='checkbox';speak.checked=true;speakLabel.append(speak,d.createTextNode(' Govori nazive i upute, bez čitanja unesenih podataka'));
 const vibrateLabel=make('label'),vibrate=make('input');vibrate.type='checkbox';vibrate.checked=typeof scope.navigator?.vibrate==='function';vibrateLabel.append(vibrate,d.createTextNode(' Vibracija: kratak signal blizu cilja, dva signala na cilju'));
 const start=make('button','Pokreni vođenje prstom');start.type='button';start.id='sense-touch-start';start.onclick=()=>{panel.classList.add('is-exploring');if(mode.value==='target')describe();else say('Pomjeri prst po ekranu. Opisat ću kontrolu koju dodiruješ i njen dio ekrana.',true);};
 const previous=make('button','Prethodna kontrola'),next=make('button','Sljedeća kontrola'),repeat=make('button','Ponovi položaj'),focus=make('button','Pređi na kontrolu'),close=make('button','Zatvori vodič'),explain=make('button','Objasni ovu kontrolu'),ask=make('button','Pitaj CLEA AI o ovoj kontroli');for(const b of [previous,next,repeat,focus,close,explain,ask])b.type='button';
 focus.id='sense-touch-focus';close.id='sense-touch-close';explain.id='sense-touch-explain';ask.id='sense-touch-ask';const actions=make('div');actions.className='sense-touch-actions';const options=make('button','Prikaži postavke vodiča');options.type='button';options.onclick=()=>panel.classList.remove('is-exploring');actions.append(start,previous,next,repeat,focus,explain,ask,close,options);previous.className=next.className=repeat.className='sense-touch-secondary';
-const details=make('div');details.className='sense-touch-options';details.append(instructions,modeLabel,targetLabel,state,speakLabel,voiceLabel,vibrateLabel);panel.append(title,status,details,actions);dialog.append(surface,panel);d.body.append(dialog);
+const details=make('div');details.className='sense-touch-options';details.append(instructions,modeLabel,targetLabel,state,speakLabel,voiceLabel,voiceHelp,rateLabel,previewVoice,vibrateLabel);panel.append(title,status,details,actions);dialog.append(surface,panel);d.body.append(dialog);
 let controls=[],selected=0,source=null,returnTo=null,speaker=null,lastSpeech='',lastSpeechAt=0,lastCue='',lastCueAt=0,session=null,point=null,lastDescription=null,pointer=null,speechTimer=null,pendingSpeech=null;
 function label(){const target=controls[selected];return target?name(target)+', '+kind(target):'Odaberi kontrolu';}
-function capabilityText(){const spoken=voices.options.length>0,haptic=typeof scope.navigator?.vibrate==='function';state.textContent=(spoken?'Lokalni glas je ponuđen. ':'Lokalni glas nije dostupan; upute ostaju tekstom i kroz čitač ekrana. ')+(haptic?'Zahtjev vibracije provjerava se na uređaju.':'Preglednik ne nudi vibraciju.');}
-function refreshVoices(){const chosen=voices.value,hadVoice=voices.options.length>0;voices.replaceChildren();for(const v of speaker?.voices()||[]){const o=make('option',v.name+' · '+v.language);o.value=v.name;voices.append(o);}if([...voices.options].some(o=>o.value===chosen))voices.value=chosen;else {const preferred=[...voices.options].find(o=>/bs|hr|sr/i.test(o.textContent));if(preferred)voices.value=preferred.value;}capabilityText();if(!hadVoice&&voices.options.length&&dialog.open&&speak.checked)say(status.textContent,true);}
+function preferredVoice(list){
+ const regional=list.filter(v=>/^(bs|hr|sr)(-|$)/i.test(v.language));
+ const score=v=>{const code=v.language.toLowerCase();return (code.startsWith('bs')?30:code.startsWith('hr')?20:10)+(/neural|natural|enhanced|premium/i.test(v.name)?4:0);};
+ return regional.sort((a,b)=>score(b)-score(a))[0]||null;
+}
+function capabilityText(){
+ const provided=speaker?.voices()||[],recommended=preferredVoice(provided),haptic=typeof scope.navigator?.vibrate==='function';
+ state.textContent=(recommended?'Pronađen je glas za bosanski ili srodan jezik. Probaj ga i promijeni ako nije razumljiv. ':
+ provided.length?'Nema lokalnog glasa za bosanski, hrvatski ili srpski. Govor neće automatski koristiti pogrešan jezik. ':
+ 'Lokalni glas nije dostupan; upute ostaju tekstom i kroz čitač ekrana. ')
+ +(haptic?'Zahtjev vibracije provjerava se na uređaju.':'Preglednik ne nudi vibraciju.');
+ voiceHelp.textContent=voices.value?
+ (/^(bs|hr|sr)(-|$)/i.test((provided.find(v=>v.name===voices.value)||{}).language||'')?'Ovo je glas instaliran na uređaju, ne poseban CLEA govorni model.':'Odabrani glas nije za bosanski jezik i može pogrešno izgovarati riječi.'):
+ 'Nema odgovarajućeg izabranog glasa. Upute ostaju čitljive na ekranu.';
+ previewVoice.disabled=!voices.value;
+}
+function refreshVoices(){
+ const chosen=voices.value,hadVoice=voices.options.length>0,installed=speaker?.voices()||[];
+ voices.replaceChildren();
+ for(const v of installed){const o=make('option',v.name+' · '+v.language);o.value=v.name;voices.append(o);}
+ const prior=installed.find(v=>v.name===chosen),best=preferredVoice(installed);
+ if(prior&&chosen)voices.value=chosen;
+ else if(best)voices.value=best.name;
+ else voices.selectedIndex=-1;
+ capabilityText();
+ if(!hadVoice&&best&&dialog.open&&speak.checked)say(status.textContent,true);
+}
+voices.addEventListener('change',()=>{stopSpeech();capabilityText();});
+previewVoice.onclick=()=>{if(voices.value)say('Ovo je probni glas CLEA Sense. Možeš li razumjeti ovu rečenicu?',true);};
+rate.onchange=()=>{if(!dialog.open)return;stopSpeech();state.textContent='Brzina govora je promijenjena. Probaj glas za provjeru.';};
 function stopSpeech(){clearTimeout(speechTimer);speechTimer=null;pendingSpeech=null;speaker?.stop();}
 function flushSpeech(){
  clearTimeout(speechTimer);speechTimer=null;const text=pendingSpeech;pendingSpeech=null;
  if(!dialog.open||!text||!speak.checked||!voices.value||!speaker)return;
  lastSpeech=text;lastSpeechAt=performance.now();
- try{speaker.speak(text,{approved:true,voiceName:voices.value}).catch(e=>{if(e.code!=='Cancelled'&&dialog.open)state.textContent='Govor nije završen. Upute ostaju tekstom; možeš odabrati drugi lokalni glas.';});}catch{state.textContent='Govor nije dostupan. Upute ostaju tekstom.';}
+ try{speaker.speak(text,{approved:true,voiceName:voices.value,rate:Number(rate.value)}).catch(e=>{if(e.code!=='Cancelled'&&dialog.open)state.textContent='Govor nije završen. Upute ostaju tekstom; možeš odabrati drugi lokalni glas.';});}catch{state.textContent='Govor nije dostupan. Upute ostaju tekstom.';}
 }
 function say(text,force=false){
  status.textContent=text;if(!speak.checked||!voices.value||!speaker)return;
@@ -127,7 +159,7 @@ const observer=new MutationObserver(records=>{if(records.some(record=>!record.ta
 d.addEventListener('visibilitychange',()=>{if(d.hidden&&dialog.open)finish();});scope.addEventListener('pagehide',()=>{if(dialog.open)finish();});scope.addEventListener('sense:erase',()=>{if(dialog.open)finish();status.textContent='';voices.replaceChildren();});scope.addEventListener('resize',scheduleMeasurement);d.addEventListener('scroll',scheduleMeasurement,true);scope.visualViewport?.addEventListener('resize',scheduleMeasurement);scope.visualViewport?.addEventListener('scroll',scheduleMeasurement);
 const companion=make('section');companion.id='sense-focus-companion';companion.className='sense-touch-launch';const companionLabel=make('label'),companionEnabled=make('input'),companionStatus=make('p');companionEnabled.type='checkbox';companionEnabled.id='sense-focus-enabled';companionLabel.append(companionEnabled,d.createTextNode(' Sense prati moj fokus · govori gdje sam, bez čitanja podataka'));companionStatus.setAttribute('role','status');companionStatus.setAttribute('aria-live','polite');companion.append(companionLabel,companionStatus);launch.after(companion);let companionSpeaker=null,companionLast='';
 function companionStop(){companionSpeaker?.stop();companionSpeaker=null;companionLast='';}
-function companionSay(text){if(!companionEnabled.checked||dialog.open)return;companionStatus.textContent=text;if(text===companionLast)return;companionLast=text;try{companionSpeaker=companionSpeaker||scope.CLEA7SenseSDK?.speaker?.();const available=companionSpeaker?.voices()||[],voice=available.find(x=>/^(bs|hr|sr)/i.test(x.language))||available[0];if(voice)companionSpeaker.speak(text,{approved:true,voiceName:voice.name}).catch(()=>{});}catch{}}
+function companionSay(text){if(!companionEnabled.checked||dialog.open)return;companionStatus.textContent=text;if(text===companionLast)return;companionLast=text;try{companionSpeaker=companionSpeaker||scope.CLEA7SenseSDK?.speaker?.();const available=companionSpeaker?.voices()||[],voice=preferredVoice(available);if(voice)companionSpeaker.speak(text,{approved:true,voiceName:voice.name,rate:0.94}).catch(()=>{});else companionStatus.textContent=text+' (Nema odgovarajućeg lokalnog glasa za govor.)';}catch{}}
 companionEnabled.onchange=()=>{if(companionEnabled.checked)companionSay('Sense prati fokus u ovoj aplikaciji. Tipkom Tab ili čitačem ekrana prelazi na kontrole. Uneseni podaci se ne čitaju.');else{companionStop();companionStatus.textContent='Vođenje fokusa je isključeno.';}};
 d.addEventListener('focusin',e=>{if(!companionEnabled.checked||companion.contains(e.target)||own(e.target)||dialog.open)return;const item=measured(e.target);if(!item)return;const p={x:(item.rect.left+item.rect.right)/2,y:(item.rect.top+item.rect.bottom)/2};companionSay('Fokus: '+item.label+'. Dio: '+item.region+'. '+position(p,{width:innerWidth,height:innerHeight}).replace('Prst je','Kontrola je'));});
 d.addEventListener('clea:action-result',e=>{if(!companionEnabled.checked)return;const data=e.detail;if(data&&data.format==='sense.action-result/1'&&typeof data.screen==='string')companionSay('Radnja je završena. Trenutni ekran: '+clean(data.screen)+'.');});
