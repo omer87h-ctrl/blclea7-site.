@@ -1,0 +1,33 @@
+{
+  "format": "clea7.app-shell-interface-release/1",
+  "interfaceRevision": "018",
+  "coreSDKVersion": "0.48.0-test",
+  "sourceCommit": "21e95d8aaca52e88baef52ecc609f4b40f0b5338",
+  "sourceRepository": "omer87h-ctrl/BL-Clea7-by-brzoilokalno",
+  "androidManifest": "clea7500-android-0.1.8.json",
+  "fixes": [
+    "Correct public workspace selected before initial editor render.",
+    "Direct Android public launch with the same petrol window background.",
+    "AI and Draw switch through the original Studio without reloading the document.",
+    "Unsent chat and current project identity retained across workspace switches."
+  ],
+  "verification": {
+    "actualChromium": true,
+    "actualEditorLoadingDelayed": true,
+    "wrongDesignFlashVisible": false,
+    "mainDocumentRequestsAcrossAIAndDraw": 1,
+    "originalPublicProductBrowserGroups": 4,
+    "targetedPythonPassed": 27,
+    "publicPythonPassed": 73,
+    "actualJVMRouteAssertions": 19,
+    "apkSignatureVerified": true
+  },
+  "limits": {
+    "physicalAndroidExecuted": false,
+    "updatedHPInferenceExecuted": false,
+    "publicModelServiceEnabled": false,
+    "wholeMasterCompleted": false,
+    "neural70BParityMeasured": false
+  },
+  "historicalDownloadsModified": false
+}

@@ -693,8 +693,8 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 18067,
-      "sha256": "c99740231f69142ce23bf0d6749b2d7f08b0892e582c22c0fdff4b220124601a"
+      "bytes": 18126,
+      "sha256": "d9709b2239afbcbe62315f0ab9e5c5808fcbc4ade9f72cc72a19023b0cd238f1"
     },
     {
       "path": "studio/workbench/intelligence.js",
@@ -737,14 +737,19 @@
       "sha256": "063eb6e2edb5e37b4109fa83af2efa91d17fd6e833898eade5def9231bcfb34e"
     },
     {
+      "path": "studio/workbench/product-entry.js",
+      "bytes": 1501,
+      "sha256": "9d595d67fb5d15e60b5594ec2accfb4cb867d57b0739f0b30a2713115f55ce43"
+    },
+    {
       "path": "studio/workbench/product-shell.css",
-      "bytes": 10571,
-      "sha256": "bf2e33d2d3605a7189539acf796fe74b9a47813c7a11fc602de6548bd15f9069"
+      "bytes": 11224,
+      "sha256": "0e49ddc77746ea8d197141556f859414eb8974ce8b2adb9786b69fafe08f9da2"
     },
     {
       "path": "studio/workbench/product-shell.js",
-      "bytes": 4274,
-      "sha256": "696d2945579e629ab6d76884976c1d2506d69211a3fd0b4406c5e61294bce551"
+      "bytes": 4618,
+      "sha256": "9ef5d9bb001b5ff24aeb4bf2d5e67da8a08319036c9261c7b5d38b2e70439c85"
     },
     {
       "path": "studio/workbench/publisher.js",
@@ -863,8 +868,8 @@
     },
     {
       "path": "studio/workbench/studio.js",
-      "bytes": 61815,
-      "sha256": "a2b8908daba949bc51234dc22d3963c1e80cc2fe670a10ccd23eb0c9773021a3"
+      "bytes": 61835,
+      "sha256": "89f47fd960e69cb9f2ad00a9a049a5e50cd907754dc8b29cd0916f3d71e77e94"
     },
     {
       "path": "studio/workbench/toolchain-ui.js",
