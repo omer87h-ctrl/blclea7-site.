@@ -27,7 +27,7 @@ def main():
   with sync_playwright() as pw:
    browser=pw.chromium.launch(executable_path=os.environ.get('CLEA7_CHROME','/usr/bin/chromium'),headless=True,args=['--no-sandbox']);page=browser.new_page(accept_downloads=True)
    page.on('pageerror',lambda e:errors.append(str(e)));page.on('request',lambda r:requests.append((r.method,r.url)))
-   page.goto(f'http://127.0.0.1:{server.server_port}/sense/',wait_until='networkidle');page.get_by_role('button',name='Uključi ravni prikaz radnog prostora',exact=True).click()
+   page.goto(f'http://127.0.0.1:{server.server_port}/sense/?tool=cv',wait_until='networkidle');page.get_by_role('button',name='Uključi ravni prikaz radnog prostora',exact=True).click()
    assert not any('/vendor/pdfjs/' in url for _,url in requests)
    denied=page.evaluate("async()=>{try{await CLEA7SenseDocumentImport.read(new File(['private'],'a.txt'));return false;}catch(e){return e.code==='Permission';}}")
    assert denied;checks.append('Document bytes require explicit approval; PDF code/worker are not fetched on page load')
@@ -61,7 +61,7 @@ def main():
    checks.append('Confirmed imported text exports as a genuine DOCX; no inference request or private-document upload occurs')
    if a.standalone:
     standalone_server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Quiet,directory=str(a.standalone.resolve().parent)));threading.Thread(target=standalone_server.serve_forever,daemon=True).start()
-    page.goto(f'http://127.0.0.1:{standalone_server.server_port}/{a.standalone.name}',wait_until='networkidle');page.get_by_role('button',name='Uključi ravni prikaz radnog prostora',exact=True).click();start=len(requests);page.context.set_offline(True)
+    page.goto(f'http://127.0.0.1:{standalone_server.server_port}/{a.standalone.name}?tool=cv',wait_until='networkidle');page.get_by_role('button',name='Uključi ravni prikaz radnog prostora',exact=True).click();start=len(requests);page.context.set_offline(True)
     page.locator('#sense-cv-text-file').set_input_files({'name':'offline.pdf','mimeType':'application/pdf','buffer':pdf('Offline local CV text')});page.locator('#sense-cv-import-preview').wait_for(timeout=45000)
     assert 'Offline local CV text' in page.locator('#sense-cv-import-text').input_value();assert not any(url.startswith(('http:','https:')) for _,url in requests[start:])
     page.get_by_role('button',name='Potvrdi učitani CV',exact=True).click();assert 'Offline local CV text' in page.locator('#cv-text').input_value()

@@ -9,9 +9,10 @@ from playwright.sync_api import sync_playwright
 
 FIXTURE="""(() => {
  window.__senseDeviceFixture={spoken:[],vibrations:[],clicks:0,voicesAvailable:true,voiceListeners:new Set()};
- const voice={name:'Local test voice',lang:'bs-BA',localService:true};
+ const voice={name:'Hrvatski lokalni glas',lang:'hr-HR',localService:true};
+ const bsVoice={name:'Bosanski lokalni glas',lang:'bs-BA',localService:true};
  Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
- getVoices:()=>__senseDeviceFixture.voicesAvailable?[voice]:[],cancel(){},addEventListener(type,fn){if(type==='voiceschanged')__senseDeviceFixture.voiceListeners.add(fn);},removeEventListener(type,fn){__senseDeviceFixture.voiceListeners.delete(fn);},
+ getVoices:()=>__senseDeviceFixture.voicesAvailable?[bsVoice,voice]:[],cancel(){},addEventListener(type,fn){if(type==='voiceschanged')__senseDeviceFixture.voiceListeners.add(fn);},removeEventListener(type,fn){__senseDeviceFixture.voiceListeners.delete(fn);},
  speak(u){__senseDeviceFixture.spoken.push(u.text);queueMicrotask(()=>u.onend?.());}}});
  window.SpeechSynthesisUtterance=class{constructor(text){this.text=text;}};
  Object.defineProperty(navigator,'vibrate',{configurable:true,value:p=>{__senseDeviceFixture.vibrations.push(p);return true;}});
@@ -28,9 +29,25 @@ def main():
    browser=pw.chromium.launch(executable_path=os.environ.get('CLEA7_CHROME','/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
    context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True,reduced_motion='reduce');context.add_init_script(FIXTURE);page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
    page.goto(f'http://127.0.0.1:{server.server_port}/sense/',wait_until='networkidle')
+   assert page.locator('#sense-interface-toggle').is_visible()
+   assert page.locator('#sense-interface-toggle').get_attribute('aria-pressed')=='false'
+   assert not page.locator('#view-workspace').is_visible()
+   page.locator('#sense-interface-toggle').click()
+   assert page.locator('#sense-touch-guide').is_visible()
+   assert page.locator('#sense-interface-toggle').get_attribute('aria-pressed')=='true'
+   assert page.locator('.sense-touch-console.is-exploring').is_visible()
+   assert not page.locator('#sense-touch-voice').is_visible()
+   assert page.evaluate("document.querySelector('#sense-touch-voice').value")=='Hrvatski lokalni glas'
+   assert any('Sense je uključen' in text for text in page.evaluate('__senseDeviceFixture.spoken'))
+   page.locator('#sense-touch-close').click()
+   assert not page.locator('#sense-touch-guide').is_visible()
+   assert page.locator('#sense-interface-toggle').get_attribute('aria-pressed')=='false'
+   checks.append('One Sense button starts Croatian-preferred guidance immediately with advanced settings hidden; stopping restores a simple screen')
+   page.goto(f'http://127.0.0.1:{server.server_port}/sense/?tool=cv',wait_until='networkidle')
    page.locator('#sense-create-cv-shortcut').click();page.locator('#sense-cv-name').fill('PRIVATE_VALUE_MUST_NOT_BE_SPOKEN')
    page.locator('#sense-cv-authoring [data-sense-touch-launch]').click();page.locator('#sense-touch-guide').wait_for(state='visible')
    choices=page.locator('#sense-touch-target option').all_text_contents();assert any('ime' in x.lower() for x in choices),choices
+   page.locator('#sense-touch-options-toggle').click()
    page.select_option('#sense-touch-target',label=next(x for x in choices if 'ime' in x.lower()))
    page.locator('#sense-touch-start').click()
    assert page.locator('.sense-touch-console.is-exploring').is_visible()
@@ -74,7 +91,7 @@ def main():
    checks.append('Exploration cannot activate underlying controls; separate focus action returns to the exact editable field')
    page.locator('#sense-cv-authoring [data-sense-touch-launch]').click()
    assert page.locator('#sense-touch-mode').input_value()=='explore'
-   page.locator('#sense-touch-start').click()
+   assert page.locator('.sense-touch-console.is-exploring').is_visible()
    points=page.evaluate('''()=>[...document.querySelector('#sense-cv-authoring').querySelectorAll('input,textarea,button')].filter(n=>!n.closest('[hidden]')&&!n.disabled&&!n.hasAttribute('data-sense-touch-launch')).map(n=>{const r=n.getBoundingClientRect();return {id:n.id,x:(r.left+r.right)/2,y:(r.top+r.bottom)/2,w:r.width,h:r.height};}).filter(r=>r.w>0&&r.h>0&&r.y>10&&r.y<innerHeight-10)''')
    first=next(x for x in points if x['id']=='sense-cv-name');second=next(x for x in points if x['id'] and x['id']!=first['id'])
    touch('touchStart',first['x'],first['y']);assert page.evaluate('CLEA7SenseNavigation.current().underFinger')
@@ -89,15 +106,15 @@ def main():
    before=page.evaluate('CLEA7SenseNavigation.current()')
    page.locator('.sense-touch-surface').dispatch_event('pointermove',{'pointerId':999,'pointerType':'mouse','buttons':0,'clientX':1,'clientY':1})
    assert page.evaluate('CLEA7SenseNavigation.current()')==before
-   page.locator('#sense-touch-explain').click();assert 'Dio:' in page.locator('#sense-touch-status').inner_text()
+   page.locator('#sense-touch-options-toggle').click();page.locator('#sense-touch-explain').click();assert 'Dio:' in page.locator('#sense-touch-status').inner_text()
    page.locator('#sense-touch-close').click()
    checks.append('Free exploration identifies actual controls under a moving finger; final queued speech is delivered even when movement stops, without reading private input values')
    page.evaluate('__senseDeviceFixture.voicesAvailable=false')
    page.locator('#sense-cv-authoring [data-sense-touch-launch]').click()
    assert page.locator('#sense-touch-voice option').count()==0
    page.evaluate('()=>{__senseDeviceFixture.voicesAvailable=true;for(const fn of __senseDeviceFixture.voiceListeners)fn();}')
-   assert page.locator('#sense-touch-voice option').count()==1
-   assert 'Sense istražuje ekran' in page.evaluate('__senseDeviceFixture.spoken.at(-1)')
+   assert page.locator('#sense-touch-voice option').count()==2
+   assert 'Sense je uključen' in page.evaluate('__senseDeviceFixture.spoken.at(-1)')
    page.locator('#sense-touch-close').click()
    checks.append('A local voice that appears asynchronously speaks the current guidance instead of leaving the user with a silent initial session')
    page.locator('#sense-cv-authoring [data-sense-touch-launch]').click();page.keyboard.press('Escape');assert not page.locator('#sense-touch-guide').is_visible()
@@ -115,6 +132,7 @@ def main():
    question_label=page.locator('#chat-question').evaluate("n=>n.getAttribute('aria-label')||n.labels[0].textContent")
    page.locator('body > [data-sense-touch-launch]').click()
    choices=page.locator('#sense-touch-target option').all_text_contents()
+   page.locator('#sense-touch-options-toggle').click()
    page.select_option('#sense-touch-target',label=next(x for x in choices if question_label.strip() in x))
    page.locator('#sense-touch-ask').click()
    page.wait_for_function("()=>document.querySelector('#chat-question').value.includes('sense.control-context/1')")
@@ -122,7 +140,7 @@ def main():
    assert page.locator('#clea-ai-task-mode').input_value()=='chat'
    assert 'PRIVATE_VALUE' not in page.locator('#chat-question').input_value()
    draft=page.locator('#chat-question').input_value()
-   page.locator('body > [data-sense-touch-launch]').click();page.locator('#sense-touch-ask').click()
+   page.locator('body > [data-sense-touch-launch]').click();page.locator('#sense-touch-options-toggle').click();page.locator('#sense-touch-ask').click()
    assert page.locator('#chat-question').input_value()==draft
    assert 'Sačuvaj trenutno pitanje' in page.locator('#sense-touch-status').inner_text()
    page.keyboard.press('Escape')
@@ -159,6 +177,7 @@ on increase {
    app.evaluate("()=>{globalThis.__appClicks=0;document.querySelector('#application').addEventListener('click',()=>__appClicks++);}")
    app.locator('body > [data-sense-touch-launch]').click()
    labels=app.locator('#sense-touch-target option').all_text_contents()
+   if app.locator('.sense-touch-console.is-exploring').is_visible():app.locator('#sense-touch-options-toggle').click()
    app.select_option('#sense-touch-target',label=next(x for x in labels if control_name in x))
    app.select_option('#sense-touch-mode','explore');app.locator('#sense-touch-start').click()
    r=control.bounding_box();runtime_client=context.new_cdp_session(app)

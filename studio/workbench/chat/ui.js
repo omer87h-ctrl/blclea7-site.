@@ -269,7 +269,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  async function speakReply(){
   stopReplySpeech();if(!spokenReply)return;const generation=speechGeneration;
   replySpeaker=replySpeaker||globalThis.CLEA7SenseSDK?.speaker?.();
-  const voices=replySpeaker?.voices()||[],voice=voices.find(v=>/^(bs|hr|sr)(-|$)/i.test(v.language))||voices[0];
+  const voices=replySpeaker?.voices()||[],voice=voices.find(v=>/^hr(?:-|$)/i.test(v.language))||voices.find(v=>/^bs(?:-|$)/i.test(v.language))||voices.find(v=>/^sr(?:-|$)/i.test(v.language));
   if(!voice){status.textContent='Uređaj trenutno ne nudi potvrđen lokalni glas. Odgovor ostaje tekstom i dostupan je sistemskom čitaču ekrana.';return;}
   speakingReply=true;readReply.textContent='Zaustavi čitanje';
   const chunks=spokenReply.match(/[\s\S]{1,2800}(?:\s|$)|[\s\S]{1,2800}/g)||[];

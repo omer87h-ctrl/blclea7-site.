@@ -371,3 +371,95 @@ html[data-clea-area="sense"] body.sense-experience.high-contrast :is(.sense-home
   display:none!important;
  }
 }
+
+
+/* Sense first, tools second. This single-action view is the default.
+ * Real CLEA tools are kept intact and appear only when the user asks for one. */
+html[data-clea-area="sense"] body.sense-one-switch:not(.sense-tools-open) :is(
+ .primary-nav,.sidebar-bottom,.workspace-label,.topbar,.page-heading,
+ #status,.view,.runtime-details,.footer,.sense-workspace-divider,
+ #sense-communication-open,#sense-guide-launch,#sense-guide-panel
+){display:none!important}
+html[data-clea-area="sense"] body.sense-one-switch :is(
+ .sense-guide-launch,[data-sense-touch-launch],#sense-focus-companion
+){display:none!important}
+html[data-clea-area="sense"] body.sense-one-switch{
+ padding-bottom:0!important
+}
+html[data-clea-area="sense"] body.sense-one-switch #main{max-width:1140px}
+html[data-clea-area="sense"] body.sense-one-switch .sense-home{
+ grid-template-columns:minmax(0,1.5fr) minmax(190px,.5fr);
+ min-height:min(70svh,530px);
+}
+html[data-clea-area="sense"] body.sense-one-switch .sense-home-description{
+ max-width:53ch
+}
+html[data-clea-area="sense"] body.sense-one-switch #sense-interface-toggle{
+ min-width:min(310px,100%);min-height:68px;padding:18px 23px;
+ font-size:clamp(18px,2.1vw,23px);font-weight:750;
+}
+html[data-clea-area="sense"] body.sense-one-switch #sense-interface-toggle[aria-pressed="true"]{
+ background:#91e6cd;color:#10262a
+}
+html[data-clea-area="sense"] body.sense-one-switch .sense-extra-tools{
+ max-width:1140px;margin:20px auto 0;padding:0;
+ border:1px solid #496c62;border-radius:14px;
+ background:#153336;color:#d1e7df;
+}
+html[data-clea-area="sense"] body.sense-one-switch .sense-extra-tools summary{
+ padding:14px 19px;min-height:52px;
+ cursor:pointer;font-size:14px;font-weight:700;
+}
+html[data-clea-area="sense"] body.sense-one-switch .sense-extra-tools[open]{
+ border-color:#91e6cd
+}
+html[data-clea-area="sense"] body.sense-one-switch .sense-extra-tools .sense-extra-actions{
+ display:flex;flex-wrap:wrap;gap:9px;padding:0 17px 11px
+}
+html[data-clea-area="sense"] body.sense-one-switch .sense-extra-tools .sense-extra-actions button{
+ min-height:48px;background:#244d49;color:#eaf3f0;
+ border:1px solid #86b9a6;border-radius:11px;padding:10px 16px;
+}
+html[data-clea-area="sense"] body.sense-one-switch .sense-extra-tools>p{
+ padding:0 17px 14px;margin:0;color:#bcd9d0;font-size:13px
+}
+html[data-clea-area="sense"] body.sense-one-switch.sense-tools-open .sense-home{
+ min-height:0;padding:clamp(18px,2.5vw,35px);
+ margin-bottom:18px
+}
+html[data-clea-area="sense"] body.sense-one-switch.sense-tools-open .sense-home-art{
+ height:150px
+}
+html[data-clea-area="sense"] body.sense-one-switch.sense-tools-open .sense-home h1{
+ font-size:clamp(27px,3vw,39px);margin-bottom:12px
+}
+html[data-clea-area="sense"] body.sense-one-switch.sense-tools-open .sense-home-description{display:none}
+html[data-clea-area="sense"] body.sense-one-switch.sense-tools-open .sense-home-trust{display:none}
+html[data-clea-area="sense"] body.sense-one-switch.sense-tools-open[data-sense-tool="communicate"] :is(
+ .page-heading,#status,.view,.runtime-details,.footer,.sense-workspace-divider
+){display:none!important}
+html[data-clea-area="sense"] body.sense-one-switch.sense-tools-open[data-sense-tool="cv"] #sense-communication-open{
+ display:none!important
+}
+html[data-clea-area="sense"] body.sense-one-switch.sense-tools-open #sense-communication-open[open]{
+ display:block
+}
+html[data-clea-area="sense"] body.sense-one-switch.sense-tools-open .primary-nav,
+html[data-clea-area="sense"] body.sense-one-switch.sense-tools-open .topbar{
+ display:flex
+}
+html[data-clea-area="sense"] body.sense-one-switch .sense-extra-tools:focus-within,
+html[data-clea-area="sense"] body.sense-one-switch #sense-interface-toggle:focus-visible{
+ outline:3px solid #ffc468;outline-offset:4px
+}
+@media(max-width:760px){
+ html[data-clea-area="sense"] body.sense-one-switch .sense-home{
+  grid-template-columns:1fr;min-height:0
+ }
+ html[data-clea-area="sense"] body.sense-one-switch #sense-interface-toggle{
+  width:100%;min-width:0;min-height:68px
+ }
+ html[data-clea-area="sense"] body.sense-one-switch.sense-tools-open .sense-home-art{
+  display:none
+ }
+}

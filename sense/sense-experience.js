@@ -13,6 +13,7 @@
  };
  function launch(kind){
   if(kind==='communicate'){
+   document.body.classList.add('sense-tools-open');document.body.dataset.senseTool='communicate';
    const disclosure=document.getElementById('sense-communication-open');
    const field=document.getElementById('sense-expression');
    if(!disclosure||!field){announce('Komunikacijski alat nije učitan. Osvježi stranicu.');return false;}
@@ -27,6 +28,7 @@
    return true;
   }
   if(kind==='cv'){
+   document.body.classList.add('sense-tools-open');document.body.dataset.senseTool='cv';
    const nav=document.querySelector('#primary-nav [data-view="workspace"]');
    const input=document.getElementById('cv-text');
    if(!nav||!input){announce('CV radni prostor nije učitan. Osvježi stranicu.');return false;}
@@ -39,5 +41,7 @@
  for(const button of document.querySelectorAll('[data-sense-launch]')){
   button.addEventListener('click',()=>launch(button.dataset.senseLaunch));
  }
+ const requestedTool=new URL(location.href).searchParams.get('tool');
+ if(requestedTool==='cv'||requestedTool==='communicate')launch(requestedTool);
  globalThis.CLEA7SenseExperience=Object.freeze({format:'clea7.sense-experience/1',launch});
 })();
