@@ -1,0 +1,15 @@
+{
+  "format": "clea7.public-product-browser/1",
+  "passed": true,
+  "checks": [
+    "Actual public homepage, links and truthful disabled-model configuration render at390/768/1440px with keyboard menu navigation",
+    "One homepage description reaches the same Studio conversation without sending it, pairing a visitor or inventing an AI reply",
+    "A new owned BIL/Draw application saves through original Studio, survives full browser exit and reopens only after explicit selection from the start screen",
+    "One Draw tab and one Sense switch operate real measured guidance; advanced tools remain accessible and mobile chat keeps its editable draft"
+  ],
+  "errors": [],
+  "actualChromium": true,
+  "modelInferenceExecuted": false,
+  "ownerPairingRequiredForPublicStudio": false,
+  "physicalAndroidExecuted": false
+}

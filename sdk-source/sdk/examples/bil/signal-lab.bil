@@ -1,0 +1,93 @@
+# Original CLEA interactive game/lab. Same owned objects, custom views and Runtime.
+BIL "CLEA Signal Lab".
+igra pamti x kao broj 70.
+igra pamti y kao broj 220.
+igra pamti ciljX kao broj 470.
+igra pamti bodovi kao broj 0.
+igra pamti rekord kao broj 0.
+igra pamti takt kao broj 0.
+igra pamti ugao kao broj 0.
+igra pamti kameraX kao broj 0.
+igra pamti kameraY kao broj 0.
+igra pamti zoom kao broj 1.
+igra izvodi udaljenost iz (x minus ciljX) puta (x minus ciljX) plus (y minus 220) puta (y minus 220).
+igra izvodi blizu iz udaljenost manje 1800 i takt manje 1200.
+igra izvodi sljedeciRezultat iz blizu:
+ ne daje bodovi;
+ da daje bodovi plus 1.
+igra izvodi sljedeciCilj iz blizu:
+ ne daje ciljX;
+ da daje (ciljX plus 137) ostatak 620 plus 30.
+igra izvodi noviRekord iz bodovi vece rekord:
+ ne daje rekord;
+ da daje bodovi.
+igra izvodi lijeviX iz x manje 25:
+ ne daje x minus 20;
+ da daje x.
+igra izvodi desniX iz x vece 715:
+ ne daje x plus 20;
+ da daje x.
+igra izvodi gornjiY iz y manje 25:
+ ne daje y minus 20;
+ da daje y.
+igra izvodi donjiY iz y vece 395:
+ ne daje y plus 20;
+ da daje y.
+igra izvodi sljedeciTakt iz takt manje 1200:
+ ne daje 1200;
+ da daje takt plus 1.
+igra izvodi poruka iz takt manje 1200:
+ ne daje "Runda je završena. Rekord ostaje sačuvan.";
+ da daje "Približi se svjetlosnom signalu i preuzmi ga.".
+lijevo nad igra postavlja x na lijeviX.
+desno nad igra postavlja x na desniX.
+gore nad igra postavlja y na gornjiY.
+dolje nad igra postavlja y na donjiY.
+miruj nad igra postavlja x na x.
+pokupi nad igra postavlja bodovi na sljedeciRezultat.
+pokupi nad igra postavlja ciljX na sljedeciCilj.
+pokupi nad igra postavlja rekord na noviRekord.
+korak nad igra postavlja takt na sljedeciTakt.
+korak nad igra postavlja ugao na (ugao plus 2) ostatak 360.
+ponovo nad igra postavlja takt na 0.
+ponovo nad igra postavlja bodovi na 0.
+ponovo nad igra postavlja x na 70.
+ponovo nad igra postavlja y na 220.
+ponovo nad igra postavlja ciljX na 470.
+pogled igraonica "Signal Lab · igra i simulacija" {
+ card "Tvoj svjetlosni laboratorij" {
+  heading "CLEA / SIGNAL LAB" style { fontSize 30; fontWeight 800; color "#9af4dc" } key naslov
+  text "Pronađi signal. Pomjeri izviđača, približi se cilju i preuzmi energiju. Uključi tok za rundu od1200 koraka." key uputa
+  row "Rezultat" {
+   card "Bodovi" { text "PREUZETI SIGNALI"; show igra.bodovi } style { background "#163a47"; padding 18; radius 18 } key rezultat
+   card "Rekord" { text "TVOJ REKORD"; show igra.rekord } style { background "#253153"; padding 18; radius 18 } key rekord
+   card "Tok" { text "KORAK RUNDE /1200"; show igra.takt } style { background "#392e42"; padding 18; radius 18 } key vrijeme
+  } style { gap 16; wrap "wrap" } key statistika
+  space "Svjetlosni prostor" size [800,450] camera [igra.kameraX,igra.kameraY,igra.zoom] {
+   drawing "Orijentir" points [[0,500],[500,0],[1000,500],[500,1000]] closed fill "#102e43" ink "#24465c" style { x 280; y 100; width 240; height 240; rotate igra.ugao } key orijentir
+   drawing "Signal energije" points [[500,0],[1000,500],[500,1000],[0,500]] closed fill "#ffb56b" ink "#ffe4bb" style { x igra.ciljX; y 220; width 36; height 36; rotate igra.ugao } gestures { tap runs pokupi } key signal
+   drawing "Tvoj izviđač" points [[500,0],[1000,850],[500,650],[0,850]] closed fill "#80f6d2" ink "#e1fff6" style { x igra.x; y igra.y; width 40; height 40 } motion move 120 key izvidjac
+  } style { background "#081621"; borderColor "#2c5b71"; borderWidth 1; radius 24; width "fill" } key svijet
+  show igra.poruka key poruka
+  pad "Kretanje izviđača" left lijevo right desno up gore down dolje release miruj key kontrole
+  row {
+   button "Preuzmi signal" runs pokupi key preuzmi
+   button "Nova runda · sačuvaj rekord" runs ponovo key reset
+   button "Otvori laboratorij" opens laboratorij key otvori_lab
+  } style { gap 12; wrap "wrap" } key komande
+  clock "Tok runde · uključi ili pauziraj" every 50 runs korak key sat
+ } style { background "#102332"; color "#e9f5fb"; padding 24; gap 18; radius 28; width "fill"; gradientFrom "#102332"; gradientTo "#122d3d" } key radni_prostor
+}.
+pogled laboratorij "Isti objekat · drugačiji pogled" {
+ card "Istraži vezu podataka i crteža" {
+  heading "Jedan objekat. Više pogleda." key lab_naslov
+  text "Ovdje mijenjaš iste tipizirane vrijednosti koje koristi igra. Nema druge kopije stanja niti posebnog izvršioca." key lab_opis
+  input igra.x label "Položaj X" range [0,740] key lab_x
+  input igra.y label "Položaj Y" range [0,410] key lab_y
+  input igra.zoom label "Uvećanje kamere" range [1,3] key lab_zoom
+  show igra.udaljenost key lab_udaljenost
+  show igra.blizu key lab_blizina
+  button "Vrati se u prostor" opens igraonica key nazad
+ } style { background "#102332"; color "#e9f5fb"; padding 24; gap 16; radius 24 } key lab
+}.
+pocetak igraonica.

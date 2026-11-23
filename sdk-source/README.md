@@ -1,10 +1,8 @@
-Source mirror of BL CLEA SDK0.44.0-test. The full downloadable ZIP includes
-optional OCR/PDF vendor assets omitted from this source mirror. CLI BIL/Core
-execution and project tools work locally with Python3.12+ and Node22+.
+# BL CLEA7 SDK 0.48.0-test — shared Core and dependency cache
 
-# BL CLEA7 SDK 0.44.0-test — shared Core and dependency cache
-
-Development/test distribution by Brzo i Lokalno. The authoritative BIL compiler,
+Development/test distribution by Brzo i Lokalno.
+Runtime0.48 adds the typed clea7500.private/1 extension contract. Its private host,
+models, paired credentials and owner data are NOT included in this curated SDK. The authoritative BIL compiler,
 bounded interpreter, shared Core, project CLI and original dependency/result cache
 are included. This archive is not an Android/iOS/Windows installer or a claim of
 native platform parity. Python3.12+ and Node22+ are development prerequisites.
@@ -22,6 +20,15 @@ in docs/BIL-INCREMENTAL-COMPILER.md; examples are in sdk/examples/bil.
 Core5 adds the original sentence-object grammar. See docs/BIL-OBJECT-GRAMMAR.md.
 It requires Runtime0.44 and includes real remembered fields, reactive relations,
 owned actions, typed lazy SELECT and the shared Studio object tools.
+Runtime0.45 adds explicit custom views (pogled) over the same owned state: arbitrary
+layouts, vectors, animation, camera, clocks, controls and navigation, not a fixed
+business form. See docs/BIL-OBJECT-VIEWS.md and signal-lab.bil.
+
+Runtime0.46 adds bounded data-only media, sprites, captioned sound and measured PCM.
+Runtime0.47 adds the original WebGL2 CLEA Depth host, real3D geometry, shadow maps,
+monocular parallax, Draw-contour extrusion and shared AI/Draw tool schema revision5.
+See docs/CLEA-DEPTH.md and CLEA-RESOURCES.md. Browser evidence is separate from
+physical-device, native, neural-training or general70B-quality acceptance.
 
 From the extracted SDK directory:
 

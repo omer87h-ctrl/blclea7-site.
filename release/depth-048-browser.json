@@ -1,0 +1,57 @@
+{
+  "format": "clea7.depth-media-browser/1",
+  "passed": true,
+  "checks": [
+    "Actual Draw forms create a new owned BIL project, custom view and user-named3D world; the same Runtime renders real WebGL2 geometry",
+    "Actual triangle/depth-aware canvas selection, named alternatives and keyboard camera controls execute prerequisites, three collection/restoration rounds and visible building growth; the user-started clock moves the vehicle",
+    "Draw generates original PCM audio, packages its real bytes/provenance, composes a captioned sound component, measures waveform/peak/RMS and exposes synchronized text; playback requires an explicit user action",
+    "An explicit file chooser imports original PNG pixels, strips/re-encodes locally, records provenance and renders the same packaged resource as a sprite",
+    "Actual Sense guide lists measured3D controls and focus companion identifies their role/region without reading field values; local semantic navigation remains optional",
+    "Actual Studio HTML/.clea7 exports embed media and original WebGL host, retain the same project state across two full browser restarts and render390px with reduced-motion/keyboard alternatives and actual CDP touch picking; the exported local Sense guide is included and audio never restarts automatically",
+    "The public Studio entry opens a new editable copy of the exact curated source through an explicit button, preserving previous saved projects"
+  ],
+  "metrics": [
+    {
+      "renderer": "webgl2",
+      "frames": 42,
+      "triangles": 3472,
+      "quality": 1,
+      "submitMs": 0.5,
+      "frameMs": 0,
+      "cacheBytes": 51264,
+      "cacheHits": 2011,
+      "cacheMisses": 5,
+      "cacheEvictions": 0,
+      "motionSensor": false,
+      "reducedMotion": false,
+      "shadowMap": true,
+      "shadowBytes": 4194304,
+      "binocular": false
+    },
+    {
+      "renderer": "webgl2",
+      "frames": 10,
+      "triangles": 3472,
+      "quality": 1,
+      "submitMs": 4.4000000059604645,
+      "frameMs": 0,
+      "cacheBytes": 51264,
+      "cacheHits": 475,
+      "cacheMisses": 5,
+      "cacheEvictions": 0,
+      "motionSensor": false,
+      "reducedMotion": true,
+      "shadowMap": true,
+      "shadowBytes": 4194304,
+      "binocular": false
+    }
+  ],
+  "actualChromium": true,
+  "webGLImplementation": "Chromium SwiftShader software renderer",
+  "physicalDeviceTested": false,
+  "actualNeuralInference": false,
+  "modelResponseFixtures": false,
+  "humanAccessibilityTested": false,
+  "binocularDisplayClaim": false,
+  "errors": []
+}

@@ -1,16 +1,16 @@
 {
   "format": "clea7.public-downloads/1",
-  "version": "0.44.0-test",
-  "source_commit": "8ae1eb1164925c2e68ce5dfdfcc765935723d508",
+  "version": "0.48.0-test",
+  "source_commit": "88d55ec6d68b11f6cd77e650c25e2a06ccf19fa8",
   "published": [
     {
       "key": "sdk",
-      "name": "BL-CLEA7-Core-SDK-0.42.2-test.zip",
-      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.44.0-test.zip",
-      "size_bytes": 5780401,
-      "sha256": "1e9e66e6a50281652d10f24352a441313cb6d7531464c22785e65d310d7e9c3e",
-      "version": "0.44.0-test",
-      "source_commit": "8ae1eb1164925c2e68ce5dfdfcc765935723d508"
+      "name": "BL-CLEA7-Core-SDK-0.48.0-test.zip",
+      "url": "sense/downloads/BL-CLEA7-Core-SDK-0.48.0-test.zip",
+      "size_bytes": 5838022,
+      "sha256": "f9bd849e72d204db13bd8cd7de5f34314ab5bbe3edff3c9af7ac17b62ff5a30c",
+      "version": "0.48.0-test",
+      "source_commit": "88d55ec6d68b11f6cd77e650c25e2a06ccf19fa8"
     },
     {
       "key": "preview",
@@ -688,10 +688,10 @@
     }
   ],
   "web_current": {
-    "version": "0.44.0-test",
-    "source_commit": "8ae1eb1164925c2e68ce5dfdfcc765935723d508",
-    "scope": "BIL sentence objects / Core5 / free Draw composition / same Studio operator / persistent browser Runtime",
-    "receipt": "release/studio-044.json",
+    "version": "0.48.0-test",
+    "source_commit": "88d55ec6d68b11f6cd77e650c25e2a06ccf19fa8",
+    "scope": "unified_public_Studio_Draw_BIL_object_views_WebGL2_resources_Sense_and_standalone_Runtime",
+    "receipt": "release/studio-048.json",
     "nativeRebuilt": false,
     "native_verification": false
   },
@@ -879,12 +879,12 @@
     "newGrammarSupported": false
   },
   "sdk_current": {
-    "version": "0.44.0-test",
-    "url": "sense/downloads/BL-CLEA7-Core-SDK-0.44.0-test.zip",
-    "size_bytes": 5780401,
-    "sha256": "1e9e66e6a50281652d10f24352a441313cb6d7531464c22785e65d310d7e9c3e",
-    "entries": 160,
-    "source_commit": "8ae1eb1164925c2e68ce5dfdfcc765935723d508"
+    "version": "0.48.0-test",
+    "url": "sense/downloads/BL-CLEA7-Core-SDK-0.48.0-test.zip",
+    "size_bytes": 5838022,
+    "sha256": "f9bd849e72d204db13bd8cd7de5f34314ab5bbe3edff3c9af7ac17b62ff5a30c",
+    "entries": 173,
+    "source_commit": "88d55ec6d68b11f6cd77e650c25e2a06ccf19fa8"
   },
   "current": {
     "web": "web_current",
@@ -897,10 +897,10 @@
       "newWeightsTrained": false
     }
   },
-  "catalogue_notes": "Use current for active component versions. published, native, web and dated histories retain immutable historical downloads and receipts; they are not new0.44 native/model verification.",
+  "catalogue_notes": "Current points to active component versions. Dated histories and native receipts retain their original versions; web/SDK0.48 do not constitute new native or public model verification.",
   "verification": {
     "mode": "actual local compiler/SDK/Chromium tests",
-    "receipt": "release/studio-044.json",
+    "receipt": "release/studio-048.json",
     "privateCiRun": null
   },
   "web_baseline_040": {

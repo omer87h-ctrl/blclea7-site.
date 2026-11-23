@@ -1,0 +1,111 @@
+# Original CLEA scene and small strategy: gather three signals, restore three stages.
+# Perspective and motion parallax are monocular depth cues, not 3DS display hardware.
+BIL "CLEA Depth Atlas".
+atlas pamti prvi kao logiku ne.
+atlas pamti drugi kao logiku ne.
+atlas pamti treci kao logiku ne.
+atlas pamti dozvola kao logiku ne.
+atlas pamti nivo kao broj 0.
+atlas pamti ugao kao broj 0.
+atlas pamti vozilo kao broj -3.
+atlas izvodi a iz prvi:
+ ne daje 0;
+ da daje 1.
+atlas izvodi b iz drugi:
+ ne daje 0;
+ da daje 1.
+atlas izvodi c iz treci:
+ ne daje 0;
+ da daje 1.
+atlas izvodi energija iz a plus b plus c.
+atlas izvodi spremno iz energija jednako 3 i nivo manje 3.
+atlas izvodi sljedeciNivo iz dozvola:
+ ne daje nivo;
+ da daje nivo plus 1.
+atlas izvodi zadrziPrvi iz dozvola:
+ ne daje prvi;
+ da daje ne.
+atlas izvodi zadrziDrugi iz dozvola:
+ ne daje drugi;
+ da daje ne.
+atlas izvodi zadrziTreci iz dozvola:
+ ne daje treci;
+ da daje ne.
+atlas izvodi visina iz 0.7 plus nivo puta 0.7.
+atlas izvodi sredina iz visina kroz 2 plus 0.25.
+atlas izvodi sjajA iz prvi:
+ ne daje 0.65;
+ da daje 0.12.
+atlas izvodi sjajB iz drugi:
+ ne daje 0.65;
+ da daje 0.12.
+atlas izvodi sjajC iz treci:
+ ne daje 0.65;
+ da daje 0.12.
+atlas izvodi poruka iz nivo jednako 3:
+ ne daje "Pronađi tri svjetlosna signala u prostoru, zatim obnovi centralni toranj. Svaka obnova podiže zgradu. Cilj: tri nivoa.";
+ da daje "Završeno. Toranj je obnovljen kroz tri stvarne BIL promjene. Možeš nastaviti istraživati ili započeti ponovo.".
+uzmiPrvi nad atlas postavlja prvi na da.
+uzmiDrugi nad atlas postavlja drugi na da.
+uzmiTreci nad atlas postavlja treci na da.
+obnovi nad atlas postavlja dozvola na spremno.
+obnovi nad atlas postavlja nivo na sljedeciNivo.
+obnovi nad atlas postavlja prvi na zadrziPrvi.
+obnovi nad atlas postavlja drugi na zadrziDrugi.
+obnovi nad atlas postavlja treci na zadrziTreci.
+korak nad atlas postavlja ugao na (ugao plus 2) ostatak 360.
+korak nad atlas postavlja vozilo na (vozilo plus 3.05) ostatak 6 minus 3.
+ponovo nad atlas postavlja nivo na 0.
+ponovo nad atlas postavlja prvi na ne.
+ponovo nad atlas postavlja drugi na ne.
+ponovo nad atlas postavlja treci na ne.
+ponovo nad atlas postavlja dozvola na ne.
+pogled prostor "CLEA / DEPTH ATLAS" {
+ card "Atelier svjetlosti" {
+  heading "Sastavi. Pokreni. Uđi u svoj svijet." style { color "#98eadb"; fontSize 32; fontWeight 800 } key title
+  text "Originalna CLEA3D scena. Dodirni signal ili koristi njegova imenovana dugmad. Miš ili pomjeranje prsta mijenja osjećaj dubine; kamera i mikrofon nisu potrebni." key intro
+  world "Tvoj svjetlosni arhipelag" camera [8.5,7.5,11.5] looking [0,0.7,0] depth 0.55 {
+   mesh "Obala" geometry "cylinder" at [0,-0.48,0] size [11,0.7,9] rotation [0,0,0] surface "matte" color "#142f46" key coast
+   mesh "Temelj" geometry "box" at [0,-0.03,0] size [8.2,0.2,6.4] rotation [0,0,0] surface "ceramic" color "#27445c" key floor
+   mesh "Put" geometry "box" at [0,0.1,1.7] size [7.8,0.035,0.7] rotation [0,0,0] surface "matte" color "#101b2c" key road
+   mesh "Vozilo" geometry "box" at [atlas.vozilo,0.3,1.7] size [0.65,0.27,0.32] rotation [0,0,0] surface "ceramic" color "#e9ac69" key vehicle
+   mesh "Središnja platforma" geometry "cylinder" at [0,0.22,0] size [3.7,0.25,3.7] rotation [0,0,0] surface "metal" color "#677d99" key base
+   mesh "Obnovi toranj" geometry "box" at [0,atlas.sredina,0] size [1.6,atlas.visina,1.6] rotation [0,0,0] surface "ceramic" color "#71b7b7" gestures { tap runs obnovi } key tower
+   mesh "Krovna kruna" geometry "torus" at [0,atlas.visina,0] size [2.3,0.4,2.3] rotation [0,atlas.ugao,0] surface "metal" color "#e2b978" key crown
+   mesh "Prozor jedan" geometry "box" at [-0.45,0.68,0.812] size [0.12,0.25,0.04] rotation [0,0,0] surface "light" color "#ffe6a0" key window1
+   mesh "Prozor dva" geometry "box" at [0,0.68,0.812] size [0.12,0.25,0.04] rotation [0,0,0] surface "light" color "#ffe6a0" key window2
+   mesh "Prozor tri" geometry "box" at [0.45,0.68,0.812] size [0.12,0.25,0.04] rotation [0,0,0] surface "light" color "#ffe6a0" key window3
+   mesh "Prvi signal" geometry "sphere" at [-2.8,1.15,0.2] size [atlas.sjajA,atlas.sjajA,atlas.sjajA] rotation [0,0,0] surface "light" color "#6af3d7" gestures { tap runs uzmiPrvi } key orb1
+   mesh "Drugi signal" geometry "sphere" at [2.7,1.5,-1] size [atlas.sjajB,atlas.sjajB,atlas.sjajB] rotation [0,0,0] surface "light" color "#e4bcff" gestures { tap runs uzmiDrugi } key orb2
+   mesh "Treći signal" geometry "sphere" at [2.5,0.85,2.4] size [atlas.sjajC,atlas.sjajC,atlas.sjajC] rotation [0,0,0] surface "light" color "#ffc989" gestures { tap runs uzmiTreci } key orb3
+   mesh "Signalna petlja A" geometry "torus" at [-2.8,0.8,0.2] size [1.3,0.3,1.3] rotation [25,atlas.ugao,0] surface "metal" color "#71c2ba" key loop1
+   mesh "Signalna petlja B" geometry "torus" at [2.7,1.15,-1] size [1.3,0.3,1.3] rotation [0,atlas.ugao,30] surface "metal" color "#b19ad4" key loop2
+   mesh "Signalna petlja C" geometry "torus" at [2.5,0.5,2.4] size [1.3,0.3,1.3] rotation [0,0,0] surface "metal" color "#d8af70" key loop3
+   mesh "Atelier zapad" geometry "box" at [-2.5,0.52,-1.9] size [1.6,0.8,1.1] rotation [0,12,0] surface "ceramic" color "#a4bcce" key studio1
+   mesh "Atelier istok" geometry "box" at [2.1,0.58,-2.2] size [1.3,0.9,1.1] rotation [0,-14,0] surface "ceramic" color "#c6a78e" key studio2
+   mesh "Nacrtani krov" geometry "prism" points [[0,400],[500,0],[1000,400],[1000,1000],[0,1000]] at [-2.5,1.18,-1.9] size [1.9,0.6,1.35] rotation [0,12,0] surface "metal" color "#4c7590" key contourRoof
+   mesh "Drvo zapad" geometry "cylinder" at [-3.2,0.55,1.6] size [0.13,0.85,0.13] rotation [0,0,0] surface "matte" color "#af8769" key trunk1
+   mesh "Krošnja zapad" geometry "sphere" at [-3.2,1.15,1.6] size [0.85,1,0.85] rotation [0,0,0] surface "matte" color "#418d81" key leaf1
+   mesh "Drvo jug" geometry "cylinder" at [-1.8,0.55,2.6] size [0.13,0.85,0.13] rotation [0,0,0] surface "matte" color "#af8769" key trunk2
+   mesh "Krošnja jug" geometry "sphere" at [-1.8,1.15,2.6] size [0.85,1,0.85] rotation [0,0,0] surface "matte" color "#60a493" key leaf2
+   mesh "Svjetlosni rub" geometry "torus" at [0,-0.18,0] size [10.7,0.09,8.7] rotation [0,0,0] surface "light" color "#6ab1c9" key rim
+  } style { width "fill" } key atlas_world
+  row "Napredak" {
+   card "Energija /3" { show atlas.energija key energy } style { background "#1a3c45"; radius 18; padding 14 } key energy_card
+   card "Obnovljeni nivoi /3" { show atlas.nivo key level } style { background "#29364c"; radius 18; padding 14 } key level_card
+  } style { gap 16; wrap "wrap" } key progress
+  show atlas.poruka key mission
+  row { button "Obnovi centralni toranj" runs obnovi key build; button "Nova obnova" runs ponovo key reset } style { gap 12; wrap "wrap" } key commands
+  clock "Živi prostor · pokreni ili pauziraj" every 100 runs korak key life
+  button "Kako ovo uređujem u Draw?" opens radionica key workshop
+ } style { background "#0c1726"; color "#e7eef7"; padding 20; gap 16; radius 24; width "fill" } key atelier
+}.
+pogled radionica "Isti projekt · stvarni alati" {
+ heading "Tvoj crtež postaje ponašanje" key how_title
+ text "U Studiju otvori CLEA7 Draw. Dodaj vlastiti3D prostor ili mrežu, nacrtaj zatvorenu konturu i izvuci je u prizmu. Uredi transformacije." key instructions
+ text "CLEA AI predlaže vlastite kompozicije istim provjerenim alatnim ugovorom, uz tvoj pregled. Ova scena nije ograničenje broja ideja." key how_ai
+ text "Položaji, rotacija i izgradnja povezuju se s tipiziranim BIL objektom. Izvezeni HTML sadrži stvarno jezgro i radi lokalno, bez model servera za ovu aplikaciju." key source
+ input atlas.ugao label "Rotacija svjetlosnih petlji" range [0,359] key angle
+ button "Nazad u svijet" opens prostor key back
+}.
+pocetak prostor.

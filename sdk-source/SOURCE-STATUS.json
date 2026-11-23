@@ -1,8 +1,8 @@
 {
   "format": "clea7.sdk.source-mirror/1",
-  "version": "0.44.0-test",
-  "archive": "../sense/downloads/BL-CLEA7-Core-SDK-0.44.0-test.zip",
-  "archiveSha256": "1e9e66e6a50281652d10f24352a441313cb6d7531464c22785e65d310d7e9c3e",
+  "version": "0.48.0-test",
+  "archive": "../sense/downloads/BL-CLEA7-Core-SDK-0.48.0-test.zip",
+  "archiveSha256": "f9bd849e72d204db13bd8cd7de5f34314ab5bbe3edff3c9af7ac17b62ff5a30c",
   "omitted": "Optional third-party vendor assets; use the full ZIP for OCR/PDF assets",
   "files": [
     {
@@ -18,17 +18,17 @@
     {
       "path": "NOTICE.txt",
       "bytes": 688,
-      "sha256": "04e05c756181d7dc4f341997cee33124cf936c58080e01d69f38c99f93259766"
+      "sha256": "3a64636f119226586f501d8630a2c6b61dbc1098ad885ee0f960a1a8012ec524"
     },
     {
       "path": "README.md",
-      "bytes": 3735,
-      "sha256": "450d1ebbd4f925eb427edaab9f71d29e5d0f7b68ba6036d1da1bc06779290e16"
+      "bytes": 4315,
+      "sha256": "302cd2bcfe137858ba6afe1a885ef4e38500e2cec4d70013caba4271432e4e4e"
     },
     {
       "path": "clea7/__init__.py",
       "bytes": 96,
-      "sha256": "e1f7911d02bae64914660a10a06c9e3775ef5fa33b5f2f11fe6746809dc661ee"
+      "sha256": "4ac29337b2013f34c3524c45f276e190b932ac32d85b40f60547fd6e817e9160"
     },
     {
       "path": "clea7/__main__.py",
@@ -37,18 +37,18 @@
     },
     {
       "path": "clea7/application.py",
-      "bytes": 21995,
-      "sha256": "5fd035d1ba99bf00842a6099dd0765d9bdd946bee763f4b2897312cac87290e6"
+      "bytes": 22265,
+      "sha256": "4a955c8ec591bb3dce6487abf30d8d688ed3f6438bd1c1dc0ba07982d80672e5"
     },
     {
       "path": "clea7/authoring_contract.py",
-      "bytes": 7265,
-      "sha256": "df91340cd0f10b957019e6d8456fab44b870175975cdc5b9cf202a06e0fb70e7"
+      "bytes": 7471,
+      "sha256": "3716fe42ea687bc6db708ebe147f34a642c5b07848cd23c38b5b0e627ad16287"
     },
     {
       "path": "clea7/bil.py",
-      "bytes": 44585,
-      "sha256": "c9ae35427076ca94223f05c7011396988bfc9a98c14d4fa8870c234914cbcb8f"
+      "bytes": 49938,
+      "sha256": "36b3f7c32475fdd2d0b93879aa49b03df12790f656bb4ec92d2b2a62f2a7616c"
     },
     {
       "path": "clea7/doctor.py",
@@ -72,13 +72,18 @@
     },
     {
       "path": "clea7/package.py",
-      "bytes": 10331,
-      "sha256": "c14c8d5a086b0858c2fb7916f6c8e275b496111180c14f432230193db1f65696"
+      "bytes": 11360,
+      "sha256": "54df44aea47fbe3d657df7323bf1aa7c60134ef5d5c625b041f862216f65d3f2"
     },
     {
       "path": "clea7/project.py",
       "bytes": 12569,
       "sha256": "251d616a8eb99d3476ff132cf05bdcbb0b4ee380ee0889e986ffafb02d4a17f2"
+    },
+    {
+      "path": "clea7/resources.py",
+      "bytes": 5972,
+      "sha256": "2d1ea41cff662cde50c7ab46eddc668d6d2942329789aa0062675b8b1c876fb5"
     },
     {
       "path": "clea7/schema.py",
@@ -87,8 +92,8 @@
     },
     {
       "path": "clea7/signing.py",
-      "bytes": 6801,
-      "sha256": "132170d9b0b7552881996bb5394cdafa09b6603dbb503e0ae53ec54d8adfab9b"
+      "bytes": 6828,
+      "sha256": "74abf847d2f078afea5c02a2da127cd1ae66d74fd275ddd70cf3c23d3c0a0f8f"
     },
     {
       "path": "clea7/storage_budget.py",
@@ -167,8 +172,13 @@
     },
     {
       "path": "docs/BIL-OBJECT-GRAMMAR.md",
-      "bytes": 6424,
-      "sha256": "4975841b8bc3137ce7d5690b387ceeadaf5fa66da5c75b777efaf6ebd5c50353"
+      "bytes": 6607,
+      "sha256": "04aad3ce80ccc7c31e612869f626b05fed818d07dabf0e8a6d16cf7c2a13f9a2"
+    },
+    {
+      "path": "docs/BIL-OBJECT-VIEWS.md",
+      "bytes": 3233,
+      "sha256": "5a11425b039c35f9c21626938d8b6eca06df5953459637211d891af98392039e"
     },
     {
       "path": "docs/BIL-PRESENTATION.md",
@@ -189,6 +199,16 @@
       "path": "docs/CLEA-CORE.md",
       "bytes": 4740,
       "sha256": "7d64fe96138a2d33e8a6192b11f6c7512030f6838b9affc7d5c3699d5b86191c"
+    },
+    {
+      "path": "docs/CLEA-DEPTH.md",
+      "bytes": 4446,
+      "sha256": "82755d5b7bd77bcb7ab583212dd13ae1062e60007d0afdf47eceae9f1622308d"
+    },
+    {
+      "path": "docs/CLEA-RESOURCES.md",
+      "bytes": 3092,
+      "sha256": "68d5486dd6fa4475a5caa41c29f977800da232306e5b145be76bf84b29f222e4"
     },
     {
       "path": "docs/CLEA7-DRAW.md",
@@ -292,8 +312,8 @@
     },
     {
       "path": "sdk/bil-cli.cjs",
-      "bytes": 11644,
-      "sha256": "10b6bce43ce79a6eb3befe87f425d90977a8469907abecac84fee7a85e74dba5"
+      "bytes": 12258,
+      "sha256": "20091ba8ef3304b7fde4df1d5f655e5290c6bd17140531b11aeafa5e05a1c0bf"
     },
     {
       "path": "sdk/examples/bil/cards-learning.bil",
@@ -324,6 +344,11 @@
       "path": "sdk/examples/bil/counter.bil",
       "bytes": 462,
       "sha256": "add72a6f576205b85282e297ac2782e889c66bb479cc4299220ade73c990251d"
+    },
+    {
+      "path": "sdk/examples/bil/depth-atlas.bil",
+      "bytes": 7823,
+      "sha256": "a96c87a5a90941969295fe5731f807bec32552e9ca6c6e0da548004b14aa0806"
     },
     {
       "path": "sdk/examples/bil/document-identities.bil",
@@ -401,6 +426,11 @@
       "sha256": "7a062a25669dbeecc7bd4dab3faabe8aab58bf5c961f12c701e82a9929ea7648"
     },
     {
+      "path": "sdk/examples/bil/signal-lab.bil",
+      "bytes": 4832,
+      "sha256": "f3f824dd23a7b85160939ebac9521cd51626fcaa76e7ca76e420d2a85e481bda"
+    },
+    {
       "path": "sdk/examples/bil/verified-application.bil",
       "bytes": 1119,
       "sha256": "76a2bb4499d5400b376087a88006894c0204739c00b775b1a757bf919c13db7f"
@@ -447,8 +477,8 @@
     },
     {
       "path": "sdk/test-runner.cjs",
-      "bytes": 1679,
-      "sha256": "d97c5b54aad2d67464873f0b388b14c9cf1205cbff1d28cf104c92a6c957a018"
+      "bytes": 1766,
+      "sha256": "f892dfc7aad14aaf54c2f42b9d86a4bdd4f92fce319eeb254a5f40749872892d"
     },
     {
       "path": "sdk/verify_sense.cjs",
@@ -497,8 +527,8 @@
     },
     {
       "path": "web/workbench/ai-authoring.js",
-      "bytes": 16671,
-      "sha256": "bd94be3e3582ddf82e2905e170a90fabe557edca391c9264c1d450189da7f353"
+      "bytes": 16716,
+      "sha256": "8b7d77a4eca66f29c555cdf93fb9256c0aed8a14a66dff628f6b58b4e3c62264"
     },
     {
       "path": "web/workbench/android-backend.js",
@@ -507,13 +537,13 @@
     },
     {
       "path": "web/workbench/bil-compiler.js",
-      "bytes": 104560,
-      "sha256": "672f3b0dc65e1f11f32e3725ff83fd729c2558ebca6701d8eec0b9343e7458e9"
+      "bytes": 114129,
+      "sha256": "d981956274fcc13215a645ba8f3727d687a40c25a300b6031ae8d0dfad9a4ba6"
     },
     {
       "path": "web/workbench/bil-designer.js",
-      "bytes": 35207,
-      "sha256": "6df438b2fec103a59a8607209ee3c0334fadba5a58786763ee4eb97467c047f4"
+      "bytes": 35229,
+      "sha256": "9075360f6119fb1c945c3a5bb7d8e829c8974224ec16d3a603917baafa2b0b6b"
     },
     {
       "path": "web/workbench/bil-elements.js",
@@ -522,23 +552,28 @@
     },
     {
       "path": "web/workbench/bil-runtime.js",
-      "bytes": 92771,
-      "sha256": "e12c6328b462ae7e1bb4c7be8cdc7584b630f04de6bc46183fd45a111dd20aae"
+      "bytes": 95426,
+      "sha256": "5a9aef5dd7e52f82e2cb8f58e45858ed6d862d552ed181fd1d3fe149f75a905a"
     },
     {
       "path": "web/workbench/clea-core.js",
-      "bytes": 9061,
-      "sha256": "79ca1128efb9436058f3a9f32b1307fa4eecda95300ad74c6d01d726e9c98c21"
+      "bytes": 9202,
+      "sha256": "00791e02b5af7f7541df5ea1a632240dc35f3a15a8ac2a16f55087a57c272de5"
     },
     {
       "path": "web/workbench/clea-draw.js",
-      "bytes": 36575,
-      "sha256": "93cc7954f0bd76fba452cc4c4d35cf715baa97dcaa324c9fa24b316c46d841de"
+      "bytes": 39255,
+      "sha256": "9a092c2c4b3db1f555cf037c306ce9e0fbd2bb390b81f724ed85881452a669c4"
     },
     {
       "path": "web/workbench/consumer.js",
       "bytes": 2683,
       "sha256": "0a53a62faeef6057b091a9510d7c86a1c6cfad80d86b14843b563b52e9facf18"
+    },
+    {
+      "path": "web/workbench/depth.js",
+      "bytes": 28504,
+      "sha256": "4f2708a6c9abe5cb90dd81f8949e229c882e2c2ffe12fb98a39049b4b8ca36d4"
     },
     {
       "path": "web/workbench/diagnostics.js",
@@ -547,8 +582,8 @@
     },
     {
       "path": "web/workbench/engine.js",
-      "bytes": 55908,
-      "sha256": "050d162ee8c57fed56a0e259394e95e5e6765e25d288e83b28efe598978cdffb"
+      "bytes": 56806,
+      "sha256": "5938d5dbaf36eeb05b102231529e844e45740dfc750d0645bdada06c01b67242"
     },
     {
       "path": "web/workbench/firebase-development.js",
@@ -557,8 +592,8 @@
     },
     {
       "path": "web/workbench/format.js",
-      "bytes": 19320,
-      "sha256": "6759dd50800f25e7b6eb2accbf86d301fc98e1fcb3b71036533b6376177d48c4"
+      "bytes": 19657,
+      "sha256": "9361b3539d54e839dc0b5241dc696906525c29a18c1e20192d9daf8faf74a65c"
     },
     {
       "path": "web/workbench/image-store.js",
@@ -577,8 +612,8 @@
     },
     {
       "path": "web/workbench/package.js",
-      "bytes": 18640,
-      "sha256": "e9b54af8b07d511e2136c6d13e9d8ffe743c63c485f532c438f3be24ffe37f85"
+      "bytes": 19634,
+      "sha256": "f2135995ca32314d79e7e58529cbc29ad2397d5233d144e4e1d0f2a7a6cf7b16"
     },
     {
       "path": "web/workbench/plan.js",
@@ -597,8 +632,23 @@
     },
     {
       "path": "web/workbench/remote.js",
-      "bytes": 23306,
-      "sha256": "a8fcfaceb6d72e324f048fdc027b6bec6e4bdc77cef158c1c825ea27c1a10594"
+      "bytes": 23981,
+      "sha256": "788af5b21bda2423a3722eac3970ceaa61fe771a3518cd7564c1c045d8e75542"
+    },
+    {
+      "path": "web/workbench/resource-host.js",
+      "bytes": 7523,
+      "sha256": "96b3c892ec8a58143c285c804480d0af41825efc853f30e98f143b5580383665"
+    },
+    {
+      "path": "web/workbench/resource-studio.js",
+      "bytes": 5957,
+      "sha256": "fd018483fcb3bb1e1799eb687aa647d15451709411ddaa3c6693e67f2cee4b62"
+    },
+    {
+      "path": "web/workbench/resources.js",
+      "bytes": 9049,
+      "sha256": "37242accc428bc1218ea8831db4d234e947adc3489480e737de39eab85a2aec9"
     },
     {
       "path": "web/workbench/review.js",
@@ -621,6 +671,16 @@
       "sha256": "149921f07f00c6e4f00103f5764f5bad7b00f32563b1b765118ba797247bf44f"
     },
     {
+      "path": "web/workbench/sense-navigation.css",
+      "bytes": 2400,
+      "sha256": "8549f22bba58ddc2c66bc42be307e74268cbb3b14b536c1051638bcba948d828"
+    },
+    {
+      "path": "web/workbench/sense-navigation.js",
+      "bytes": 24007,
+      "sha256": "f199d1b9334635fc635621363a997ec841028a6a0f18d92b8d39d100004e00ce"
+    },
+    {
       "path": "web/workbench/sense-ocr-policy.js",
       "bytes": 2081,
       "sha256": "e128be0ea06bda0fe09d17977fc803a5cacaf037353c475de55d0fe85cfa82db"
@@ -632,13 +692,18 @@
     },
     {
       "path": "web/workbench/sense-sdk.js",
-      "bytes": 6697,
-      "sha256": "cfac98c54be426442b5cc0220cb4fce4f8d82a80e156cad109a4cbbd25371316"
+      "bytes": 6815,
+      "sha256": "3b37d9ec0206e8e660aa83aae38ff00daf38d53f2c9833a626a03c414724698b"
+    },
+    {
+      "path": "web/workbench/standalone.js",
+      "bytes": 11712,
+      "sha256": "447b69bd9ea012555a550391f6e7710d569544b80c4afb9ed64d0296dde69238"
     },
     {
       "path": "web/workbench/studio-operator.js",
-      "bytes": 36262,
-      "sha256": "6150181a4c167e23a2370700769239c00faf1a2111d513a7b1d6e6e7a490d74c"
+      "bytes": 43795,
+      "sha256": "9abfbb4b6d4d36338e63c8590ffd22addf8e22ed74388e6f11c98a418e0197df"
     },
     {
       "path": "web/workbench/working-cache.js",

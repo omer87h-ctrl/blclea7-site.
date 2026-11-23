@@ -35,11 +35,11 @@ assert not list(ROOT.rglob('session.json')) and not list(ROOT.rglob('identity.js
 for forbidden in ['main.py','runtime_main.py','clea7/desktop.py','clea7/host.py','clea7/cloud_ai.py','clea7/ai.py']:
  assert not (ROOT/'sdk-source'/forbidden).exists(),forbidden
 catalog=json.loads((ROOT/'releases.json').read_text());assert catalog['catalogue_baseline']['source_commit']=='980ae86a15fe1ddbb4ec8442fb5bfe4d1f5b9610'
-assert catalog['version']==catalog['web_current']['version']==catalog['sdk_current']['version']=='0.44.0-test'
+assert catalog['version']==catalog['web_current']['version']==catalog['sdk_current']['version']=='0.48.0-test'
 assert catalog['source_commit']==catalog['web_current']['source_commit']==catalog['sdk_current']['source_commit']
 download_page=(ROOT/'preuzimanja.html').read_text()
 for page in ROOT.glob('*.html'):
- assert 'Web Studio 0.44.0-test · SDK 0.44.0-test · Windows 0.42.2-test · Android 0.42.2-test' in page.read_text(),(page,'stale visible release version')
+ assert ('Web Studio 0.48.0-test · SDK 0.48.0-test · Windows 0.42.2-test · Android 0.42.2-test' in page.read_text()) if page.name!='index.html' else ('Web Studio 0.48.0-test i SDK 0.48.0-test' in page.read_text()),(page,'stale visible release version')
 for entry in catalog['published']:
  p=ROOT/entry['url'];data=p.read_bytes();assert p.is_relative_to(ROOT) and len(data)==entry['size_bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'],p
  if entry['key'] in ('sdk','preview'):
@@ -136,14 +136,14 @@ assert 'collaboration.js' not in workbench
 assert 'standalone.js?v=' in workbench
 
 proof=json.loads((ROOT/'release/studio-044.json').read_text())
-assert proof['sourceCommit']==catalog['source_commit'] and proof['coreVersion']==5
+assert proof['sourceCommit']=='8ae1eb1164925c2e68ce5dfdfcc765935723d508' and proof['coreVersion']==5
 assert proof['python']=={'run':410,'passed':408,'skipped':2,'skipReason':'Windows DPAPI checks on Linux'}
 assert proof['actualBrowser']['objectGrammarGroups']==4 and proof['actualBrowser']['freeCompositionGroups']==4
 assert proof['hpInferenceVerified'] is False and proof['quality70BVerified'] is False and proof['nativeRebuilt'] is False
 sdk=catalog['sdk_current'];data=(ROOT/sdk['url']).read_bytes()
-assert len(data)==sdk['size_bytes']==5780401 and hashlib.sha256(data).hexdigest()==sdk['sha256']
+assert len(data)==sdk['size_bytes']==5838022 and hashlib.sha256(data).hexdigest()==sdk['sha256']
 with zipfile.ZipFile(ROOT/sdk['url']) as archive:
- assert len(archive.namelist())==160 and 'docs/BIL-OBJECT-GRAMMAR.md' in archive.namelist()
+ assert len(archive.namelist())==173 and 'docs/BIL-OBJECT-GRAMMAR.md' in archive.namelist()
  assert archive.testzip() is None
 for row in proof['example']:
  data=(ROOT/row['path']).read_bytes();assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
@@ -153,8 +153,15 @@ assert 'studio-start-grammar' in (ROOT/'studio/workbench/studio.js').read_text()
 print('PUBLIC_CORE5 actual source/SDK/example receipts and preserved public removal verified; no HP/70B/native claim')
 
 mirror=json.loads((ROOT/'sdk-source/SOURCE-STATUS.json').read_text())
-assert mirror['version']=='0.44.0-test' and mirror['archiveSha256']==sdk['sha256']
+assert mirror['version']=='0.48.0-test' and mirror['archiveSha256']==sdk['sha256']
 for row in mirror['files']:
  path=ROOT/'sdk-source'/row['path'];data=path.read_bytes()
  assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
 print('PUBLIC_SDK_SOURCE current curated CLI source mirror hashes verified')
+
+current=json.loads((ROOT/'release/studio-048.json').read_text())
+assert current['webVersion']==catalog['version']=='0.48.0-test' and current['coreVersion']==8
+assert current['sourceCommit']==catalog['source_commit'] and current['sdk']==catalog['sdk_current']
+assert current['actualPublicProductBrowserGroups']==4 and current['actualDepthBrowserGroups']==7
+assert all(current[k] is False for k in ('publicAIEnabled','physicalAndroidVerified','nativeRebuilt','hpInferenceForThisReleaseVerified','quality70BVerified','wholeMasterCompleted','ownerPairingRequiredForPublicStudio'))
+print('PUBLIC_PRODUCT048 current original Studio/Depth/SDK proof verified; public AI and physical Android remain unverified')

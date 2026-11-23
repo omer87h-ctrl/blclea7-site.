@@ -5,13 +5,13 @@
   "files": [
     {
       "path": "studio/launcher/index.html",
-      "bytes": 3707,
-      "sha256": "8b6ebfe45a6a90d3a6cb209166a8f616279fbbeeb1f6d1ffc70498af797f54f7"
+      "bytes": 3911,
+      "sha256": "aa3ff2831e840b5082ccbfadf750b9269646d1442d409f91532db4bc8d82f61d"
     },
     {
       "path": "studio/launcher/player.html",
-      "bytes": 3928,
-      "sha256": "68b6e3a3c83c89e7d5a3eed287b331dcd1bdb5fdceb286043d090dca3d356289"
+      "bytes": 4156,
+      "sha256": "f683f53724e1496ca862968bfe2e1dad322440cf8a67f1a010e0688a7ceb679a"
     },
     {
       "path": "studio/launcher/player.js",
@@ -20,33 +20,33 @@
     },
     {
       "path": "studio/workbench/bil-compiler.js",
-      "bytes": 104560,
-      "sha256": "672f3b0dc65e1f11f32e3725ff83fd729c2558ebca6701d8eec0b9343e7458e9"
+      "bytes": 114129,
+      "sha256": "d981956274fcc13215a645ba8f3727d687a40c25a300b6031ae8d0dfad9a4ba6"
     },
     {
       "path": "studio/workbench/bil-runtime.js",
-      "bytes": 92771,
-      "sha256": "e12c6328b462ae7e1bb4c7be8cdc7584b630f04de6bc46183fd45a111dd20aae"
+      "bytes": 95426,
+      "sha256": "5a9aef5dd7e52f82e2cb8f58e45858ed6d862d552ed181fd1d3fe149f75a905a"
     },
     {
       "path": "studio/workbench/clea-core.js",
-      "bytes": 9061,
-      "sha256": "79ca1128efb9436058f3a9f32b1307fa4eecda95300ad74c6d01d726e9c98c21"
+      "bytes": 9202,
+      "sha256": "00791e02b5af7f7541df5ea1a632240dc35f3a15a8ac2a16f55087a57c272de5"
     },
     {
       "path": "studio/workbench/engine.js",
-      "bytes": 55908,
-      "sha256": "050d162ee8c57fed56a0e259394e95e5e6765e25d288e83b28efe598978cdffb"
+      "bytes": 56806,
+      "sha256": "5938d5dbaf36eeb05b102231529e844e45740dfc750d0645bdada06c01b67242"
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 17529,
-      "sha256": "e57b6486099b9080a345ef8ed662dcce376f80e5a912c77e1a2b89b063b04850"
+      "bytes": 17911,
+      "sha256": "b174c0038a37241f9814b396d4a30d9f7ba6f12d8d4baee68184be0cd2125a39"
     },
     {
       "path": "studio/workbench/package.js",
-      "bytes": 18640,
-      "sha256": "e9b54af8b07d511e2136c6d13e9d8ffe743c63c485f532c438f3be24ffe37f85"
+      "bytes": 19634,
+      "sha256": "f2135995ca32314d79e7e58529cbc29ad2397d5233d144e4e1d0f2a7a6cf7b16"
     },
     {
       "path": "studio/workbench/working-cache.js",

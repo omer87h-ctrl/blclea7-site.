@@ -4,7 +4,7 @@
  * No DOM, filesystem, shell, networking or second evaluator lives here.
  */
 (function(scope){
-const VERSION='0.44.0',FORMAT='clea7.core/1';
+const VERSION='0.47.0',FORMAT='clea7.core/1';
 const own=(value,key)=>Object.prototype.hasOwnProperty.call(value,key);
 const clone=value=>JSON.parse(JSON.stringify(value));
 const frozen=value=>{if(value&&typeof value==='object'){for(const child of Object.values(value))frozen(child);Object.freeze(value);}return value;};
@@ -45,7 +45,7 @@ function describe(raw,targets=[]){
 function profile(options={}){
  if(!options||typeof options!=='object'||Array.isArray(options))fault('CoreProfile','Host profile must be an object.');
  const runtime=options.runtime||VERSION;version(runtime);
- const defaults=['bil.execute/1','bil.ui-model/1','bil.ui-model/2','bil.ui-model/3'];for(const feature of scope.CLEA7BILRuntime?.SUPPORTED_CORE_FEATURES||[])defaults.push('bil.feature/'+feature);if(typeof scope.CLEA7BILRuntime?.reconcileDerived==='function')defaults.push('bil.derive/1');
+ const defaults=['bil.execute/1','bil.ui-model/1','bil.ui-model/2','bil.ui-model/3'];for(const feature of scope.CLEA7BILRuntime?.SUPPORTED_CORE_FEATURES||[]){if(feature==='depth.world'&&!scope.CLEA7Depth||feature.startsWith('resource.')&&(!scope.CLEA7Resources||!scope.CLEA7ResourceHost))continue;defaults.push('bil.feature/'+feature);}if(typeof scope.CLEA7BILRuntime?.reconcileDerived==='function')defaults.push('bil.derive/1');
  const capabilities=options.capabilities===undefined?defaults:options.capabilities,permissions=options.permissions||[];
  if(!Array.isArray(capabilities)||capabilities.length>256||capabilities.some(x=>typeof x!=='string'||!x.length||x.length>180||!/^[A-Za-z0-9._:/-]+$/.test(x)))fault('CoreProfile','Host capabilities must be bounded explicit identifiers.');
  if(!Array.isArray(permissions)||permissions.length>32||permissions.some(x=>typeof x!=='string'||!x.length||x.length>64))fault('CoreProfile','Host permissions must be explicit bounded names.');

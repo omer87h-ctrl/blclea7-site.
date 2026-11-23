@@ -18,6 +18,7 @@ def safe(value):
 
 NATIVE_TYPES={'NativeMedia':{'handle':'Text','mime':'Text','width':'Number','height':'Number','bytes':'Number'},'NativeLocation':{'latitude':'Number','longitude':'Number','accuracy':'Number','timestamp':'Number'},'NativeReceipt':{'posted':'Boolean','id':'Number'}}
 NATIVE_OPS={'camera.capture':(0,'NativeMedia'),'media.pick':(0,'NativeMedia'),'media.list':(0,'NativeMediaList'),'media.inspect':(1,'NativeMedia'),'media.remove':(1,'Boolean'),'location.current':(0,'NativeLocation'),'notification.post':(1,'NativeReceipt')}
+PRIVATE_OPS={'assistant.call':(1,'Text')}
 SENSE_OPS={'speech.speak':(1,'Boolean'),'speech.listen':(1,'Text'),'speech.stop':(0,'Boolean'),'document.docx':(1,'Boolean'),'document.ocr':(1,'Text'),'haptic.cue':(1,'Boolean')}
 IMAGE_OPS={'image.choose':(0,'NativeMedia'),'image.upload':(2,'RemoteImage'),'image.load':(1,'NativeMedia'),'image.remove':(1,'Boolean'),'image.discard':(1,'Boolean')}
 IMAGE_TYPES={**NATIVE_TYPES,'RemoteImage':{'path':'Text'}}
@@ -40,6 +41,8 @@ def core_features(project):
     """
     ir=project.get('bil',{}).get('ir',{}) if isinstance(project,dict) else {}
     used={'object.sentences'} if isinstance(ir.get('objects'),dict) else set()
+    if isinstance(ir.get('objects'),dict) and ir['objects'].get('views'):used.add('object.views')
+    if isinstance(ir.get('resources'),dict):used.update('resource.'+r['kind'] for r in ir['resources'].get('items',{}).values())
     def inspect(value):
         if isinstance(value,list):
             for child in value:inspect(child)
@@ -47,6 +50,7 @@ def core_features(project):
             if value.get('op')=='CALL' and value.get('call') in CORE2_OPERATIONS:used.add(value['call'])
             if value.get('op')=='CALL' and value.get('call') in CORE3_OPERATIONS:used.add(value['call'])
             if value.get('op')=='CALL' and str(value.get('call','')).startswith('scene.'):used.add(value['call'])
+            if value.get('type')=='world':used.add('depth.world')
             if value.get('type') in ('clock','pad') or value.get('type')=='space' and value.get('camera'):used.add('scene.ui')
             if value.get('op')=='STORE_NEW' and value.get('coreFeature')=='derive':used.add('derive')
             if value.get('op')=='LOOP_WHILE':used.add('while')
@@ -56,18 +60,22 @@ def core_features(project):
     for value in (ir.get('main',[]),ir.get('functions',{}),ir.get('handlers',{}),ir.get('ui',{})):inspect(value)
     for item in ir.get('sourceMap',[]):
         if isinstance(item,dict) and item.get('coreFeature') in ('guard','derive','while'):used.add(item['coreFeature'])
-    version=5 if 'object.sentences' in used else 4 if any(x.startswith('scene.') for x in used) else 3 if used & (CORE3_OPERATIONS|{'derive','while'}) else 2 if used else 1
+    version=8 if 'depth.world' in used else 7 if any(x.startswith('resource.') for x in used) else 6 if 'object.views' in used else 5 if 'object.sentences' in used else 4 if any(x.startswith('scene.') for x in used) else 3 if used & (CORE3_OPERATIONS|{'derive','while'}) else 2 if used else 1
     return {'format':'bil.core.features/1','version':version,
-            'minimumRuntime':'0.44.0' if version==5 else '0.42.0' if version==4 else '0.18.0' if version==3 else '0.17.0' if used else '0.6.0','used':sorted(used)}
+            'minimumRuntime':'0.47.0' if version==8 else '0.46.0' if version==7 else '0.45.0' if version==6 else '0.44.0' if version==5 else '0.42.0' if version==4 else '0.18.0' if version==3 else '0.17.0' if used else '0.6.0','used':sorted(used)}
 
 def validate_objects(ir):
     """Validate sentence-profile metadata; the shared JS compiler owns semantics."""
     contract=ir.get('objects')
     if contract is None:return
-    if not isinstance(contract,dict) or set(contract)!={'format','title','objects'} or contract['format']!='bil.objects/1' or not isinstance(contract['title'],str) or not 1<=len(contract['title'].strip())<=200 or not isinstance(contract['objects'],list) or not 0<=len(contract['objects'])<=24:
+    if not isinstance(contract,dict) or set(contract)!=({'format','title','objects'}|({'views'} if 'views' in contract else set())) or contract['format']!='bil.objects/1' or not isinstance(contract['title'],str) or not 1<=len(contract['title'].strip())<=200 or not isinstance(contract['objects'],list) or not 0<=len(contract['objects'])<=24:
         raise UserError('Neispravan ugovor BIL objekata.')
     if ir['format']!='bil.ir/2' or ir['imports'] or ir['functions']:
         raise UserError('Gramatika objekata zahtijeva vlastiti ograničeni profil.')
+    if 'views' in contract:
+        views=contract['views']
+        if not isinstance(views,list) or not 1<=len(views)<=16 or any(not safe(x) for x in views) or len(set(views))!=len(views) or views!=[screen.get('id') for screen in ir.get('ui',{}).get('screens',[])] or ir.get('ui',{}).get('start') not in views:
+            raise UserError('Neispravan ugovor vlastitih pogleda BIL objekata.')
     owners=set();symbols=set();actions=set()
     for obj in contract['objects']:
         if not isinstance(obj,dict) or set(obj)!={'name','fields','actions'} or not safe(obj['name']) or obj['name'] in owners or not isinstance(obj['fields'],list) or not 1<=len(obj['fields'])<=32 or not isinstance(obj['actions'],list):
@@ -180,9 +188,9 @@ def validate_derive_markers(ir):
 def validate_remote(value):
     if not isinstance(value,dict) or set(value)!={'format','backends'} or value['format']!='bil.remote/1' or not isinstance(value['backends'],dict) or not 1<=len(value['backends'])<=4:raise UserError('Neispravan BIL remote ugovor.')
     for name,backend in value['backends'].items():
-        if not safe(name) or not isinstance(backend,dict) or set(backend)!={'adapter','operations'} or backend['adapter'] not in ('firebase.development/1','firebase.development/2','firebase.development/3','firebase.development/4','android.native/1','sense.local/1'):raise UserError('Nepodržan udaljeni adapter.')
+        if not safe(name) or not isinstance(backend,dict) or set(backend)!={'adapter','operations'} or backend['adapter'] not in ('firebase.development/1','firebase.development/2','firebase.development/3','firebase.development/4','android.native/1','sense.local/1','clea7500.private/1'):raise UserError('Nepodržan udaljeni adapter.')
         operations=backend['operations']
-        if not isinstance(operations,list) or any(not isinstance(op,str) or (op not in (SENSE_OPS if backend['adapter']=='sense.local/1' else NATIVE_OPS if backend['adapter']=='android.native/1' else REMOTE_OPS|IMAGE_OPS.keys() if backend['adapter']=='firebase.development/4' else REMOTE_OPS) or op in ('query.documents','observe.query.documents') and backend['adapter'] not in ('firebase.development/3','firebase.development/4') or backend['adapter']=='firebase.development/1' and (op in ('query.list','query.documents','document.add') or op.startswith('observe.'))) for op in operations) or operations!=sorted(set(operations)):raise UserError('Neispravne udaljene operacije.')
+        if not isinstance(operations,list) or any(not isinstance(op,str) or (op not in (PRIVATE_OPS if backend['adapter']=='clea7500.private/1' else SENSE_OPS if backend['adapter']=='sense.local/1' else NATIVE_OPS if backend['adapter']=='android.native/1' else REMOTE_OPS|IMAGE_OPS.keys() if backend['adapter']=='firebase.development/4' else REMOTE_OPS) or op in ('query.documents','observe.query.documents') and backend['adapter'] not in ('firebase.development/3','firebase.development/4') or backend['adapter']=='firebase.development/1' and (op in ('query.list','query.documents','document.add') or op.startswith('observe.'))) for op in operations) or operations!=sorted(set(operations)):raise UserError('Neispravne udaljene operacije.')
     return value
 
 
@@ -210,7 +218,7 @@ def validate_presentation_node(node,ir):
         if not isinstance(motion,dict) or set(motion)!={'preset','duration'} or motion['preset'] not in ('none','fade','slide','move','scale') or type(motion['duration']) is not int or not 0<=motion['duration']<=2000:raise UserError('Neispravan ugovor animacije.')
     if 'gestures' in node:
         gestures=node['gestures']
-        if node['type'] not in ('row','card','heading','text','shape','drawing') or not isinstance(gestures,dict) or not set(gestures)<=GESTURES:raise UserError('Neispravan ugovor gesti.')
+        if node['type'] not in ('row','card','heading','text','shape','drawing','sprite','mesh') or not isinstance(gestures,dict) or not set(gestures)<=GESTURES:raise UserError('Neispravan ugovor gesti.')
         for key,event in gestures.items():
             if not isinstance(event,dict) or set(event)!={'handler','entry'} or not safe(event['handler']) or not safe(event['entry']) or event['handler'] not in ir['handlers'] or event['entry'] not in ir['handlers'] or event['handler'] in ir.get('events',{}).get('handlers',{}):raise UserError('Gesta treba postojeću običnu radnju.')
             code=ir['handlers'][event['entry']]
@@ -272,13 +280,36 @@ def validate_draw_node(node,ir):
     if node['type']=='space':
         if 'camera' in node and (not isinstance(node['camera'],list) or len(node['camera'])!=3 or any(not isinstance(k,str) or ir['globals'].get(k,{}).get('type')!='Number' for k in node['camera'])):raise UserError('Kamera treba tri Number vrijednosti.')
         size=node['spaceSize']
-        if not isinstance(size,list) or len(size)!=2 or any(type(x) not in (int,float) or not 64<=x<=4096 for x in size) or not isinstance(node['children'],list) or any(not isinstance(n,dict) or n.get('type')!='drawing' for n in node['children']):raise UserError('Draw prostor treba dimenzije64–4096 i objekte crteža.')
+        if not isinstance(size,list) or len(size)!=2 or any(type(x) not in (int,float) or not 64<=x<=4096 for x in size) or not isinstance(node['children'],list) or any(not isinstance(n,dict) or n.get('type') not in ('drawing','sprite') for n in node['children']):raise UserError('Draw prostor treba dimenzije64–4096 i objekte crteža.')
         return
     points=node['points']
     if not isinstance(points,list) or not 2<=len(points)<=256 or any(not isinstance(p,list) or len(p)!=2 or any(type(v) not in (int,float) or not 0<=v<=1000 for v in p) for p in points):raise UserError('Crtež treba2–256 parova koordinata0–1000.')
     if node['role'] not in ('object','actor','door','solid') or type(node['closed']) is not bool or type(node['weight']) not in (int,float) or not 1<=node['weight']<=16:raise UserError('Neispravna Draw uloga ili debljina linije.')
     for key in ('fill','ink'):
         if not isinstance(node[key],str) or not (re.fullmatch(r'#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?',node[key]) or node[key] in ('transparent','currentColor')):raise UserError('Nedozvoljena boja crteža.')
+
+def validate_depth_node(node,ir):
+    if ir['ui']['format']!='bil.ui/3':raise UserError('Depth zahtijeva bil.ui/3.')
+    if node['type']=='mesh' and (node.get('style') or node.get('motion') or set(node.get('gestures',{}))-{'tap'}):raise UserError('Mreža koristi3D transformacije i tap radnju.')
+    base={'id','type','loc','label'};extra={'eye','aim','depthStrength','children'} if node['type']=='world' else {'meshGeometry','origin','extent','rotation','surface','tint'}
+    if not base|extra<=set(node) or set(node)-base-extra-{'contour','style','motion','gestures'}:raise UserError('Neispravan3D objekat.')
+    if not isinstance(node['label'],str) or not node['label'].strip() or len(node['label'])>160:raise UserError('3D objekat treba naziv1–160 znakova.')
+    def triple(value,positive=False):
+        if not isinstance(value,list) or len(value)!=3:raise UserError('3D vektor treba tri vrijednosti.')
+        for v in value:
+            if isinstance(v,dict):
+                if set(v)!={'bind'} or ir['globals'].get(v['bind'],{}).get('type')!='Number':raise UserError('3D veza treba Number.')
+            elif type(v) not in (float,int) or not -10000<=v<=10000 or positive and v<=0:raise UserError('3D broj je izvan budžeta.')
+    if node['type']=='world':
+        triple(node['eye']);triple(node['aim'])
+        if type(node['depthStrength']) not in (float,int) or not 0<=node['depthStrength']<=1 or not isinstance(node['children'],list) or not 1<=len(node['children'])<=96 or any(not isinstance(n,dict) or n.get('type')!='mesh' for n in node['children']):raise UserError('3D prostor treba1–96 mreža i jačinu0–1.')
+    else:
+        triple(node['origin']);triple(node['extent'],True);triple(node['rotation'])
+        if node['meshGeometry'] not in ('box','sphere','cylinder','torus','prism') or node['surface'] not in ('matte','ceramic','metal','light') or not isinstance(node['tint'],str) or not re.fullmatch('#[0-9a-fA-F]{6}',node['tint']):raise UserError('Nepodržana3D geometrija ili materijal.')
+        if node['meshGeometry']=='prism':
+            points=node.get('contour')
+            if not isinstance(points,list) or not 3<=len(points)<=128 or any(not isinstance(p,list) or len(p)!=2 or any(type(v) not in (int,float) or not 0<=v<=1000 for v in p) for p in points):raise UserError('Prizma treba ograničenu konturu.')
+        elif 'contour' in node:raise UserError('Samo prizma koristi konturu.')
 
 def validate_program(project):
     live=project.get('format')=='clea7.application/9'
@@ -289,7 +320,7 @@ def validate_program(project):
     bundle=project.get('bil')
     if not isinstance(bundle,dict) or set(bundle)!={'format','source','ir'} or bundle['format']!='bil.program/'+str(version):raise UserError('Neispravna BIL omotnica.')
     source=bundle['source'];ir=bundle['ir']
-    if not isinstance(source,str) or len(source)>131072 or not isinstance(ir,dict) or set(ir)!=({'format','language','globals','records','imports','functions','handlers','main','controls','sourceMap'}|({'ui'} if extended else set())|({'remote'} if remote else set())|({'events'} if asynchronous else set())|({'objects'} if 'objects' in ir else set())) or ir['format']!='bil.ir/'+str(version) or ir['language']!='bil/'+str(version):raise UserError('Nepodržan BIL ugovor.')
+    if not isinstance(source,str) or len(source)>131072 or not isinstance(ir,dict) or set(ir)!=({'format','language','globals','records','imports','functions','handlers','main','controls','sourceMap'}|({'ui'} if extended else set())|({'remote'} if remote else set())|({'events'} if asynchronous else set())|({'objects'} if 'objects' in ir else set())|({'resources'} if 'resources' in ir else set())) or ir['format']!='bil.ir/'+str(version) or ir['language']!='bil/'+str(version):raise UserError('Nepodržan BIL ugovor.')
     rich_ui=isinstance(ir.get('ui'),dict) and ir['ui'].get('format') in ('bil.ui/2','bil.ui/3')
     for key in ('globals','records','functions','handlers'):
         if not isinstance(ir[key],dict) or len(ir[key])>(4224 if rich_ui and key=='handlers' else 128 if rich_ui and key in ('globals','functions') else 192 if extended and key=='handlers' else 64) or any(not safe(k) for k in ir[key]):raise UserError('Neispravni BIL simboli.')
@@ -309,6 +340,11 @@ def validate_program(project):
             for v in value:walk(v,depth+1)
         elif value is not None and type(value) not in (str,int,float,bool):raise UserError('BIL treba podatkovne vrijednosti.')
     walk(ir)
+    if 'resources' in ir:
+        from . import resources
+        resources.requirements(ir['resources'])
+        resources.validate(project.get('resources'),ir['resources'])
+    elif 'resources' in project:raise UserError('Podaci resursa zahtijevaju deklaracije u izvoru.')
     validate_objects(ir)
     validate_derive_markers(ir)
     completion_type={'record':{'requestId':'Text','sourceId':'Text','backend':'Text','operation':'Text'},'name':'RemoteCompletion'}
@@ -325,7 +361,7 @@ def validate_program(project):
     used_events=set();watches=set();cancellations=set()
     if remote:
         validate_remote(project.get('remote'));validate_remote(ir.get('remote'))
-        if not live and any(b['adapter'] in ('firebase.development/3','firebase.development/4','android.native/1','sense.local/1') for b in ir['remote']['backends'].values()):raise UserError('Adapter3 zahtijeva BIL5 aplikacijski ugovor.')
+        if not live and any(b['adapter'] in ('firebase.development/3','firebase.development/4','android.native/1','sense.local/1','clea7500.private/1') for b in ir['remote']['backends'].values()):raise UserError('Adapter3 zahtijeva BIL5 aplikacijski ugovor.')
         if project['remote']!=ir['remote']:raise UserError('Udaljene mogućnosti ne odgovaraju BIL izvoru.')
         actual={name:set() for name in ir['remote']['backends']}
         def requests(value):
@@ -333,7 +369,7 @@ def validate_program(project):
                 for entry in value:requests(entry)
             elif isinstance(value,dict):
                 if value.get('op') in ('REQUEST','WATCH'):
-                    if set(value)!=({'op','id','loc','backend','operation','args','target','error','resultType'}|({'completion'} if asynchronous and 'completion' in value else set())|({'subscription','interval'} if live and value.get('op')=='WATCH' else set())) or not isinstance(value.get('backend'),str) or value['backend'] not in actual or not isinstance(value.get('operation'),str) or value['operation'] not in (SENSE_OPS if ir['remote']['backends'][value['backend']]['adapter']=='sense.local/1' else NATIVE_OPS if ir['remote']['backends'][value['backend']]['adapter']=='android.native/1' else REMOTE_OPS|IMAGE_OPS.keys() if ir['remote']['backends'][value['backend']]['adapter']=='firebase.development/4' else REMOTE_OPS) or not isinstance(value.get('args'),list) or not safe(value.get('target')) or not safe(value.get('error')) or value['target'] not in ir['globals'] or value['error'] not in ir['globals']:raise UserError('Neispravan udaljeni BIL zahtjev.')
+                    if set(value)!=({'op','id','loc','backend','operation','args','target','error','resultType'}|({'completion'} if asynchronous and 'completion' in value else set())|({'subscription','interval'} if live and value.get('op')=='WATCH' else set())) or not isinstance(value.get('backend'),str) or value['backend'] not in actual or not isinstance(value.get('operation'),str) or value['operation'] not in (PRIVATE_OPS if ir['remote']['backends'][value['backend']]['adapter']=='clea7500.private/1' else SENSE_OPS if ir['remote']['backends'][value['backend']]['adapter']=='sense.local/1' else NATIVE_OPS if ir['remote']['backends'][value['backend']]['adapter']=='android.native/1' else REMOTE_OPS|IMAGE_OPS.keys() if ir['remote']['backends'][value['backend']]['adapter']=='firebase.development/4' else REMOTE_OPS) or not isinstance(value.get('args'),list) or not safe(value.get('target')) or not safe(value.get('error')) or value['target'] not in ir['globals'] or value['error'] not in ir['globals']:raise UserError('Neispravan udaljeni BIL zahtjev.')
                     target=ir['globals'][value['target']];error=ir['globals'][value['error']]
                     if not isinstance(target,dict) or target.get('mutable') is not True or value['resultType']!=target.get('type'):raise UserError('Tip udaljenog rezultata ne odgovara stanju.')
                     failure_type=error.get('type',{}) if isinstance(error,dict) else {}
@@ -342,8 +378,8 @@ def validate_program(project):
                     if value['operation'].startswith('observe.') or (value['operation'] in ('query.list','query.documents','document.add') or value['op']=='WATCH') and ir['remote']['backends'][value['backend']]['adapter'] not in ('firebase.development/2','firebase.development/3','firebase.development/4') or value['operation']=='query.documents' and ir['remote']['backends'][value['backend']]['adapter'] not in ('firebase.development/3','firebase.development/4'):raise UserError('Neispravan adapter za upit ili pretplatu.')
                     result=value['resultType'];nullable=isinstance(result,dict) and 'nullable' in result
                     result_type=result['nullable'] if nullable else result
-                    if ir['remote']['backends'][value['backend']]['adapter']=='sense.local/1':
-                        spec=SENSE_OPS[value['operation']]
+                    if ir['remote']['backends'][value['backend']]['adapter'] in ('sense.local/1','clea7500.private/1'):
+                        spec=(PRIVATE_OPS if value['operation'] in PRIVATE_OPS else SENSE_OPS)[value['operation']]
                         if len(value['args'])!=spec[0] or result_type!=spec[1]:raise UserError('Sense operation has an invalid typed contract.')
                     elif ir['remote']['backends'][value['backend']]['adapter']=='android.native/1':
                         native_result=NATIVE_OPS[value['operation']][1]
@@ -366,7 +402,7 @@ def validate_program(project):
                             fields=result['list']['record']
                             if set(fields)!={'id','path','value'} or fields['id']!='Text' or fields['path']!='Text' or not isinstance(fields['value'],dict) or not isinstance(fields['value'].get('record'),dict):raise UserError('Identificirani upit treba id, path i tipizirani value Record.')
                     elif result!='Boolean':raise UserError('Udaljena izmjena treba Boolean rezultat.')
-                    expected_args=(SENSE_OPS[value['operation']][0] if value['operation'] in SENSE_OPS else NATIVE_OPS[value['operation']][0] if value['operation'] in NATIVE_OPS else IMAGE_OPS[value['operation']][0] if value['operation'] in IMAGE_OPS else {'auth.session':0,'auth.register':0,'auth.signIn':0,'auth.signOut':0,'document.get':1,'document.set':2,'document.delete':1,'query.list':2,'query.documents':2,'document.add':2}[value['operation']])
+                    expected_args=(PRIVATE_OPS[value['operation']][0] if value['operation'] in PRIVATE_OPS else SENSE_OPS[value['operation']][0] if value['operation'] in SENSE_OPS else NATIVE_OPS[value['operation']][0] if value['operation'] in NATIVE_OPS else IMAGE_OPS[value['operation']][0] if value['operation'] in IMAGE_OPS else {'auth.session':0,'auth.register':0,'auth.signIn':0,'auth.signOut':0,'document.get':1,'document.set':2,'document.delete':1,'query.list':2,'query.documents':2,'document.add':2}[value['operation']])
                     if len(value['args'])!=expected_args:raise UserError('Udaljeni zahtjev ima neispravan broj argumenata.')
                     if 'completion' in value:
                         completion=value['completion']
@@ -406,11 +442,22 @@ def validate_program(project):
     if extended:
         ui=ir['ui']
         if not isinstance(ui,dict) or set(ui)!={'format','start','screens'} or ui['format'] not in ('bil.ui/1','bil.ui/2','bil.ui/3') or not isinstance(ui['screens'],list) or len(ui['screens'])>(64 if rich_ui else 32):raise UserError('Neispravan BIL UI ugovor.')
-        screens=set();node_ids=set()
-        def nodes(items,depth=0):
+        screens=set();node_ids=set();world_count=0
+        def nodes(items,depth=0,parent=None):
+            nonlocal world_count
             if not isinstance(items,list) or depth>8:raise UserError('Neispravan BIL raspored.')
             for n in items:
-                if not isinstance(n,dict) or not safe(n.get('id')) or n['id'] in node_ids or n.get('type') not in (('row','card','heading','text','input','select','toggle','table','view','button','image','shape','cards','drawing','space','clock','pad') if rich_ui else ('row','card','heading','text','input','select','toggle','table','view','button','image')):raise UserError('Neispravna BIL komponenta.')
+                if not isinstance(n,dict) or not safe(n.get('id')) or n['id'] in node_ids or n.get('type') not in (('row','card','heading','text','input','select','toggle','table','view','button','image','shape','cards','drawing','space','clock','pad','sprite','sound','world','mesh') if rich_ui else ('row','card','heading','text','input','select','toggle','table','view','button','image')):raise UserError('Neispravna BIL komponenta.')
+                if n['type']=='world':
+                    world_count+=1
+                    if world_count>4:raise UserError('Ekran podržava najviše četiri3D prostora.')
+                if n['type']=='mesh' and parent!='world':raise UserError('Mreža pripada3D prostoru.')
+                if n['type'] in ('world','mesh'):validate_depth_node(n,ir)
+                if n['type'] in ('sprite','sound'):
+                    kind='image' if n['type']=='sprite' else 'audio'
+                    if ir.get('resources',{}).get('items',{}).get(n.get('asset'),{}).get('kind')!=kind:raise UserError('Nedeklarisan medijski resurs.')
+                    if kind=='image' and (not isinstance(n.get('grid'),list) or len(n['grid'])!=2 or any(type(x) is not int or not 1<=x<=64 for x in n['grid']) or n['grid'][0]*n['grid'][1]>256 or n.get('frame') and ir['globals'].get(n['frame'],{}).get('type')!='Number'):raise UserError('Neispravan sprite kadar.')
+                    if kind=='audio' and (not isinstance(n.get('caption'),str) or not n['caption'].strip() or len(n['caption'])>200):raise UserError('Zvuk treba vidljiv opis.')
                 if n['type']=='cards':validate_cards_node(n,ir)
                 if n['type'] in ('clock','pad'):validate_scene_node(n,ir)
                 if n['type'] in ('drawing','space'):validate_draw_node(n,ir)
@@ -420,10 +467,10 @@ def validate_program(project):
                 if len(node_ids)>(1024 if rich_ui else 128):raise UserError('Previše BIL komponenti.')
                 if n.get('name') is not None and n['name'] not in ir['globals']:raise UserError('BIL komponenta koristi nepoznato stanje.')
                 if n.get('entry') is not None and n['entry'] not in ir['handlers']:raise UserError('BIL komponenta koristi nepoznat događaj.')
-                if 'children' in n:nodes(n['children'],depth+1)
+                if 'children' in n:nodes(n['children'],depth+1,n['type'])
         for screen in ui['screens']:
             if not isinstance(screen,dict) or set(screen)!={'id','label','loc','children'} or not safe(screen['id']) or screen['id'] in screens or not isinstance(screen['label'],str):raise UserError('Neispravan BIL ekran.')
-            screens.add(screen['id']);nodes(screen['children'])
+            screens.add(screen['id']);world_count=0;nodes(screen['children'])
         if (ui['screens'] and ui['start'] not in screens) or (not ui['screens'] and ui['start']!=''):raise UserError('BIL početni ekran nije deklarisan.')
         expected_state['bilScreen']=ui['start']
     expected_permissions=sorted({{'camera.capture':'camera','location.current':'location','notification.post':'notifications'}[op] for b in ir.get('remote',{}).get('backends',{}).values() if b['adapter']=='android.native/1' for op in b['operations'] if op in ('camera.capture','location.current','notification.post')})

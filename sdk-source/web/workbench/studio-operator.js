@@ -10,6 +10,7 @@ const fail=message=>{throw Object.assign(Error(message),{code:'StudioTool'});};
 const object=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
 function shape(x,required,optional=[]){if(!object(x)||required.some(k=>!Object.hasOwn(x,k))||Object.keys(x).some(k=>!required.includes(k)&&!optional.includes(k)))fail('Nepotpuna ili nepoznata Studio radnja.');}
 function name(x){if(typeof x!=='string'||x.length>48||!B.safe(x))fail('Neispravan Studio identitet.');return x;}
+function binding(x){if(typeof x!=='string'||x.split('.').length>2)fail('Veza treba ime podatka ili objekat.polje.');x.split('.').forEach(name);return x;}
 function text(x,max=800){if(typeof x!=='string'||!x.trim()||x.length>max)fail('Studio tekst je prazan ili predug.');return x;}
 const TOOLS=Object.freeze({
  'project.create':'Novi BIL projekt; samo pri izričitoj izradi novog projekta.',
@@ -23,6 +24,9 @@ const TOOLS=Object.freeze({
  'sense.ocr':'Dodaj lokalno čitanje slike, pregled prije prijenosa i tipizirani tekst u isti projekt.',
  'ui.add':'Dodaj radni element sa stvarnim stanjem i događajima.',
  'ui.collection':'Dodaj tipiziranu kolekciju i događaje stavki.',
+ 'resource.declare':'Deklariši medijski identitet; datoteku i njena prava korisnik bira odvojeno.',
+ 'depth.transform':'Uredi položaj, veličinu, rotaciju i materijal postojećeg3D objekta bez promjene BIL radnji.',
+ 'depth.from-drawing':'Izvuci vlastitu Draw konturu u3D prizmu postojećeg prostora.',
  'ui.compose':'Sastavi vlastitu ugniježđenu hijerarhiju rasporeda, prostora, vektora i radnih kontrola.',
  'ui.style':'Izmijeni provjerene vizuelne osobine postojeće komponente bez promjene njene logike.',
  'ui.label':'Izmijeni naziv postojeće komponente.',
@@ -36,25 +40,26 @@ const TOOLS=Object.freeze({
  'bil.event':'Dodaj provjereni BIL događaj.',
  'bil.item':'Dodaj provjerenu BIL komponentu postojećem ekranu.'
 });
-const NODE_KINDS=Object.freeze(['row','card','heading','text','input','toggle','select','button','show','visualize','shape','drawing','space','clock','pad']);
+const NODE_KINDS=Object.freeze(['row','card','heading','text','input','toggle','select','button','show','visualize','shape','drawing','space','clock','pad','world','mesh','sprite','sound']);
 function treeSource(nodes){
  let count=0;const keys=new Set();
  const list=(v,min,max)=>{if(!Array.isArray(v)||v.length<min||v.length>max)fail('Neispravan broj elemenata kompozicije.');return v;};
  const label=v=>q(text(v,200));
- const scalar=v=>{if(typeof v==='number'&&Number.isFinite(v)||typeof v==='string')return q(v);if(object(v)&&Object.keys(v).join()==='bind')return name(v.bind);fail('Izgled prihvata vrijednost ili tipiziranu vezu sa stanjem.');};
+ const scalar=v=>{if(typeof v==='number'&&Number.isFinite(v)||typeof v==='string')return q(v);if(object(v)&&Object.keys(v).join()==='bind')return binding(v.bind);fail('Izgled prihvata vrijednost ili tipiziranu vezu sa stanjem.');};
  function node(n,depth){
   if(++count>128||depth>12)fail('Kompozicija prelazi128 elemenata ili12 nivoa.');
   if(!object(n)||!NODE_KINDS.includes(n.kind))fail('Nepodržana komponenta kompozicije.');
-  const fields={row:['children'],card:['children'],heading:[],text:[],input:['bind','required','multiline','range'],toggle:['bind'],select:['bind','options'],button:['runs','opens','validate'],show:['bind'],visualize:['bind','range'],shape:['geometry'],drawing:['points','role','closed','fill','ink','weight'],space:['size','camera','children'],clock:['every','runs'],pad:['directions']};
+  const fields={row:['children'],card:['children'],heading:[],text:[],input:['bind','required','multiline','range'],toggle:['bind'],select:['bind','options'],button:['runs','opens','validate'],show:['bind'],visualize:['bind','range'],shape:['geometry'],drawing:['points','role','closed','fill','ink','weight'],space:['size','camera','children'],clock:['every','runs'],pad:['directions'],world:['eye','aim','depthStrength','children'],mesh:['meshGeometry','origin','extent','rotation','surface','tint','contour'],sprite:['asset','grid','frame'],sound:['asset','caption']};
   shape(n,['kind','id'],['label','style','motion','gestures',...fields[n.kind]]);name(n.id);if(keys.has(n.id))fail('Ključevi kompozicije moraju biti jedinstveni.');keys.add(n.id);
   let s;
-  if(['row','card','space'].includes(n.kind)){
+  if(['row','card','space','world'].includes(n.kind)){
    s=n.kind+' '+label(n.label||n.id);
-   if(n.kind==='space'){const size=list(n.size,2,2);if(size.some(x=>!Number.isFinite(x)||x<64||x>4096))fail('Prostor treba dimenzije64–4096.');s+=' size '+q(size);if(n.camera)s+=' camera ['+list(n.camera,3,3).map(name).join(', ')+']';}
+   if(n.kind==='space'){const size=list(n.size,2,2);if(size.some(x=>!Number.isFinite(x)||x<64||x>4096))fail('Prostor treba dimenzije64–4096.');s+=' size '+q(size);if(n.camera)s+=' camera ['+list(n.camera,3,3).map(binding).join(', ')+']';}
+   if(n.kind==='world'){s+=' camera ['+list(n.eye,3,3).map(scalar).join(', ')+'] looking ['+list(n.aim,3,3).map(scalar).join(', ')+'] depth '+(n.depthStrength??.45);}
    s+=' {\n'+list(n.children||[],0,128).map(child=>' '+node(child,depth+1).replaceAll('\n','\n ')).join('\n')+'\n}';
   }else if(['heading','text'].includes(n.kind))s=n.kind+' '+label(n.label);
   else if(['input','toggle','select'].includes(n.kind)){
-   s=n.kind+' '+name(n.bind)+' label '+label(n.label);
+   s=n.kind+' '+binding(n.bind)+' label '+label(n.label);
    if(n.required!==undefined){if(typeof n.required!=='boolean')fail('Obaveznost treba Boolean.');if(n.required)s+=' required';}
    if(n.multiline!==undefined){if(typeof n.multiline!=='boolean')fail('Višeredni unos treba Boolean.');if(n.multiline)s+=' multiline';}
    if(n.range)s+=' range '+q(list(n.range,2,2));if(n.options)s+=' options '+q(list(n.options,1,32));
@@ -62,8 +67,11 @@ function treeSource(nodes){
    if(Boolean(n.runs)===Boolean(n.opens))fail('Dugme treba tačno jedan događaj ili odredišni ekran.');
    s='button '+label(n.label)+(n.runs?' runs '+name(n.runs):' opens '+name(n.opens));if(n.validate===true)s+=' validate';else if(n.validate!==undefined&&n.validate!==false)fail('Validacija treba Boolean.');
   }else if(['show','visualize'].includes(n.kind)){
-   s=n.kind+' '+name(n.bind);if(n.kind==='visualize')s+=' using runtime';if(n.range)s+=' range '+q(list(n.range,2,2));
+   s=n.kind+' '+binding(n.bind);if(n.kind==='visualize')s+=' using runtime';if(n.range)s+=' range '+q(list(n.range,2,2));
   }else if(n.kind==='shape')s='shape '+label(n.geometry)+' label '+label(n.label);
+  else if(n.kind==='mesh'){s='mesh '+label(n.label)+' geometry '+label(n.meshGeometry)+(n.contour?' points '+q(n.contour):'')+' at ['+list(n.origin,3,3).map(scalar).join(', ')+'] size ['+list(n.extent,3,3).map(scalar).join(', ')+'] rotation ['+list(n.rotation,3,3).map(scalar).join(', ')+'] surface '+label(n.surface)+' color '+label(n.tint);}
+  else if(n.kind==='sprite'){s='sprite '+name(n.asset)+' label '+label(n.label)+' frames '+q(list(n.grid||[1,1],2,2))+(n.frame?' frame '+binding(n.frame):'');}
+  else if(n.kind==='sound'){s='sound '+name(n.asset)+' label '+label(n.label)+' caption '+label(n.caption);}
   else if(n.kind==='drawing'){
    const points=list(n.points,2,256);if(points.some(p=>!Array.isArray(p)||p.length!==2||p.some(x=>!Number.isFinite(x)||x<0||x>1000)))fail('Vektor treba normalizirane numeričke tačke0–1000.');
    if(n.closed!==undefined&&typeof n.closed!=='boolean')fail('Zatvorena kontura treba Boolean.');
@@ -80,22 +88,27 @@ function treeSource(nodes){
 }
 function compose(source,{screen,parent,nodes}){
  const c=B.compile(source),page=c.ast.body.find(n=>n.kind==='screen'&&n.name===name(screen));if(!page)fail('Odaberi postojeći ekran.');
+ if(c.ir.objects&&!page.objectView)fail('BIL rečenice: prvo dodaj vlastiti pogled. Automatski obrazac objekata ostaje sačuvan dok ne odabereš vlastiti izgled.');
  let target=page;const walk=xs=>{for(const n of xs){if(n.key===parent||n.id===parent)target=n;if(n.children)walk(n.children);}};
- if(parent){walk(page.children);if(target===page||!['ui_row','ui_card','ui_space'].includes(target.kind))fail('Odredište treba postojeći raspored ili prostor u istom ekranu.');}
+ if(parent){walk(page.children);if(target===page||!['ui_row','ui_card','ui_space','ui_world'].includes(target.kind))fail('Odredište treba postojeći raspored ili prostor u istom ekranu.');}
  const insertion=treeSource(nodes),at=target.childrenEnd??target.loc.end-1,next=source.slice(0,at)+'\n'+insertion+'\n'+source.slice(at);B.compile(next);return next;
 }
 function context(source){
  const c=B.compile(source),draw=scope.CLEA7Draw.model(source);
  const components=[];const visit=(nodes,page,parent)=>{for(const n of nodes){if(n.kind!=='screen')components.push({id:n.id,key:n.key||null,kind:n.kind.replace('ui_',''),label:n.label||'',screen:page,parent,bind:n.name||null});if(n.children)visit(n.children,page,n.id);}};for(const page of c.ast.body.filter(n=>n.kind==='screen'))visit(page.children,page.name,page.id);
  return {format:FORMAT,tools:Object.keys(TOOLS),screens:c.ast.body.filter(n=>n.kind==='screen').map(n=>({id:n.name,title:n.label})),
-  objects:draw.objects.map(({key,label,role,screen,x,y,width,height})=>({key,label,role,screen,x,y,width,height})),
+  ...(c.ir.resources?{resources:c.ir.resources.items}:{}),objects:draw.objects.map(({key,label,role,screen,x,y,width,height})=>({key,label,role,screen,x,y,width,height})),
   ...(c.ir.objects?{grammar:'bil.objects/1',objectModel:c.ir.objects.objects}:{}),components,state:Object.entries(c.ir.globals).map(([id,s])=>({id,type:s.type,mutable:s.mutable})),events:Object.keys(c.ir.handlers).filter(n=>!n.startsWith('ui_'))};
 }
-async function modelContext(source){
+async function modelContext(source,{intent='',maximumBytes=3600}={}){
  const value=context(source),data={format:'clea7.studio-context/1',fingerprint:await scope.CLEA7.digest(source),screens:value.screens,state:value.state.map(x=>({id:x.id,type:typeof x.type==='string'?x.type:'Structured',mutable:x.mutable})),events:value.events,components:value.components.map(x=>({...x,label:x.label.slice(0,80)})),omitted:0};
+ if(value.resources)data.resources=value.resources;
  if(value.grammar){data.grammar=value.grammar;data.objectModel=value.objectModel;}
- while(new TextEncoder().encode(q(data)).length>8000&&data.components.length){data.components.pop();data.omitted++;}
- if(new TextEncoder().encode(q(data)).length>8000)fail('Struktura projekta prelazi trenutni modelski prozor. Izvor nije poslan.');return data;
+ const words=String(intent).toLocaleLowerCase().match(/[\p{L}\p{N}_]{3,}/gu)||[],score=value=>words.reduce((n,w)=>n+(q(value).toLocaleLowerCase().includes(w)?1:0),0),rank=rows=>rows.sort((a,b)=>score(b)-score(a));
+ rank(data.components);rank(data.state);rank(data.events);if(data.objectModel)for(const object of data.objectModel){rank(object.fields);rank(object.actions);}
+ const size=()=>new TextEncoder().encode(q(data)).length;
+ while(size()>maximumBytes){let changed=false;if(data.components.length>3){data.components.pop();changed=true;}else if(data.state.length>4){data.state.pop();changed=true;}else if(data.events.length>4){data.events.pop();changed=true;}else if(data.screens.length>3){data.screens.pop();changed=true;}else if(data.objectModel){const largest=[...data.objectModel].sort((a,b)=>b.fields.length-a.fields.length).find(x=>x.fields.length>4);if(largest){largest.fields.pop();changed=true;}else{const action=data.objectModel.find(x=>x.actions.length>4);if(action){action.actions.pop();changed=true;}else if(data.objectModel.length>1){data.objectModel.pop();changed=true;}}}if(!changed)break;data.omitted++;}
+ if(size()>8000)fail('Struktura projekta prelazi trenutni modelski prozor. Izvor nije poslan.');return data;
 }
 function emit(plan,{source=null}={}){
  shape(plan,['format','operations'],['checks']);if(plan.format!==FORMAT||!Array.isArray(plan.operations)||!plan.operations.length||plan.operations.length>32||new TextEncoder().encode(q(plan)).length>12000)fail('Nepodržan ili prevelik Studio plan.');
@@ -112,14 +125,20 @@ function emit(plan,{source=null}={}){
   }else{
    if(next===null)fail('Novi Studio plan mora prvo kreirati projekt.');
    const sentence=B.compile(next).ir.objects;
-   if(sentence&&!op.tool.startsWith('object.')&&op.tool!=='ui.label')fail('Ovaj projekt koristi BIL rečenice. Uredi objekte alatima object.*; postojeći izvor je sačuvan.');
+   if(sentence&&!op.tool.startsWith('object.')&&!['screen.add','ui.compose','ui.style','ui.label','ui.move','ui.duplicate','ui.remove','resource.declare','depth.transform','depth.from-drawing'].includes(op.tool))fail('BIL objekti koriste object.* za logiku i vlastite poglede za Draw kompoziciju. Postojeći izvor je sačuvan.');
    if(op.tool.startsWith('object.')){
     const kind=op.tool.slice(7),fields={remember:[['object','field','type','value'],[]],derive:[['object','field','expression'],['whenTrue','whenFalse']],action:[['object','field','action','expression'],['label']],label:[['object','field','label'],[]]}[kind];
     shape(op,['tool',...fields[0]],fields[1]);const {tool,...parameters}=op;next=B.objectWrite(next,{kind,...parameters});
+   }else if(op.tool==='resource.declare'){
+    shape(op,['tool','id','kind']);name(op.id);if(!['image','audio'].includes(op.kind))fail('Resurs treba image/audio vrstu.');const c=B.compile(next);if(c.ir.resources?.items[op.id])fail('Resurs je već deklarisan.');const tokens=sentence?B.lex(next):null,index=tokens?.findIndex((t,i)=>t.value==='BIL'&&tokens[i+1]?.kind==='string'),at=sentence?tokens[index+2].end:0;next=next.slice(0,at)+'\nresurs '+op.id+' vrsta '+(op.kind==='image'?'slika':'zvuk')+'.\n'+next.slice(at);
+   }else if(op.tool==='depth.from-drawing'){
+    shape(op,['tool','drawing','world','id','origin','extent'],['rotation','surface','tint']);const c=B.compile(next);let drawing=null,world=null;const visit=nodes=>{for(const n of nodes){if(n.kind==='ui_drawing'&&(n.id===op.drawing||n.key===op.drawing))drawing=n;if(n.kind==='ui_world'&&(n.id===op.world||n.key===op.world))world=n;if(n.children)visit(n.children);}};for(const page of c.ast.body.filter(n=>n.kind==='screen'))visit(page.children);if(!drawing?.closed||!world)fail('Izaberi zatvoreni Draw crtež i postojeći3D prostor.');scope.CLEA7Depth.triangulate(drawing.points);const node={kind:'mesh',id:op.id,label:drawing.label,meshGeometry:'prism',contour:drawing.points,origin:op.origin,extent:op.extent,rotation:op.rotation||[0,0,0],surface:op.surface||'ceramic',tint:op.tint||'#51d8c2'};const at=world.childrenEnd;next=next.slice(0,at)+'\n'+treeSource([node])+'\n'+next.slice(at);
+   }else if(op.tool==='depth.transform'){
+    shape(op,['tool','target'],['origin','extent','rotation','surface','tint']);const c=B.compile(next);let mesh=null;const visit=nodes=>{for(const n of nodes){if(n.kind==='ui_mesh'&&(n.id===op.target||n.key===op.target))mesh=n;if(n.children)visit(n.children);}};for(const page of c.ast.body.filter(n=>n.kind==='screen'))visit(page.children);if(!mesh)fail('Izaberi postojeći3D objekat.');const node={kind:'mesh',id:mesh.key||mesh.id,label:mesh.label};for(const k of ['meshGeometry','origin','extent','rotation','surface','tint','contour','style','motion','gestures'])if(mesh[k]!==undefined)node[k]=mesh[k];for(const k of ['origin','extent','rotation','surface','tint'])if(op[k]!==undefined)node[k]=op[k];if(sentence)for(const key of ['origin','extent','rotation'])node[key]=node[key].map(v=>typeof v==='object'?{bind:c.ir.objects.objects.flatMap(o=>o.fields.map(f=>({symbol:f.symbol,name:o.name+'.'+f.name}))).find(f=>f.symbol===v.bind)?.name||v.bind}:v);next=next.slice(0,mesh.loc.start)+treeSource([node])+next.slice(mesh.loc.end);
    }else if(op.tool==='ui.compose'){shape(op,['tool','screen','nodes'],['parent']);next=compose(next,op);}
    else if(['ui.style','ui.label','ui.move','ui.duplicate','ui.remove'].includes(op.tool)){
     const D=scope.CLEA7BILDesigner;if(!D)fail('Ovom hostu nedostaje zajednički editor izgleda.');
-    if(op.tool==='ui.style'){shape(op,['tool','target','style']);if(!object(op.style)||!Object.keys(op.style).length||Object.keys(op.style).length>32)fail('Odaberi vizuelne osobine.');for(const [property,value]of Object.entries(op.style)){if(object(value)){shape(value,['bind']);name(value.bind);}else if(typeof value!=='string'&&!(typeof value==='number'&&Number.isFinite(value)))fail('Neispravna vizuelna vrijednost.');next=D.editAppearance(next,text(op.target,64),'style',property,value);}}
+    if(op.tool==='ui.style'){shape(op,['tool','target','style']);if(!object(op.style)||!Object.keys(op.style).length||Object.keys(op.style).length>32)fail('Odaberi vizuelne osobine.');for(const [property,value]of Object.entries(op.style)){if(object(value)){shape(value,['bind']);binding(value.bind);}else if(typeof value!=='string'&&!(typeof value==='number'&&Number.isFinite(value)))fail('Neispravna vizuelna vrijednost.');next=D.editAppearance(next,text(op.target,64),'style',property,value);}}
     else if(op.tool==='ui.label'){shape(op,['tool','target','label']);next=D.changeLabel(next,text(op.target,64),text(op.label,200));}
     else if(op.tool==='ui.move'){shape(op,['tool','target','parent']);next=D.reparent(next,text(op.target,64),text(op.parent,64));}
     else{shape(op,['tool','target']);next=D[op.tool==='ui.duplicate'?'duplicate':'remove'](next,text(op.target,64));}
@@ -133,7 +152,7 @@ function emit(plan,{source=null}={}){
     next=next.slice(0,at)+'\ninput '+prefix+'_text label "Pregledani tekst slike" multiline key '+prefix+'_output\n'+next.slice(at);
    }else if(op.tool==='screen.add'){
     shape(op,['tool','screen','title']);name(op.screen);if(B.parse(next).body.some(n=>n.name===op.screen))fail('Ekran ili simbol već postoji.');
-    next+='\nscreen '+op.screen+' '+q(text(op.title,160))+' {\n}\n';
+    next+=sentence?'\npogled '+op.screen+' '+q(text(op.title,160))+' {\n}.\n':'\nscreen '+op.screen+' '+q(text(op.title,160))+' {\n}\n';
    }else if(['ui.add','ui.collection','draw.add'].includes(op.tool)){
     shape(op,['tool','spec']);if(!object(op.spec))fail('Radnja treba tipizirane parametre.');
     const allowed=op.tool==='draw.add'?['screen','id','label','role','x','y','width','height','step','radius','points','fill','ink','closed','actor']:op.tool==='ui.add'?['screen','id','label','kind','initial','required','options','min','max','step','handler','target','amount','text']:['screen','id','label','action','collection','selection','identity','handler','columns','image'];
@@ -233,7 +252,9 @@ function attachComposer(api){
  const objects=attachObjectComposer(api);
  const d=api.parent.ownerDocument,el=(tag,text)=>{const n=d.createElement(tag);if(text!==undefined)n.textContent=text;return n;},root=el('details');root.id=(api.idPrefix||'')+'composition';root.className='draw-composition';root.open=true;root.append(el('summary','Sastavi svoj interfejs i prostor'));
  const field=(label,key,tag='input')=>{const l=el('label',label),n=el(tag);n.id=(api.idPrefix||'')+'compose-'+key;n.setAttribute('aria-label',label);l.append(n);root.append(l);return n;};
- const kind=field('Vrsta vlastite komponente','kind','select');const labels={row:'Raspored · red ili kolona',card:'Kartica / grupa',heading:'Naslov',text:'Tekst',input:'Povezani unos',toggle:'Prekidač',select:'Padajući izbor',button:'Dugme s događajem ili navigacijom',show:'Reaktivna vrijednost',visualize:'Runtime vizualizacija',shape:'Geometrijski oblik',drawing:'Vlastiti vektor',space:'Prostor vlastitih dimenzija',clock:'Sat / tok scene',pad:'Dodirna i tastaturna kontrola'};
+ const kind=field('Vrsta vlastite komponente','kind','select');const labels={row:'Raspored · red ili kolona',card:'Kartica / grupa',heading:'Naslov',text:'Tekst',input:'Povezani unos',toggle:'Prekidač',select:'Padajući izbor',button:'Dugme s događajem ili navigacijom',show:'Reaktivna vrijednost',visualize:'Runtime vizualizacija',shape:'Geometrijski oblik',drawing:'Vlastiti vektor',space:'Prostor vlastitih dimenzija',clock:'Sat / tok scene',pad:'Dodirna i tastaturna kontrola',world:'3D prostor · kamera i dubina',mesh:'3D geometrija i vlastita kontura',sprite:'Slika ili sprite kadrovi',sound:'Zvuk s opisom i titlovima'};
+ const viewId=field('Identitet vlastitog pogleda','view-id'),viewTitle=field('Naziv vlastitog pogleda','view-title');viewId.value='custom';viewTitle.value='Moj interaktivni prostor';
+ const addView=el('button','Dodaj slobodni pogled');addView.type='button';addView.id=(api.idPrefix||'')+'compose-view-add';addView.onclick=()=>{try{const next=emit({format:FORMAT,operations:[{tool:'screen.add',screen:viewId.value.trim(),title:viewTitle.value}]},{source:api.source()});api.setSource(next.source);api.inspect();status.textContent='Vlastiti pogled je dodan. Podaci i radnje objekata ostaju isti; dodaj svoje povezane kontrole, prostor ili crteže.';refresh();}catch(e){status.textContent=e.message;}};root.append(addView);
  for(const id of NODE_KINDS){const o=el('option',labels[id]);o.value=id;kind.append(o);}
  const id=field('Ključ vlastite komponente','id'),label=field('Tekst ili naziv komponente','label'),parent=field('Dodaj u raspored','parent','select'),bind=field('Povezani podatak','bind','select'),runs=field('Povezani događaj','runs','select'),opens=field('Ili otvori ekran','opens','select');id.value='my_layout';id.maxLength=48;label.value='Moj prostor';
  const geometry=field('Geometrija oblika','geometry','select');for(const shape of B.SHAPES){const o=el('option',shape);o.value=shape;geometry.append(o);}
@@ -251,17 +272,19 @@ function attachComposer(api){
  const add=el('button','Dodaj vlastitu komponentu');add.type='button';add.id=(api.idPrefix||'')+'compose-add';
  const fill=(select,values,blank)=>{const old=select.value;select.replaceChildren();const first=el('option',blank);first.value='';select.append(first);for(const [value,text]of values){const o=el('option',text);o.value=value;select.append(o);}if([...select.options].some(o=>o.value===old))select.value=old;};
  function fields(){for(const [control,visible]of [[bind,['input','toggle','select','show','visualize'].includes(kind.value)],[runs,kind.value==='button'],[opens,kind.value==='button'],[geometry,kind.value==='shape'],[options,kind.value==='select'],[points,kind.value==='drawing'],[width,kind.value==='space'],[height,kind.value==='space']])control.closest('label').hidden=!visible;}
- function refresh(){objects.refresh();try{root.hidden=!!B.compile(api.source()).ir.objects;if(root.hidden){add.disabled=true;return;}const c=context(api.source()),page=api.screen();fill(parent,c.components.filter(n=>n.screen===page&&['row','card','space'].includes(n.kind)).map(n=>[n.key,n.label||n.key]),'Na odabrani ekran');fill(bind,c.state.map(n=>[n.id,n.id+' · '+q(n.type)]),'Odaberi postojeći podatak');fill(runs,c.events.map(n=>[n,n]),'Bez događaja');fill(opens,c.screens.map(n=>[n.id,n.title]),'Bez navigacije');add.disabled=false;fields();}catch{add.disabled=true;}}
+ function refresh(){objects.refresh();try{root.hidden=false;const compiled=B.compile(api.source()),c=context(api.source()),page=api.screen(),sentences=!!compiled.ir.objects;viewId.closest('label').hidden=viewTitle.closest('label').hidden=addView.hidden=!sentences;fill(parent,c.components.filter(n=>n.screen===page&&['row','card','space','world'].includes(n.kind)).map(n=>[n.key,n.label||n.key]),'Na odabrani ekran');const bindings=sentences?c.objectModel.flatMap(o=>o.fields.map(f=>({id:o.name+'.'+f.name,type:c.state.find(s=>s.id===f.symbol)?.type}))):c.state;fill(bind,bindings.map(n=>[n.id,n.id+' · '+q(n.type)]),'Odaberi postojeći podatak');fill(runs,c.events.map(n=>[n,n]),'Bez događaja');fill(opens,c.screens.map(n=>[n.id,n.title]),'Bez navigacije');add.disabled=sentences&&!compiled.ast.body.some(n=>n.kind==='screen'&&n.name===page&&n.objectView);fields();}catch{add.disabled=true;}}
  add.onclick=()=>{try{
-  const node={...JSON.parse(extra.value),kind:kind.value,id:id.value.trim(),label:label.value.trim(),style:JSON.parse(style.value)};
-  if(['row','card','space'].includes(node.kind))node.children=node.children||[];
+  const node={...JSON.parse(extra.value),kind:kind.value,id:id.value.trim(),label:label.value.trim(),style:JSON.parse(style.value)};if(node.kind==='mesh'&&!Object.keys(node.style).length)delete node.style;
+  if(['row','card','space','world'].includes(node.kind))node.children=node.children||[];
   if(['input','toggle','select','show','visualize'].includes(node.kind))node.bind=bind.value;
   if(node.kind==='button'){if(runs.value)node.runs=runs.value;if(opens.value)node.opens=opens.value;}
+  if(node.kind==='world'){node.eye=node.eye||[7,5,9];node.aim=node.aim||[0,0,0];node.depthStrength=node.depthStrength??.45;if(!node.children.length)node.children=[{kind:'mesh',id:node.id+'_object',label:'Moj3D objekat',meshGeometry:'box',origin:[0,.5,0],extent:[1,1,1],rotation:[0,0,0],surface:'ceramic',tint:'#51d8c2'}];}
   if(node.kind==='shape')node.geometry=geometry.value;if(node.kind==='select')node.options=options.value.split('|').map(x=>x.trim());if(node.kind==='drawing')node.points=JSON.parse(points.value);if(node.kind==='space')node.size=[Number(width.value),Number(height.value)];
   const plan={format:FORMAT,operations:[{tool:'ui.compose',screen:api.screen(),...(parent.value?{parent:parent.value}:{}),nodes:[node]}]},next=emit(plan,{source:api.source()});api.setSource(next.source);api.inspect();status.textContent='Komponenta je dio istog BIL projekta. Pokreni i isprobaj njene događaje.';const used=new Set(context(api.source()).components.map(n=>n.key));let i=2,stem=node.id.slice(0,40);while(used.has(stem+'_'+i))i++;id.value=stem+'_'+i;refresh();
  }catch(error){status.textContent=error.message;api.error?.(error);}};
- kind.onchange=()=>{style.value=['row','card'].includes(kind.value)?'{"direction":"column","gap":16,"padding":20}':kind.value==='space'?'{}':'{"width":180,"padding":12}';fields();};
+ kind.onchange=()=>{extra.value=q(kind.value==='mesh'?{meshGeometry:'box',origin:[0,.5,0],extent:[1,1,1],rotation:[0,0,0],surface:'ceramic',tint:'#51d8c2'}:kind.value==='sprite'?{asset:'picture',grid:[1,1]}:kind.value==='sound'?{asset:'soundtrack',caption:'Opis zvuka'}:{});style.value=kind.value==='mesh'?'{}':kind.value==='world'?'{"width":"fill"}':['row','card'].includes(kind.value)?'{"direction":"column","gap":16,"padding":20}':kind.value==='space'?'{}':'{"width":180,"padding":12}';fields();};
+ runs.onchange=()=>{if(runs.value)opens.value='';};opens.onchange=()=>{if(opens.value)runs.value='';};
  root.append(add,status);api.parent.prepend(root);refresh();return {refresh};
 }
-scope.CLEA7StudioTools=Object.freeze({FORMAT,nodeKinds:NODE_KINDS,treeSource,compose,attachComposer,manifest:()=>({format:FORMAT,revision:3,nodeKinds:NODE_KINDS,visualProperties:Object.keys(B.PRESENTATION),tools:Object.entries(TOOLS).map(([id,description])=>({id,description,effects:'source-proposal-only'})),requiresReview:true}),context,modelContext,emit,resolve});
+scope.CLEA7StudioTools=Object.freeze({FORMAT,nodeKinds:NODE_KINDS,treeSource,compose,attachComposer,manifest:()=>({format:FORMAT,revision:5,nodeKinds:NODE_KINDS,visualProperties:Object.keys(B.PRESENTATION),tools:Object.entries(TOOLS).map(([id,description])=>({id,description,effects:'source-proposal-only'})),requiresReview:true}),context,modelContext,emit,resolve});
 })(globalThis);

@@ -2,7 +2,7 @@
 // Executes only the repository's compiler/Core/interpreter. BIL input is data.
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),{webcrypto}=require('node:crypto');
 const root=path.resolve(__dirname,'..'),scope={crypto:webcrypto,performance,TextEncoder,TextDecoder,URL,Blob,AbortController,setTimeout,clearTimeout,Date,console};scope.globalThis=scope;vm.createContext(scope);
-for(const f of ['runtime','workbench/living','workbench/bil-compiler','workbench/bil-runtime','workbench/working-cache','workbench/clea-core','workbench/format','workbench/plan','workbench/review','workbench/consumer','workbench/engine','workbench/intelligence','workbench/bil-elements','workbench/clea-draw','workbench/remote-studio','workbench/bil-designer','workbench/studio-operator','workbench/ai-authoring'])vm.runInContext(fs.readFileSync(path.join(root,'web',f+'.js'),'utf8'),scope);
+for(const f of ['runtime','workbench/living','workbench/resources','workbench/resource-host','workbench/depth','workbench/bil-compiler','workbench/bil-runtime','workbench/working-cache','workbench/clea-core','workbench/format','workbench/plan','workbench/review','workbench/consumer','workbench/engine','workbench/intelligence','workbench/bil-elements','workbench/clea-draw','workbench/remote-studio','workbench/bil-designer','workbench/studio-operator','workbench/ai-authoring'])vm.runInContext(fs.readFileSync(path.join(root,'web',f+'.js'),'utf8'),scope);
 const own=(value,key)=>Object.prototype.hasOwnProperty.call(value,key),copy=value=>JSON.parse(JSON.stringify(value));
 function options(request){
  if(request.cache!==undefined&&!['enabled','off'].includes(request.cache))throw Error('Use cache enabled or off.');
@@ -30,7 +30,7 @@ function validateTests(suite,app){
  return copy(suite);
 }
 async function testProject(request,app){
- if(app.remote)throw Error('Project unit tests do not implicitly configure network or native adapters.');
+ if(app.remote&&!Object.values(app.remote.backends).every(b=>b.adapter==='clea7500.private/1'))throw Error('Project unit tests do not implicitly configure network or native adapters.');
  const suite=validateTests(request.tests,app),host=options(request),cases=[],started=performance.now();
  for(const test of suite.cases){
   const vault=new scope.CLEA7.MemoryVault(),create=()=>new scope.CLEA7Engine.Engine(app,{vault,modules:null,reality:'SHADOW',...host});let engine=create();const steps=[];
@@ -47,9 +47,15 @@ async function testProject(request,app){
  return {format:'clea7.project-test-report/1',passed:cases.every(x=>x.passed),application:app.id,core:scope.CLEA7Core.FORMAT,reality:'SHADOW',storage:'fresh MemoryVault per case; shared across restart steps',ms:performance.now()-started,cases};
 }
 async function run(request){
+ if(request.action==='standalone-html'){
+  vm.runInContext(fs.readFileSync(path.join(root,'web/workbench/standalone.js'),'utf8'),scope);
+  const html=await scope.CLEA7Standalone.build(request.application,{load:async name=>fs.readFileSync(path.resolve(root,'web/workbench',name),'utf8')});
+  return {format:'clea7.standalone-html/1',html};
+ }
  if(request.action==='doctor')return {format:'clea7.sdk.doctor/1',node:process.versions.node,minimumNode:'22.0.0',nodeSupported:Number(process.versions.node.split('.')[0])>=22,compiler:{language:scope.CLEA7BIL.VERSION,ir:scope.CLEA7BIL.IR,coreFeatures:scope.CLEA7BIL.CORE_FEATURES},offline:true};
  if(request.action==='verify')return scope.CLEA7Intelligence.verifyBIL(request.source,{metadata:request.metadata||{},checks:request.checks||[]});
  if(request.action==='studio-tools')return scope.CLEA7AppAuthoring.operate(request.plan,{project:request.project||null,mode:request.mode||'create',checks:request.checks||[]});
+ if(request.action==='studio-context')return scope.CLEA7StudioTools.modelContext(request.source,{intent:request.intent||''});
  if(request.action==='verify-reply'){const decoded=scope.CLEA7AppAuthoring.decode(request.reply,{source:request.source||null}),checks=[...(request.checks||[]),...(decoded.checks||[])];if(checks.length>20)throw Error('Too many authoring checks.');return scope.CLEA7Intelligence.verifyBIL(decoded.source,{metadata:request.metadata||{},checks});}
  const result=scope.CLEA7Core.compile(request.source,request.metadata||{}),features=scope.CLEA7Core.featuresFor(result),extra=features.version>=2?{features}:{};
  if(request.action==='features')return {valid:true,features};

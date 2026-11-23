@@ -1,3 +1,5 @@
+> Runtime0.45 adds [custom Draw views](BIL-OBJECT-VIEWS.md) over these same objects. The automatic form is no longer the only presentation. Original no-view files still require0.44.
+
 # BIL sentence grammar 1 — Core5 / Runtime0.44
 
 Implemented in the existing authoritative compiler and checked VM. This is an
