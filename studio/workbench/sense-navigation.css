@@ -100,3 +100,16 @@
  padding:0!important;margin:-1px!important;overflow:hidden!important;
  clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important;
 }
+
+
+/* Continuous, non-interfering Sense guidance after a control is selected. */
+#sense-guidance-caption:not([hidden]){
+ position:fixed;left:clamp(12px,3vw,40px);right:clamp(12px,3vw,40px);
+ bottom:calc(12px + env(safe-area-inset-bottom));z-index:1900;
+ max-width:700px;margin:0 auto;padding:12px 18px;border-radius:15px;
+ background:#102f31ef;color:#eaf3f0;border:1px solid #91e6cd;
+ box-shadow:0 8px 26px #06171960;
+ font:600 clamp(14px,2vw,17px)/1.5 system-ui;
+ pointer-events:none;overflow-wrap:anywhere;
+}
+#sense-guidance-caption[hidden]{display:none!important}
