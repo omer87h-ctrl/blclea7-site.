@@ -113,3 +113,19 @@
  pointer-events:none;overflow-wrap:anywhere;
 }
 #sense-guidance-caption[hidden]{display:none!important}
+
+
+/* One recognisable CLEA Sense switch on every compatible CLEA page. */
+.sense-touch-launch{
+ display:block;position:relative;
+ margin:10px clamp(12px,3vw,36px);
+ padding:12px 20px;min-height:52px;min-width:190px;
+ max-width:calc(100% - 24px);
+ background:#91e6cd;color:#10262a;
+ border:1px solid #327a67;border-radius:13px;
+ box-shadow:0 6px 20px #07191c35;
+ font:750 16px/1.35 system-ui;
+ cursor:pointer;text-align:center;
+}
+.sense-touch-launch[aria-pressed="true"]{background:#d9f4ea;border-color:#11664d}
+.sense-touch-launch:focus-visible{outline:3px solid #ffc468;outline-offset:4px}
