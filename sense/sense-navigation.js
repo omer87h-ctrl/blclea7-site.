@@ -65,7 +65,8 @@ const panel=make('section');panel.className='sense-touch-console';const title=ma
 const instructions=make('p','Pomjeri prst po ekranu. Sense opisuje stvarnu kontrolu ispod prsta, dio ekrana i dostupnu radnju. Za traženje određenog polja izaberi cilj. Istraživanje ne pritišće dugmad i ne čita tvoje unesene podatke. „Pređi na kontrolu“ zasebno postavlja fokus za unos. Uz sistemski čitač ekrana koristi listu i dugmad; čitač može preuzeti geste dodira.');
 const modeLabel=make('label','Način vođenja'),mode=make('select');mode.id='sense-touch-mode';for(const [value,text]of [['explore','Istraži šta je ispod prsta'],['target','Vodi me do odabrane kontrole']]){const option=make('option',text);option.value=value;mode.append(option);}modeLabel.append(mode);
 const targetLabel=make('label','Šta želiš pronaći?'),targets=make('select');targets.id='sense-touch-target';targetLabel.append(targets);
-const status=make('p');status.id='sense-touch-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');status.setAttribute('aria-atomic','true');
+const status=make('p');status.id='sense-touch-status';status.setAttribute('aria-live','off');
+const accessibleUpdate=make('p');accessibleUpdate.id='sense-touch-live';accessibleUpdate.className='sense-touch-sr-only';accessibleUpdate.setAttribute('role','status');accessibleUpdate.setAttribute('aria-live','polite');accessibleUpdate.setAttribute('aria-atomic','true');
 const state=make('p');state.id='sense-touch-capabilities';const voiceLabel=make('label','Lokalni glas uređaja'),voices=make('select');voices.id='sense-touch-voice';voiceLabel.append(voices);
 const voiceHelp=make('p');voiceHelp.id='sense-touch-voice-help';
 const rateLabel=make('label','Brzina govora'),rate=make('select');rate.id='sense-touch-rate';
@@ -76,8 +77,8 @@ const vibrateLabel=make('label'),vibrate=make('input');vibrate.type='checkbox';v
 const start=make('button','Pokreni vođenje prstom');start.type='button';start.id='sense-touch-start';start.onclick=()=>{panel.classList.add('is-exploring');options.setAttribute('aria-expanded','false');options.textContent='Postavke';if(mode.value==='target')describe();else say('Klizi prstom po ekranu.',true);};
 const previous=make('button','Prethodna kontrola'),next=make('button','Sljedeća kontrola'),repeat=make('button','Ponovi položaj'),focus=make('button','Pređi na kontrolu'),close=make('button','Zatvori vodič'),explain=make('button','Objasni ovu kontrolu'),ask=make('button','Pitaj CLEA AI o ovoj kontroli');for(const b of [previous,next,repeat,focus,close,explain,ask])b.type='button';
 focus.id='sense-touch-focus';close.id='sense-touch-close';explain.id='sense-touch-explain';ask.id='sense-touch-ask';const actions=make('div');actions.className='sense-touch-actions';const options=make('button','Postavke');options.type='button';options.id='sense-touch-options-toggle';options.setAttribute('aria-expanded','true');options.onclick=()=>{const wasCompact=panel.classList.contains('is-exploring');panel.classList.toggle('is-exploring');options.textContent=wasCompact?'Sakrij postavke':'Postavke';options.setAttribute('aria-expanded',String(wasCompact));};actions.append(start,previous,next,repeat,focus,explain,ask,close,options);previous.className=next.className=repeat.className='sense-touch-secondary';
-const details=make('div');details.className='sense-touch-options';details.append(instructions,modeLabel,targetLabel,state,speakLabel,voiceLabel,voiceHelp,rateLabel,previewVoice,vibrateLabel);panel.append(title,status,details,actions);dialog.append(surface,panel);d.body.append(dialog);
-let controls=[],selected=0,source=null,returnTo=null,speaker=null,lastSpeech='',lastSpeechAt=0,lastSpeechKey='',lastCue='',lastCueAt=0,session=null,point=null,lastDescription=null,pointer=null,speechTimer=null,pendingSpeech=null,pendingSpeechKey='',speechBusy=false;
+const details=make('div');details.className='sense-touch-options';details.append(instructions,modeLabel,targetLabel,state,speakLabel,voiceLabel,voiceHelp,rateLabel,previewVoice,vibrateLabel);panel.append(title,status,accessibleUpdate,details,actions);dialog.append(surface,panel);d.body.append(dialog);
+let controls=[],selected=0,source=null,returnTo=null,speaker=null,lastSpeech='',lastSpeechAt=0,lastSpeechKey='',lastAccessibleKey='',lastCue='',lastCueAt=0,session=null,point=null,lastDescription=null,pointer=null,speechTimer=null,pendingSpeech=null,pendingSpeechKey='',speechBusy=false;
 function label(){const target=controls[selected];return target?name(target)+', '+kind(target):'Odaberi kontrolu';}
 function preferredVoice(list){
  const regional=list.filter(v=>/^(bs|hr|sr)(-|$)/i.test(v.language));
@@ -127,6 +128,7 @@ function flushSpeech(){
 }
 function say(text,force=false,key=text,spoken=text){
  status.textContent=text;
+ if(force||key!==lastAccessibleKey){accessibleUpdate.textContent=spoken;lastAccessibleKey=key;}
  if(!speak.checked||!voices.value||!speaker)return;
  if(key===lastSpeechKey&&!force){pendingSpeech=null;pendingSpeechKey='';clearTimeout(speechTimer);speechTimer=null;return;}
  if(key===pendingSpeechKey&&!force)return;
@@ -161,7 +163,7 @@ function refreshControls(){
 function previousButtonState(){previous.disabled=selected===0;next.disabled=selected===controls.length-1;}
 let measureFrame=null;
 function scheduleMeasurement(){if(!dialog.open||measureFrame!==null)return;measureFrame=requestAnimationFrame(()=>{measureFrame=null;if(!dialog.open)return;refreshControls();if(point&&pointer!==null)explore({pointerId:pointer,clientX:point.x,clientY:point.y,type:'pointermove',preventDefault(){}});});}
-function stop(){if(measureFrame!==null)cancelAnimationFrame(measureFrame);measureFrame=null;clearTimeout(session);session=null;stopSpeech();speaker=null;pointer=null;lastSpeech='';lastSpeechKey='';lastSpeechAt=0;try{scope.navigator?.vibrate?.(0);}catch{}controls=[];point=null;source=null;lastDescription=null;targets.replaceChildren();ring.hidden=true;scope.speechSynthesis?.removeEventListener?.('voiceschanged',refreshVoices);}
+function stop(){if(measureFrame!==null)cancelAnimationFrame(measureFrame);measureFrame=null;clearTimeout(session);session=null;stopSpeech();speaker=null;pointer=null;lastSpeech='';lastSpeechKey='';lastAccessibleKey='';lastSpeechAt=0;accessibleUpdate.textContent='';try{scope.navigator?.vibrate?.(0);}catch{}controls=[];point=null;source=null;lastDescription=null;targets.replaceChildren();ring.hidden=true;scope.speechSynthesis?.removeEventListener?.('voiceschanged',refreshVoices);}
 function finish(move=false){const target=move?controls[selected]:null,back=returnTo;dialog.close();stop();if(target?.isConnected){target.focus({preventScroll:true});}else if(back?.isConnected)back.focus();}
 function open(trigger){if(dialog.open)return;panel.classList.remove('is-exploring');options.textContent='Postavke';options.setAttribute('aria-expanded','true');const active=d.activeElement;returnTo=trigger||active;source=d.querySelector('dialog[open]')||d;controls=[...source.querySelectorAll(selector)].filter(visible);if(!controls.length){returnTo?.focus();return;}
  targets.replaceChildren();controls.forEach((node,i)=>{const option=make('option',(i+1)+'. '+name(node)+' · '+kind(node));option.value=String(i);targets.append(option);});
