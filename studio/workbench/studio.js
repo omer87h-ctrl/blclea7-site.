@@ -145,7 +145,9 @@ const localAI=CLEA7AIStudio.attach({root:$('clea-ai'),project:aiSnapshot,apply:a
  canUndo:()=>undo.length>0,undo:()=>applyHistory('undo'),run:async()=>{panel('test',false);await startPlayer();return engine;},showSource:loc=>{panel('bil');const area=$('bil-source');area.focus();area.setSelectionRange(loc?.start||0,loc?.end||0);}
 });globalThis.CLEA7LocalAIWorkspace=localAI;
 
-draw();panel('design');status(vault.persistent?'CLEA7 Studio je spreman · dizajn, logika, kod i lokalni Runtime.':'Trajno skladište nije dostupno; preuzimaj kopije.');globalThis.CLEA7Workbench={nativeAI:nativeToken?Object.freeze({status:async()=>await(await native('ai/clea-status',{})).json(),ask:async value=>await(await native('ai/clea-chat',value)).json()}):null,snapshot:aiSnapshot,applyReviewed:applyReviewedAI,undo:()=>applyHistory('undo'),redo:()=>applyHistory('redo'),get project(){return project;},get engine(){return engine;},save:saveProject,acknowledgeExternalSave:source=>{if(project.bil?.source!==source||bilStudio?.dirty)throw Error('Izvor je promijenjen tokom čuvanja. Dorada na ekranu ostaje sačuvana.');dirty=false;},open:p=>{const checked=F.validate(p);stopPlayer();project=checked;screen=project.start;selected=null;saved=null;bilStudio?.loadProject();draw();},run:startPlayer};
+const initialWorkspace=new URLSearchParams(location.search).get('workspace');
+const initialPanel=['clea-chat','clea-ai','assistant'].includes(initialWorkspace)?'clea-chat':initialWorkspace==='draw'?'draw':'design';
+draw();panel(initialPanel);status(vault.persistent?'CLEA7 Studio je spreman · dizajn, logika, kod i lokalni Runtime.':'Trajno skladište nije dostupno; preuzimaj kopije.');globalThis.CLEA7Workbench={nativeAI:nativeToken?Object.freeze({status:async()=>await(await native('ai/clea-status',{})).json(),ask:async value=>await(await native('ai/clea-chat',value)).json()}):null,snapshot:aiSnapshot,applyReviewed:applyReviewedAI,undo:()=>applyHistory('undo'),redo:()=>applyHistory('redo'),get project(){return project;},get engine(){return engine;},save:saveProject,acknowledgeExternalSave:source=>{if(project.bil?.source!==source||bilStudio?.dirty)throw Error('Izvor je promijenjen tokom čuvanja. Dorada na ekranu ostaje sačuvana.');dirty=false;},open:p=>{const checked=F.validate(p);stopPlayer();project=checked;screen=project.start;selected=null;saved=null;bilStudio?.loadProject();draw();},run:startPlayer};
 globalThis.dispatchEvent(new Event('clea:studio-ready'));
 let archiveExport=null;const archivePanel=elem('div'),archiveDownload=elem('button','Preuzmi arhivu poništenih podataka'),archiveClear=elem('button','Ukloni preuzetu arhivu');archiveDownload.type=archiveClear.type='button';archiveClear.disabled=true;archivePanel.append(archiveDownload,archiveClear);$('build').append(archivePanel);
 archiveDownload.onclick=async()=>{try{if(project.remote)throw Error('Ova arhiva je za lokalne projekte bez udaljenog korisničkog konteksta.');const result=await CLEA7SchemaHistory.exportArchive(vault,project.id);download(project.id+'-historija-podataka.json',result.json);archiveExport={id:project.id,digest:result.digest};archiveClear.disabled=false;status('Preuzeta je lokalna arhiva. Aktivni podaci nisu promijenjeni.');}catch(e){status(e.message);}};
@@ -170,8 +172,6 @@ async function showStart(force=false){
 const startButton=button('Početak Studija',async()=>{stopPlayer();await showStart(true);});startButton.id='studio-home';document.querySelector('nav[aria-label="Radni prostor"]').prepend(startButton);
 const entry=new URLSearchParams(location.search);if(!entry.has('workspace')&&!entry.has('collaboration')&&!entry.has('proposal'))await showStart();if(entry.get('example')==='depth-atlas')document.getElementById('studio-depth-start')?.scrollIntoView({block:'start'});
 
-// Only fixed Studio workspaces may be selected by a public link.
-const linkedWorkspace=new URLSearchParams(location.search).get('workspace');
-if(['clea-chat','clea-ai','assistant'].includes(linkedWorkspace))document.querySelector('[data-panel="clea-chat"]').click();
+// The linked workspace was selected before the first editor render.
 })();
 

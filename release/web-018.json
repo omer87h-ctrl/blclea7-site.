@@ -40,8 +40,8 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 18067,
-      "sha256": "c99740231f69142ce23bf0d6749b2d7f08b0892e582c22c0fdff4b220124601a"
+      "bytes": 18126,
+      "sha256": "d9709b2239afbcbe62315f0ab9e5c5808fcbc4ade9f72cc72a19023b0cd238f1"
     },
     {
       "path": "studio/workbench/package.js",

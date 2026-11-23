@@ -98,8 +98,8 @@
     },
     {
       "path": "studio/workbench/index.html",
-      "bytes": 18067,
-      "sha256": "c99740231f69142ce23bf0d6749b2d7f08b0892e582c22c0fdff4b220124601a"
+      "bytes": 18126,
+      "sha256": "d9709b2239afbcbe62315f0ab9e5c5808fcbc4ade9f72cc72a19023b0cd238f1"
     },
     {
       "path": "studio/workbench/studio.css",
@@ -108,8 +108,8 @@
     },
     {
       "path": "studio/workbench/studio.js",
-      "bytes": 61815,
-      "sha256": "a2b8908daba949bc51234dc22d3963c1e80cc2fe670a10ccd23eb0c9773021a3"
+      "bytes": 61835,
+      "sha256": "89f47fd960e69cb9f2ad00a9a049a5e50cd907754dc8b29cd0916f3d71e77e94"
     }
   ]
 }

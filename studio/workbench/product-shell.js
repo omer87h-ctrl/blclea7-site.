@@ -12,6 +12,11 @@
     const summary = document.createElement('summary'), list = document.createElement('div');
     summary.textContent = 'Svi alati'; more.append(summary, list);
     const open = name => document.querySelector('[data-panel="' + name + '"]')?.click();
+    const router=Object.freeze({open(name){
+      if(!['clea-chat','draw'].includes(name))return false;
+      open(name);const url=new URL(location.href);url.searchParams.set('workspace',name);history.replaceState(null,'',url);return true;
+    }});
+    globalThis.CLEA7ProductNavigation=router;
     const button = (text, action) => {
       const node = document.createElement('button'); node.type = 'button';
       node.textContent = text; node.onclick = action; return node;
@@ -65,6 +70,7 @@
       sessionStorage.removeItem('clea-public-intent'); open('clea-chat');
       const input = document.getElementById('chat-question'); if (input) input.value = question;
     }
+    globalThis.CLEA7ProductEntry?.ready(router);
   }
   if (globalThis.CLEA7Workbench) ready();
   else globalThis.addEventListener('clea:studio-ready', ready, {once:true});
