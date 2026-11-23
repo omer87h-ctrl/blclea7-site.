@@ -8,11 +8,12 @@ function capabilities(){return {format:'sense.capabilities/1',speechInputAPI:typ
 function speaker({onState=()=>{}}={}){
  let active=null,timer=null,serial=0;
  const stop=()=>{serial++;if(timer)clearTimeout(timer);timer=null;try{scope.speechSynthesis?.cancel();}catch{}if(active){active.reject(fault('Cancelled','Govor je zaustavljen.'));active=null;}onState('stopped');};
- function speak(text,{approved=false,voiceName}={}){
+ function speak(text,{approved=false,voiceName,rate=0.94}={}){
   if(approved!==true)throw fault('Permission','Prvo potvrdi tačan sadržaj poruke.');
   if(typeof text!=='string'||!text.trim()||text.length>3000)throw fault('Input','Poruka mora imati 1–3000 znakova.');
+  if(typeof rate!=='number'||!Number.isFinite(rate)||rate<0.7||rate>1.2)throw fault('Input','Brzina govora mora biti između 0,7 i 1,2.');
   const voice=localVoices().find(v=>v.name===voiceName);if(!voice||typeof scope.SpeechSynthesisUtterance!=='function')throw fault('Unavailable','Odaberi dostupan lokalni glas uređaja. Poruka ostaje tekstom.');
-  stop();const generation=serial,utterance=new scope.SpeechSynthesisUtterance(text);utterance.voice=voice;utterance.lang=voice.lang;
+  stop();const generation=serial,utterance=new scope.SpeechSynthesisUtterance(text);utterance.voice=voice;utterance.lang=voice.lang;utterance.rate=rate;
   return new Promise((resolve,reject)=>{
    active={reject};const finish=(error)=>{if(generation!==serial)return;if(timer)clearTimeout(timer);timer=null;active=null;error?reject(error):resolve({spoken:true,localVoice:true,language:voice.lang});};
    utterance.onstart=()=>{if(generation===serial)onState('speaking');};utterance.onend=()=>{if(generation===serial){onState('completed');finish();}};
