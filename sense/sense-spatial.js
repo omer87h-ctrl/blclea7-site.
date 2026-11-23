@@ -33,7 +33,7 @@ const metrics=make('div','spatial-metrics');metrics.id='spatial-metrics';metrics
 const metricValues=[];for(const label of ['Potvrđeno','Obavezno za pregled','Za tvoju potvrdu']){const item=make('div','spatial-metric');const value=make('strong','','—');item.append(value,make('span','',label));metrics.append(item);metricValues.push(value);}
 host.append(heading,stage,footer,metrics);
 function flat(value){host.classList.toggle('spatial-flat',value);document.body.classList.toggle('sense-flat',value);mode.setAttribute('aria-pressed',String(value));mode.textContent=value?'Prostorni prikaz':'Ravni prikaz';mode.setAttribute('aria-label',value?'Uključi prostorni prikaz radnog prostora':'Uključi ravni prikaz radnog prostora');}
-try{flat(localStorage.getItem('blclea.sense.cv.space/1')==='flat');}catch(_){flat(false);}
+try{flat(localStorage.getItem('blclea.sense.cv.space/1')!=='spatial');}catch(_){flat(true);}
 mode.addEventListener('click',()=>{const next=!host.classList.contains('spatial-flat');flat(next);try{localStorage.setItem('blclea.sense.cv.space/1',next?'flat':'spatial');}catch(_){/* View preference is optional; private work is unaffected. */}});
 function update(){
  const summary=document.getElementById('summary'),values=summary?Array.from(summary.querySelectorAll('.summary-card strong')).map(e=>e.textContent.trim()):[];

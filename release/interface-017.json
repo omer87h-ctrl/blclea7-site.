@@ -1,0 +1,36 @@
+{
+  "format": "clea7.interface-release/1",
+  "interfaceRevision": "017",
+  "coreSDKVersion": "0.48.0-test",
+  "sourceRepository": "omer87h-ctrl/BL-Clea7-by-brzoilokalno",
+  "sourceCommit": "0acc7022ddb3f4bc036319998ce3d3c44a6e77c4",
+  "androidManifest": "clea7500-android-0.1.7.json",
+  "commonTheme": "../studio/workbench/clea-theme.css",
+  "themeSHA256": "2df8e16b7a6080b4c447f2aa6cb94697454d61498c083d7f66febcf2525b9847",
+  "changes": [
+    "One shared CLEA petrol/mint interface palette on existing website, Studio, Draw, Sense, chat and private Android assistant.",
+    "One optional Sense switch; default CV workspace starts without the decorative spatial stage.",
+    "Correct SVG media type in Android WebView and adaptive/monochrome launcher and activity icons.",
+    "Complete recent conversation pairs only; shorter greeting context while keeping full history on SSD."
+  ],
+  "validation": {
+    "actualChromiumRoutes": 18,
+    "actualProductBrowserGroups": 4,
+    "actualSenseCVBrowserChecks": 23,
+    "sourcePythonRan": 452,
+    "sourcePythonPassed": 450,
+    "sourceWindowsOnlySkipped": 2,
+    "publicPythonPassed": 73,
+    "androidAPKSignatureVerified": true,
+    "actualJVMMimeAssertions": 7
+  },
+  "limits": {
+    "physicalAndroidExecuted": false,
+    "updatedHPInferenceExecuted": false,
+    "updatedModelLatencyMeasured": false,
+    "anonymousPublicAIEndpointEnabled": false,
+    "wholeMasterCompleted": false,
+    "neural70BParityMeasured": false
+  },
+  "historicalSDKAndNativeDownloadsModified": false
+}
