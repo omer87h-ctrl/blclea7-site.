@@ -163,24 +163,33 @@ let measureFrame=null;
 function scheduleMeasurement(){if(!dialog.open||measureFrame!==null)return;measureFrame=requestAnimationFrame(()=>{measureFrame=null;if(!dialog.open)return;refreshControls();if(point&&pointer!==null)explore({pointerId:pointer,clientX:point.x,clientY:point.y,type:'pointermove',preventDefault(){}});});}
 function stop(){if(measureFrame!==null)cancelAnimationFrame(measureFrame);measureFrame=null;clearTimeout(session);session=null;stopSpeech();speaker=null;pointer=null;lastSpeech='';lastSpeechKey='';lastSpeechAt=0;try{scope.navigator?.vibrate?.(0);}catch{}controls=[];point=null;source=null;lastDescription=null;targets.replaceChildren();ring.hidden=true;scope.speechSynthesis?.removeEventListener?.('voiceschanged',refreshVoices);}
 function finish(move=false){const target=move?controls[selected]:null,back=returnTo;dialog.close();stop();if(target?.isConnected){target.focus({preventScroll:true});}else if(back?.isConnected)back.focus();}
-function open(trigger){if(dialog.open)return;panel.classList.remove('is-exploring');const active=d.activeElement;returnTo=trigger||active;source=d.querySelector('dialog[open]')||d;controls=[...source.querySelectorAll(selector)].filter(visible);if(!controls.length){returnTo?.focus();return;}
+function open(trigger){if(dialog.open)return;panel.classList.remove('is-exploring');options.textContent='Postavke';options.setAttribute('aria-expanded','true');const active=d.activeElement;returnTo=trigger||active;source=d.querySelector('dialog[open]')||d;controls=[...source.querySelectorAll(selector)].filter(visible);if(!controls.length){returnTo?.focus();return;}
  targets.replaceChildren();controls.forEach((node,i)=>{const option=make('option',(i+1)+'. '+name(node)+' · '+kind(node));option.value=String(i);targets.append(option);});
  speaker=scope.CLEA7SenseSDK?.speaker?.()||null;refreshVoices();scope.speechSynthesis?.addEventListener?.('voiceschanged',refreshVoices);dialog.showModal();selected=Math.max(0,controls.findIndex(n=>n===active));targets.value=String(selected);mode.value='explore';draw();say('Sense istražuje ekran. Pomjeri prst i reći ću šta je ispod njega. Za traženje određenog polja odaberi cilj. Dodir ne pokreće radnju.',true);targets.focus();
 }
 function explore(event){
- if(!dialog.open||event.pointerId!==pointer)return;event.preventDefault();panel.classList.add('is-exploring');point={x:event.clientX,y:event.clientY};
+ if(!dialog.open||event.pointerId!==pointer)return;
+ event.preventDefault();
+ if(!panel.classList.contains('is-exploring')){panel.classList.add('is-exploring');options.setAttribute('aria-expanded','false');options.textContent='Postavke';}
+ point={x:event.clientX,y:event.clientY};
  if(mode.value==='explore'){
-  const items=controls.map(measured).filter(Boolean),found=locate(point,items),where=position(point,{width:innerWidth,height:innerHeight});
-  if(!found.available){lastDescription={mode:'explore',point:{...point},underFinger:null};say(where+' Ovdje nema prikazane kontrole.',event.type==='pointerup');return;}
-  const item=items[found.index];selected=controls.indexOf(item.target);targets.value=String(selected);draw();panel.dataset.dock=point.y>innerHeight*.55?'top':'bottom';
-  lastDescription={mode:'explore',point:{...point},underFinger:found.hit?item.name:null,label:item.label,region:item.region,kind:item.kind,...found};
-  const text=where+(found.hit?' Ispod prsta: '+item.label+'. Dio: '+item.region+'.':' Između kontrola. Najbliže je '+item.label+': '+found.text);
-  say(text,event.type==='pointerup');cue(found.hit?'target':found.zone);return;
+  const items=controls.map(measured).filter(Boolean);
+  const guidance=touchGuidance(point,items,{width:innerWidth,height:innerHeight}),found=guidance.found;
+  panel.dataset.dock=point.y>innerHeight*.55?'top':'bottom';
+  const item=found.available?items[found.index]:null;
+  if(item){selected=controls.indexOf(item.target);targets.value=String(selected);draw();panel.dataset.dock=point.y>innerHeight*.55?'top':'bottom';}
+  else ring.hidden=true;
+  lastDescription={mode:'explore',point:{...point},underFinger:found.hit?item.name:null,
+   label:item?.label||null,region:item?.region||null,kind:item?.kind||null,...found};
+  say(guidance.text,event.type==='pointerup',guidance.key,guidance.spoken);
+  if(found.available)cue(found.hit?'target':found.zone);
+  return;
  }
  const item=draw();if(!item)return;const result=direction(point,item.rect);if(!result.available)return;
  lastDescription={mode:'target',point:{...point},underFinger:result.arrived?item.name:null,label:item.label,region:item.region,kind:item.kind,...result};
  const text=result.arrived?item.label+'. Tu je cilj. Podigni prst, a zatim odaberi „Pređi na kontrolu“.':position(point,{width:innerWidth,height:innerHeight})+' '+item.label+'. '+result.text;
- say(text,event.type==='pointerup'||result.arrived&&lastCue!=='target');cue(result.zone);
+ const key=result.arrived?'target:hit:'+selected:'target:'+selected+':'+result.zone+':'+Math.sign(result.dx)+':'+Math.sign(result.dy);
+ say(text,event.type==='pointerup'||result.arrived&&lastCue!=='target',key,result.arrived?item.label+'. Tu je cilj.':'Do '+item.name+': '+result.text);cue(result.zone);
 }
 surface.addEventListener('pointerdown',event=>{if(pointer!==null)return;pointer=event.pointerId;surface.setPointerCapture?.(pointer);explore(event);});surface.addEventListener('pointermove',explore);surface.addEventListener('pointerup',event=>{explore(event);if(event.pointerId===pointer){surface.releasePointerCapture?.(pointer);pointer=null;}});surface.addEventListener('pointercancel',event=>{if(event.pointerId===pointer){pointer=null;stopSpeech();}});surface.addEventListener('click',event=>event.preventDefault());
 function explanation(){const item=current();if(!item)return null;return {format:'sense.control-context/1',label:item.name,kind:item.kind,region:item.region,help:item.hint,position:lastDescription?.point?position(lastDescription.point,{width:innerWidth,height:innerHeight}):'Odabrana kontrola.'};}
