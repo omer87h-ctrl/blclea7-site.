@@ -21,7 +21,7 @@ def main():
     try:
         with sync_playwright() as pw:
             browser=pw.chromium.launch(executable_path=os.environ.get('CLEA7_CHROME','/usr/bin/chromium'),headless=True,args=['--no-sandbox']);context=browser.new_context(accept_downloads=True);page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.on('request',lambda r:requests.append({'method':r.method,'url':r.url}))
-            page.goto(f'http://127.0.0.1:{server.server_port}/sense/',wait_until='networkidle');page.get_by_role('button',name='Uključi ravni prikaz radnog prostora',exact=True).click()
+            page.goto(f'http://127.0.0.1:{server.server_port}/sense/?tool=cv',wait_until='networkidle');page.get_by_role('button',name='Uključi ravni prikaz radnog prostora',exact=True).click()
             assert not any('/vendor/ocr/' in r['url'] for r in requests)
             assert page.evaluate("async()=>{try{await CLEA7SenseOCR.read(new Blob(['x']));return false;}catch(e){return e.code==='Permission'}}")
             checks.append('No OCR engine/model downloads or device access on load; image bytes require explicit approval')
