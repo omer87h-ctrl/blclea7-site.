@@ -72,6 +72,9 @@
     }
     globalThis.CLEA7ProductEntry?.ready(router);
   }
-  if (globalThis.CLEA7Workbench) ready();
+  // Workbench API exists before its asynchronous project chooser is ready.
+  // Waiting for the explicit initialization signal avoids a mid-paint
+  // switch between legacy chrome, splash, and the actual Studio start.
+  if (globalThis.CLEA7StudioUiReady) ready();
   else globalThis.addEventListener('clea:studio-ready', ready, {once:true});
 })();
