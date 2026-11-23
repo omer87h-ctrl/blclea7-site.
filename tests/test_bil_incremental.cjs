@@ -1,7 +1,11 @@
 'use strict';
 // Same authoritative compiler, source maps and execution; no compiler fixture.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),vm=require('node:vm');
-const s={TextEncoder,TextDecoder,performance,console};s.globalThis=s;vm.createContext(s);vm.runInContext(fs.readFileSync((process.env.CLEA7_SOURCE_WEB||'web')+'/workbench/bil-compiler.js','utf8'),s);
+const s={TextEncoder,TextDecoder,performance,console};s.globalThis=s;vm.createContext(s);
+// The SDK example suite contains real 3D outlines; compiler validation needs
+// the production shared Depth triangulation host, never a mock validator.
+vm.runInContext(fs.readFileSync((process.env.CLEA7_SOURCE_WEB||'web')+'/workbench/depth.js','utf8'),s);
+vm.runInContext(fs.readFileSync((process.env.CLEA7_SOURCE_WEB||'web')+'/workbench/bil-compiler.js','utf8'),s);
 const B=s.CLEA7BIL,clean=x=>JSON.parse(JSON.stringify(x)),session=B.createSession({scope:'owner-project'});let passed=0;
 function check(name,run){run();passed++;console.log('PASS incremental '+name);}
 function same(source,metadata={}){const cold=clean(B.compile(source,metadata)),warm=clean(session.compile(source,metadata));assert.deepEqual(warm,cold);return warm;}
