@@ -17,3 +17,8 @@ body.large-text .spatial-footer{flex-direction:column;align-items:stretch}body.l
 @media(max-width:430px){.spatial-stage{height:205px;margin-left:-16px;margin-right:-16px}.spatial-desk{transform:translateX(-50%) scale(.53);transform-origin:center 36px;top:0}.spatial-object-caption{top:169px;font-size:8px;width:82px}.source-caption{margin-left:-107px}.result-caption{margin-left:107px}.spatial-metrics{grid-template-columns:1fr}.spatial-metric{display:flex;align-items:baseline;gap:10px}.spatial-metric strong{min-width:52px}.spatial-metric span{margin:0}.spatial-heading{gap:5px}.spatial-mode{max-width:58%}}
 @media(prefers-reduced-motion:reduce){.sense-spatial *{animation:none!important;transition:none!important}.spatial-stage{perspective:none}.spatial-source,.spatial-result,.spatial-core{transform:none}}
 @media print{.sense-spatial{display:none!important}}
+/* The default flat workspace opens directly on the editable CV and job form.
+   The complete spatial view remains available through its existing control. */
+body.sense-flat #sense-spatial-host .spatial-stage{display:none}
+body.sense-flat #sense-spatial-host{padding:12px 18px}
+body.sense-flat #sense-spatial-host .spatial-footer{margin-top:12px}

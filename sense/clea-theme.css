@@ -1,0 +1,79 @@
+/* One CLEA interface palette. Authored application previews keep their design. */
+html[data-clea-theme="clea"]{
+ --clea-bg:#10262a;--clea-surface:#173337;--clea-surface-soft:#1d3c40;
+ --clea-paper:#eaf3f0;--clea-mint:#91e6cd;--clea-text:#eaf3f0;
+ --clea-muted:#b3ccc7;--clea-line:#3b5b5f;--clea-focus:#ffc468;
+ --bg:var(--clea-bg);--surface:var(--clea-surface);--panel:var(--clea-surface);
+ --panel2:var(--clea-surface-soft);--panel-soft:var(--clea-surface-soft);
+ --ink:var(--clea-text);--text:var(--clea-text);--muted:var(--clea-muted);
+ --dim:var(--clea-muted);--line:var(--clea-line);--border:var(--clea-line);
+ --orange:var(--clea-mint);--soft:var(--clea-mint);--green:var(--clea-mint);
+ --teal:var(--clea-mint);--blue:var(--clea-mint);--gold:var(--clea-mint);
+ --amber:var(--clea-mint);--sense-light:var(--clea-mint);--sense-depth:var(--clea-bg);
+ --sense-glass:var(--clea-surface);--sense-edge:var(--clea-line);
+ color-scheme:dark;background:var(--clea-bg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+html[data-clea-theme="clea"][data-clea-area] body{background:var(--clea-bg);color:var(--clea-text);font-size:1rem;line-height:1.6}
+html[data-clea-theme="clea"] :is(a,button,input,textarea,select,summary):focus-visible{outline:3px solid var(--clea-focus);outline-offset:4px}
+html[data-clea-theme="clea"] :is(.brand,.brandmark,.mark){color:var(--clea-mint)}
+html[data-clea-theme="clea"] .brandmark{width:42px;height:42px;object-fit:contain}
+html[data-clea-theme="clea"] :is(.topline,.noticebar,.test-banner,.mobile-preview-note){background:var(--clea-surface);border-color:var(--clea-line);color:var(--clea-muted)}
+html[data-clea-theme="clea"] :is(body>header,.site-header,.topbar,.sidebar,.studio-topbar,.page-header){background:var(--clea-bg);border-color:var(--clea-line);box-shadow:none;backdrop-filter:none}
+html[data-clea-theme="clea"] :is(.nav,.site-header nav,.topbar-actions,.primary-nav){font-size:15px}
+html[data-clea-theme="clea"] :is(.nav a,.site-header nav a){color:var(--clea-muted)}
+html[data-clea-theme="clea"] :is(.nav a:hover,.nav a[aria-current=page],.site-header nav a:hover){color:var(--clea-mint)}
+html[data-clea-theme="clea"] .nav-download{border-color:var(--clea-mint);color:var(--clea-mint)}
+html[data-clea-theme="clea"] .clea-more{position:relative}
+html[data-clea-theme="clea"] .clea-more>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;padding:8px 12px}
+html[data-clea-theme="clea"] .clea-more>div{position:absolute;right:0;top:100%;z-index:40;display:grid;gap:5px;min-width:210px;padding:14px;border:1px solid var(--clea-line);border-radius:14px;background:var(--clea-surface);box-shadow:0 15px 35px #0004}
+html[data-clea-theme="clea"] .clea-more:not([open])>div{display:none}
+html[data-clea-theme="clea"] .clea-more>div>a{padding:9px 10px}
+html[data-clea-theme="clea"] :is(.button,.quiet-button,.icon-button,.stop-button,.close-button){border-radius:12px;min-height:44px;font-size:14px;line-height:1.5;border-color:#63837f;box-shadow:none}
+html[data-clea-theme="clea"] :is(.button.primary,button.primary,a.primary,.primary-nav button[aria-current=page]):where(:not(#application *,#player *,#canvas *,#draw-object-preview *)){background:var(--clea-mint);border-color:var(--clea-mint);color:var(--clea-bg)}
+html[data-clea-theme="clea"] :is(.button.primary:hover,button.primary:hover,a.primary:hover):where(:not(#application *,#player *,#canvas *,#draw-object-preview *)){background:#b0f5df;border-color:#b0f5df;color:var(--clea-bg);transform:none}
+html[data-clea-theme="clea"] :is(.button:not(.primary):not(.danger):hover,.quiet-button:hover){background:var(--clea-surface-soft);color:var(--clea-text);border-color:var(--clea-mint);transform:none}
+html[data-clea-theme="clea"] :is(.eyebrow,.section-index){color:var(--clea-mint)}
+html[data-clea-theme="clea"] :is(.hero-art,.download-core){background:var(--clea-surface);box-shadow:none;border-color:var(--clea-line)}
+html[data-clea-theme="clea"] :is(.download-grid article,.setup-card){background:var(--clea-surface);border-color:var(--clea-line);border-radius:18px}
+html[data-clea-theme="clea"] :is(.download-meta,.download-grid p,.setup-card p,.setup-card li){color:var(--clea-muted);font-size:14px}
+html[data-clea-theme="clea"] .download-hero .button.primary{background:var(--clea-mint);color:var(--clea-bg)}
+html[data-clea-theme="clea"] :is(.topline,.noticebar,.brand small,.meta,.topbar-left,.save-state,.workspace-label){font-size:13px}
+
+/* Sense keeps the same controls, sources and semantic CV document. */
+html[data-clea-area="sense"]{--ink:var(--clea-bg)}
+html[data-clea-area="sense"] body::before,html[data-clea-area="sense"] .sidebar::after{display:none}
+html[data-clea-area="sense"] :is(.app-body,#sense-spatial-host){background:var(--clea-bg);box-shadow:none}
+html[data-clea-area="sense"] :is(.panel,.summary-card,.status-bar){background:var(--clea-surface);border-color:var(--clea-line);box-shadow:none;border-radius:16px}
+html[data-clea-area="sense"] :is(.primary-nav button,.topbar-actions .button){background:var(--clea-surface);border-color:var(--clea-line)}
+html[data-clea-area="sense"] .primary-nav button[aria-current=page]{background:var(--clea-mint);color:var(--clea-bg);border-color:var(--clea-mint);box-shadow:none}
+html[data-clea-area="sense"] .primary-nav button[aria-current=page] :is(svg,small,.nav-step){color:var(--clea-bg)}
+html[data-clea-area="sense"] .primary-nav button:hover{transform:none}
+html[data-clea-area="sense"] :is(.brand img,.small-orbit){filter:none}
+html[data-clea-area="sense"] :is(.primary-nav button span:not(.nav-step),.field label){font-size:15px}
+html[data-clea-area="sense"] :is(.primary-nav button small,.sidebar-note p,.sidebar-bottom .quiet-button,.workspace-footer>span,.panel-heading p){font-size:14px}
+html[data-clea-area="sense"] .status-bar[data-kind=error]{background:#492b32;border-color:#db8e92;color:#ffe7e8}
+
+/* Library and setup chrome; never recolour #application, #player or #canvas. */
+html[data-clea-area="library"] :is(main>section,main>aside,.app-card,dialog),html[data-clea-area="setup"] :is(main,.card,.setup-card){background:var(--clea-surface);color:var(--clea-text);border-color:var(--clea-line);border-radius:16px}
+html[data-clea-area="library"] :is(button,input,select),html[data-clea-area="setup"] :is(button,input,select){font-size:15px;border-radius:10px;min-height:44px}
+html[data-clea-area="library"] button{background:var(--clea-surface-soft);color:var(--clea-text);border-color:#63837f}
+html[data-clea-area="library"] :is(header button,.primary){background:var(--clea-mint);color:var(--clea-bg);border-color:var(--clea-mint)}
+html[data-clea-area="library"] :is(.mark,#status){color:var(--clea-mint)}
+html[data-clea-area="library"] .app-card p{color:var(--clea-muted);font-size:14px}
+html[data-clea-area="chat"] :is(.clea-chat-room,.clea-chat-heading,.chat-model-card,.chat-welcome,.page-intro){background:var(--clea-surface);border-color:var(--clea-line)}
+html[data-clea-area="chat"] button.primary{background:var(--clea-mint);color:var(--clea-bg);border-color:var(--clea-mint)}
+html[data-clea-area="auto"] :is(.workspace,.workspace-tabs,.diagnostic-panel,.device-panel,.investigation-panel,.auto-home,.tool-card){border-color:var(--clea-line)}
+html[data-clea-area="auto"] .workspace-tabs button.active{background:var(--clea-mint);color:var(--clea-bg);border-color:var(--clea-mint)}
+html[data-clea-area="auto"] .hero-description{font-size:16px}
+
+@media(max-width:800px){
+ html[data-clea-theme="clea"] :is(.topline,.noticebar){font-size:12px}
+ html[data-clea-theme="clea"] .clea-more>div{position:static;box-shadow:none;min-width:0}
+ html[data-clea-theme="clea"] .nav.open{background:var(--clea-surface);border-color:var(--clea-line)}
+ html[data-clea-theme="clea"] .button{font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-clea-theme="clea"] :is(.button,.primary-nav button,.sidebar,.hero-art){transition:none;animation:none}
+}
+
+html[data-clea-theme="clea"] body.high-contrast{--clea-bg:#000;--clea-surface:#080b0c;--clea-text:#fff;--clea-muted:#e0f0eb;--clea-line:#d2eee6;--panel:var(--clea-surface);--panel-soft:#10211d;--text:var(--clea-text);--muted:var(--clea-muted);--dim:var(--clea-muted);--line:var(--clea-line);--border:var(--clea-line)}
