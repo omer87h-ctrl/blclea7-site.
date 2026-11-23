@@ -598,8 +598,8 @@
     },
     {
       "path": "studio/workbench/chat/ui.js",
-      "bytes": 65634,
-      "sha256": "93625cb1b538e20de8bb14acfd6c3af8a777439890c2b806ceb4283d77b1c090"
+      "bytes": 67322,
+      "sha256": "9e1fe4795267c91050ab6c896cc57ae506cd1cae42ea53763d47468702caf428"
     },
     {
       "path": "studio/workbench/chat/worker.js",
@@ -694,7 +694,7 @@
     {
       "path": "studio/workbench/index.html",
       "bytes": 18067,
-      "sha256": "2e6b1a625965d4f3a442671e2989f7d52f0edb6ccdeae13b6801687b74a35530"
+      "sha256": "c99740231f69142ce23bf0d6749b2d7f08b0892e582c22c0fdff4b220124601a"
     },
     {
       "path": "studio/workbench/intelligence.js",
@@ -738,13 +738,13 @@
     },
     {
       "path": "studio/workbench/product-shell.css",
-      "bytes": 9313,
-      "sha256": "ad147a3541f2e9ec0edc7082a353c93358f987f5887ab5cdd3175abab4d24fdb"
+      "bytes": 10571,
+      "sha256": "bf2e33d2d3605a7189539acf796fe74b9a47813c7a11fc602de6548bd15f9069"
     },
     {
       "path": "studio/workbench/product-shell.js",
-      "bytes": 4159,
-      "sha256": "c13f21b66742ce9ed89057ff5eb22de56203c57b5f1f1be2a63042de46b23fab"
+      "bytes": 4274,
+      "sha256": "696d2945579e629ab6d76884976c1d2506d69211a3fd0b4406c5e61294bce551"
     },
     {
       "path": "studio/workbench/publisher.js",

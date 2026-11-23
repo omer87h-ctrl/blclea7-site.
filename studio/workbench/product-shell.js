@@ -6,6 +6,7 @@
     const navigation = document.querySelector('nav[aria-label="Radni prostor"]');
     if (!api || !navigation || document.body.classList.contains('clea-product-studio')) return;
     document.body.classList.add('clea-product-studio');
+    if(new URL(location.href).searchParams.get('audience')==='public')document.body.dataset.cleaAudience='public';
     const old = [...navigation.children], more = document.createElement('details');
     more.className = 'private-studio-tools';
     const summary = document.createElement('summary'), list = document.createElement('div');

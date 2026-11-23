@@ -3,7 +3,7 @@
   "interfaceRevision": "017",
   "coreSDKVersion": "0.48.0-test",
   "sourceRepository": "omer87h-ctrl/BL-Clea7-by-brzoilokalno",
-  "sourceCommit": "0acc7022ddb3f4bc036319998ce3d3c44a6e77c4",
+  "sourceCommit": "4aaaa964d68d795dfe2c5a56ee9550a52d9c8227",
   "androidManifest": "clea7500-android-0.1.7.json",
   "commonTheme": "../studio/workbench/clea-theme.css",
   "themeSHA256": "2df8e16b7a6080b4c447f2aa6cb94697454d61498c083d7f66febcf2525b9847",
@@ -11,18 +11,20 @@
     "One shared CLEA petrol/mint interface palette on existing website, Studio, Draw, Sense, chat and private Android assistant.",
     "One optional Sense switch; default CV workspace starts without the decorative spatial stage.",
     "Correct SVG media type in Android WebView and adaptive/monochrome launcher and activity icons.",
-    "Complete recent conversation pairs only; shorter greeting context while keeping full history on SSD."
+    "Complete recent conversation pairs only; shorter greeting context while keeping full history on SSD.",
+    "Public Android users open one conversation inside the application without a private HP pairing; owner tools remain separate."
   ],
   "validation": {
     "actualChromiumRoutes": 18,
     "actualProductBrowserGroups": 4,
     "actualSenseCVBrowserChecks": 23,
-    "sourcePythonRan": 452,
-    "sourcePythonPassed": 450,
+    "sourcePythonRan": 453,
+    "sourcePythonPassed": 451,
     "sourceWindowsOnlySkipped": 2,
     "publicPythonPassed": 73,
     "androidAPKSignatureVerified": true,
-    "actualJVMMimeAssertions": 7
+    "actualJVMMimeAssertions": 7,
+    "publicRouteJVMChecks": 13
   },
   "limits": {
     "physicalAndroidExecuted": false,
@@ -32,5 +34,8 @@
     "wholeMasterCompleted": false,
     "neural70BParityMeasured": false
   },
-  "historicalSDKAndNativeDownloadsModified": false
+  "historicalSDKAndNativeDownloadsModified": false,
+  "publicAudienceDefault": true,
+  "privatePairingRequiredForPublicUsers": false,
+  "publicAudienceBrowserVerified": true
 }
