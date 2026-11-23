@@ -57,7 +57,7 @@ const own=n=>n?.closest?.('#sense-touch-guide,[data-sense-touch-launch],#sense-g
 function visible(n){if(!n?.isConnected||n.closest('[hidden],[inert],[aria-hidden=true]')||n.matches(':disabled,[aria-disabled=true]')||n.tabIndex<0||own(n))return false;const style=getComputedStyle(n);if(style.display==='none'||style.visibility!=='visible'||!n.getClientRects().length)return false;for(let p=n.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS'&&!p.open&&!p.querySelector(':scope > summary')?.contains(n))return false;return true;}
 function name(n){const explicit=n.getAttribute('aria-label');if(explicit)return clean(explicit);const ids=n.getAttribute('aria-labelledby');if(ids)return clean(ids.split(/\s+/).map(id=>d.getElementById(id)?.textContent||'').join(' '));if(n.labels?.length)return clean([...n.labels].map(l=>l.textContent).join(' '));return clean(n.matches('button,a,summary')?n.textContent:n.getAttribute('title'))||'Kontrola';}
 const kind=n=>n.matches('textarea,input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file])')?'polje za unos':n.matches('button')?'dugme':n.matches('select')?'lista izbora':n.matches('a')?'veza':'kontrola';
-const launch=make('button','Sense: istraži ekran prstom i govorom');launch.type='button';launch.dataset.senseTouchLaunch='true';launch.className='sense-touch-launch';d.body.prepend(launch);
+const launch=make('button','Uključi Sense');launch.type='button';launch.dataset.senseTouchLaunch='true';launch.className='sense-touch-launch';launch.setAttribute('aria-pressed','false');d.body.prepend(launch);
 const dialog=make('dialog');dialog.id='sense-touch-guide';dialog.className='sense-dialog-guide';dialog.setAttribute('aria-labelledby','sense-touch-title');
 const surface=make('div');surface.className='sense-touch-surface';surface.setAttribute('aria-hidden','true');
 const ring=make('div');ring.className='sense-touch-target';ring.setAttribute('aria-hidden','true');surface.append(ring);
@@ -166,9 +166,22 @@ let measureFrame=null;
 function scheduleMeasurement(){if(!dialog.open||measureFrame!==null)return;measureFrame=requestAnimationFrame(()=>{measureFrame=null;if(!dialog.open)return;refreshControls();if(point&&pointer!==null)explore({pointerId:pointer,clientX:point.x,clientY:point.y,type:'pointermove',preventDefault(){}});});}
 function stop(){if(measureFrame!==null)cancelAnimationFrame(measureFrame);measureFrame=null;clearTimeout(session);session=null;stopSpeech();speaker=null;pointer=null;lastSpeech='';lastSpeechKey='';lastAccessibleKey='';lastSpeechAt=0;accessibleUpdate.textContent='';try{scope.navigator?.vibrate?.(0);}catch{}controls=[];point=null;source=null;lastDescription=null;targets.replaceChildren();ring.hidden=true;scope.speechSynthesis?.removeEventListener?.('voiceschanged',refreshVoices);}
 function notifyRunning(active){
+ launch.textContent=active?'Isključi Sense':'Uključi Sense';launch.setAttribute('aria-pressed',String(active));
  d.dispatchEvent(new CustomEvent('sense:navigation-changed',{detail:{active}}));
 }
-function finish(move=false){const target=move?controls[selected]:null,back=returnTo;dialog.close();stop();notifyRunning(false);if(target?.isConnected){target.focus({preventScroll:true});}else if(back?.isConnected)back.focus();}
+function finish(move=false){
+ const target=move?controls[selected]:null,back=returnTo;
+ dialog.close();stop();
+ if(target?.isConnected){
+  // Exploration ends, but Sense stays ON and follows subsequent focus/action
+  // changes until the same single switch explicitly deactivates it.
+  companionEnabled.checked=true;notifyRunning(true);
+  target.focus({preventScroll:true});
+ }else{
+  companionEnabled.checked=false;companionStop();notifyRunning(false);
+  if(back?.isConnected)back.focus();
+ }
+}
 function open(trigger){if(dialog.open)return;panel.classList.add('is-exploring');options.textContent='Postavke';options.setAttribute('aria-expanded','false');const active=d.activeElement;returnTo=trigger||active;source=d.querySelector('dialog[open]')||d;controls=[...source.querySelectorAll(selector)].filter(visible);if(!controls.length){returnTo?.focus();return;}
  targets.replaceChildren();controls.forEach((node,i)=>{const option=make('option',(i+1)+'. '+name(node)+' · '+kind(node));option.value=String(i);targets.append(option);});
  speaker=scope.CLEA7SenseSDK?.speaker?.()||null;mode.value='explore';speak.checked=true;rate.value='0.94';refreshVoices();scope.speechSynthesis?.addEventListener?.('voiceschanged',refreshVoices);dialog.showModal();selected=Math.max(0,controls.findIndex(n=>n===active));targets.value=String(selected);draw();notifyRunning(true);say(voices.value?'Sense je uključen. Klizi prstom. Reći ću šta je tu i kojim smjerom dalje.':'Sense je uključen. Lokalni hrvatski glas nije dostupan na ovom uređaju. Upute ostaju tekstom i kroz sistemski čitač ekrana.',true);close.focus({preventScroll:true});
@@ -201,7 +214,7 @@ surface.addEventListener('pointerdown',event=>{if(pointer!==null)return;pointer=
 function explanation(){const item=current();if(!item)return null;return {format:'sense.control-context/1',label:item.name,kind:item.kind,region:item.region,help:item.hint,position:lastDescription?.point?position(lastDescription.point,{width:innerWidth,height:innerHeight}):'Odabrana kontrola.'};}
 explain.onclick=()=>{const item=explanation();if(item)say(item.position+' '+item.label+', '+item.kind+'. Dio: '+item.region+'. '+(item.help||'Za korištenje prvo odaberi „Pređi na kontrolu“. Unos ili pokretanje radnje potvrđuješ zasebno.'),true);};
 ask.onclick=()=>{const detail=explanation();if(!detail)return;const event=new CustomEvent('clea:sense-explain',{detail,cancelable:true});d.dispatchEvent(event);if(event.defaultPrevented)finish();else say(detail.refusal||'Ova kontrola nema povezani AI razgovor. Dostupno je lokalno objašnjenje kroz „Objasni ovu kontrolu“.',true);};
-launch.onclick=()=>open(launch);targets.onchange=()=>choose(Number(targets.value));previous.onclick=()=>choose(selected-1);next.onclick=()=>choose(selected+1);repeat.onclick=()=>point?explore({pointerId:pointer,clientX:point.x,clientY:point.y,type:'pointerup',preventDefault(){}}):describe();focus.onclick=()=>finish(true);close.onclick=()=>finish();dialog.addEventListener('cancel',event=>{event.preventDefault();finish();});
+launch.onclick=()=>{if(dialog.open)finish();else if(companionEnabled.checked){companionEnabled.checked=false;companionStop();notifyRunning(false);}else open(launch);};targets.onchange=()=>choose(Number(targets.value));previous.onclick=()=>choose(selected-1);next.onclick=()=>choose(selected+1);repeat.onclick=()=>point?explore({pointerId:pointer,clientX:point.x,clientY:point.y,type:'pointerup',preventDefault(){}}):describe();focus.onclick=()=>finish(true);close.onclick=()=>finish();dialog.addEventListener('cancel',event=>{event.preventDefault();finish();});
 mode.onchange=()=>{point=null;lastDescription=null;if(mode.value==='target')choose(selected);else say('Istraživanje je uključeno. Pomjeri prst da čuješ šta je ispod njega.',true);};
 speak.onchange=()=>{if(!speak.checked)stopSpeech();else describe();};vibrate.onchange=()=>{if(vibrate.checked)cue('target',true);else try{scope.navigator?.vibrate?.(0);}catch{}};
 function attachDialogs(){for(const modal of d.querySelectorAll('dialog[open]'))if(modal!==dialog&&!modal.querySelector('[data-sense-touch-launch]')){const button=make('button','Vođenje govorom i dodirom u ovom prozoru');button.type='button';button.dataset.senseTouchLaunch='true';button.onclick=()=>open(button);modal.prepend(button);}}
@@ -214,5 +227,5 @@ companionEnabled.onchange=()=>{if(companionEnabled.checked)companionSay('Sense p
 d.addEventListener('focusin',e=>{if(!companionEnabled.checked||companion.contains(e.target)||own(e.target)||dialog.open)return;const item=measured(e.target);if(!item)return;const p={x:(item.rect.left+item.rect.right)/2,y:(item.rect.top+item.rect.bottom)/2};companionSay('Fokus: '+item.label+'. Dio: '+item.region+'. '+position(p,{width:innerWidth,height:innerHeight}).replace('Prst je','Kontrola je'));});
 d.addEventListener('clea:action-result',e=>{if(!companionEnabled.checked)return;const data=e.detail;if(data&&data.format==='sense.action-result/1'&&typeof data.screen==='string')companionSay('Radnja je završena. Trenutni ekran: '+clean(data.screen)+'.');});
 d.addEventListener('visibilitychange',()=>{if(d.hidden)companionStop();});scope.addEventListener('pagehide',companionStop);scope.addEventListener('sense:erase',()=>{companionEnabled.checked=false;companionStop();companionStatus.textContent='';});
-scope.CLEA7SenseNavigation=Object.freeze({format:'sense.navigation/1',direction,position,locate,touchGuidance,controlQuestion,open:trigger=>open(trigger||d.activeElement),isOpen:()=>dialog.open,close:()=>{if(dialog.open)finish();},current:()=>lastDescription?structuredClone(lastDescription):null});
+scope.CLEA7SenseNavigation=Object.freeze({format:'sense.navigation/1',direction,position,locate,touchGuidance,controlQuestion,open:trigger=>open(trigger||d.activeElement),isOpen:()=>dialog.open,isActive:()=>dialog.open||companionEnabled.checked,close:()=>{if(dialog.open)finish();else{companionEnabled.checked=false;companionStop();notifyRunning(false);}},current:()=>lastDescription?structuredClone(lastDescription):null});
 })(globalThis);
