@@ -40,7 +40,7 @@ function touchGuidance(point,items,viewport){
   spoken:region+'. Ovdje nema kontrole. '+destination+' je '+directionText+'. Klizi dalje prstom.'};
  return {found,key:'near:'+found.index+':'+region,
   text:where+' Još nisi na kontroli. '+destination+': '+found.text,
-  spoken:'Još malo '+directionText+' do '+destination+'.'};
+  spoken:directionText.charAt(0).toUpperCase()+directionText.slice(1)+' do '+destination+'.'};
 }
 function controlQuestion(context){
  const keys=['format','label','kind','region','help','position'];
