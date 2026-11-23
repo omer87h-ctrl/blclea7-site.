@@ -98,7 +98,7 @@ function extract(reply,options){return decode(reply,options).source;}
 async function operate(plan,{project=null,mode='change',checks=[],signal,onEvent}={}){
  if(!['create','change'].includes(mode)||mode==='change'&&!project?.bil)throw fault('Project','Odaberi postojeći BIL projekt ili izričito novi projekt.');
  const before=project?scope.CLEA7.stable(project):null,conversion=scope.CLEA7StudioTools.emit(plan,{source:mode==='change'?project.bil.source:null});
- const metadata=mode==='change'?Object.fromEntries(['id','name','package','version','licenses'].filter(k=>project[k]!==undefined).map(k=>[k,clone(project[k])])):{id:scope.CLEA7Format.newId('ai'),name:conversion.projectName||'Moja CLEA aplikacija'};
+ const metadata=mode==='change'?Object.fromEntries(['id','name','package','version','licenses','resources'].filter(k=>project[k]!==undefined).map(k=>[k,clone(project[k])])):{id:scope.CLEA7Format.newId('ai'),name:conversion.projectName||'Moja CLEA aplikacija'};
  const allChecks=clone([...checks,...conversion.checks]);if(allChecks.length>20)throw fault('Test','Studio plan i odabrani testovi prelaze20 provjera.');
  const verified=await scope.CLEA7Intelligence.verifyBIL(conversion.source,{metadata,checks:allChecks,signal,onEvent,modelAvailable:false});
  const impact=project?.bil?scope.CLEA7Intelligence.impact(await scope.CLEA7Intelligence.dependencyGraph(project),verified.graph):null;
@@ -116,8 +116,8 @@ function create({generate,onEvent=()=>{},attempts=3}={}){
   checks=clone(checks);if(!Array.isArray(checks)||checks.length>20)throw fault('Input','Previše ili neispravne lokalne provjere.');
   const useStructure=mode==='change'&&representation==='tools'&&projectContext===true;
   if(mode==='change'&&!useStructure&&new TextEncoder().encode(project.bil.source).length>10000)throw fault('Context','Ovom modelskom servisu treba ažurirani ugovor za izmjene većeg projekta. Izvor nije skraćen niti poslan.');
-  const structurePending=useStructure?scope.CLEA7StudioTools.modelContext(project.bil.source):null;
-  const metadata=mode==='change'?Object.fromEntries(['id','name','package','version','licenses'].filter(k=>project[k]!==undefined).map(k=>[k,clone(project[k])])):{id:scope.CLEA7Format.newId('ai'),name:'Moja CLEA aplikacija'};
+  const structurePending=useStructure?scope.CLEA7StudioTools.modelContext(project.bil.source,{intent}):null;
+  const metadata=mode==='change'?Object.fromEntries(['id','name','package','version','licenses','resources'].filter(k=>project[k]!==undefined).map(k=>[k,clone(project[k])])):{id:scope.CLEA7Format.newId('ai'),name:'Moja CLEA aplikacija'};
   const history=[];let previous=null,diagnostic=null;busy=true;
   const check=()=>{if(signal?.aborted)throw fault('Cancelled','Kreiranje je zaustavljeno. Projekt nije promijenjen.');};
   try{
@@ -153,7 +153,7 @@ async function recheck(proposal,current,{signal}={}){
  const certificate=certificates.get(proposal);
  if(!certificate||proposal.source!==certificate.source||proposal.application?.bil?.source!==certificate.source)throw fault('Verification','Ovaj prijedlog nema važeću lokalnu provjeru.');
  if(certificate.base!==null&&scope.CLEA7.stable(current)!==certificate.base)throw fault('Stale','Projekt ili BIL skica su promijenjeni nakon zahtjeva. Novi rad nije prepisan.');
- const metadata=Object.fromEntries(['id','name','package','version','licenses'].filter(k=>proposal.application[k]!==undefined).map(k=>[k,clone(proposal.application[k])]));
+ const metadata=Object.fromEntries(['id','name','package','version','licenses','resources'].filter(k=>proposal.application[k]!==undefined).map(k=>[k,clone(proposal.application[k])]));
  const verified=await scope.CLEA7Intelligence.verifyBIL(certificate.source,{metadata,checks:certificate.checks||[],signal,modelAvailable:proposal.modelInvoked!==false});
  return verified.application;
 }

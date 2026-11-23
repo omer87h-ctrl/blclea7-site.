@@ -1,7 +1,7 @@
 'use strict';
 /* One self-contained HTML host for the existing checked BIL/Core. No app-specific JS. */
 (function(scope){
-const FILES=['../runtime.js','living.js','bil-compiler.js','bil-runtime.js','working-cache.js','clea-core.js','format.js','plan.js','review.js','consumer.js','engine.js','studio.css'];
+const FILES=['../runtime.js','living.js','resources.js','resource-host.js','depth.js','bil-compiler.js','bil-runtime.js','working-cache.js','clea-core.js','format.js','plan.js','review.js','consumer.js','engine.js','sense-sdk.js','sense-navigation.js','studio.css'];
 const CSS=`
 :root{color-scheme:light;--bg:#f5f4f0;--surface:#ffffff;--line:#dedfdc;--accent:#214ed3;--ink:#202b36;--muted:#63707c;font:15px/1.55 system-ui,sans-serif}
 body{margin:0;background:var(--bg);color:var(--ink)}[hidden]{display:none!important}
@@ -45,9 +45,9 @@ function checked(project){
  return app;
 }
 async function build(project,{load=async name=>{const r=await fetch(name,{cache:'no-cache'});if(!r.ok)throw Error('Nedostaje Runtime datoteka: '+name);return r.text();}}={}){
- const app=checked(project),assets=await Promise.all(FILES.map(load));
+ const app=checked(project);if(app.resources)await scope.CLEA7Resources.verify(app.resources,app.bil.ir.resources,{complete:true});const assets=await Promise.all(FILES.map(load));
  if(assets.some(x=>typeof x!=='string')||assets.reduce((n,x)=>n+x.length,0)>4*1024*1024)throw Error('Neispravan ili prevelik skup Runtime datoteka.');
- const css=assets.pop(),nonce=Array.from(scope.crypto.getRandomValues(new Uint8Array(18)),x=>x.toString(16).padStart(2,'0')).join('');
+ const css=assets.pop()+'\n'+await load('sense-navigation.css'),nonce=Array.from(scope.crypto.getRandomValues(new Uint8Array(18)),x=>x.toString(16).padStart(2,'0')).join('');
  const data=JSON.stringify(app).replace(/</g,'\\u003c');
  const boot=`
 const app=${data};
@@ -66,7 +66,7 @@ const restore=document.getElementById('restore-file');document.getElementById('d
 restore.onchange=async()=>{try{const f=restore.files[0];if(!f)return;if(f.size>20*1024*1024)throw Error('Kopija prelazi20 MiB.');if(!confirm('Zamijeniti podatke ove aplikacije odabranom kopijom?'))return;await engine.restoreFull(JSON.parse(await f.text()));report('Podaci su vraćeni iz kopije.');}catch(e){report(e.message);}finally{restore.value='';}};
 addEventListener('beforeunload',e=>{if(engine.pending){e.preventDefault();e.returnValue='';}});addEventListener('pagehide',()=>engine.close());addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
 `;
- const policy="default-src 'none'; script-src 'nonce-"+nonce+"'; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
+ const policy="default-src 'none'; script-src 'nonce-"+nonce+"'; style-src 'unsafe-inline'; img-src data: blob:; media-src blob:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
  return '<!doctype html><html lang="bs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="'+policy+'"><title>'+escapeHTML(app.name)+'</title><style>'+css.replace(/<\/style/gi,'<\\/style')+'\n'+CSS+'\n'+themeCSS(app)+'</style></head><body><header class="standalone-bar"><span class="standalone-emblem" aria-hidden="true">7</span><div class="standalone-brand"><h1>'+escapeHTML(app.name)+'</h1><p>Tvoj radni prostor · by Brzo i Lokalno</p></div><span id="storage-state" class="standalone-status" role="status">Otvaranje aplikacije…</span><details class="standalone-tools"><summary>Moji podaci</summary><div><p>Zapisi ostaju u ovom pregledniku. Preuzmi kopiju za prenos ili prije brisanja podataka preglednika.</p><button id="data-backup" type="button" disabled>Preuzmi kopiju podataka</button><button id="data-restore" type="button" disabled>Vrati svoju kopiju</button></div></details></header><p id="standalone-notice" role="status" aria-live="polite"></p><main class="standalone-content"><div id="app"></div></main><footer class="standalone-foot"><span>BL CLEA7 · lična aplikacija</span><span>Bez računa i automatskog slanja podataka</span></footer><input id="restore-file" type="file" accept=".json,application/json" hidden><script nonce="'+nonce+'">'+scriptSafe(assets.join('\n')+'\n'+boot)+'</script></body></html>';
 }
 scope.CLEA7Standalone=Object.freeze({FILES,build,checked});

@@ -7,14 +7,15 @@ from .application import validate
 from .schema import UserError
 
 FORMAT='clea7.package/1'
-RUNTIME='0.44.0'
-MAX_PACKAGE=2*1024*1024
-MAX_APPLICATION=1024*1024
+RUNTIME='0.48.0'
+MAX_PACKAGE=28*1024*1024
+MAX_APPLICATION=20*1024*1024
 TARGETS={'browser','windows','android'}
 MANIFEST_KEYS={'id','name','version','runtime','abi','targets','permissions','dependencies','sha256','publisher'}
 
 def minimum_runtime(app,targets):
     """Minimum supported host, preserving all older application contracts."""
+    if any(b.get('adapter')=='clea7500.private/1' for b in app.get('remote',{}).get('backends',{}).values()):return '0.48.0'
     floor=_application_minimum_runtime(app,targets)
     if app.get('bil'):
         from .bil import core_features
@@ -39,12 +40,17 @@ def _application_minimum_runtime(app,targets):
 
 def encode(project,targets=None,publisher=''):
     app=validate(project)
-    if targets is None and app.get('bil',{}).get('ir',{}).get('objects'):targets=('browser',)
+    if targets is None and app.get('bil'):
+        from .bil import core_features
+        if core_features(app)['version']>=5:targets=('browser',)
     if targets is None and any(b['adapter']=='android.native/1' for b in app.get('remote',{}).get('backends',{}).values()):targets=('android',)
     if targets is None and app.get('remote',{}).get('backends') and all(b['adapter']=='sense.local/1' for b in app['remote']['backends'].values()):targets=('browser','windows','android')
     if targets is None:targets=('browser',) if app['format'] in ('clea7.application/7','clea7.application/8','clea7.application/9') else ('browser','windows')
     payload=json.dumps(app,ensure_ascii=False,allow_nan=False,separators=(',',':')).encode()
-    if len(payload)>MAX_APPLICATION:raise UserError('Aplikacija prelazi 1 MiB.')
+    if len(payload)>(MAX_APPLICATION if app.get('resources') else 1024*1024):raise UserError('Aplikacija prelazi dozvoljeni budžet.')
+    if app.get('resources'):
+        from .resources import validate as validate_resources
+        validate_resources(app['resources'],app['bil']['ir']['resources'],complete=True)
     manifest={'id':app['id'],'name':app['name'],'version':app['version'],'runtime':minimum_runtime(app,targets),
               'abi':app['format'],'targets':list(targets),'permissions':sorted(set(app['permissions'])),
               'dependencies':[],'sha256':hashlib.sha256(payload).hexdigest(),'publisher':publisher}
@@ -56,7 +62,7 @@ def encode(project,targets=None,publisher=''):
 
 def decode(raw,target=None):
     if isinstance(raw,str):raw=raw.encode()
-    if not isinstance(raw,bytes) or len(raw)>MAX_PACKAGE:raise UserError('Paket prelazi 2 MiB ili nije datoteka.')
+    if not isinstance(raw,bytes) or len(raw)>MAX_PACKAGE:raise UserError('Paket prelazi28 MiB ili nije datoteka.')
     try:
         value=json.loads(raw)
         if isinstance(value,dict) and value.get('format')=='clea7.package/2':
@@ -73,12 +79,19 @@ def decode(raw,target=None):
         if manifest['dependencies']!=[]:raise UserError('Vanjske zavisnosti nisu podržane u package/1.')
         if not isinstance(manifest['publisher'],str) or len(manifest['publisher'])>100:raise ValueError()
         if not isinstance(manifest['sha256'],str) or not re.fullmatch(r'[0-9a-f]{64}',manifest['sha256']):raise ValueError()
-        if not isinstance(value['payload'],str) or len(value['payload'])>1400000:raise ValueError()
+        if not isinstance(value['payload'],str) or len(value['payload'])>28*1024*1024:raise ValueError()
         payload=base64.b64decode(value['payload'],validate=True)
         if len(payload)>MAX_APPLICATION or hashlib.sha256(payload).hexdigest()!=manifest['sha256']:raise UserError('Integritet aplikacije nije potvrđen.')
         app=validate(json.loads(payload))
+        if not app.get('resources') and (len(payload)>1024*1024 or len(raw)>2*1024*1024):raise UserError('Paket bez resursa zadržava budžet1/2MiB.')
+        if app.get('resources'):
+            from .resources import validate as validate_resources
+            validate_resources(app['resources'],app['bil']['ir']['resources'],complete=True)
+        if app.get('bil'):
+            from .bil import core_features
+            if core_features(app)['version']>=5 and any(t!='browser' for t in manifest['targets']):raise UserError('Medijski/3D host je provjeren samo za browser cilj.')
         backends=app.get('remote',{}).get('backends',{})
-        if backends and 'windows' in manifest['targets'] and not all(b['adapter']=='sense.local/1' for b in backends.values()):raise UserError('Windows udaljeni broker nije podržan; Sense lokalni adapter je zaseban ugovor.')
+        if backends and 'windows' in manifest['targets'] and not all(b['adapter'] in ('sense.local/1','clea7500.private/1') for b in backends.values()):raise UserError('Windows udaljeni broker nije podržan; Sense lokalni adapter je zaseban ugovor.')
         if any(b['adapter']=='sense.local/1' and 'document.ocr' in b['operations'] for b in backends.values()) and tuple(map(int,manifest['runtime'].split('.'))) < (0,42,0):raise UserError('Lokalni OCR zahtijeva Runtime 0.42.0.')
         if any(b['adapter']=='sense.local/1' for b in backends.values()) and tuple(map(int,manifest['runtime'].split('.'))) < (0,37,0):raise UserError('Sense lokalne mogućnosti zahtijevaju Runtime 0.37.0.')
         if app.get('bil'):

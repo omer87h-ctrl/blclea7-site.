@@ -19,12 +19,12 @@ def validate(raw):
     if not isinstance(raw,dict):raise UserError('Projekt treba biti objekat.')
     try:p=json.loads(json.dumps(raw,allow_nan=False))
     except (TypeError,ValueError):raise UserError('Projekt sadrži neispravne vrijednosti.')
-    if len(json.dumps(p).encode())>1048576:raise UserError('Projekt prelazi 1 MiB.')
+    if len(json.dumps(p).encode())>(20*1048576 if 'resources' in p else 1048576):raise UserError('Projekt prelazi 1 MiB.')
     v7=p.get('format') in ('clea7.application/7','clea7.application/8','clea7.application/9')
     v5=p.get('format') in ('clea7.application/5','clea7.application/6','clea7.application/7','clea7.application/8','clea7.application/9')
     v4=v5 or p.get('format')=='clea7.application/4'
     living=v4 or p.get('format')=='clea7.application/3'
-    if any(k not in ('format','id','name','package','version','start','permissions','state','screens','flows','tables')+(('machines','animations','components') if living else ())+(('licenses',) if v4 else ())+(('bil',) if v5 else ())+(('remote',) if v7 else ()) for k in p):raise UserError('Nepodržano svojstvo projekta.')
+    if any(k not in ('format','id','name','package','version','start','permissions','state','screens','flows','tables')+(('machines','animations','components') if living else ())+(('licenses',) if v4 else ())+(('bil','resources') if v5 else ())+(('remote',) if v7 else ()) for k in p):raise UserError('Nepodržano svojstvo projekta.')
     if p.get('format')!='clea7.application/2' and not living:raise UserError('Potreban je application/2 format.')
     def key(value):return isinstance(value,str) and KEY.fullmatch(value) and value not in ('constructor','prototype','__proto__')
     if not key(p.get('id')) or not isinstance(p.get('name'),str) or not p['name'].strip() or len(p['name'])>100:raise UserError('Neispravan naziv ili identitet.')
@@ -62,6 +62,9 @@ def validate(raw):
         for entry in licenses:
             if not isinstance(entry,dict) or set(entry)!={'id','name','text'} or not key(entry['id']) or entry['id'] in seen or not isinstance(entry['name'],str) or not entry['name'].strip() or len(entry['name'])>100 or not isinstance(entry['text'],str) or not entry['text'].strip() or len(entry['text'])>16000:raise UserError('Neispravna licenca materijala.')
             seen.add(entry['id'])
+    if 'resources' in p:
+        from . import resources
+        resources.validate(p['resources'],p.get('bil',{}).get('ir',{}).get('resources'))
     nodes=set()
     def node(n,depth=0):
         if depth>12 or not isinstance(n,dict) or not key(n.get('id')) or n['id'] in nodes or not (n.get('type') in TYPES or v5 and n.get('type')=='bil'):raise UserError('Neispravna komponenta.')
@@ -149,7 +152,7 @@ def source_files(root,project):
     # Generated apps contain only the whitelisted embedded consumer and AAR.
     # The repository's independent launcher is a different product, not a missing dependency.
     files['android/settings.gradle']=re.sub(r'^include\b.*$',"include ':runtime', ':app'",files['android/settings.gradle'].decode(),flags=re.MULTILINE).encode()
-    for rel in ('runtime.js','workbench/living.js','workbench/bil-compiler.js','workbench/bil-runtime.js','workbench/working-cache.js','workbench/clea-core.js','workbench/format.js','workbench/plan.js','workbench/publisher.js','workbench/package.js','workbench/review.js','workbench/consumer.js','workbench/image-store.js','workbench/firebase-development.js','workbench/android-backend.js','workbench/remote.js','workbench/remote-studio.js','workbench/engine.js','workbench/sense-sdk.js','workbench/sense-document.js','workbench/sense-backend.js','workbench/device.js','workbench/studio.css','launcher/index.html','launcher/launcher.css','launcher/library.js','launcher/player.html','launcher/player.js'):
+    for rel in ('runtime.js','workbench/living.js','workbench/resources.js','workbench/resource-host.js','workbench/depth.js','workbench/bil-compiler.js','workbench/bil-runtime.js','workbench/working-cache.js','workbench/clea-core.js','workbench/format.js','workbench/plan.js','workbench/publisher.js','workbench/package.js','workbench/review.js','workbench/consumer.js','workbench/image-store.js','workbench/firebase-development.js','workbench/android-backend.js','workbench/remote.js','workbench/remote-studio.js','workbench/engine.js','workbench/sense-sdk.js','workbench/sense-document.js','workbench/sense-backend.js','workbench/device.js','workbench/studio.css','launcher/index.html','launcher/launcher.css','launcher/library.js','launcher/player.html','launcher/player.js'):
         files['web/'+rel]=(root/'web'/rel).read_bytes()
     for rel in ('workbench/sense-ocr-policy.js','workbench/sense-ocr.js'):
         files['web/'+rel]=(root/'web'/rel).read_bytes()

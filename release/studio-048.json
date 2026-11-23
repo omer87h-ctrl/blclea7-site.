@@ -1,0 +1,36 @@
+{
+  "format": "clea7.public-product-acceptance/1",
+  "webVersion": "0.48.0-test",
+  "coreVersion": 8,
+  "sourceCommit": "88d55ec6d68b11f6cd77e650c25e2a06ccf19fa8",
+  "publicPython": {
+    "run": 73,
+    "passed": 73
+  },
+  "privatePython": {
+    "run": 450,
+    "passed": 448,
+    "skipped": 2
+  },
+  "actualPublicProductBrowserGroups": 4,
+  "actualDepthBrowserGroups": 7,
+  "actualOperatorCoreGroups": 10,
+  "actualDepthResourceCoreGroups": 14,
+  "browserProcessRestartVerified": true,
+  "webGL": "actual Chromium WebGL2 software rendering",
+  "sdk": {
+    "version": "0.48.0-test",
+    "url": "sense/downloads/BL-CLEA7-Core-SDK-0.48.0-test.zip",
+    "size_bytes": 5838022,
+    "sha256": "f9bd849e72d204db13bd8cd7de5f34314ab5bbe3edff3c9af7ac17b62ff5a30c",
+    "entries": 173,
+    "source_commit": "88d55ec6d68b11f6cd77e650c25e2a06ccf19fa8"
+  },
+  "publicAIEnabled": false,
+  "physicalAndroidVerified": false,
+  "nativeRebuilt": false,
+  "hpInferenceForThisReleaseVerified": false,
+  "quality70BVerified": false,
+  "wholeMasterCompleted": false,
+  "ownerPairingRequiredForPublicStudio": false
+}
