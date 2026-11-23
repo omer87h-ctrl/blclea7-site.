@@ -77,3 +77,64 @@ html[data-clea-area="auto"] .hero-description{font-size:16px}
 }
 
 html[data-clea-theme="clea"] body.high-contrast{--clea-bg:#000;--clea-surface:#080b0c;--clea-text:#fff;--clea-muted:#e0f0eb;--clea-line:#d2eee6;--panel:var(--clea-surface);--panel-soft:#10211d;--text:var(--clea-text);--muted:var(--clea-muted);--dim:var(--clea-muted);--line:var(--clea-line);--border:var(--clea-line)}
+
+
+/* CLEA Studio entry: the project chooser precedes the legacy editor.
+ * A separate loading panel prevents the old Design page from flashing.
+ * These tokens style only the Studio chrome, never an authored application. */
+html[data-clea-area="studio"] body[data-workspace="studio-boot"] #studio-boot,
+html[data-clea-area="studio"] body[data-workspace="studio-start"] #studio-start{
+  max-width:1320px;margin:clamp(18px,4vh,54px) auto 36px;
+}
+html[data-clea-area="studio"] #studio-boot{grid-template-columns:minmax(0,1fr)}
+html[data-clea-area="studio"] #studio-boot article{
+  padding:clamp(26px,6vw,72px);border:1px solid #b9d7d0;border-radius:24px;
+  background:#eaf3f0;color:#10262a;min-height:180px;text-align:center;
+}
+html[data-clea-area="studio"] #studio-boot h1{font-size:clamp(26px,4vw,44px);color:#10262a}
+html[data-clea-area="studio"] #studio-boot p{color:#42625e}
+html[data-clea-area="studio"] body[data-workspace="studio-start"] #studio-start{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:stretch;
+}
+html[data-clea-area="studio"] #studio-start>article{
+  background:#eaf3f0!important;color:#10262a;border:1px solid #cde0db;
+  border-radius:24px;padding:clamp(22px,3vw,46px);box-shadow:0 10px 35px #071d1e25;
+  min-width:0;
+}
+html[data-clea-area="studio"] #studio-start-create{display:flex;flex-direction:column;align-items:stretch;gap:10px}
+html[data-clea-area="studio"] #studio-start-create h1{
+  color:#10262a;font-size:clamp(30px,3.5vw,52px);line-height:1.1;letter-spacing:-.035em;
+  margin:4px 0 12px;
+}
+html[data-clea-area="studio"] #studio-start :is(h2,label){color:#10262a}
+html[data-clea-area="studio"] #studio-start :is(p,small){color:#42645e;font-size:clamp(14px,1.2vw,16px)}
+html[data-clea-area="studio"] #studio-start :is(input,select,textarea){
+  background:#fbfefd;color:#10262a;border:1px solid #93b8ac;border-radius:12px;
+  font-size:16px;min-height:46px;
+}
+html[data-clea-area="studio"] #studio-start textarea{width:100%;min-height:130px;resize:vertical}
+html[data-clea-area="studio"] #studio-start button{
+  min-height:46px;border-radius:12px;border:1px solid #89bea9;
+  background:#e1f1ec;color:#10262a;font-size:15px;font-weight:600;text-align:center;
+}
+html[data-clea-area="studio"] #studio-start-create>button:first-of-type,
+html[data-clea-area="studio"] #studio-start-ai>button:first-of-type{
+  background:#91e6cd;border-color:#91e6cd;color:#10262a;
+}
+html[data-clea-area="studio"] #studio-start button:focus-visible{outline:3px solid #995e00;outline-offset:3px}
+html[data-clea-area="studio"] #studio-start :is(button,input,textarea,select):hover{border-color:#267a68}
+html[data-clea-area="studio"] #studio-recent-projects{
+  grid-column:1/-1;display:flex;flex-direction:column;gap:10px
+}
+html[data-clea-area="studio"] #studio-depth-start{grid-column:1/-1}
+html[data-clea-area="studio"] body[data-workspace="studio-start"] :is(#flow-dock,#runtime-dock),
+html[data-clea-area="studio"] body[data-workspace="studio-boot"] :is(#flow-dock,#runtime-dock){display:none}
+html[data-clea-area="studio"] body[data-workspace="studio-start"] nav[aria-label="Radni prostor"]>button:not(#studio-home):not(#open-project):not([data-panel="draw"]):not([data-panel="bil"]):not([data-panel="clea-chat"]){display:none}
+@media(max-width:760px){
+  html[data-clea-area="studio"] body[data-workspace="studio-start"] #studio-start{grid-template-columns:minmax(0,1fr);gap:12px}
+  html[data-clea-area="studio"] #studio-start>article{padding:22px;border-radius:18px}
+  html[data-clea-area="studio"] #studio-recent-projects,html[data-clea-area="studio"] #studio-depth-start{grid-column:auto}
+}
+@media(prefers-reduced-motion:reduce){
+  html[data-clea-area="studio"] #studio-start *{transition:none!important;animation:none!important}
+}
