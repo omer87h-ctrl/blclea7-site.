@@ -41,5 +41,7 @@
  for(const button of document.querySelectorAll('[data-sense-launch]')){
   button.addEventListener('click',()=>launch(button.dataset.senseLaunch));
  }
+ const requestedTool=new URL(location.href).searchParams.get('tool');
+ if(requestedTool==='cv'||requestedTool==='communicate')launch(requestedTool);
  globalThis.CLEA7SenseExperience=Object.freeze({format:'clea7.sense-experience/1',launch});
 })();
