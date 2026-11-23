@@ -11,3 +11,85 @@
 .sense-touch-console[data-dock=top]{top:8px;bottom:auto}.sense-touch-console.is-exploring .sense-touch-options,.sense-touch-console.is-exploring .sense-touch-secondary{display:none}.sense-touch-console.is-exploring{max-height:34dvh}#sense-touch-guide [hidden]{display:none!important}
 
 .sense-touch-console.is-exploring #sense-touch-start{display:none}
+
+
+/* CLEA Sense · calm guided exploration: the screen stays visible. */
+#sense-touch-guide{
+ background:transparent;color:#eaf3f0;
+}
+#sense-touch-guide::backdrop{background:#06171938}
+#sense-touch-guide .sense-touch-surface{touch-action:none}
+#sense-touch-guide .sense-touch-target{
+ border:3px solid #91e6cd;border-radius:12px;
+ box-shadow:0 0 0 3px #10262a99,0 0 0 5px #91e6cd7a;
+}
+#sense-touch-guide .sense-touch-console{
+ left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));
+ width:auto;max-height:min(53dvh,480px);padding:15px 17px;
+ background:#102f31f5;color:#eaf3f0;
+ border:1px solid #91e6cd;border-radius:17px;
+ box-shadow:0 10px 34px #06181850;
+ font:15px/1.5 system-ui;overscroll-behavior:contain;
+}
+#sense-touch-guide .sense-touch-console h2{font-size:18px;line-height:1.3;color:#eaf3f0}
+#sense-touch-guide #sense-touch-status{
+ font-size:clamp(16px,4vw,20px);font-weight:650;line-height:1.35;
+ color:#f1faf6;overflow-wrap:anywhere;
+}
+#sense-touch-guide .sense-touch-console :is(select,input,textarea){
+ background:#183d3c;color:#fff;border:1px solid #8bb9ab;min-height:44px;
+}
+#sense-touch-guide .sense-touch-console button{
+ color:#ecfbf5;background:#214f48;border:1px solid #91e6cd8c;
+ border-radius:11px;min-height:44px;font-weight:600;
+}
+#sense-touch-guide #sense-touch-focus{background:#91e6cd;color:#10262a}
+#sense-touch-guide .sense-touch-console[data-dock=top]{
+ top:calc(10px + env(safe-area-inset-top));bottom:auto;
+}
+#sense-touch-guide .sense-touch-console.is-exploring{
+ max-height:min(29dvh,210px);padding:11px 12px;
+ overflow:auto;display:flex;flex-direction:column;gap:5px;
+}
+#sense-touch-guide .sense-touch-console.is-exploring #sense-touch-title,
+#sense-touch-guide .sense-touch-console.is-exploring #sense-touch-start,
+#sense-touch-guide .sense-touch-console.is-exploring #sense-touch-explain,
+#sense-touch-guide .sense-touch-console.is-exploring #sense-touch-ask,
+#sense-touch-guide .sense-touch-console.is-exploring .sense-touch-options,
+#sense-touch-guide .sense-touch-console.is-exploring .sense-touch-secondary{
+ display:none!important;
+}
+#sense-touch-guide .sense-touch-console.is-exploring #sense-touch-status{
+ margin:0;max-height:4.1em;overflow:auto;
+}
+#sense-touch-guide .sense-touch-console.is-exploring .sense-touch-actions{
+ display:flex;gap:7px;flex-wrap:wrap;align-items:stretch;
+}
+#sense-touch-guide .sense-touch-console.is-exploring .sense-touch-actions button{
+ min-height:42px;flex:1 1 auto;font-size:13px;padding:7px 10px;
+}
+#sense-touch-guide .sense-touch-console.is-exploring #sense-touch-focus{flex:2 1 140px}
+#sense-touch-guide .sense-touch-console.is-exploring #sense-touch-close{flex:1 1 84px}
+#sense-touch-guide .sense-touch-console.is-exploring #sense-touch-options-toggle{flex:1 1 85px}
+#sense-touch-guide :is(button,select,input):focus-visible{
+ outline:3px solid #ffd28d;outline-offset:3px;
+}
+@media (min-width:900px){
+ #sense-touch-guide .sense-touch-console{
+  left:auto;right:16px;width:min(475px,calc(100vw - 32px));
+ }
+ #sense-touch-guide .sense-touch-console.is-exploring{
+  width:min(425px,calc(100vw - 32px));
+ }
+}
+@media (max-width:420px){
+ #sense-touch-guide .sense-touch-console.is-exploring{
+  max-height:32dvh;padding:9px 10px;border-radius:13px;
+ }
+ #sense-touch-guide .sense-touch-console.is-exploring #sense-touch-status{
+  font-size:16px;max-height:4.2em;
+ }
+}
+@media (prefers-reduced-motion:reduce){
+ #sense-touch-guide *{transition:none!important;animation:none!important}
+}
