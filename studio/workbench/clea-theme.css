@@ -138,3 +138,32 @@ html[data-clea-area="studio"] body[data-workspace="studio-start"] nav[aria-label
 @media(prefers-reduced-motion:reduce){
   html[data-clea-area="studio"] #studio-start *{transition:none!important;animation:none!important}
 }
+
+
+/* Draw uses actual BIL screens and Runtime: selection is not a fake preview. */
+html[data-clea-area="studio"] #draw-screen-browser{display:grid;gap:10px;margin:10px 0 25px}
+html[data-clea-area="studio"] #draw-screen-list{display:grid;gap:8px;max-height:260px;overflow:auto}
+html[data-clea-area="studio"] #draw-screen-list .draw-screen-entry{
+  width:100%;text-align:left;padding:12px 15px;min-height:44px;
+  color:#10262a;background:#e4f2ee;border:1px solid #afcdc5;border-radius:10px;
+  white-space:normal;overflow-wrap:anywhere;
+}
+html[data-clea-area="studio"] #draw-screen-list .draw-screen-entry[aria-pressed="true"]{
+  background:#91e6cd;border-color:#2a8c74;font-weight:700;
+}
+html[data-clea-area="studio"] #draw-screen-browser>button{
+  background:#91e6cd!important;color:#10262a!important;border:1px solid #68ba9e!important;
+  font-weight:700;min-height:45px;
+}
+html[data-clea-area="studio"] #draw-screen-browser label{font-size:14px}
+html[data-clea-area="studio"] .draw-stage>h2{
+  color:inherit;font-size:clamp(18px,2vw,27px);font-weight:750;
+  margin:0 0 14px;line-height:1.25;
+}
+html[data-clea-area="studio"] .draw-palette>h3,
+html[data-clea-area="studio"] .draw-inspector>h3{font-size:clamp(17px,1.6vw,22px);margin:0 0 14px}
+html[data-clea-area="studio"] .draw-stage{min-width:0}
+@media(max-width:760px){
+ html[data-clea-area="studio"] #draw-screen-list{max-height:none}
+ html[data-clea-area="studio"] .draw-stage>h2{font-size:22px}
+}
