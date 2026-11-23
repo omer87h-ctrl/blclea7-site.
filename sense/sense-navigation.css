@@ -129,3 +129,6 @@
 }
 .sense-touch-launch[aria-pressed="true"]{background:#d9f4ea;border-color:#11664d}
 .sense-touch-launch:focus-visible{outline:3px solid #ffc468;outline-offset:4px}
+
+/* The private focus engine has no public settings panel. */
+#sense-focus-companion[hidden]{display:none!important}
