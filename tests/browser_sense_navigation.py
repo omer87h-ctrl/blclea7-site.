@@ -33,6 +33,18 @@ def main():
    choices=page.locator('#sense-touch-target option').all_text_contents();assert any('ime' in x.lower() for x in choices),choices
    page.select_option('#sense-touch-target',label=next(x for x in choices if 'ime' in x.lower()))
    page.locator('#sense-touch-start').click()
+   assert page.locator('.sense-touch-console.is-exploring').is_visible()
+   assert page.locator('#sense-touch-options-toggle').is_visible()
+   empty=page.evaluate("CLEA7SenseNavigation.touchGuidance({x:4,y:5},[],{width:390,height:844})")
+   assert empty['found']['available'] is False
+   assert 'nema kontrole' in empty['spoken'].lower()
+   assert 'Klizi dalje' in empty['spoken']
+   target=page.evaluate("""() => CLEA7SenseNavigation.touchGuidance(
+     {x:125,y:270},
+     [{rect:{left:110,top:245,right:220,bottom:305},name:'Ime',label:'Ime, polje za unos',kind:'input',region:'CV'}],
+     {width:390,height:844})""")
+   assert target['found']['hit'] is True
+   assert 'Ispod prsta: Ime' in target['text']
    data=page.evaluate('''()=>{const r=document.querySelector('#sense-cv-name').getBoundingClientRect();return {x:(r.left+r.right)/2,y:(r.top+r.bottom)/2,top:r.top,bottom:r.bottom,left:r.left,right:r.right};}''')
    client=context.new_cdp_session(page)
    def touch(event,x,y):client.send('Input.dispatchTouchEvent',{'type':event,'touchPoints':[] if event=='touchEnd' else [{'x':x,'y':y,'id':1}]})
