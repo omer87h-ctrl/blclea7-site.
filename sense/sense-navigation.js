@@ -109,18 +109,32 @@ function refreshVoices(){
 voices.addEventListener('change',()=>{stopSpeech();capabilityText();});
 previewVoice.onclick=()=>{if(voices.value)say('Ovo je probni glas CLEA Sense. Možeš li razumjeti ovu rečenicu?',true);};
 rate.onchange=()=>{if(!dialog.open)return;stopSpeech();state.textContent='Brzina govora je promijenjena. Probaj glas za provjeru.';};
-function stopSpeech(){clearTimeout(speechTimer);speechTimer=null;pendingSpeech=null;speaker?.stop();}
-function flushSpeech(){
- clearTimeout(speechTimer);speechTimer=null;const text=pendingSpeech;pendingSpeech=null;
- if(!dialog.open||!text||!speak.checked||!voices.value||!speaker)return;
- lastSpeech=text;lastSpeechAt=performance.now();
- try{speaker.speak(text,{approved:true,voiceName:voices.value,rate:Number(rate.value)}).catch(e=>{if(e.code!=='Cancelled'&&dialog.open)state.textContent='Govor nije završen. Upute ostaju tekstom; možeš odabrati drugi lokalni glas.';});}catch{state.textContent='Govor nije dostupan. Upute ostaju tekstom.';}
+function stopSpeech(){
+ clearTimeout(speechTimer);speechTimer=null;pendingSpeech=null;pendingSpeechKey='';
+ speechBusy=false;lastSpeechKey='';speaker?.stop();
 }
-function say(text,force=false){
- status.textContent=text;if(!speak.checked||!voices.value||!speaker)return;
- if(!force&&text===lastSpeech){pendingSpeech=null;clearTimeout(speechTimer);speechTimer=null;return;}
- pendingSpeech=text;const delay=force?0:Math.max(0,1100-(performance.now()-lastSpeechAt));
- if(!delay){flushSpeech();return;}if(speechTimer===null)speechTimer=setTimeout(flushSpeech,delay);
+function flushSpeech(){
+ clearTimeout(speechTimer);speechTimer=null;
+ if(speechBusy)return;
+ const text=pendingSpeech,key=pendingSpeechKey;pendingSpeech=null;pendingSpeechKey='';
+ if(!dialog.open||!text||!speak.checked||!voices.value||!speaker)return;
+ speechBusy=true;lastSpeech=text;lastSpeechKey=key;lastSpeechAt=performance.now();
+ try{
+  Promise.resolve(speaker.speak(text,{approved:true,voiceName:voices.value,rate:Number(rate.value)}))
+   .catch(e=>{if(e.code!=='Cancelled'&&dialog.open)state.textContent='Govor nije završen. Upute ostaju tekstom; možeš odabrati drugi lokalni glas.';})
+   .finally(()=>{speechBusy=false;if(pendingSpeech&&dialog.open&&speechTimer===null)speechTimer=setTimeout(flushSpeech,260);});
+ }catch{speechBusy=false;state.textContent='Govor nije dostupan. Upute ostaju tekstom.';}
+}
+function say(text,force=false,key=text,spoken=text){
+ status.textContent=text;
+ if(!speak.checked||!voices.value||!speaker)return;
+ if(key===lastSpeechKey&&!force){pendingSpeech=null;pendingSpeechKey='';clearTimeout(speechTimer);speechTimer=null;return;}
+ if(key===pendingSpeechKey&&!force)return;
+ pendingSpeech=spoken;pendingSpeechKey=key;
+ if(speechBusy)return; // Finish the current sentence; keep only the newest position.
+ const delay=force?0:Math.max(0,850-(performance.now()-lastSpeechAt));
+ if(!delay){flushSpeech();return;}
+ if(speechTimer===null)speechTimer=setTimeout(flushSpeech,delay);
 }
 function cue(zone,force=false){if(!vibrate.checked||typeof scope.navigator?.vibrate!=='function')return;const now=performance.now();if(!force&&(zone===lastCue&&now-lastCueAt<900||now-lastCueAt<280))return;lastCue=zone;lastCueAt=now;const pattern=zone==='target'?[65,70,65]:zone==='near'?[30]:[12];try{if(scope.navigator.vibrate(pattern)!==true){vibrate.checked=false;state.textContent='Uređaj nije prihvatio vibraciju. Govorne i tekstualne upute ostaju dostupne.';}}catch{vibrate.checked=false;state.textContent='Vibracija trenutno nije dostupna.';}}
 function measured(target){
@@ -147,7 +161,7 @@ function refreshControls(){
 function previousButtonState(){previous.disabled=selected===0;next.disabled=selected===controls.length-1;}
 let measureFrame=null;
 function scheduleMeasurement(){if(!dialog.open||measureFrame!==null)return;measureFrame=requestAnimationFrame(()=>{measureFrame=null;if(!dialog.open)return;refreshControls();if(point&&pointer!==null)explore({pointerId:pointer,clientX:point.x,clientY:point.y,type:'pointermove',preventDefault(){}});});}
-function stop(){if(measureFrame!==null)cancelAnimationFrame(measureFrame);measureFrame=null;clearTimeout(session);session=null;stopSpeech();speaker=null;pointer=null;lastSpeech='';lastSpeechAt=0;try{scope.navigator?.vibrate?.(0);}catch{}controls=[];point=null;source=null;lastDescription=null;targets.replaceChildren();ring.hidden=true;scope.speechSynthesis?.removeEventListener?.('voiceschanged',refreshVoices);}
+function stop(){if(measureFrame!==null)cancelAnimationFrame(measureFrame);measureFrame=null;clearTimeout(session);session=null;stopSpeech();speaker=null;pointer=null;lastSpeech='';lastSpeechKey='';lastSpeechAt=0;try{scope.navigator?.vibrate?.(0);}catch{}controls=[];point=null;source=null;lastDescription=null;targets.replaceChildren();ring.hidden=true;scope.speechSynthesis?.removeEventListener?.('voiceschanged',refreshVoices);}
 function finish(move=false){const target=move?controls[selected]:null,back=returnTo;dialog.close();stop();if(target?.isConnected){target.focus({preventScroll:true});}else if(back?.isConnected)back.focus();}
 function open(trigger){if(dialog.open)return;panel.classList.remove('is-exploring');const active=d.activeElement;returnTo=trigger||active;source=d.querySelector('dialog[open]')||d;controls=[...source.querySelectorAll(selector)].filter(visible);if(!controls.length){returnTo?.focus();return;}
  targets.replaceChildren();controls.forEach((node,i)=>{const option=make('option',(i+1)+'. '+name(node)+' · '+kind(node));option.value=String(i);targets.append(option);});
