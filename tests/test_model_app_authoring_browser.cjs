@@ -33,7 +33,7 @@ const plan={format:'clea7.authoring-plan/1',state:[{name:'player',type:'Text',va
   console.log('PASS actual authoring UI: rejected compiler error -> bounded model repair -> reviewed BIL app -> actual input, events and navigation (inference fixture)');
   await page.locator('[data-panel="clea-chat"]').click();await page.locator('#clea-ai-task-mode').selectOption('change');
   await page.locator('#chat-question').fill('Promijeni naslov kviza.');await page.locator('#chat-send').click();await page.waitForFunction(()=>!document.querySelector('#chat-send').disabled);
-  assert.equal(received.length,2);assert((await page.locator('#chat-log').innerText()).toLocaleLowerCase('bs').includes('odobri'));
+  assert.equal(received.length,2);assert((await page.locator('#clea-local-model-status').innerText()).includes('Odobri slanje izvora'));
   await page.locator('#clea-ai-source-approved').check();await page.locator('#chat-question').fill('Promijeni naslov kviza.');await page.locator('#chat-send').click();
   await page.waitForFunction(()=>document.querySelectorAll('[data-ai-app-proposal]').length===2);assert.equal(received.length,3);assert.equal(received[2].authoring.source,source);assert(!received[2].authoring.source.includes('Mira test'));
   console.log('PASS actual authoring privacy: no project transmission before approval; running user state is absent from explicit source change');
