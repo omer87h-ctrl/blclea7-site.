@@ -145,10 +145,12 @@ const localAI=CLEA7AIStudio.attach({root:$('clea-ai'),project:aiSnapshot,apply:a
  canUndo:()=>undo.length>0,undo:()=>applyHistory('undo'),run:async()=>{panel('test',false);await startPlayer();return engine;},showSource:loc=>{panel('bil');const area=$('bil-source');area.focus();area.setSelectionRange(loc?.start||0,loc?.end||0);}
 });globalThis.CLEA7LocalAIWorkspace=localAI;
 
-const initialWorkspace=new URLSearchParams(location.search).get('workspace');
-const initialPanel=['clea-chat','clea-ai','assistant'].includes(initialWorkspace)?'clea-chat':initialWorkspace==='draw'?'draw':'design';
-draw();panel(initialPanel==='design'?'studio-boot':initialPanel,false);status(vault.persistent?'CLEA7 Studio je spreman · dizajn, logika, kod i lokalni Runtime.':'Trajno skladište nije dostupno; preuzimaj kopije.');globalThis.CLEA7Workbench={nativeAI:nativeToken?Object.freeze({status:async()=>await(await native('ai/clea-status',{})).json(),ask:async value=>await(await native('ai/clea-chat',value)).json()}):null,snapshot:aiSnapshot,applyReviewed:applyReviewedAI,undo:()=>applyHistory('undo'),redo:()=>applyHistory('redo'),get project(){return project;},get engine(){return engine;},save:saveProject,acknowledgeExternalSave:source=>{if(project.bil?.source!==source||bilStudio?.dirty)throw Error('Izvor je promijenjen tokom čuvanja. Dorada na ekranu ostaje sačuvana.');dirty=false;},open:p=>{const checked=F.validate(p);stopPlayer();project=checked;screen=project.start;selected=null;saved=null;bilStudio?.loadProject();draw();},run:startPlayer};
-globalThis.dispatchEvent(new Event('clea:studio-ready'));
+const studioEntry=new URLSearchParams(location.search),initialWorkspace=studioEntry.get('workspace');
+const allowedWorkspaces=['design','draw','bil','logic','data','test','build','runtime','lab','source','sense-studio','clea-chat'];
+const initialPanel=studioEntry.has('collaboration')||studioEntry.has('proposal')?'design':
+  ['clea-chat','clea-ai','assistant'].includes(initialWorkspace)||(!initialWorkspace&&studioEntry.get('audience')==='public')?'clea-chat':
+  allowedWorkspaces.includes(initialWorkspace)?initialWorkspace:'studio-boot';
+draw();panel(initialPanel,false);status(vault.persistent?'CLEA7 Studio je spreman · dizajn, logika, kod i lokalni Runtime.':'Trajno skladište nije dostupno; preuzimaj kopije.');globalThis.CLEA7Workbench={nativeAI:nativeToken?Object.freeze({status:async()=>await(await native('ai/clea-status',{})).json(),ask:async value=>await(await native('ai/clea-chat',value)).json()}):null,snapshot:aiSnapshot,applyReviewed:applyReviewedAI,undo:()=>applyHistory('undo'),redo:()=>applyHistory('redo'),get project(){return project;},get engine(){return engine;},save:saveProject,acknowledgeExternalSave:source=>{if(project.bil?.source!==source||bilStudio?.dirty)throw Error('Izvor je promijenjen tokom čuvanja. Dorada na ekranu ostaje sačuvana.');dirty=false;},open:p=>{const checked=F.validate(p);stopPlayer();project=checked;screen=project.start;selected=null;saved=null;bilStudio?.loadProject();draw();},run:startPlayer};
 let archiveExport=null;const archivePanel=elem('div'),archiveDownload=elem('button','Preuzmi arhivu poništenih podataka'),archiveClear=elem('button','Ukloni preuzetu arhivu');archiveDownload.type=archiveClear.type='button';archiveClear.disabled=true;archivePanel.append(archiveDownload,archiveClear);$('build').append(archivePanel);
 archiveDownload.onclick=async()=>{try{if(project.remote)throw Error('Ova arhiva je za lokalne projekte bez udaljenog korisničkog konteksta.');const result=await CLEA7SchemaHistory.exportArchive(vault,project.id);download(project.id+'-historija-podataka.json',result.json);archiveExport={id:project.id,digest:result.digest};archiveClear.disabled=false;status('Preuzeta je lokalna arhiva. Aktivni podaci nisu promijenjeni.');}catch(e){status(e.message);}};
 archiveClear.onclick=async()=>{try{if(archiveExport?.id!==project.id)throw Error('Prvo preuzmi arhivu ovog projekta.');if(!confirm('Ukloniti samo preuzetu arhivu poništenih podataka? Aktivni podaci aplikacije ostaju.'))return;await CLEA7SchemaHistory.clearArchive(vault,project.id,{approved:true,expectedDigest:archiveExport.digest});archiveExport=null;archiveClear.disabled=true;status('Arhiva je uklonjena. Aktivni podaci nisu promijenjeni.');}catch(e){status(e.message);}};
@@ -170,8 +172,12 @@ async function showStart(force=false){
  root.append(intro,ai,worlds,recent);$('studio-start')?.remove();document.querySelector('main').prepend(root);if(force||(project.id===bootId&&!dirty&&['studio-boot','design'].includes(document.body.dataset.workspace)))panel('studio-start');
 }
 const startButton=button('Početak Studija',async()=>{stopPlayer();await showStart(true);});startButton.id='studio-home';document.querySelector('nav[aria-label="Radni prostor"]').prepend(startButton);
-const entry=new URLSearchParams(location.search);if(!entry.has('workspace')&&!entry.has('collaboration')&&!entry.has('proposal')){try{await showStart();}catch(e){panel('design');status('Početni ekran nije učitan: '+e.message+'. Projekt nije obrisan.');}}if(entry.get('example')==='depth-atlas')document.getElementById('studio-depth-start')?.scrollIntoView({block:'start'});
-
-// The linked workspace was selected before the first editor render.
+const entry=new URLSearchParams(location.search);
+if(initialPanel==='studio-boot'){try{await showStart();}catch(e){panel('design');status('Početni ekran nije učitan: '+e.message+'. Projekt nije obrisan.');}}
+if(entry.get('example')==='depth-atlas')document.getElementById('studio-depth-start')?.scrollIntoView({block:'start'});
+// The public product shell may reveal the UI only after the chooser and local
+// draft/project list are ready. The legacy editor never appears by default.
+globalThis.CLEA7StudioUiReady=true;
+globalThis.dispatchEvent(new Event('clea:studio-ready'));
 })();
 
