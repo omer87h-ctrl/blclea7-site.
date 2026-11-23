@@ -78,7 +78,7 @@ const start=make('button','Pokreni vođenje prstom');start.type='button';start.i
 const previous=make('button','Prethodna kontrola'),next=make('button','Sljedeća kontrola'),repeat=make('button','Ponovi položaj'),focus=make('button','Pređi na kontrolu'),close=make('button','Zatvori vodič'),explain=make('button','Objasni ovu kontrolu'),ask=make('button','Pitaj CLEA AI o ovoj kontroli');for(const b of [previous,next,repeat,focus,close,explain,ask])b.type='button';
 focus.id='sense-touch-focus';close.id='sense-touch-close';explain.id='sense-touch-explain';ask.id='sense-touch-ask';const actions=make('div');actions.className='sense-touch-actions';const options=make('button','Postavke');options.type='button';options.id='sense-touch-options-toggle';options.setAttribute('aria-expanded','true');options.onclick=()=>{const wasCompact=panel.classList.contains('is-exploring');panel.classList.toggle('is-exploring');options.textContent=wasCompact?'Sakrij postavke':'Postavke';options.setAttribute('aria-expanded',String(wasCompact));};actions.append(start,previous,next,repeat,focus,explain,ask,close,options);previous.className=next.className=repeat.className='sense-touch-secondary';
 const details=make('div');details.className='sense-touch-options';details.append(instructions,modeLabel,targetLabel,state,speakLabel,voiceLabel,voiceHelp,rateLabel,previewVoice,vibrateLabel);panel.append(title,status,accessibleUpdate,details,actions);dialog.append(surface,panel);d.body.append(dialog);
-let controls=[],selected=0,source=null,returnTo=null,speaker=null,lastSpeech='',lastSpeechAt=0,lastSpeechKey='',lastAccessibleKey='',lastCue='',lastCueAt=0,session=null,point=null,lastDescription=null,pointer=null,speechTimer=null,pendingSpeech=null,pendingSpeechKey='',speechBusy=false;
+let controls=[],selected=0,source=null,returnTo=null,speaker=null,lastSpeech='',lastSpeechAt=0,lastSpeechKey='',lastAccessibleKey='',speechEpoch=0,lastCue='',lastCueAt=0,session=null,point=null,lastDescription=null,pointer=null,speechTimer=null,pendingSpeech=null,pendingSpeechKey='',speechBusy=false;
 function label(){const target=controls[selected];return target?name(target)+', '+kind(target):'Odaberi kontrolu';}
 function preferredVoice(list){
  const regional=list.filter(v=>/^(bs|hr|sr)(-|$)/i.test(v.language));
@@ -111,6 +111,7 @@ voices.addEventListener('change',()=>{stopSpeech();capabilityText();});
 previewVoice.onclick=()=>{if(voices.value)say('Ovo je probni glas CLEA Sense. Možeš li razumjeti ovu rečenicu?',true);};
 rate.onchange=()=>{if(!dialog.open)return;stopSpeech();state.textContent='Brzina govora je promijenjena. Probaj glas za provjeru.';};
 function stopSpeech(){
+ speechEpoch++;
  clearTimeout(speechTimer);speechTimer=null;pendingSpeech=null;pendingSpeechKey='';
  speechBusy=false;lastSpeechKey='';speaker?.stop();
 }
@@ -119,12 +120,12 @@ function flushSpeech(){
  if(speechBusy)return;
  const text=pendingSpeech,key=pendingSpeechKey;pendingSpeech=null;pendingSpeechKey='';
  if(!dialog.open||!text||!speak.checked||!voices.value||!speaker)return;
- speechBusy=true;lastSpeech=text;lastSpeechKey=key;lastSpeechAt=performance.now();
+ speechBusy=true;const epoch=++speechEpoch;lastSpeech=text;lastSpeechKey=key;lastSpeechAt=performance.now();
  try{
   Promise.resolve(speaker.speak(text,{approved:true,voiceName:voices.value,rate:Number(rate.value)}))
    .catch(e=>{if(e.code!=='Cancelled'&&dialog.open)state.textContent='Govor nije završen. Upute ostaju tekstom; možeš odabrati drugi lokalni glas.';})
-   .finally(()=>{speechBusy=false;if(pendingSpeech&&dialog.open&&speechTimer===null)speechTimer=setTimeout(flushSpeech,260);});
- }catch{speechBusy=false;state.textContent='Govor nije dostupan. Upute ostaju tekstom.';}
+   .finally(()=>{if(epoch!==speechEpoch)return;speechBusy=false;if(pendingSpeech&&dialog.open&&speechTimer===null)speechTimer=setTimeout(flushSpeech,260);});
+ }catch{if(epoch===speechEpoch)speechBusy=false;state.textContent='Govor nije dostupan. Upute ostaju tekstom.';}
 }
 function say(text,force=false,key=text,spoken=text){
  status.textContent=text;
