@@ -13,6 +13,7 @@
  };
  function launch(kind){
   if(kind==='communicate'){
+   document.body.classList.add('sense-tools-open');document.body.dataset.senseTool='communicate';
    const disclosure=document.getElementById('sense-communication-open');
    const field=document.getElementById('sense-expression');
    if(!disclosure||!field){announce('Komunikacijski alat nije učitan. Osvježi stranicu.');return false;}
@@ -27,6 +28,7 @@
    return true;
   }
   if(kind==='cv'){
+   document.body.classList.add('sense-tools-open');document.body.dataset.senseTool='cv';
    const nav=document.querySelector('#primary-nav [data-view="workspace"]');
    const input=document.getElementById('cv-text');
    if(!nav||!input){announce('CV radni prostor nije učitan. Osvježi stranicu.');return false;}
