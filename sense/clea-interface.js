@@ -1,12 +1,34 @@
 'use strict';
-// One optional control over the existing measured Sense navigation SDK.
+/* One action starts Sense. Everything else remains inside existing CLEA tools.
+ * This is an explicit user gesture, not microphone or AI auto-activation. */
 (function(){
  function mount(){
-  const bar=document.querySelector('.topbar-actions'),enabled=document.getElementById('sense-focus-enabled'),focus=document.getElementById('sense-focus-companion'),launch=document.querySelector('body>[data-sense-touch-launch]');
-  if(!bar||!enabled||!focus||!launch||document.getElementById('sense-interface-toggle'))return;
-  focus.hidden=true;launch.hidden=true;bar.append(focus,launch);
-  const button=document.createElement('button');button.id='sense-interface-toggle';button.type='button';button.className='button';button.textContent='Uključi Sense';button.setAttribute('aria-pressed','false');
-  button.onclick=()=>{enabled.checked=!enabled.checked;enabled.dispatchEvent(new Event('change'));button.textContent=enabled.checked?'Isključi Sense':'Uključi Sense';button.setAttribute('aria-pressed',String(enabled.checked));if(enabled.checked)globalThis.CLEA7SenseNavigation?.open();};bar.prepend(button);
+  const button=document.getElementById('sense-interface-toggle');
+  if(!button)return;
+  const oldLaunch=document.querySelector('body>[data-sense-touch-launch]');
+  const focus=document.getElementById('sense-focus-companion');
+  // These are redundant for the single-switch Sense entry; keep their APIs,
+  // but never expose a second control or a competing speech engine.
+  if(oldLaunch)oldLaunch.hidden=true;
+  if(focus)focus.hidden=true;
+  const update=active=>{
+   button.setAttribute('aria-pressed',String(active));
+   button.textContent=active?'Isključi Sense':'Uključi Sense';
+   button.setAttribute('aria-label',active?'Isključi Sense i zaustavi govor':'Uključi Sense: odmah počni vođenje dodirom i govorom');
+  };
+  button.addEventListener('click',()=>{
+   const guide=globalThis.CLEA7SenseNavigation;
+   const status=document.getElementById('sense-mode-status');
+   if(!guide?.open||!guide?.close){
+    if(status)status.textContent='Sense vodič nije dostupan. Pokušaj ponovo učitati stranicu.';
+    return;
+   }
+   if(guide.isOpen?.())guide.close();
+   else guide.open(button);
+  });
+  document.addEventListener('sense:navigation-changed',event=>update(event.detail?.active===true));
+  update(false);
  }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});
+ else mount();
 })();
