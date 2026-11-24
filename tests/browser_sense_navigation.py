@@ -8,13 +8,26 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 FIXTURE="""(() => {
- window.__senseDeviceFixture={spoken:[],spokenVoices:[],vibrations:[],clicks:0,voicesAvailable:true,voiceListeners:new Set()};
+ window.__senseDeviceFixture={spoken:[],spokenVoices:[],vibrations:[],clicks:0,recognitionStarts:0,voicesAvailable:true,voiceListeners:new Set()};
  const voice={name:'Hrvatski lokalni glas',lang:'hr-HR',localService:true};
  const bsVoice={name:'Bosanski lokalni glas',lang:'bs-BA',localService:true};
  Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
  getVoices:()=>__senseDeviceFixture.voicesAvailable?[bsVoice,voice]:[],cancel(){},addEventListener(type,fn){if(type==='voiceschanged')__senseDeviceFixture.voiceListeners.add(fn);},removeEventListener(type,fn){__senseDeviceFixture.voiceListeners.delete(fn);},
  speak(u){__senseDeviceFixture.spoken.push(u.text);__senseDeviceFixture.spokenVoices.push(u.voice?.lang||u.lang||'');queueMicrotask(()=>u.onend?.());}}});
  window.SpeechSynthesisUtterance=class{constructor(text){this.text=text;}};
+ window.SpeechRecognition=class{
+  constructor(){this.processLocally=false;this.continuous=false;this.interimResults=false;}
+  start(){
+   __senseDeviceFixture.recognitionStarts++;
+   queueMicrotask(()=>{
+    this.onstart?.();
+    const result=[{transcript:'Dobrodošli u CLEA Sense',confidence:0.93}];result.isFinal=true;
+    this.onresult?.({resultIndex:0,results:[result]});
+   });
+  }
+  stop(){this.onend?.();}
+  abort(){this.onend?.();}
+ };
  Object.defineProperty(navigator,'vibrate',{configurable:true,value:p=>{__senseDeviceFixture.vibrations.push(p);return true;}});
 })()"""
 
@@ -74,8 +87,15 @@ def main():
    # A user who cannot speak can show a large message without the microphone.
    page.goto(f'http://127.0.0.1:{server.server_port}/sense/',wait_until='networkidle')
    page.locator('#sense-interface-toggle').click()
+   assert page.evaluate('__senseDeviceFixture.recognitionStarts')==0
    page.locator('#sense-touch-communicate').click()
    assert page.locator('#sense-expression').is_visible()
+   assert page.evaluate('__senseDeviceFixture.recognitionStarts')==0
+   page.locator('#sense-listen-start').click()
+   page.wait_for_function("()=>document.querySelector('#sense-transcript').value.includes('Dobrodošli u CLEA Sense')")
+   assert page.evaluate('__senseDeviceFixture.recognitionStarts')==1
+   assert 'Dobrodošli' in page.locator('#sense-transcript').input_value()
+   page.locator('#sense-listen-stop').click()
    page.locator('#sense-expression').fill('Treba mi pomoć, molim vas.')
    page.locator('#sense-expression-show').click()
    assert page.locator('#sense-show-message').is_visible()
