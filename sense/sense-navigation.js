@@ -464,6 +464,7 @@ d.addEventListener('click',event=>{
   if(item){hapticLive('click');speakLive('Odabrano: '+item.name+', '+item.kind+'.','click');}
  },110);
 },true);
+d.addEventListener('toggle',event=>{if(!companionEnabled.checked||dialog.open)return;const box=event.target;if(box?.tagName!=='DETAILS'||own(box))return;const title=name(box.querySelector('summary')||box);speakLive((box.open?'Otvoren je meni ':'Zatvoren je meni ')+title+'.','window');if(box.open)hapticLive('window');},true);
 d.addEventListener('change',event=>{
  if(!companionEnabled.checked||dialog.open||own(event.target))return;
  const el=event.target;if(!el?.matches?.('select,input[type=checkbox],input[type=radio]'))return;
@@ -479,5 +480,5 @@ d.addEventListener('clea:action-result',event=>{if(companionEnabled.checked&&eve
 d.addEventListener('visibilitychange',()=>{if(d.hidden&&companionEnabled.checked)stopLive();});
 scope.addEventListener('pagehide',()=>{if(companionEnabled.checked)stopLive();});
 scope.addEventListener('sense:erase',()=>{if(companionEnabled.checked)stopLive();});
-scope.CLEA7SenseNavigation=Object.freeze({format:'sense.navigation/1',direction,position,locate,touchGuidance,controlQuestion,open:trigger=>open(trigger||d.activeElement),startLive,stopLive,isOpen:()=>dialog.open,isActive:()=>dialog.open||companionEnabled.checked,close:()=>dialog.open?finish():stopLive(),current:()=>lastDescription?structuredClone(lastDescription):null});
+scope.CLEA7SenseNavigation=Object.freeze({format:'sense.navigation/1',direction,position,locate,touchGuidance,controlQuestion,open:trigger=>startLive(trigger||d.activeElement),startLive,stopLive,isOpen:()=>dialog.open,isActive:()=>dialog.open||companionEnabled.checked,close:()=>dialog.open?finish():stopLive(),current:()=>lastDescription?structuredClone(lastDescription):null});
 })(globalThis);
