@@ -81,7 +81,7 @@ const details=make('div');details.className='sense-touch-options';details.append
 const communicate=make('button','Komunikacija');communicate.id='sense-touch-communicate';communicate.type='button';actions.append(communicate);
 panel.classList.add('sense-simple');details.hidden=true;options.hidden=true;start.hidden=true;previous.hidden=true;next.hidden=true;repeat.hidden=true;explain.hidden=true;ask.hidden=true;
 panel.append(title,status,accessibleUpdate,details,actions);dialog.append(surface,panel);d.body.append(dialog);
-let controls=[],selected=0,source=null,returnTo=null,speaker=null,lastSpeech='',lastSpeechAt=0,lastSpeechKey='',lastAccessibleKey='',speechEpoch=0,lastCue='',lastCueAt=0,session=null,point=null,lastDescription=null,pointer=null,speechTimer=null,pendingSpeech=null,pendingSpeechKey='',speechBusy=false,voiceRetryTimer=null,voiceRetryAttempts=0,startupRequested=false,browserWelcomeUtterance=null,fallbackKey='',fallbackTime=0;
+let controls=[],selected=0,source=null,returnTo=null,speaker=null,lastSpeech='',lastSpeechAt=0,lastSpeechKey='',lastAccessibleKey='',speechEpoch=0,lastCue='',lastCueAt=0,session=null,point=null,lastDescription=null,pointer=null,speechTimer=null,pendingSpeech=null,pendingSpeechKey='',speechBusy=false,voiceRetryTimer=null,voiceRetryAttempts=0,startupRequested=false,browserWelcomeUtterance=null,fallbackKey='',fallbackTime=0,fallbackBusy=false,fallbackPending=null,fallbackTimer=null,fallbackToken=0;
 const startupWelcome='Sense je uključen. Nalaziš se u BL CLEA okruženju. Klizi prstom po ekranu. Reći ću ti gdje je kontrola i kojim smjerom dalje.';
 function orientation(){
  const heading=source?.querySelector?.('main h1,h1');
@@ -134,23 +134,45 @@ function refreshVoices(){
  }
 }
 function browserSafeSay(message,key='welcome',force=false){
- // An uncertified browser TTS engine may be network-backed. Only PUBLIC
- // wording built by this module is allowed, never labels or personal text.
- if(!dialog.open||typeof scope.SpeechSynthesisUtterance!=='function'||!scope.speechSynthesis?.speak)return false;
+ // Never pass personal/DOM labels to uncertified browser speech.
+ if(!dialog.open||voices.value||typeof scope.SpeechSynthesisUtterance!=='function'||!scope.speechSynthesis?.speak)return false;
  const now=performance.now();
- if(!force&&(fallbackKey===key||now-fallbackTime<850))return false;
+ if(!force&&key===fallbackKey)return false;
+ if(force){
+  fallbackToken++;clearTimeout(fallbackTimer);fallbackTimer=null;
+  fallbackBusy=false;fallbackPending=null;
+  try{scope.speechSynthesis.cancel?.();}catch{}
+ }else if(fallbackBusy){
+  // Finger movement updates one pending prompt, rather than building a queue.
+  fallbackPending={message,key};return true;
+ }
  let candidate=null;
  try{const list=scope.speechSynthesis.getVoices?.()||[];
-  candidate=list.find(v=>/^hr(?:-|$)/i.test(v.lang||''))||list.find(v=>/^sr(?:-|$)/i.test(v.lang||''));}catch{}
+  candidate=list.find(v=>/^hr(?:-|$)/i.test(v.lang||''))||
+            list.find(v=>/^sr(?:-|$)/i.test(v.lang||''));}catch{}
  try{
-  if(force)scope.speechSynthesis.cancel?.();
   const utterance=new scope.SpeechSynthesisUtterance(message);
   if(candidate)utterance.voice=candidate;
   utterance.lang=candidate?.lang||'hr-HR';utterance.rate=0.94;
   browserWelcomeUtterance=utterance;fallbackKey=key;fallbackTime=now;
+  const token=++fallbackToken;fallbackBusy=true;
+  const done=()=>{
+   if(token!==fallbackToken)return;
+   clearTimeout(fallbackTimer);fallbackTimer=null;fallbackBusy=false;
+   const pending=fallbackPending;fallbackPending=null;
+   if(pending&&dialog.open&&!voices.value){
+    const delay=Math.max(0,700-(performance.now()-fallbackTime));
+    fallbackTimer=setTimeout(()=>{
+     fallbackTimer=null;
+     if(token===fallbackToken)browserSafeSay(pending.message,pending.key);
+    },delay);
+   }
+  };
+  utterance.onend=done;utterance.onerror=done;
+  fallbackTimer=setTimeout(done,5000);
   scope.speechSynthesis.speak(utterance);
   return true;
- }catch{return false;}
+ }catch{fallbackBusy=false;return false;}
 }
 function browserCroatianWelcome(){
  return browserSafeSay(startupWelcome,'welcome',true);
@@ -220,7 +242,7 @@ function refreshControls(){
 function previousButtonState(){previous.disabled=selected===0;next.disabled=selected===controls.length-1;}
 let measureFrame=null;
 function scheduleMeasurement(){if(!dialog.open||measureFrame!==null)return;measureFrame=requestAnimationFrame(()=>{measureFrame=null;if(!dialog.open)return;refreshControls();if(point&&pointer!==null)explore({pointerId:pointer,clientX:point.x,clientY:point.y,type:'pointermove',preventDefault(){}});});}
-function stop(){if(measureFrame!==null)cancelAnimationFrame(measureFrame);measureFrame=null;clearTimeout(session);session=null;clearTimeout(voiceRetryTimer);voiceRetryTimer=null;voiceRetryAttempts=0;startupRequested=false;stopSpeech();try{scope.speechSynthesis?.cancel?.();}catch{}browserWelcomeUtterance=null;fallbackKey='';fallbackTime=0;speaker=null;pointer=null;lastSpeech='';lastSpeechKey='';lastAccessibleKey='';lastSpeechAt=0;accessibleUpdate.textContent='';try{scope.navigator?.vibrate?.(0);}catch{}controls=[];point=null;source=null;lastDescription=null;targets.replaceChildren();ring.hidden=true;scope.speechSynthesis?.removeEventListener?.('voiceschanged',onVoicesChanged);}
+function stop(){if(measureFrame!==null)cancelAnimationFrame(measureFrame);measureFrame=null;clearTimeout(session);session=null;clearTimeout(voiceRetryTimer);voiceRetryTimer=null;voiceRetryAttempts=0;startupRequested=false;stopSpeech();try{scope.speechSynthesis?.cancel?.();}catch{}browserWelcomeUtterance=null;fallbackKey='';fallbackTime=0;fallbackToken++;fallbackBusy=false;fallbackPending=null;clearTimeout(fallbackTimer);fallbackTimer=null;speaker=null;pointer=null;lastSpeech='';lastSpeechKey='';lastAccessibleKey='';lastSpeechAt=0;accessibleUpdate.textContent='';try{scope.navigator?.vibrate?.(0);}catch{}controls=[];point=null;source=null;lastDescription=null;targets.replaceChildren();ring.hidden=true;scope.speechSynthesis?.removeEventListener?.('voiceschanged',onVoicesChanged);}
 function notifyRunning(active){
  launch.textContent=active?'Isključi Sense':'Uključi Sense';launch.setAttribute('aria-pressed',String(active));
  d.dispatchEvent(new CustomEvent('sense:navigation-changed',{detail:{active}}));
@@ -238,7 +260,7 @@ function finish(move=false){
   if(back?.isConnected)back.focus();
  }
 }
-function open(trigger){if(dialog.open)return;panel.classList.add('is-exploring','sense-simple');options.hidden=true;details.hidden=true;const active=d.activeElement;returnTo=trigger||active;source=d.querySelector('dialog[open]')||d;controls=[...source.querySelectorAll(selector)].filter(visible);if(!controls.length){status.textContent='Na ovom ekranu nema dostupnih kontrola. Sense ostaje uključen.';}
+function open(trigger){if(dialog.open)return;panel.classList.add('is-exploring','sense-simple');options.hidden=true;details.hidden=true;communicate.hidden=typeof scope.CLEA7SenseExperience?.launch!=='function';const active=d.activeElement;returnTo=trigger||active;source=d.querySelector('dialog[open]')||d;controls=[...source.querySelectorAll(selector)].filter(visible);if(!controls.length){status.textContent='Na ovom ekranu nema dostupnih kontrola. Sense ostaje uključen.';}
  targets.replaceChildren();controls.forEach((node,i)=>{const option=make('option',(i+1)+'. '+name(node)+' · '+kind(node));option.value=String(i);targets.append(option);});
  // Initialize the device voice list on the user gesture, before any async work.
  startupRequested=false;voiceRetryAttempts=0;clearTimeout(voiceRetryTimer);voiceRetryTimer=null;
