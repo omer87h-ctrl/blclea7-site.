@@ -84,7 +84,7 @@ panel.append(title,status,accessibleUpdate,details,actions);dialog.append(surfac
 let controls=[],selected=0,source=null,returnTo=null,speaker=null,lastSpeech='',lastSpeechAt=0,lastSpeechKey='',lastAccessibleKey='',speechEpoch=0,lastCue='',lastCueAt=0,session=null,point=null,lastDescription=null,pointer=null,speechTimer=null,pendingSpeech=null,pendingSpeechKey='',speechBusy=false,voiceRetryTimer=null,voiceRetryAttempts=0,startupRequested=false,browserWelcomeUtterance=null,fallbackKey='',fallbackTime=0,fallbackBusy=false,fallbackPending=null,fallbackTimer=null,fallbackToken=0;
 const startupWelcome='Sense je uključen. Nalaziš se u BL CLEA okruženju. Klizi prstom po ekranu. Reći ću ti gdje je kontrola i kojim smjerom dalje.';
 function orientation(){
- const heading=source?.querySelector?.('main h1,h1');
+ const heading=[...(source?.querySelectorAll?.('main h1,[role="heading"],h1')||[])].find(n=>n.isConnected&&n.getClientRects().length>0&&!n.closest('[hidden],[inert],[aria-hidden="true"]'))||null;
  const page=clean(heading?.textContent||d.title||'trenutni ekran').slice(0,100);
  const target=controls.find(n=>n!==returnTo&&visible(n)),item=target?measured(target):null;
  const center=item?{x:(item.rect.left+item.rect.right)/2,y:(item.rect.top+item.rect.bottom)/2}:null;
