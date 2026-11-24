@@ -312,7 +312,7 @@ const observer=new MutationObserver(records=>{if(records.some(record=>!own(recor
 d.addEventListener('visibilitychange',()=>{if(d.hidden&&dialog.open)finish();});scope.addEventListener('pagehide',()=>{if(dialog.open)finish();});scope.addEventListener('sense:erase',()=>{if(dialog.open)finish();status.textContent='';voices.replaceChildren();});scope.addEventListener('resize',scheduleMeasurement);d.addEventListener('scroll',scheduleMeasurement,true);scope.visualViewport?.addEventListener('resize',scheduleMeasurement);scope.visualViewport?.addEventListener('scroll',scheduleMeasurement);
 const focusCaption=make('p');focusCaption.id='sense-guidance-caption';focusCaption.hidden=true;focusCaption.setAttribute('role','note');focusCaption.setAttribute('aria-live','off');d.body.append(focusCaption);
 const companion=make('section');companion.id='sense-focus-companion';companion.className='sense-touch-launch';companion.hidden=true;companion.setAttribute('aria-hidden','true');const companionLabel=make('label'),companionEnabled=make('input'),companionStatus=make('p');companionEnabled.type='checkbox';companionEnabled.id='sense-focus-enabled';companionLabel.append(companionEnabled,d.createTextNode(' Sense prati fokus u ovoj aplikaciji'));companionStatus.setAttribute('role','status');companionStatus.setAttribute('aria-live','off');companion.append(companionLabel,companionStatus);launch.after(companion);
-let companionSpeaker=null,companionLast='',liveSurfaceKey='',liveScrollTimer=null,liveScreenTimer=null,liveVoiceTimer=null,liveScrollKey='',livePending=null,liveSpeechBusy=false,liveSpeechId=0;
+let companionSpeaker=null,companionLast='',liveSurfaceKey='',liveScrollTimer=null,liveScreenTimer=null,liveVoiceTimer=null,liveScrollKey='',livePending=null,liveSpeechBusy=false,liveSpeechId=0,livePointerTimer=null,livePoint=null,livePointerKey='',liveHapticAt=0,liveTarget=null;
 const fixedLivePhrases=Object.freeze({
  start:'Sense je uključen. Sada možeš koristiti cijeli ekran. Dok listaš, biraš i otvaraš prozore, vodit ću te kroz aplikaciju.',
  screen:'Otvoren je novi ekran. Možeš nastaviti s kontrolama u tom ekranu.',
@@ -326,7 +326,7 @@ const fixedLivePhrases=Object.freeze({
 function visibleSurface(n){if(!n?.isConnected||n.closest('[hidden],[inert]')||!n.getClientRects().length)return false;const st=getComputedStyle(n);return st.display!=='none'&&st.visibility==='visible';}
 function liveSurface(){
  const modals=[...d.querySelectorAll('dialog[open]:not(#sense-touch-guide),[role="dialog"]:not([aria-hidden="true"])')].filter(visibleSurface);
- const root=modals.at(-1)||d.querySelector('main > .panel:not([hidden]),main .panel:not([hidden]),main > .view:not([hidden]),#application')||d.querySelector('main')||d.body;
+ const root=modals.at(-1)||[...d.querySelectorAll('main > .panel:not([hidden]),main .panel:not([hidden]),main > .view:not([hidden]),#application')].find(visibleSurface)||d.querySelector('main')||d.body;
  const modal=modals.length>0,headingNode=[...root.querySelectorAll('h1,h2,h3,[role="heading"]')].find(visibleSurface);
  const id=modal?'dialog:'+(root.id||root.getAttribute('aria-labelledby')||'modal'):'page:'+(root.id||d.body.dataset.workspace||location.pathname);
  const labelled=root.getAttribute('aria-labelledby')?d.getElementById(root.getAttribute('aria-labelledby'))?.textContent:'';
@@ -340,13 +340,44 @@ function liveMessage(info){
  (first?'Prva kontrola je '+name(first)+', '+kind(first)+'.':'Nema dostupnih kontrola na ovom dijelu.')+
  ' Kreći se tipkom Tab, prstom ili listanjem. Sense prati naredne korake.';
 }
+function clearLiveTarget(){if(liveTarget?.isConnected)liveTarget.removeAttribute('data-sense-live-highlight');liveTarget=null;}
+function markLiveTarget(el){if(el===liveTarget)return;clearLiveTarget();liveTarget=el||null;if(liveTarget?.isConnected)liveTarget.setAttribute('data-sense-live-highlight','true');}
+function hapticLive(kind){
+ if(!companionEnabled.checked||typeof scope.navigator?.vibrate!=='function')return;
+ const now=performance.now();if(now-liveHapticAt<300)return;liveHapticAt=now;
+ const pattern={target:[24],click:[38,55,38],window:[50,55,50],scroll:[12]};
+ try{scope.navigator.vibrate(pattern[kind]||[20]);}catch{}
+}
+function liveExploreAt(x,y){
+ if(!companionEnabled.checked||dialog.open||!Number.isFinite(x)||!Number.isFinite(y))return;
+ const surface=liveSurface(),raw=d.elementFromPoint(x,y),target=raw?.closest?.(selector);
+ const actual=target&&surface.root.contains(target)&&visible(target)&&!own(target)?target:null;
+ const point={x,y},item=actual?measured(actual):null;
+ const key=(item?'control:'+(actual.id||name(actual)):'empty:')+':'+Math.floor(x/Math.max(1,innerWidth/3))+':'+Math.floor(y/Math.max(1,innerHeight/3));
+ if(key===livePointerKey)return;livePointerKey=key;markLiveTarget(actual);
+ if(item){hapticLive('target');speakLive('Pod prstom: '+item.label+'. Dio: '+item.region+'.','focus');}
+ else{
+  const measuredItems=surface.items.map(measured).filter(Boolean);
+  const guide=touchGuidance(point,measuredItems,{width:innerWidth,height:innerHeight});
+  // Never invent inaccessible objects within a canvas or an SVG scene.
+  speakLive(guide.spoken,'scroll');
+ }
+}
+function livePointerMoved(event){
+ if(!companionEnabled.checked||dialog.open)return;
+ if(event.pointerType==='mouse'&&event.buttons===0)return;
+ if(event.pointerType==='touch'&&event.isPrimary===false)return;
+ livePoint={x:event.clientX,y:event.clientY};
+ if(livePointerTimer!==null)return;
+ livePointerTimer=setTimeout(()=>{livePointerTimer=null;if(!livePoint)return;const p=livePoint;livePoint=null;liveExploreAt(p.x,p.y);},220);
+}
 function liveStopSpeech(){
  liveSpeechId++;liveSpeechBusy=false;livePending=null;clearTimeout(liveVoiceTimer);liveVoiceTimer=null;
  try{companionSpeaker?.stop();}catch{}try{scope.speechSynthesis?.cancel?.();}catch{}
 }
 function companionStop(){
  liveStopSpeech();companionSpeaker=null;companionLast='';focusCaption.hidden=true;focusCaption.textContent='';
- clearTimeout(liveScrollTimer);liveScrollTimer=null;clearTimeout(liveScreenTimer);liveScreenTimer=null;
+ clearTimeout(liveScrollTimer);liveScrollTimer=null;clearTimeout(liveScreenTimer);liveScreenTimer=null;clearTimeout(livePointerTimer);livePointerTimer=null;livePoint=null;livePointerKey='';clearLiveTarget();
  liveSurfaceKey='';liveScrollKey='';d.body.removeAttribute('data-sense-live');
  scope.speechSynthesis?.removeEventListener?.('voiceschanged',onLiveVoicesChanged);
 }
@@ -404,7 +435,7 @@ function scheduleLiveScreen(){
  liveScreenTimer=setTimeout(()=>{
   liveScreenTimer=null;if(!companionEnabled.checked)return;
   const here=liveSurface();if(here.id===liveSurfaceKey)return;
-  liveSurfaceKey=here.id;speakLive(liveMessage(here),here.modal?'window':'screen',true);
+  liveSurfaceKey=here.id;clearLiveTarget();hapticLive('window');speakLive(liveMessage(here),here.modal?'window':'screen',true);
  },85);
 }
 function liveScroll(){
@@ -413,13 +444,13 @@ function liveScroll(){
   liveScrollTimer=null;if(!companionEnabled.checked)return;
   const here=liveSurface(),top=here.items.find(n=>{const r=n.getBoundingClientRect();return r.bottom>55&&r.top<Math.min(innerHeight*.72,520);});
   const key=here.id+':'+(top?.id||top&&name(top)||'empty');if(key===liveScrollKey)return;
-  liveScrollKey=key;
+  liveScrollKey=key;hapticLive('scroll');
   speakLive(top?'Sada je vidljivo: '+name(top)+', '+kind(top)+'.':'Na ovom dijelu nema nove kontrole. Nastavi listati.','scroll');
  },650);
 }
 d.addEventListener('focusin',event=>{
  if(!companionEnabled.checked||dialog.open||own(event.target))return;
- const item=measured(event.target);if(item)speakLive('Fokus: '+item.label+'. Dio: '+item.region+'.','focus');
+ const item=measured(event.target);if(item){markLiveTarget(event.target);hapticLive('target');speakLive('Fokus: '+item.label+'. Dio: '+item.region+'.','focus');}
 });
 d.addEventListener('click',event=>{
  if(!companionEnabled.checked||dialog.open||own(event.target))return;
@@ -428,9 +459,9 @@ d.addEventListener('click',event=>{
  setTimeout(()=>{
   if(!companionEnabled.checked)return;
   const here=liveSurface();if(here.id!==liveSurfaceKey){
-   liveSurfaceKey=here.id;speakLive(liveMessage(here),here.modal?'window':'screen',true);return;
+   liveSurfaceKey=here.id;clearLiveTarget();hapticLive('window');speakLive(liveMessage(here),here.modal?'window':'screen',true);return;
   }
-  if(item)speakLive('Odabrano: '+item.name+', '+item.kind+'.','click');
+  if(item){hapticLive('click');speakLive('Odabrano: '+item.name+', '+item.kind+'.','click');}
  },110);
 },true);
 d.addEventListener('change',event=>{
@@ -439,6 +470,8 @@ d.addEventListener('change',event=>{
  const result=el.matches('input[type=checkbox],input[type=radio]')?(el.checked?'Uključeno.':'Isključeno.'):'Izbor promijenjen.';
  speakLive(name(el)+'. '+result,'change');
 },true);
+d.addEventListener('pointermove',livePointerMoved,{capture:true,passive:true});
+d.addEventListener('touchmove',event=>{if(!companionEnabled.checked||dialog.open||!event.touches.length)return;const finger=event.touches[0];livePointerMoved({pointerType:'touch',isPrimary:true,clientX:finger.clientX,clientY:finger.clientY});},{capture:true,passive:true});
 d.addEventListener('scroll',liveScroll,true);
 scope.visualViewport?.addEventListener?.('scroll',liveScroll);
 d.addEventListener('clea:workspace',scheduleLiveScreen);
