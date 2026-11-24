@@ -53,7 +53,7 @@ if(!scope.document)return;
 const d=scope.document;if(d.getElementById('sense-touch-guide'))return;
 const selector='button,input:not([type=hidden]),textarea,select,a[href],summary,[tabindex]:not([tabindex="-1"])';
 const make=(tag,text)=>{const n=d.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
-const own=n=>n?.closest?.('#sense-touch-guide,[data-sense-touch-launch],#sense-guide-panel,.sense-dialog-guide');
+const own=n=>n?.closest?.('#sense-touch-guide,[data-sense-touch-launch],#sense-guide-panel,.sense-dialog-guide,#sense-guidance-caption,#sense-focus-companion');
 function visible(n){if(!n?.isConnected||n.closest('[hidden],[inert],[aria-hidden=true]')||n.matches(':disabled,[aria-disabled=true]')||n.tabIndex<0||own(n))return false;const style=getComputedStyle(n);if(style.display==='none'||style.visibility!=='visible'||!n.getClientRects().length)return false;for(let p=n.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS'&&!p.open&&!p.querySelector(':scope > summary')?.contains(n))return false;return true;}
 function name(n){const explicit=n.getAttribute('aria-label');if(explicit)return clean(explicit);const ids=n.getAttribute('aria-labelledby');if(ids)return clean(ids.split(/\s+/).map(id=>d.getElementById(id)?.textContent||'').join(' '));if(n.labels?.length)return clean([...n.labels].map(l=>l.textContent).join(' '));return clean(n.matches('button,a,summary')?n.textContent:n.getAttribute('title'))||'Kontrola';}
 const kind=n=>n.matches('textarea,input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file])')?'polje za unos':n.matches('button')?'dugme':n.matches('select')?'lista izbora':n.matches('a')?'veza':'kontrola';
@@ -304,19 +304,147 @@ surface.addEventListener('pointerdown',event=>{if(pointer!==null)return;pointer=
 function explanation(){const item=current();if(!item)return null;return {format:'sense.control-context/1',label:item.name,kind:item.kind,region:item.region,help:item.hint,position:lastDescription?.point?position(lastDescription.point,{width:innerWidth,height:innerHeight}):'Odabrana kontrola.'};}
 explain.onclick=()=>{const item=explanation();if(item)say(item.position+' '+item.label+', '+item.kind+'. Dio: '+item.region+'. '+(item.help||'Za korištenje prvo odaberi „Pređi na kontrolu“. Unos ili pokretanje radnje potvrđuješ zasebno.'),true);};
 ask.onclick=()=>{const detail=explanation();if(!detail)return;const event=new CustomEvent('clea:sense-explain',{detail,cancelable:true});d.dispatchEvent(event);if(event.defaultPrevented)finish();else say(detail.refusal||'Ova kontrola nema povezani AI razgovor. Dostupno je lokalno objašnjenje kroz „Objasni ovu kontrolu“.',true);};
-launch.onclick=()=>{if(dialog.open)finish();else if(companionEnabled.checked){companionEnabled.checked=false;companionStop();notifyRunning(false);}else open(launch);};targets.onchange=()=>choose(Number(targets.value));previous.onclick=()=>choose(selected-1);next.onclick=()=>choose(selected+1);repeat.onclick=()=>point?explore({pointerId:pointer,clientX:point.x,clientY:point.y,type:'pointerup',preventDefault(){}}):describe();focus.onclick=()=>finish(true);close.onclick=()=>finish();communicate.onclick=()=>{finish();scope.CLEA7SenseExperience?.launch?.('communicate');};dialog.addEventListener('cancel',event=>{event.preventDefault();finish();});
+launch.onclick=()=>{if(dialog.open)finish();else if(companionEnabled.checked)stopLive();else startLive(launch);};targets.onchange=()=>choose(Number(targets.value));previous.onclick=()=>choose(selected-1);next.onclick=()=>choose(selected+1);repeat.onclick=()=>point?explore({pointerId:pointer,clientX:point.x,clientY:point.y,type:'pointerup',preventDefault(){}}):describe();focus.onclick=()=>finish(true);close.onclick=()=>finish();communicate.onclick=()=>{finish();scope.CLEA7SenseExperience?.launch?.('communicate');};dialog.addEventListener('cancel',event=>{event.preventDefault();finish();});
 mode.onchange=()=>{point=null;lastDescription=null;if(mode.value==='target')choose(selected);else say('Istraživanje je uključeno. Pomjeri prst da čuješ šta je ispod njega.',true);};
 speak.onchange=()=>{if(!speak.checked)stopSpeech();else describe();};vibrate.onchange=()=>{if(vibrate.checked)cue('target',true);else try{scope.navigator?.vibrate?.(0);}catch{}};
-function attachDialogs(){for(const modal of d.querySelectorAll('dialog[open]'))if(modal!==dialog&&modal.id!=='sense-show-message'&&!modal.querySelector('[data-sense-touch-launch]')){const button=make('button','Vođenje govorom i dodirom u ovom prozoru');button.type='button';button.dataset.senseTouchLaunch='true';button.onclick=()=>open(button);modal.prepend(button);}}
-const observer=new MutationObserver(records=>{if(records.some(record=>!record.target.closest?.('#sense-touch-guide'))){attachDialogs();scheduleMeasurement();}});observer.observe(d.body,{childList:true,subtree:true,attributes:true,attributeFilter:['open','hidden','disabled','aria-disabled','aria-hidden','class','style']});
+function attachDialogs(){ /* The live guide observes real dialogs; it never inserts another settings button. */ }
+const observer=new MutationObserver(records=>{if(records.some(record=>!own(record.target))){scheduleMeasurement();scheduleLiveScreen();}});observer.observe(d.body,{childList:true,subtree:true,attributes:true,attributeFilter:['open','hidden','disabled','aria-disabled','aria-hidden','class','style']});
 d.addEventListener('visibilitychange',()=>{if(d.hidden&&dialog.open)finish();});scope.addEventListener('pagehide',()=>{if(dialog.open)finish();});scope.addEventListener('sense:erase',()=>{if(dialog.open)finish();status.textContent='';voices.replaceChildren();});scope.addEventListener('resize',scheduleMeasurement);d.addEventListener('scroll',scheduleMeasurement,true);scope.visualViewport?.addEventListener('resize',scheduleMeasurement);scope.visualViewport?.addEventListener('scroll',scheduleMeasurement);
 const focusCaption=make('p');focusCaption.id='sense-guidance-caption';focusCaption.hidden=true;focusCaption.setAttribute('role','note');focusCaption.setAttribute('aria-live','off');d.body.append(focusCaption);
-const companion=make('section');companion.id='sense-focus-companion';companion.className='sense-touch-launch';companion.hidden=true;companion.setAttribute('aria-hidden','true');const companionLabel=make('label'),companionEnabled=make('input'),companionStatus=make('p');companionEnabled.type='checkbox';companionEnabled.id='sense-focus-enabled';companionLabel.append(companionEnabled,d.createTextNode(' Sense prati moj fokus · govori gdje sam, bez čitanja podataka'));companionStatus.setAttribute('role','status');companionStatus.setAttribute('aria-live','polite');companion.append(companionLabel,companionStatus);launch.after(companion);let companionSpeaker=null,companionLast='';
-function companionStop(){companionSpeaker?.stop();companionSpeaker=null;companionLast='';focusCaption.hidden=true;focusCaption.textContent='';}
-function companionSay(text){if(!companionEnabled.checked||dialog.open)return;companionStatus.textContent=text;focusCaption.hidden=false;focusCaption.textContent=text;if(text===companionLast)return;companionLast=text;try{companionSpeaker=companionSpeaker||scope.CLEA7SenseSDK?.speaker?.();const available=companionSpeaker?.voices()||[],voice=preferredVoice(available);if(voice)companionSpeaker.speak(text,{approved:true,voiceName:voice.name,rate:0.94}).catch(()=>{});else companionStatus.textContent=text+' (Nema odgovarajućeg lokalnog glasa za govor.)';}catch{}}
-companionEnabled.onchange=()=>{if(companionEnabled.checked)companionSay('Sense prati fokus u ovoj aplikaciji. Tipkom Tab ili čitačem ekrana prelazi na kontrole. Uneseni podaci se ne čitaju.');else{companionStop();companionStatus.textContent='Vođenje fokusa je isključeno.';}};
-d.addEventListener('focusin',e=>{if(!companionEnabled.checked||companion.contains(e.target)||own(e.target)||dialog.open)return;const item=measured(e.target);if(!item)return;const p={x:(item.rect.left+item.rect.right)/2,y:(item.rect.top+item.rect.bottom)/2};companionSay('Fokus: '+item.label+'. Dio: '+item.region+'. '+position(p,{width:innerWidth,height:innerHeight}).replace('Prst je','Kontrola je'));});
-d.addEventListener('clea:action-result',e=>{if(!companionEnabled.checked)return;const data=e.detail;if(data&&data.format==='sense.action-result/1'&&typeof data.screen==='string')companionSay('Radnja je završena. Trenutni ekran: '+clean(data.screen)+'.');});
-d.addEventListener('visibilitychange',()=>{if(d.hidden)companionStop();});scope.addEventListener('pagehide',companionStop);scope.addEventListener('sense:erase',()=>{companionEnabled.checked=false;companionStop();companionStatus.textContent='';});
-scope.CLEA7SenseNavigation=Object.freeze({format:'sense.navigation/1',direction,position,locate,touchGuidance,controlQuestion,open:trigger=>open(trigger||d.activeElement),isOpen:()=>dialog.open,isActive:()=>dialog.open||companionEnabled.checked,close:()=>{if(dialog.open)finish();else{companionEnabled.checked=false;companionStop();notifyRunning(false);}},current:()=>lastDescription?structuredClone(lastDescription):null});
+const companion=make('section');companion.id='sense-focus-companion';companion.className='sense-touch-launch';companion.hidden=true;companion.setAttribute('aria-hidden','true');const companionLabel=make('label'),companionEnabled=make('input'),companionStatus=make('p');companionEnabled.type='checkbox';companionEnabled.id='sense-focus-enabled';companionLabel.append(companionEnabled,d.createTextNode(' Sense prati fokus u ovoj aplikaciji'));companionStatus.setAttribute('role','status');companionStatus.setAttribute('aria-live','off');companion.append(companionLabel,companionStatus);launch.after(companion);
+let companionSpeaker=null,companionLast='',liveSurfaceKey='',liveScrollTimer=null,liveScreenTimer=null,liveVoiceTimer=null,liveScrollKey='',livePending=null,liveSpeechBusy=false,liveSpeechId=0;
+const fixedLivePhrases=Object.freeze({
+ start:'Sense je uključen. Sada možeš koristiti cijeli ekran. Dok listaš, biraš i otvaraš prozore, vodit ću te kroz aplikaciju.',
+ screen:'Otvoren je novi ekran. Možeš nastaviti s kontrolama u tom ekranu.',
+ window:'Otvoren je prozor. Prelazi preko njegovih polja i dugmadi.',
+ focus:'Sada si na kontroli. Potvrdi radnju kao i obično.',
+ click:'Kontrola je odabrana. Sense prati rezultat.',
+ scroll:'Lista je pomjerena. Nastavi listati ili prelazi preko kontrola.',
+ change:'Izbor je promijenjen.',
+ action:'Radnja je završena. Sense nastavlja pratiti ekran.'
+});
+function visibleSurface(n){if(!n?.isConnected||n.closest('[hidden],[inert]')||!n.getClientRects().length)return false;const st=getComputedStyle(n);return st.display!=='none'&&st.visibility==='visible';}
+function liveSurface(){
+ const modals=[...d.querySelectorAll('dialog[open]:not(#sense-touch-guide),[role="dialog"]:not([aria-hidden="true"])')].filter(visibleSurface);
+ const root=modals.at(-1)||d.querySelector('main > .panel:not([hidden]),main .panel:not([hidden]),main > .view:not([hidden]),#application')||d.querySelector('main')||d.body;
+ const modal=modals.length>0,headingNode=[...root.querySelectorAll('h1,h2,h3,[role="heading"]')].find(visibleSurface);
+ const id=modal?'dialog:'+(root.id||root.getAttribute('aria-labelledby')||'modal'):'page:'+(root.id||d.body.dataset.workspace||location.pathname);
+ const labelled=root.getAttribute('aria-labelledby')?d.getElementById(root.getAttribute('aria-labelledby'))?.textContent:'';
+ const heading=clean(root.getAttribute('aria-label')||labelled||headingNode?.textContent||d.title||'trenutni ekran');
+ const items=[...root.querySelectorAll(selector)].filter(visible).filter(n=>!own(n));
+ return {root,id,heading,items,modal};
+}
+function liveMessage(info){
+ const first=info.items[0];
+ return (info.modal?'Otvoren je prozor: ':'Trenutni ekran: ')+info.heading+'. '+
+ (first?'Prva kontrola je '+name(first)+', '+kind(first)+'.':'Nema dostupnih kontrola na ovom dijelu.')+
+ ' Kreći se tipkom Tab, prstom ili listanjem. Sense prati naredne korake.';
+}
+function liveStopSpeech(){
+ liveSpeechId++;liveSpeechBusy=false;livePending=null;clearTimeout(liveVoiceTimer);liveVoiceTimer=null;
+ try{companionSpeaker?.stop();}catch{}try{scope.speechSynthesis?.cancel?.();}catch{}
+}
+function companionStop(){
+ liveStopSpeech();companionSpeaker=null;companionLast='';focusCaption.hidden=true;focusCaption.textContent='';
+ clearTimeout(liveScrollTimer);liveScrollTimer=null;clearTimeout(liveScreenTimer);liveScreenTimer=null;
+ liveSurfaceKey='';liveScrollKey='';d.body.removeAttribute('data-sense-live');
+ scope.speechSynthesis?.removeEventListener?.('voiceschanged',onLiveVoicesChanged);
+}
+function speakLiveBrowser(kind='focus'){
+ // Unverified browser TTS may be network-backed. Fixed phrases only: no data
+ // from the app, field names, private text, CVs or user projects.
+ const text=fixedLivePhrases[kind]||fixedLivePhrases.focus;
+ if(typeof scope.SpeechSynthesisUtterance!=='function'||!scope.speechSynthesis?.speak)return false;
+ let voice=null;try{const all=scope.speechSynthesis.getVoices?.()||[];voice=all.find(v=>/^hr(?:-|$)/i.test(v.lang||''))||all.find(v=>/^sr(?:-|$)/i.test(v.lang||''));}catch{}
+ try{
+  const u=new scope.SpeechSynthesisUtterance(text);if(voice)u.voice=voice;u.lang=voice?.lang||'hr-HR';u.rate=.94;
+  const id=++liveSpeechId;liveSpeechBusy=true;
+  const done=()=>{if(id!==liveSpeechId)return;clearTimeout(liveVoiceTimer);liveVoiceTimer=null;liveSpeechBusy=false;const next=livePending;livePending=null;if(next)liveVoiceTimer=setTimeout(()=>{liveVoiceTimer=null;speakLive(next.text,next.kind);},140);};
+  u.onend=done;u.onerror=done;liveVoiceTimer=setTimeout(done,5500);scope.speechSynthesis.speak(u);return true;
+ }catch{liveSpeechBusy=false;return false;}
+}
+function speakLive(text,kind='focus',force=false){
+ if(!companionEnabled.checked||dialog.open)return;
+ const normalized=clean(text).slice(0,450);
+ companionStatus.textContent=normalized;focusCaption.hidden=false;focusCaption.textContent=normalized;
+ if(normalized===companionLast&&!force)return;companionLast=normalized;
+ if(liveSpeechBusy&&!force){livePending={text:normalized,kind};return;}
+ if(force)liveStopSpeech();
+ companionSpeaker=companionSpeaker||scope.CLEA7SenseSDK?.speaker?.()||null;
+ const local=preferredVoice(companionSpeaker?.voices?.()||[]);
+ if(!local){speakLiveBrowser(kind);return;}
+ const id=++liveSpeechId;liveSpeechBusy=true;
+ try{Promise.resolve(companionSpeaker.speak(normalized,{approved:true,voiceName:local.name,rate:.94})).catch(()=>{}).finally(()=>{
+  if(id!==liveSpeechId)return;liveSpeechBusy=false;const next=livePending;livePending=null;
+  if(next)liveVoiceTimer=setTimeout(()=>{liveVoiceTimer=null;speakLive(next.text,next.kind);},140);
+ });}catch{liveSpeechBusy=false;}
+}
+function onLiveVoicesChanged(){
+ if(!companionEnabled.checked||dialog.open)return;
+ companionSpeaker=companionSpeaker||scope.CLEA7SenseSDK?.speaker?.()||null;
+ if(preferredVoice(companionSpeaker?.voices?.()||[])){
+  liveStopSpeech();companionLast='';const here=liveSurface();speakLive(liveMessage(here),here.modal?'window':'screen',true);
+ }
+}
+function startLive(trigger){
+ if(dialog.open||companionEnabled.checked)return;
+ companionEnabled.checked=true;companionSpeaker=scope.CLEA7SenseSDK?.speaker?.()||null;
+ scope.speechSynthesis?.addEventListener?.('voiceschanged',onLiveVoicesChanged);
+ d.body.dataset.senseLive='true';
+ const here=liveSurface();liveSurfaceKey=here.id;notifyRunning(true);
+ // Speak synchronously with activation tap to meet mobile gesture requirements.
+ speakLive(liveMessage(here),'start',true);
+}
+function stopLive(){
+ if(dialog.open){finish();return;}
+ companionEnabled.checked=false;companionStop();notifyRunning(false);
+}
+function scheduleLiveScreen(){
+ if(!companionEnabled.checked||dialog.open||liveScreenTimer!==null)return;
+ liveScreenTimer=setTimeout(()=>{
+  liveScreenTimer=null;if(!companionEnabled.checked)return;
+  const here=liveSurface();if(here.id===liveSurfaceKey)return;
+  liveSurfaceKey=here.id;speakLive(liveMessage(here),here.modal?'window':'screen',true);
+ },85);
+}
+function liveScroll(){
+ if(!companionEnabled.checked||dialog.open||liveScrollTimer!==null)return;
+ liveScrollTimer=setTimeout(()=>{
+  liveScrollTimer=null;if(!companionEnabled.checked)return;
+  const here=liveSurface(),top=here.items.find(n=>{const r=n.getBoundingClientRect();return r.bottom>55&&r.top<Math.min(innerHeight*.72,520);});
+  const key=here.id+':'+(top?.id||top&&name(top)||'empty');if(key===liveScrollKey)return;
+  liveScrollKey=key;
+  speakLive(top?'Sada je vidljivo: '+name(top)+', '+kind(top)+'.':'Na ovom dijelu nema nove kontrole. Nastavi listati.','scroll');
+ },650);
+}
+d.addEventListener('focusin',event=>{
+ if(!companionEnabled.checked||dialog.open||own(event.target))return;
+ const item=measured(event.target);if(item)speakLive('Fokus: '+item.label+'. Dio: '+item.region+'.','focus');
+});
+d.addEventListener('click',event=>{
+ if(!companionEnabled.checked||dialog.open||own(event.target))return;
+ const el=event.target?.closest?.(selector);if(!el||!visible(el))return;
+ const item=measured(el);
+ setTimeout(()=>{
+  if(!companionEnabled.checked)return;
+  const here=liveSurface();if(here.id!==liveSurfaceKey){
+   liveSurfaceKey=here.id;speakLive(liveMessage(here),here.modal?'window':'screen',true);return;
+  }
+  if(item)speakLive('Odabrano: '+item.name+', '+item.kind+'.','click');
+ },110);
+},true);
+d.addEventListener('change',event=>{
+ if(!companionEnabled.checked||dialog.open||own(event.target))return;
+ const el=event.target;if(!el?.matches?.('select,input[type=checkbox],input[type=radio]'))return;
+ const result=el.matches('input[type=checkbox],input[type=radio]')?(el.checked?'Uključeno.':'Isključeno.'):'Izbor promijenjen.';
+ speakLive(name(el)+'. '+result,'change');
+},true);
+d.addEventListener('scroll',liveScroll,true);
+scope.visualViewport?.addEventListener?.('scroll',liveScroll);
+d.addEventListener('clea:workspace',scheduleLiveScreen);
+d.addEventListener('clea:action-result',event=>{if(companionEnabled.checked&&event.detail?.format==='sense.action-result/1')speakLive('Radnja je završena. Trenutni ekran je ažuriran.','action');});
+d.addEventListener('visibilitychange',()=>{if(d.hidden&&companionEnabled.checked)stopLive();});
+scope.addEventListener('pagehide',()=>{if(companionEnabled.checked)stopLive();});
+scope.addEventListener('sense:erase',()=>{if(companionEnabled.checked)stopLive();});
+scope.CLEA7SenseNavigation=Object.freeze({format:'sense.navigation/1',direction,position,locate,touchGuidance,controlQuestion,open:trigger=>open(trigger||d.activeElement),startLive,stopLive,isOpen:()=>dialog.open,isActive:()=>dialog.open||companionEnabled.checked,close:()=>dialog.open?finish():stopLive(),current:()=>lastDescription?structuredClone(lastDescription):null});
 })(globalThis);
