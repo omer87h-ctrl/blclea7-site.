@@ -77,13 +77,35 @@ const vibrateLabel=make('label'),vibrate=make('input');vibrate.type='checkbox';v
 const start=make('button','Pokreni vođenje prstom');start.type='button';start.id='sense-touch-start';start.onclick=()=>{panel.classList.add('is-exploring');options.setAttribute('aria-expanded','false');options.textContent='Postavke';if(mode.value==='target')describe();else say('Klizi prstom po ekranu.',true);};
 const previous=make('button','Prethodna kontrola'),next=make('button','Sljedeća kontrola'),repeat=make('button','Ponovi položaj'),focus=make('button','Pređi na kontrolu'),close=make('button','Isključi Sense'),explain=make('button','Objasni ovu kontrolu'),ask=make('button','Pitaj CLEA AI o ovoj kontroli');for(const b of [previous,next,repeat,focus,close,explain,ask])b.type='button';
 focus.id='sense-touch-focus';close.id='sense-touch-close';explain.id='sense-touch-explain';ask.id='sense-touch-ask';const actions=make('div');actions.className='sense-touch-actions';const options=make('button','Postavke');options.type='button';options.id='sense-touch-options-toggle';options.setAttribute('aria-expanded','true');options.onclick=()=>{const wasCompact=panel.classList.contains('is-exploring');panel.classList.toggle('is-exploring');options.textContent=wasCompact?'Sakrij postavke':'Postavke';options.setAttribute('aria-expanded',String(wasCompact));};actions.append(start,previous,next,repeat,focus,explain,ask,close,options);previous.className=next.className=repeat.className='sense-touch-secondary';
-const details=make('div');details.className='sense-touch-options';details.append(instructions,modeLabel,targetLabel,state,speakLabel,voiceLabel,voiceHelp,rateLabel,previewVoice,vibrateLabel);panel.append(title,status,accessibleUpdate,details,actions);dialog.append(surface,panel);d.body.append(dialog);
-let controls=[],selected=0,source=null,returnTo=null,speaker=null,lastSpeech='',lastSpeechAt=0,lastSpeechKey='',lastAccessibleKey='',speechEpoch=0,lastCue='',lastCueAt=0,session=null,point=null,lastDescription=null,pointer=null,speechTimer=null,pendingSpeech=null,pendingSpeechKey='',speechBusy=false,voiceRetryTimer=null,voiceRetryAttempts=0,startupRequested=false,browserWelcomeUtterance=null;
-const startupWelcome='Sense je uključen. Sada ću ti pomagati da pronađeš kontrole. Pomjeri prst po ekranu; reći ću gdje se nalaziš i šta je sljedeće.';
+const details=make('div');details.className='sense-touch-options';details.append(instructions,modeLabel,targetLabel,state,speakLabel,voiceLabel,voiceHelp,rateLabel,previewVoice,vibrateLabel);
+const communicate=make('button','Komunikacija');communicate.id='sense-touch-communicate';communicate.type='button';actions.append(communicate);
+panel.classList.add('sense-simple');details.hidden=true;options.hidden=true;start.hidden=true;previous.hidden=true;next.hidden=true;repeat.hidden=true;explain.hidden=true;ask.hidden=true;
+panel.append(title,status,accessibleUpdate,details,actions);dialog.append(surface,panel);d.body.append(dialog);
+let controls=[],selected=0,source=null,returnTo=null,speaker=null,lastSpeech='',lastSpeechAt=0,lastSpeechKey='',lastAccessibleKey='',speechEpoch=0,lastCue='',lastCueAt=0,session=null,point=null,lastDescription=null,pointer=null,speechTimer=null,pendingSpeech=null,pendingSpeechKey='',speechBusy=false,voiceRetryTimer=null,voiceRetryAttempts=0,startupRequested=false,browserWelcomeUtterance=null,fallbackKey='',fallbackTime=0,fallbackBusy=false,fallbackPending=null,fallbackTimer=null,fallbackToken=0;
+const startupWelcome='Sense je uključen. Nalaziš se u BL CLEA okruženju. Klizi prstom po ekranu. Reći ću ti gdje je kontrola i kojim smjerom dalje.';
+function orientation(){
+ const heading=[...(source?.querySelectorAll?.('main h1,[role="heading"],h1')||[])].find(n=>n.isConnected&&n.getClientRects().length>0&&!n.closest('[hidden],[inert],[aria-hidden="true"]'))||null;
+ const page=clean(heading?.textContent||d.title||'trenutni ekran').slice(0,100);
+ const target=controls.find(n=>n!==returnTo&&visible(n)),item=target?measured(target):null;
+ const center=item?{x:(item.rect.left+item.rect.right)/2,y:(item.rect.top+item.rect.bottom)/2}:null;
+ return 'Sense je uključen. Trenutni ekran: '+page+'. '+
+ (item?'Sljedeća kontrola: '+item.name+', '+item.kind+'. '+position(center,{width:innerWidth,height:innerHeight}).replace('Prst je','Nalazi se'):
+ 'Ovdje trenutno nema dostupnih kontrola.')+
+ ' Klizi prstom za istraživanje. Radnju pokrećeš samo zasebnom potvrdom.';
+}
+function safeDirection(point,found,item){
+ const vertical=point.y<innerHeight/3?'gore':point.y>2*innerHeight/3?'dolje':'na sredini';
+ const horizontal=point.x<innerWidth/3?'lijevo':point.x>innerWidth*2/3?'desno':'na sredini';
+ if(found.hit)return 'Ovdje je '+(item?.kind||'kontrola')+'. Za radnju koristi potvrdu.';
+ if(!found.available)return 'Ovdje nema kontrole. Klizi dalje.';
+ return 'Nalaziš se '+vertical+', '+horizontal+'. '+(found.distance>125?'Ovdje nema kontrole. ':'')+
+  (found.dy>0?'Idi niže. ':found.dy<0?'Idi više. ':'')+
+  (found.dx>0?'Idi desno. ':found.dx<0?'Idi lijevo. ':'');
+}
 function label(){const target=controls[selected];return target?name(target)+', '+kind(target):'Odaberi kontrolu';}
 function preferredVoice(list){
  const regional=list.filter(v=>/^(bs|hr|sr)(-|$)/i.test(v.language));
- const score=v=>{const code=v.language.toLowerCase();return (code.startsWith('hr')?30:code.startsWith('bs')?20:10)+(/neural|natural|enhanced|premium/i.test(v.name)?4:0);};
+ const score=v=>{const code=v.language.toLowerCase();return (code.startsWith('hr')?30:code.startsWith('sr')?20:10)+(/neural|natural|enhanced|premium/i.test(v.name)?4:0);};
  return regional.sort((a,b)=>score(b)-score(a))[0]||null;
 }
 function capabilityText(){
@@ -108,36 +130,61 @@ function refreshVoices(){
  capabilityText();
  if(best&&dialog.open&&speak.checked&&!startupRequested){
   startupRequested=true;
-  say(status.textContent||startupWelcome,true);
+  say(orientation(),true,'orientation-local');
  }
 }
-function browserCroatianWelcome(){
- // A browser may expose a Croatian voice but not certify it as offline.
- // Only this fixed public greeting may use that voice: NEVER labels, screen
- // content, user text or AI responses, which require the local SDK.
- if(startupRequested||!dialog.open||typeof scope.SpeechSynthesisUtterance!=='function')return false;
- let hr=null;
- try{hr=(scope.speechSynthesis?.getVoices?.()||[]).find(v=>/^hr(?:-|$)/i.test(v.lang||'')&&v.localService!==true);}catch{}
- if(!hr)return false;
+function browserSafeSay(message,key='welcome',force=false){
+ // Never pass personal/DOM labels to uncertified browser speech.
+ if(!dialog.open||voices.value||typeof scope.SpeechSynthesisUtterance!=='function'||!scope.speechSynthesis?.speak)return false;
+ const now=performance.now();
+ if(!force&&key===fallbackKey)return false;
+ if(force){
+  fallbackToken++;clearTimeout(fallbackTimer);fallbackTimer=null;
+  fallbackBusy=false;fallbackPending=null;
+  try{scope.speechSynthesis.cancel?.();}catch{}
+ }else if(fallbackBusy){
+  // Finger movement updates one pending prompt, rather than building a queue.
+  fallbackPending={message,key};return true;
+ }
+ let candidate=null;
+ try{const list=scope.speechSynthesis.getVoices?.()||[];
+  candidate=list.find(v=>/^hr(?:-|$)/i.test(v.lang||''))||
+            list.find(v=>/^sr(?:-|$)/i.test(v.lang||''));}catch{}
  try{
-  const sentence=new scope.SpeechSynthesisUtterance(startupWelcome);
-  sentence.voice=hr;sentence.lang='hr-HR';sentence.rate=0.94;
-  sentence.onerror=()=>{if(dialog.open)state.textContent='Pozdrav se nije mogao izgovoriti. Za potpuno govorno vođenje potreban je lokalni hrvatski glas.';};
-  browserWelcomeUtterance=sentence;
-  scope.speechSynthesis.speak(sentence);
-  startupRequested=true;
-  state.textContent='Kratki pozdrav koristi hrvatski glas preglednika i može zahtijevati internet. Opisi kontrole i privatni podaci ne koriste taj glas.';
+  const utterance=new scope.SpeechSynthesisUtterance(message);
+  if(candidate)utterance.voice=candidate;
+  utterance.lang=candidate?.lang||'hr-HR';utterance.rate=0.94;
+  browserWelcomeUtterance=utterance;fallbackKey=key;fallbackTime=now;
+  const token=++fallbackToken;fallbackBusy=true;
+  const done=()=>{
+   if(token!==fallbackToken)return;
+   clearTimeout(fallbackTimer);fallbackTimer=null;fallbackBusy=false;
+   const pending=fallbackPending;fallbackPending=null;
+   if(pending&&dialog.open&&!voices.value){
+    const delay=Math.max(0,700-(performance.now()-fallbackTime));
+    fallbackTimer=setTimeout(()=>{
+     fallbackTimer=null;
+     if(token===fallbackToken)browserSafeSay(pending.message,pending.key);
+    },delay);
+   }
+  };
+  utterance.onend=done;utterance.onerror=done;
+  fallbackTimer=setTimeout(done,5000);
+  scope.speechSynthesis.speak(utterance);
   return true;
- }catch{browserWelcomeUtterance=null;return false;}
+ }catch{fallbackBusy=false;return false;}
+}
+function browserCroatianWelcome(){
+ return browserSafeSay(startupWelcome,'welcome',true);
 }
 function checkDelayedVoice(){
  voiceRetryTimer=null;
  if(!dialog.open||startupRequested)return;
  refreshVoices();
- if(!startupRequested)browserCroatianWelcome();
+ if(!startupRequested&&!browserWelcomeUtterance)browserCroatianWelcome();
  if(!startupRequested&&++voiceRetryAttempts<10)voiceRetryTimer=setTimeout(checkDelayedVoice,350);
 }
-function onVoicesChanged(){refreshVoices();if(!startupRequested)browserCroatianWelcome();}
+function onVoicesChanged(){refreshVoices();if(!startupRequested&&!browserWelcomeUtterance)browserCroatianWelcome();}
 voices.addEventListener('change',()=>{stopSpeech();capabilityText();});
 previewVoice.onclick=()=>{if(voices.value)say('Ovo je probni glas CLEA Sense. Možeš li razumjeti ovu rečenicu?',true);};
 rate.onchange=()=>{if(!dialog.open)return;stopSpeech();state.textContent='Brzina govora je promijenjena. Probaj glas za provjeru.';};
@@ -195,7 +242,7 @@ function refreshControls(){
 function previousButtonState(){previous.disabled=selected===0;next.disabled=selected===controls.length-1;}
 let measureFrame=null;
 function scheduleMeasurement(){if(!dialog.open||measureFrame!==null)return;measureFrame=requestAnimationFrame(()=>{measureFrame=null;if(!dialog.open)return;refreshControls();if(point&&pointer!==null)explore({pointerId:pointer,clientX:point.x,clientY:point.y,type:'pointermove',preventDefault(){}});});}
-function stop(){if(measureFrame!==null)cancelAnimationFrame(measureFrame);measureFrame=null;clearTimeout(session);session=null;clearTimeout(voiceRetryTimer);voiceRetryTimer=null;voiceRetryAttempts=0;startupRequested=false;stopSpeech();browserWelcomeUtterance=null;speaker=null;pointer=null;lastSpeech='';lastSpeechKey='';lastAccessibleKey='';lastSpeechAt=0;accessibleUpdate.textContent='';try{scope.navigator?.vibrate?.(0);}catch{}controls=[];point=null;source=null;lastDescription=null;targets.replaceChildren();ring.hidden=true;scope.speechSynthesis?.removeEventListener?.('voiceschanged',onVoicesChanged);}
+function stop(){if(measureFrame!==null)cancelAnimationFrame(measureFrame);measureFrame=null;clearTimeout(session);session=null;clearTimeout(voiceRetryTimer);voiceRetryTimer=null;voiceRetryAttempts=0;startupRequested=false;stopSpeech();try{scope.speechSynthesis?.cancel?.();}catch{}browserWelcomeUtterance=null;fallbackKey='';fallbackTime=0;fallbackToken++;fallbackBusy=false;fallbackPending=null;clearTimeout(fallbackTimer);fallbackTimer=null;speaker=null;pointer=null;lastSpeech='';lastSpeechKey='';lastAccessibleKey='';lastSpeechAt=0;accessibleUpdate.textContent='';try{scope.navigator?.vibrate?.(0);}catch{}controls=[];point=null;source=null;lastDescription=null;targets.replaceChildren();ring.hidden=true;scope.speechSynthesis?.removeEventListener?.('voiceschanged',onVoicesChanged);}
 function notifyRunning(active){
  launch.textContent=active?'Isključi Sense':'Uključi Sense';launch.setAttribute('aria-pressed',String(active));
  d.dispatchEvent(new CustomEvent('sense:navigation-changed',{detail:{active}}));
@@ -213,16 +260,17 @@ function finish(move=false){
   if(back?.isConnected)back.focus();
  }
 }
-function open(trigger){if(dialog.open)return;panel.classList.add('is-exploring');options.textContent='Postavke';options.setAttribute('aria-expanded','false');const active=d.activeElement;returnTo=trigger||active;source=d.querySelector('dialog[open]')||d;controls=[...source.querySelectorAll(selector)].filter(visible);if(!controls.length){returnTo?.focus();return;}
+function open(trigger){if(dialog.open)return;panel.classList.add('is-exploring','sense-simple');options.hidden=true;details.hidden=true;communicate.hidden=typeof scope.CLEA7SenseExperience?.launch!=='function';const active=d.activeElement;returnTo=trigger||active;source=d.querySelector('dialog[open]')||d;controls=[...source.querySelectorAll(selector)].filter(visible);if(!controls.length){status.textContent='Na ovom ekranu nema dostupnih kontrola. Sense ostaje uključen.';}
  targets.replaceChildren();controls.forEach((node,i)=>{const option=make('option',(i+1)+'. '+name(node)+' · '+kind(node));option.value=String(i);targets.append(option);});
  // Initialize the device voice list on the user gesture, before any async work.
  startupRequested=false;voiceRetryAttempts=0;clearTimeout(voiceRetryTimer);voiceRetryTimer=null;
  speaker=scope.CLEA7SenseSDK?.speaker?.()||null;mode.value='explore';speak.checked=true;rate.value='0.94';refreshVoices();
  scope.speechSynthesis?.addEventListener?.('voiceschanged',onVoicesChanged);
  dialog.showModal();selected=Math.max(0,controls.findIndex(n=>n===active));targets.value=String(selected);draw();notifyRunning(true);
- say(startupWelcome,true);
+ const introduction=orientation();
+ say(introduction,true,'orientation-local');
  if(voices.value)startupRequested=true;
- else if(!browserCroatianWelcome())voiceRetryTimer=setTimeout(checkDelayedVoice,250);
+ else {browserCroatianWelcome();voiceRetryTimer=setTimeout(checkDelayedVoice,250);}
  close.focus({preventScroll:true});
 }
 function explore(event){
@@ -240,6 +288,9 @@ function explore(event){
   lastDescription={mode:'explore',point:{...point},underFinger:found.hit?item.name:null,
    label:item?.label||null,region:item?.region||null,kind:item?.kind||null,...found};
   say(guidance.text,event.type==='pointerup',guidance.key,guidance.spoken);
+  const zone=found.hit?'target':found.available?'near':'empty';
+  panel.dataset.senseZone=zone;
+  if(!voices.value)browserSafeSay(safeDirection(point,found,item),'safe:'+guidance.key);
   if(found.available)cue(found.hit?'target':found.zone);
   return;
  }
@@ -253,10 +304,10 @@ surface.addEventListener('pointerdown',event=>{if(pointer!==null)return;pointer=
 function explanation(){const item=current();if(!item)return null;return {format:'sense.control-context/1',label:item.name,kind:item.kind,region:item.region,help:item.hint,position:lastDescription?.point?position(lastDescription.point,{width:innerWidth,height:innerHeight}):'Odabrana kontrola.'};}
 explain.onclick=()=>{const item=explanation();if(item)say(item.position+' '+item.label+', '+item.kind+'. Dio: '+item.region+'. '+(item.help||'Za korištenje prvo odaberi „Pređi na kontrolu“. Unos ili pokretanje radnje potvrđuješ zasebno.'),true);};
 ask.onclick=()=>{const detail=explanation();if(!detail)return;const event=new CustomEvent('clea:sense-explain',{detail,cancelable:true});d.dispatchEvent(event);if(event.defaultPrevented)finish();else say(detail.refusal||'Ova kontrola nema povezani AI razgovor. Dostupno je lokalno objašnjenje kroz „Objasni ovu kontrolu“.',true);};
-launch.onclick=()=>{if(dialog.open)finish();else if(companionEnabled.checked){companionEnabled.checked=false;companionStop();notifyRunning(false);}else open(launch);};targets.onchange=()=>choose(Number(targets.value));previous.onclick=()=>choose(selected-1);next.onclick=()=>choose(selected+1);repeat.onclick=()=>point?explore({pointerId:pointer,clientX:point.x,clientY:point.y,type:'pointerup',preventDefault(){}}):describe();focus.onclick=()=>finish(true);close.onclick=()=>finish();dialog.addEventListener('cancel',event=>{event.preventDefault();finish();});
+launch.onclick=()=>{if(dialog.open)finish();else if(companionEnabled.checked){companionEnabled.checked=false;companionStop();notifyRunning(false);}else open(launch);};targets.onchange=()=>choose(Number(targets.value));previous.onclick=()=>choose(selected-1);next.onclick=()=>choose(selected+1);repeat.onclick=()=>point?explore({pointerId:pointer,clientX:point.x,clientY:point.y,type:'pointerup',preventDefault(){}}):describe();focus.onclick=()=>finish(true);close.onclick=()=>finish();communicate.onclick=()=>{finish();scope.CLEA7SenseExperience?.launch?.('communicate');};dialog.addEventListener('cancel',event=>{event.preventDefault();finish();});
 mode.onchange=()=>{point=null;lastDescription=null;if(mode.value==='target')choose(selected);else say('Istraživanje je uključeno. Pomjeri prst da čuješ šta je ispod njega.',true);};
 speak.onchange=()=>{if(!speak.checked)stopSpeech();else describe();};vibrate.onchange=()=>{if(vibrate.checked)cue('target',true);else try{scope.navigator?.vibrate?.(0);}catch{}};
-function attachDialogs(){for(const modal of d.querySelectorAll('dialog[open]'))if(modal!==dialog&&!modal.querySelector('[data-sense-touch-launch]')){const button=make('button','Vođenje govorom i dodirom u ovom prozoru');button.type='button';button.dataset.senseTouchLaunch='true';button.onclick=()=>open(button);modal.prepend(button);}}
+function attachDialogs(){for(const modal of d.querySelectorAll('dialog[open]'))if(modal!==dialog&&modal.id!=='sense-show-message'&&!modal.querySelector('[data-sense-touch-launch]')){const button=make('button','Vođenje govorom i dodirom u ovom prozoru');button.type='button';button.dataset.senseTouchLaunch='true';button.onclick=()=>open(button);modal.prepend(button);}}
 const observer=new MutationObserver(records=>{if(records.some(record=>!record.target.closest?.('#sense-touch-guide'))){attachDialogs();scheduleMeasurement();}});observer.observe(d.body,{childList:true,subtree:true,attributes:true,attributeFilter:['open','hidden','disabled','aria-disabled','aria-hidden','class','style']});
 d.addEventListener('visibilitychange',()=>{if(d.hidden&&dialog.open)finish();});scope.addEventListener('pagehide',()=>{if(dialog.open)finish();});scope.addEventListener('sense:erase',()=>{if(dialog.open)finish();status.textContent='';voices.replaceChildren();});scope.addEventListener('resize',scheduleMeasurement);d.addEventListener('scroll',scheduleMeasurement,true);scope.visualViewport?.addEventListener('resize',scheduleMeasurement);scope.visualViewport?.addEventListener('scroll',scheduleMeasurement);
 const focusCaption=make('p');focusCaption.id='sense-guidance-caption';focusCaption.hidden=true;focusCaption.setAttribute('role','note');focusCaption.setAttribute('aria-live','off');d.body.append(focusCaption);

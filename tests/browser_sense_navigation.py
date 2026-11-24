@@ -8,15 +8,40 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 FIXTURE="""(() => {
- window.__senseDeviceFixture={spoken:[],spokenVoices:[],vibrations:[],clicks:0,voicesAvailable:true,voiceListeners:new Set()};
+ window.__senseDeviceFixture={spoken:[],spokenVoices:[],vibrations:[],clicks:0,recognitionStarts:0,voicesAvailable:true,voiceListeners:new Set()};
  const voice={name:'Hrvatski lokalni glas',lang:'hr-HR',localService:true};
  const bsVoice={name:'Bosanski lokalni glas',lang:'bs-BA',localService:true};
  Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
  getVoices:()=>__senseDeviceFixture.voicesAvailable?[bsVoice,voice]:[],cancel(){},addEventListener(type,fn){if(type==='voiceschanged')__senseDeviceFixture.voiceListeners.add(fn);},removeEventListener(type,fn){__senseDeviceFixture.voiceListeners.delete(fn);},
  speak(u){__senseDeviceFixture.spoken.push(u.text);__senseDeviceFixture.spokenVoices.push(u.voice?.lang||u.lang||'');queueMicrotask(()=>u.onend?.());}}});
  window.SpeechSynthesisUtterance=class{constructor(text){this.text=text;}};
+ window.SpeechRecognition=class{
+  constructor(){this.processLocally=false;this.continuous=false;this.interimResults=false;}
+  start(){
+   __senseDeviceFixture.recognitionStarts++;
+   queueMicrotask(()=>{
+    this.onstart?.();
+    const result=[{transcript:'Dobrodošli u CLEA Sense',confidence:0.93}];result.isFinal=true;
+    this.onresult?.({resultIndex:0,results:[result]});
+   });
+  }
+  stop(){this.onend?.();}
+  abort(){this.onend?.();}
+ };
  Object.defineProperty(navigator,'vibrate',{configurable:true,value:p=>{__senseDeviceFixture.vibrations.push(p);return true;}});
 })()"""
+
+def advanced_test_controls(page):
+ """Expose internal navigation controls ONLY in this regression test.
+ Users see only one Sense switch, live guidance, confirm and communication."""
+ page.evaluate("""() => {
+  const p=document.querySelector('#sense-touch-guide .sense-touch-console');
+  p.classList.remove('sense-simple');
+  for(const id of ['sense-touch-options-toggle','sense-touch-start','sense-touch-explain','sense-touch-ask']){
+   document.getElementById(id).hidden=false;
+  }
+  document.querySelector('#sense-touch-guide .sense-touch-options').hidden=false;
+ }""")
 
 def main():
  p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);p.add_argument('--site',type=Path);a=p.parse_args();a.output.mkdir(parents=True,exist_ok=True)
@@ -37,6 +62,9 @@ def main():
    assert page.locator('#sense-interface-toggle').get_attribute('aria-pressed')=='true'
    assert page.locator('.sense-touch-console.is-exploring').is_visible()
    assert not page.locator('#sense-touch-voice').is_visible()
+   assert not page.locator('#sense-touch-options-toggle').is_visible()
+   assert page.locator('#sense-touch-communicate').is_visible()
+   assert 'Trenutni ekran:' in page.locator('#sense-touch-status').inner_text()
    assert page.evaluate("document.querySelector('#sense-touch-voice').value")=='Hrvatski lokalni glas'
    assert page.evaluate('__senseDeviceFixture.spoken[0].startsWith("Sense je uključen.")')
    assert page.evaluate('__senseDeviceFixture.spokenVoices[0]')=='hr-HR'
@@ -53,13 +81,34 @@ def main():
    assert page.locator('#sense-touch-guide').is_visible()
    spoken_browser=page.evaluate('__senseDeviceFixture.spoken.slice('+str(before)+')')
    assert len(spoken_browser)==1 and spoken_browser[0].startswith('Sense je uključen.'),spoken_browser
-   assert 'Kratki pozdrav' in page.locator('#sense-touch-capabilities').inner_text()
+   assert 'Trenutni ekran:' not in spoken_browser[0] # only public fallback
    page.locator('#sense-touch-close').click()
    checks.append('Uncertified Croatian browser voice gets only the fixed greeting; private screen contents still need a local TTS voice')
+   # A user who cannot speak can show a large message without the microphone.
+   page.goto(f'http://127.0.0.1:{server.server_port}/sense/',wait_until='networkidle')
+   page.locator('#sense-interface-toggle').click()
+   assert page.evaluate('__senseDeviceFixture.recognitionStarts')==0
+   page.locator('#sense-touch-communicate').click()
+   assert page.locator('#sense-expression').is_visible()
+   assert page.evaluate('__senseDeviceFixture.recognitionStarts')==0
+   page.locator('#sense-listen-start').click()
+   page.wait_for_function("()=>document.querySelector('#sense-transcript').value.includes('Dobrodošli u CLEA Sense')")
+   assert page.evaluate('__senseDeviceFixture.recognitionStarts')==1
+   assert 'Dobrodošli' in page.locator('#sense-transcript').input_value()
+   page.locator('#sense-listen-stop').click()
+   page.locator('#sense-expression').fill('Treba mi pomoć, molim vas.')
+   page.locator('#sense-expression-show').click()
+   assert page.locator('#sense-show-message').is_visible()
+   assert 'Treba mi pomoć' in page.locator('#sense-show-message-text').inner_text()
+   page.locator('#sense-show-message button').click()
+   assert not page.locator('#sense-show-message').is_visible()
+   assert not page.locator('#sense-listen-system').is_visible()
+   checks.append('Communication displays a large typed message without microphone, and captions need a separate opt-in')
    page.goto(f'http://127.0.0.1:{server.server_port}/sense/?tool=cv',wait_until='networkidle')
    page.locator('#sense-create-cv-shortcut').click();page.locator('#sense-cv-name').fill('PRIVATE_VALUE_MUST_NOT_BE_SPOKEN')
    page.locator('#sense-cv-authoring [data-sense-touch-launch]').click();page.locator('#sense-touch-guide').wait_for(state='visible')
    choices=page.locator('#sense-touch-target option').all_text_contents();assert any('ime' in x.lower() for x in choices),choices
+   advanced_test_controls(page)
    page.locator('#sense-touch-options-toggle').click()
    page.select_option('#sense-touch-target',label=next(x for x in choices if 'ime' in x.lower()))
    page.locator('#sense-touch-start').click()
@@ -103,6 +152,7 @@ def main():
    assert page.locator('#sense-cv-name').input_value()=='PRIVATE_VALUE_MUST_NOT_BE_SPOKEN'
    checks.append('Exploration cannot activate underlying controls; separate focus action returns to the exact editable field')
    page.locator('#sense-cv-authoring [data-sense-touch-launch]').click()
+   advanced_test_controls(page)
    assert page.locator('#sense-touch-mode').input_value()=='explore'
    assert page.locator('.sense-touch-console.is-exploring').is_visible()
    points=page.evaluate('''()=>[...document.querySelector('#sense-cv-authoring').querySelectorAll('input,textarea,button')].filter(n=>!n.closest('[hidden]')&&!n.disabled&&!n.hasAttribute('data-sense-touch-launch')).map(n=>{const r=n.getBoundingClientRect();return {id:n.id,x:(r.left+r.right)/2,y:(r.top+r.bottom)/2,w:r.width,h:r.height};}).filter(r=>r.w>0&&r.h>0&&r.y>10&&r.y<innerHeight-10)''')
@@ -144,6 +194,7 @@ def main():
    page.locator('[data-panel="clea-chat"]').click();page.locator('#chat-question').fill('')
    question_label=page.locator('#chat-question').evaluate("n=>n.getAttribute('aria-label')||n.labels[0].textContent")
    page.locator('body > [data-sense-touch-launch]').click()
+   advanced_test_controls(page)
    choices=page.locator('#sense-touch-target option').all_text_contents()
    page.locator('#sense-touch-options-toggle').click()
    page.select_option('#sense-touch-target',label=next(x for x in choices if question_label.strip() in x))
@@ -153,7 +204,7 @@ def main():
    assert page.locator('#clea-ai-task-mode').input_value()=='chat'
    assert 'PRIVATE_VALUE' not in page.locator('#chat-question').input_value()
    draft=page.locator('#chat-question').input_value()
-   page.locator('body > [data-sense-touch-launch]').click();page.locator('#sense-touch-options-toggle').click();page.locator('#sense-touch-ask').click()
+   page.locator('body > [data-sense-touch-launch]').click();advanced_test_controls(page);page.locator('#sense-touch-options-toggle').click();page.locator('#sense-touch-ask').click()
    assert page.locator('#chat-question').input_value()==draft
    assert 'Sačuvaj trenutno pitanje' in page.locator('#sense-touch-status').inner_text()
    page.keyboard.press('Escape')
@@ -170,12 +221,15 @@ on increase {
     clicks = clicks + 1
 }
 '''
-   page.once('dialog',lambda dialog:dialog.accept())
-   page.locator('#guided-start').click();page.wait_for_function('()=>Boolean(CLEA7Workbench.project.bil)')
+   page.locator('#studio-home').click()
+   page.locator('#studio-start').wait_for(state='visible')
+   page.locator('#studio-start-grammar').select_option('classic')
+   page.locator('#studio-start-create').get_by_role('button',name='Novi projekat',exact=True).click()
+   page.wait_for_function('()=>Boolean(CLEA7Workbench.project.bil)')
    page.locator('[data-panel="bil"]').click();page.locator('#bil-source').fill(bil);page.locator('#bil-apply').click()
    page.wait_for_function("()=>Boolean(CLEA7Workbench.project.bil?.source.includes('Prstom do cilja'))")
    application_id=page.evaluate('CLEA7Workbench.project.id')
-   page.locator('[data-panel="build"]').click()
+   page.locator('.private-studio-tools>summary').click();page.locator('[data-panel="build"]').click()
    with page.expect_download() as downloading:page.locator('#export-package').click()
    package=Path(downloading.value.path()).read_bytes();(a.output/'guided-runtime.clea7').write_bytes(package)
    launcher='studio/launcher/' if a.site else 'launcher/'
@@ -189,6 +243,7 @@ on increase {
    control_name=control.evaluate("n=>(n.getAttribute('aria-label')||(n.labels?.length?n.labels[0].textContent:n.textContent)).replace(/\\s+/g,' ').trim()")
    app.evaluate("()=>{globalThis.__appClicks=0;document.querySelector('#application').addEventListener('click',()=>__appClicks++);}")
    app.locator('body > [data-sense-touch-launch]').click()
+   advanced_test_controls(app)
    labels=app.locator('#sense-touch-target option').all_text_contents()
    if app.locator('.sense-touch-console.is-exploring').is_visible():app.locator('#sense-touch-options-toggle').click()
    app.select_option('#sense-touch-target',label=next(x for x in labels if control_name in x))
