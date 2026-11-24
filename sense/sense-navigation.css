@@ -209,3 +209,11 @@ body[data-sense-live="true"] #sense-guidance-caption:not([hidden]){
   animation:none!important;transition:none!important
  }
 }
+
+
+/* Hidden legacy controls must never defeat the semantic hidden attribute. */
+.sense-touch-launch[hidden],
+#sense-focus-companion[hidden],
+#sense-touch-guide:not([open]){
+ display:none!important;
+}
