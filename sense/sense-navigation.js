@@ -351,13 +351,13 @@ function hapticLive(kind){
 function liveExploreAt(x,y){
  if(!companionEnabled.checked||dialog.open||!Number.isFinite(x)||!Number.isFinite(y))return;
  const surface=liveSurface(),raw=d.elementFromPoint(x,y),target=raw?.closest?.(selector);
- const actual=target&&surface.root.contains(target)&&visible(target)&&!own(target)?target:null;
+ const actual=target&&(!surface.modal||surface.root.contains(target))&&visible(target)&&!own(target)?target:null;
  const point={x,y},item=actual?measured(actual):null;
  const key=(item?'control:'+(actual.id||name(actual)):'empty:')+':'+Math.floor(x/Math.max(1,innerWidth/3))+':'+Math.floor(y/Math.max(1,innerHeight/3));
  if(key===livePointerKey)return;livePointerKey=key;markLiveTarget(actual);
  if(item){hapticLive('target');speakLive('Pod prstom: '+item.label+'. Dio: '+item.region+'.','focus');}
  else{
-  const measuredItems=surface.items.map(measured).filter(Boolean);
+  const measuredItems=(surface.modal?surface.items:[...d.body.querySelectorAll(selector)].filter(visible).filter(n=>!own(n))).map(measured).filter(Boolean);
   const guide=touchGuidance(point,measuredItems,{width:innerWidth,height:innerHeight});
   // Never invent inaccessible objects within a canvas or an SVG scene.
   speakLive(guide.spoken,'scroll');
