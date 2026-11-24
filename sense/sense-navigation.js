@@ -77,13 +77,35 @@ const vibrateLabel=make('label'),vibrate=make('input');vibrate.type='checkbox';v
 const start=make('button','Pokreni vođenje prstom');start.type='button';start.id='sense-touch-start';start.onclick=()=>{panel.classList.add('is-exploring');options.setAttribute('aria-expanded','false');options.textContent='Postavke';if(mode.value==='target')describe();else say('Klizi prstom po ekranu.',true);};
 const previous=make('button','Prethodna kontrola'),next=make('button','Sljedeća kontrola'),repeat=make('button','Ponovi položaj'),focus=make('button','Pređi na kontrolu'),close=make('button','Isključi Sense'),explain=make('button','Objasni ovu kontrolu'),ask=make('button','Pitaj CLEA AI o ovoj kontroli');for(const b of [previous,next,repeat,focus,close,explain,ask])b.type='button';
 focus.id='sense-touch-focus';close.id='sense-touch-close';explain.id='sense-touch-explain';ask.id='sense-touch-ask';const actions=make('div');actions.className='sense-touch-actions';const options=make('button','Postavke');options.type='button';options.id='sense-touch-options-toggle';options.setAttribute('aria-expanded','true');options.onclick=()=>{const wasCompact=panel.classList.contains('is-exploring');panel.classList.toggle('is-exploring');options.textContent=wasCompact?'Sakrij postavke':'Postavke';options.setAttribute('aria-expanded',String(wasCompact));};actions.append(start,previous,next,repeat,focus,explain,ask,close,options);previous.className=next.className=repeat.className='sense-touch-secondary';
-const details=make('div');details.className='sense-touch-options';details.append(instructions,modeLabel,targetLabel,state,speakLabel,voiceLabel,voiceHelp,rateLabel,previewVoice,vibrateLabel);panel.append(title,status,accessibleUpdate,details,actions);dialog.append(surface,panel);d.body.append(dialog);
-let controls=[],selected=0,source=null,returnTo=null,speaker=null,lastSpeech='',lastSpeechAt=0,lastSpeechKey='',lastAccessibleKey='',speechEpoch=0,lastCue='',lastCueAt=0,session=null,point=null,lastDescription=null,pointer=null,speechTimer=null,pendingSpeech=null,pendingSpeechKey='',speechBusy=false,voiceRetryTimer=null,voiceRetryAttempts=0,startupRequested=false,browserWelcomeUtterance=null;
-const startupWelcome='Sense je uključen. Sada ću ti pomagati da pronađeš kontrole. Pomjeri prst po ekranu; reći ću gdje se nalaziš i šta je sljedeće.';
+const details=make('div');details.className='sense-touch-options';details.append(instructions,modeLabel,targetLabel,state,speakLabel,voiceLabel,voiceHelp,rateLabel,previewVoice,vibrateLabel);
+const communicate=make('button','Komunikacija');communicate.id='sense-touch-communicate';communicate.type='button';actions.append(communicate);
+panel.classList.add('sense-simple');details.hidden=true;options.hidden=true;start.hidden=true;previous.hidden=true;next.hidden=true;repeat.hidden=true;explain.hidden=true;ask.hidden=true;
+panel.append(title,status,accessibleUpdate,details,actions);dialog.append(surface,panel);d.body.append(dialog);
+let controls=[],selected=0,source=null,returnTo=null,speaker=null,lastSpeech='',lastSpeechAt=0,lastSpeechKey='',lastAccessibleKey='',speechEpoch=0,lastCue='',lastCueAt=0,session=null,point=null,lastDescription=null,pointer=null,speechTimer=null,pendingSpeech=null,pendingSpeechKey='',speechBusy=false,voiceRetryTimer=null,voiceRetryAttempts=0,startupRequested=false,browserWelcomeUtterance=null,fallbackKey='',fallbackTime=0;
+const startupWelcome='Sense je uključen. Nalaziš se u BL CLEA okruženju. Klizi prstom po ekranu. Reći ću ti gdje je kontrola i kojim smjerom dalje.';
+function orientation(){
+ const heading=source?.querySelector?.('main h1,h1');
+ const page=clean(heading?.textContent||d.title||'trenutni ekran').slice(0,100);
+ const target=controls.find(n=>n!==returnTo&&visible(n)),item=target?measured(target):null;
+ const center=item?{x:(item.rect.left+item.rect.right)/2,y:(item.rect.top+item.rect.bottom)/2}:null;
+ return 'Sense je uključen. Trenutni ekran: '+page+'. '+
+ (item?'Sljedeća kontrola: '+item.name+', '+item.kind+'. '+position(center,{width:innerWidth,height:innerHeight}).replace('Prst je','Nalazi se'):
+ 'Ovdje trenutno nema dostupnih kontrola.')+
+ ' Klizi prstom za istraživanje. Radnju pokrećeš samo zasebnom potvrdom.';
+}
+function safeDirection(point,found,item){
+ const vertical=point.y<innerHeight/3?'gore':point.y>2*innerHeight/3?'dolje':'na sredini';
+ const horizontal=point.x<innerWidth/3?'lijevo':point.x>innerWidth*2/3?'desno':'na sredini';
+ if(found.hit)return 'Ovdje je '+(item?.kind||'kontrola')+'. Za radnju koristi potvrdu.';
+ if(!found.available)return 'Ovdje nema kontrole. Klizi dalje.';
+ return 'Nalaziš se '+vertical+', '+horizontal+'. '+(found.distance>125?'Ovdje nema kontrole. ':'')+
+  (found.dy>0?'Idi niže. ':found.dy<0?'Idi više. ':'')+
+  (found.dx>0?'Idi desno. ':found.dx<0?'Idi lijevo. ':'');
+}
 function label(){const target=controls[selected];return target?name(target)+', '+kind(target):'Odaberi kontrolu';}
 function preferredVoice(list){
  const regional=list.filter(v=>/^(bs|hr|sr)(-|$)/i.test(v.language));
- const score=v=>{const code=v.language.toLowerCase();return (code.startsWith('hr')?30:code.startsWith('bs')?20:10)+(/neural|natural|enhanced|premium/i.test(v.name)?4:0);};
+ const score=v=>{const code=v.language.toLowerCase();return (code.startsWith('hr')?30:code.startsWith('sr')?20:10)+(/neural|natural|enhanced|premium/i.test(v.name)?4:0);};
  return regional.sort((a,b)=>score(b)-score(a))[0]||null;
 }
 function capabilityText(){
@@ -108,36 +130,39 @@ function refreshVoices(){
  capabilityText();
  if(best&&dialog.open&&speak.checked&&!startupRequested){
   startupRequested=true;
-  say(status.textContent||startupWelcome,true);
+  say(orientation(),true,'orientation-local');
  }
 }
-function browserCroatianWelcome(){
- // A browser may expose a Croatian voice but not certify it as offline.
- // Only this fixed public greeting may use that voice: NEVER labels, screen
- // content, user text or AI responses, which require the local SDK.
- if(startupRequested||!dialog.open||typeof scope.SpeechSynthesisUtterance!=='function')return false;
- let hr=null;
- try{hr=(scope.speechSynthesis?.getVoices?.()||[]).find(v=>/^hr(?:-|$)/i.test(v.lang||'')&&v.localService!==true);}catch{}
- if(!hr)return false;
+function browserSafeSay(message,key='welcome',force=false){
+ // An uncertified browser TTS engine may be network-backed. Only PUBLIC
+ // wording built by this module is allowed, never labels or personal text.
+ if(!dialog.open||typeof scope.SpeechSynthesisUtterance!=='function'||!scope.speechSynthesis?.speak)return false;
+ const now=performance.now();
+ if(!force&&(fallbackKey===key||now-fallbackTime<850))return false;
+ let candidate=null;
+ try{const list=scope.speechSynthesis.getVoices?.()||[];
+  candidate=list.find(v=>/^hr(?:-|$)/i.test(v.lang||''))||list.find(v=>/^sr(?:-|$)/i.test(v.lang||''));}catch{}
  try{
-  const sentence=new scope.SpeechSynthesisUtterance(startupWelcome);
-  sentence.voice=hr;sentence.lang='hr-HR';sentence.rate=0.94;
-  sentence.onerror=()=>{if(dialog.open)state.textContent='Pozdrav se nije mogao izgovoriti. Za potpuno govorno vođenje potreban je lokalni hrvatski glas.';};
-  browserWelcomeUtterance=sentence;
-  scope.speechSynthesis.speak(sentence);
-  startupRequested=true;
-  state.textContent='Kratki pozdrav koristi hrvatski glas preglednika i može zahtijevati internet. Opisi kontrole i privatni podaci ne koriste taj glas.';
+  if(force)scope.speechSynthesis.cancel?.();
+  const utterance=new scope.SpeechSynthesisUtterance(message);
+  if(candidate)utterance.voice=candidate;
+  utterance.lang=candidate?.lang||'hr-HR';utterance.rate=0.94;
+  browserWelcomeUtterance=utterance;fallbackKey=key;fallbackTime=now;
+  scope.speechSynthesis.speak(utterance);
   return true;
- }catch{browserWelcomeUtterance=null;return false;}
+ }catch{return false;}
+}
+function browserCroatianWelcome(){
+ return browserSafeSay(startupWelcome,'welcome',true);
 }
 function checkDelayedVoice(){
  voiceRetryTimer=null;
  if(!dialog.open||startupRequested)return;
  refreshVoices();
- if(!startupRequested)browserCroatianWelcome();
+ if(!startupRequested&&!browserWelcomeUtterance)browserCroatianWelcome();
  if(!startupRequested&&++voiceRetryAttempts<10)voiceRetryTimer=setTimeout(checkDelayedVoice,350);
 }
-function onVoicesChanged(){refreshVoices();if(!startupRequested)browserCroatianWelcome();}
+function onVoicesChanged(){refreshVoices();if(!startupRequested&&!browserWelcomeUtterance)browserCroatianWelcome();}
 voices.addEventListener('change',()=>{stopSpeech();capabilityText();});
 previewVoice.onclick=()=>{if(voices.value)say('Ovo je probni glas CLEA Sense. Možeš li razumjeti ovu rečenicu?',true);};
 rate.onchange=()=>{if(!dialog.open)return;stopSpeech();state.textContent='Brzina govora je promijenjena. Probaj glas za provjeru.';};
