@@ -221,12 +221,15 @@ on increase {
     clicks = clicks + 1
 }
 '''
-   page.once('dialog',lambda dialog:dialog.accept())
-   page.locator('#guided-start').click();page.wait_for_function('()=>Boolean(CLEA7Workbench.project.bil)')
+   page.locator('#studio-home').click()
+   page.locator('#studio-start').wait_for(state='visible')
+   page.locator('#studio-start-grammar').select_option('classic')
+   page.locator('#studio-start-create').get_by_role('button',name='Novi projekat',exact=True).click()
+   page.wait_for_function('()=>Boolean(CLEA7Workbench.project.bil)')
    page.locator('[data-panel="bil"]').click();page.locator('#bil-source').fill(bil);page.locator('#bil-apply').click()
    page.wait_for_function("()=>Boolean(CLEA7Workbench.project.bil?.source.includes('Prstom do cilja'))")
    application_id=page.evaluate('CLEA7Workbench.project.id')
-   page.locator('[data-panel="build"]').click()
+   page.locator('.private-studio-tools>summary').click();page.locator('[data-panel="build"]').click()
    with page.expect_download() as downloading:page.locator('#export-package').click()
    package=Path(downloading.value.path()).read_bytes();(a.output/'guided-runtime.clea7').write_bytes(package)
    launcher='studio/launcher/' if a.site else 'launcher/'
