@@ -41,18 +41,30 @@
     const downloads = document.querySelector('.studio-topbar>a.primary');
     if (downloads) { downloads.href = '../../preuzimanja.html'; downloads.textContent = 'Preuzimanja'; }
     const focus = document.getElementById('sense-focus-companion');
-    const enabled = document.getElementById('sense-focus-enabled');
     const launch = document.querySelector('body>[data-sense-touch-launch]');
-    if (focus && enabled && launch) {
-      focus.hidden = true; list.append(focus); launch.hidden = true; list.append(launch);
+    // One Studio switch controls live guidance. A modal must NOT cover the
+    // canvas, Draw, BIL or project actions while Sense is enabled.
+    if (focus) { focus.hidden = true; list.append(focus); }
+    if (launch) { launch.hidden = true; list.append(launch); }
+    const senseApi = globalThis.CLEA7SenseNavigation;
+    if (senseApi?.startLive && senseApi?.stopLive) {
       const sense = button('Uključi Sense', () => {
-        enabled.checked = !enabled.checked; enabled.dispatchEvent(new Event('change'));
-        sense.textContent = enabled.checked ? 'Isključi Sense' : 'Uključi Sense';
-        sense.setAttribute('aria-pressed', String(enabled.checked)); launch.hidden = !enabled.checked;
-        if (enabled.checked) globalThis.CLEA7SenseNavigation?.open();
+        if (senseApi.isActive()) senseApi.stopLive();
+        else senseApi.startLive(sense);
       });
-      sense.id = 'private-studio-sense'; sense.setAttribute('aria-pressed', 'false');
+      sense.id = 'private-studio-sense';
+      sense.setAttribute('aria-pressed','false');
+      sense.setAttribute('aria-label','Uključi Sense i nastavi raditi u Studiju uz govorne i vibracijske upute');
+      sense.setAttribute('aria-controls','sense-guidance-caption');
+      const updateSense = () => {
+        const active = senseApi.isActive();
+        sense.textContent = active ? 'Isključi Sense' : 'Uključi Sense';
+        sense.setAttribute('aria-pressed',String(active));
+        sense.setAttribute('aria-label',active ? 'Isključi Sense i zaustavi vođenje' : 'Uključi Sense i nastavi raditi u Studiju uz govorne i vibracijske upute');
+      };
+      document.addEventListener('sense:navigation-changed',updateSense);
       document.querySelector('.studio-topbar').append(sense);
+      updateSense();
     }
     document.addEventListener('clea:workspace', event => {
       document.body.dataset.activePanel = event.detail.panel; more.open = false;
