@@ -6,6 +6,7 @@ const recognitionClass=()=>scope.SpeechRecognition||scope.webkitSpeechRecognitio
 const localVoices=()=>{try{return (scope.speechSynthesis?.getVoices()||[]).filter(voice=>voice.localService===true);}catch{return [];}};
 function capabilities(){return {format:'sense.capabilities/1',speechInputAPI:typeof recognitionClass()==='function',localSpeechInputVerified:false,localVoiceCount:localVoices().length,haptics:typeof scope.navigator?.vibrate==='function',ocrConfigured:scope.CLEA7SenseOCR?.capabilities?.().configured===true,brailleDirectAdapter:false};}
 function speaker({onState=()=>{}}={}){
+ if(typeof scope.CLEA7SenseNativeSpeaker?.create==='function')return scope.CLEA7SenseNativeSpeaker.create({onState});
  let active=null,timer=null,serial=0;
  const stop=()=>{serial++;if(timer)clearTimeout(timer);timer=null;try{scope.speechSynthesis?.cancel();}catch{}if(active){active.reject(fault('Cancelled','Govor je zaustavljen.'));active=null;}onState('stopped');};
  function speak(text,{approved=false,voiceName,rate=0.94}={}){
