@@ -167,3 +167,49 @@ html[data-clea-area="studio"] .draw-stage{min-width:0}
  html[data-clea-area="studio"] #draw-screen-list{max-height:none}
  html[data-clea-area="studio"] .draw-stage>h2{font-size:22px}
 }
+
+
+/* CLEA chrome palette reconciliation. Does not recolor user-authored app previews. */
+html[data-clea-theme="clea"]{
+ --amber-soft:#244842;--teal-soft:#244842;
+ accent-color:var(--clea-mint);
+}
+html[data-clea-theme="clea"] body:not(.high-contrast) .sense-touch-launch{
+ background:var(--clea-mint);border-color:#5cae94;color:var(--clea-bg);
+}
+html[data-clea-theme="clea"] body:not(.high-contrast) .sense-touch-launch[aria-pressed="true"]{
+ background:#d9f4ea;border-color:var(--clea-mint);color:var(--clea-bg);
+}
+html[data-clea-theme="clea"] body:not(.high-contrast) #sense-touch-guide .sense-touch-console{
+ background:#102f31f7;border-color:var(--clea-mint);color:var(--clea-text);
+}
+html[data-clea-theme="clea"] body:not(.high-contrast) #sense-touch-guide .sense-touch-target{
+ border-color:var(--clea-mint);box-shadow:0 0 0 4px #10262a99,0 0 0 6px #91e6cd77;
+}
+html[data-clea-theme="clea"] body:not(.high-contrast) #sense-touch-guide .sense-touch-console :is(select,textarea,input:not([type=checkbox])){
+ background:var(--clea-surface-soft);color:var(--clea-text);border-color:#7bb8a6;
+}
+html[data-clea-theme="clea"] body:not(.high-contrast) #sense-touch-guide .sense-touch-console button{
+ background:#244b47;color:var(--clea-text);border-color:#7dbba5;
+}
+html[data-clea-theme="clea"] body:not(.high-contrast) #sense-touch-guide #sense-touch-focus{
+ background:var(--clea-mint);color:var(--clea-bg);
+}
+html[data-clea-theme="clea"] body:not(.high-contrast) #sense-touch-guide :is(#sense-touch-status,#sense-touch-title){
+ color:var(--clea-text);
+}
+html[data-clea-theme="clea"] body:not(.high-contrast) #sense-touch-guide #sense-touch-capabilities{
+ color:var(--clea-muted);
+}
+html[data-clea-theme="clea"] body:not(.high-contrast) :is(.sense-guide-panel,.sense-guide-launch){
+ background:var(--clea-surface);color:var(--clea-text);border-color:#7cb7a4;
+}
+html[data-clea-theme="clea"] body:not(.high-contrast) .sense-guide-panel :is(button,select){
+ background:var(--clea-surface-soft);color:var(--clea-text);border-color:#7cb7a4;
+}
+html[data-clea-theme="clea"] body:not(.high-contrast) .sense-guide-panel :is(.sense-guide-action,.sense-guide-target-label){
+ color:var(--clea-mint);
+}
+html[data-clea-theme="clea"] body:not(.high-contrast) :is(.sense-guide-target,#sense-guidance-caption){
+ border-color:var(--clea-mint);
+}
