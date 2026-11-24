@@ -8,12 +8,12 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 FIXTURE="""(() => {
- window.__senseDeviceFixture={spoken:[],vibrations:[],clicks:0,voicesAvailable:true,voiceListeners:new Set()};
+ window.__senseDeviceFixture={spoken:[],spokenVoices:[],vibrations:[],clicks:0,voicesAvailable:true,voiceListeners:new Set()};
  const voice={name:'Hrvatski lokalni glas',lang:'hr-HR',localService:true};
  const bsVoice={name:'Bosanski lokalni glas',lang:'bs-BA',localService:true};
  Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
  getVoices:()=>__senseDeviceFixture.voicesAvailable?[bsVoice,voice]:[],cancel(){},addEventListener(type,fn){if(type==='voiceschanged')__senseDeviceFixture.voiceListeners.add(fn);},removeEventListener(type,fn){__senseDeviceFixture.voiceListeners.delete(fn);},
- speak(u){__senseDeviceFixture.spoken.push(u.text);queueMicrotask(()=>u.onend?.());}}});
+ speak(u){__senseDeviceFixture.spoken.push(u.text);__senseDeviceFixture.spokenVoices.push(u.voice?.lang||u.lang||'');queueMicrotask(()=>u.onend?.());}}});
  window.SpeechSynthesisUtterance=class{constructor(text){this.text=text;}};
  Object.defineProperty(navigator,'vibrate',{configurable:true,value:p=>{__senseDeviceFixture.vibrations.push(p);return true;}});
 })()"""
@@ -38,11 +38,24 @@ def main():
    assert page.locator('.sense-touch-console.is-exploring').is_visible()
    assert not page.locator('#sense-touch-voice').is_visible()
    assert page.evaluate("document.querySelector('#sense-touch-voice').value")=='Hrvatski lokalni glas'
-   assert any('Sense je uključen' in text for text in page.evaluate('__senseDeviceFixture.spoken'))
+   assert page.evaluate('__senseDeviceFixture.spoken[0].startsWith("Sense je uključen.")')
+   assert page.evaluate('__senseDeviceFixture.spokenVoices[0]')=='hr-HR'
+   assert '16, 47, 49' in page.locator('#sense-touch-guide .sense-touch-console').evaluate('(n)=>getComputedStyle(n).backgroundColor')
    page.locator('#sense-touch-close').click()
    assert not page.locator('#sense-touch-guide').is_visible()
    assert page.locator('#sense-interface-toggle').get_attribute('aria-pressed')=='false'
-   checks.append('One Sense button starts Croatian-preferred guidance immediately with advanced settings hidden; stopping restores a simple screen')
+   checks.append('One Sense button starts Croatian TTS synchronously on a user tap, uses mint/dark-green guidance and stops without settings')
+   # A browser may expose an uncertified Croatian voice; that voice is
+   # permitted only to say a fixed public greeting, never field labels.
+   page.evaluate("""() => {speechSynthesis.getVoices=()=>[{name:'Croatian browser voice',lang:'hr-HR',localService:false}];}""")
+   before=page.evaluate('__senseDeviceFixture.spoken.length')
+   page.locator('#sense-interface-toggle').click()
+   assert page.locator('#sense-touch-guide').is_visible()
+   spoken_browser=page.evaluate('__senseDeviceFixture.spoken.slice('+str(before)+')')
+   assert len(spoken_browser)==1 and spoken_browser[0].startswith('Sense je uključen.'),spoken_browser
+   assert 'Kratki pozdrav' in page.locator('#sense-touch-capabilities').inner_text()
+   page.locator('#sense-touch-close').click()
+   checks.append('Uncertified Croatian browser voice gets only the fixed greeting; private screen contents still need a local TTS voice')
    page.goto(f'http://127.0.0.1:{server.server_port}/sense/?tool=cv',wait_until='networkidle')
    page.locator('#sense-create-cv-shortcut').click();page.locator('#sense-cv-name').fill('PRIVATE_VALUE_MUST_NOT_BE_SPOKEN')
    page.locator('#sense-cv-authoring [data-sense-touch-launch]').click();page.locator('#sense-touch-guide').wait_for(state='visible')
