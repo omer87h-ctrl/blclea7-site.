@@ -220,7 +220,7 @@ function refreshControls(){
 function previousButtonState(){previous.disabled=selected===0;next.disabled=selected===controls.length-1;}
 let measureFrame=null;
 function scheduleMeasurement(){if(!dialog.open||measureFrame!==null)return;measureFrame=requestAnimationFrame(()=>{measureFrame=null;if(!dialog.open)return;refreshControls();if(point&&pointer!==null)explore({pointerId:pointer,clientX:point.x,clientY:point.y,type:'pointermove',preventDefault(){}});});}
-function stop(){if(measureFrame!==null)cancelAnimationFrame(measureFrame);measureFrame=null;clearTimeout(session);session=null;clearTimeout(voiceRetryTimer);voiceRetryTimer=null;voiceRetryAttempts=0;startupRequested=false;stopSpeech();browserWelcomeUtterance=null;speaker=null;pointer=null;lastSpeech='';lastSpeechKey='';lastAccessibleKey='';lastSpeechAt=0;accessibleUpdate.textContent='';try{scope.navigator?.vibrate?.(0);}catch{}controls=[];point=null;source=null;lastDescription=null;targets.replaceChildren();ring.hidden=true;scope.speechSynthesis?.removeEventListener?.('voiceschanged',onVoicesChanged);}
+function stop(){if(measureFrame!==null)cancelAnimationFrame(measureFrame);measureFrame=null;clearTimeout(session);session=null;clearTimeout(voiceRetryTimer);voiceRetryTimer=null;voiceRetryAttempts=0;startupRequested=false;stopSpeech();try{scope.speechSynthesis?.cancel?.();}catch{}browserWelcomeUtterance=null;fallbackKey='';fallbackTime=0;speaker=null;pointer=null;lastSpeech='';lastSpeechKey='';lastAccessibleKey='';lastSpeechAt=0;accessibleUpdate.textContent='';try{scope.navigator?.vibrate?.(0);}catch{}controls=[];point=null;source=null;lastDescription=null;targets.replaceChildren();ring.hidden=true;scope.speechSynthesis?.removeEventListener?.('voiceschanged',onVoicesChanged);}
 function notifyRunning(active){
  launch.textContent=active?'Isključi Sense':'Uključi Sense';launch.setAttribute('aria-pressed',String(active));
  d.dispatchEvent(new CustomEvent('sense:navigation-changed',{detail:{active}}));
@@ -238,16 +238,17 @@ function finish(move=false){
   if(back?.isConnected)back.focus();
  }
 }
-function open(trigger){if(dialog.open)return;panel.classList.add('is-exploring');options.textContent='Postavke';options.setAttribute('aria-expanded','false');const active=d.activeElement;returnTo=trigger||active;source=d.querySelector('dialog[open]')||d;controls=[...source.querySelectorAll(selector)].filter(visible);if(!controls.length){returnTo?.focus();return;}
+function open(trigger){if(dialog.open)return;panel.classList.add('is-exploring','sense-simple');options.hidden=true;details.hidden=true;const active=d.activeElement;returnTo=trigger||active;source=d.querySelector('dialog[open]')||d;controls=[...source.querySelectorAll(selector)].filter(visible);if(!controls.length){status.textContent='Na ovom ekranu nema dostupnih kontrola. Sense ostaje uključen.';}
  targets.replaceChildren();controls.forEach((node,i)=>{const option=make('option',(i+1)+'. '+name(node)+' · '+kind(node));option.value=String(i);targets.append(option);});
  // Initialize the device voice list on the user gesture, before any async work.
  startupRequested=false;voiceRetryAttempts=0;clearTimeout(voiceRetryTimer);voiceRetryTimer=null;
  speaker=scope.CLEA7SenseSDK?.speaker?.()||null;mode.value='explore';speak.checked=true;rate.value='0.94';refreshVoices();
  scope.speechSynthesis?.addEventListener?.('voiceschanged',onVoicesChanged);
  dialog.showModal();selected=Math.max(0,controls.findIndex(n=>n===active));targets.value=String(selected);draw();notifyRunning(true);
- say(startupWelcome,true);
+ const introduction=orientation();
+ say(introduction,true,'orientation-local');
  if(voices.value)startupRequested=true;
- else if(!browserCroatianWelcome())voiceRetryTimer=setTimeout(checkDelayedVoice,250);
+ else {browserCroatianWelcome();voiceRetryTimer=setTimeout(checkDelayedVoice,250);}
  close.focus({preventScroll:true});
 }
 function explore(event){
@@ -265,6 +266,9 @@ function explore(event){
   lastDescription={mode:'explore',point:{...point},underFinger:found.hit?item.name:null,
    label:item?.label||null,region:item?.region||null,kind:item?.kind||null,...found};
   say(guidance.text,event.type==='pointerup',guidance.key,guidance.spoken);
+  const zone=found.hit?'target':found.available?'near':'empty';
+  panel.dataset.senseZone=zone;
+  if(!voices.value)browserSafeSay(safeDirection(point,found,item),'safe:'+guidance.key);
   if(found.available)cue(found.hit?'target':found.zone);
   return;
  }
@@ -278,7 +282,7 @@ surface.addEventListener('pointerdown',event=>{if(pointer!==null)return;pointer=
 function explanation(){const item=current();if(!item)return null;return {format:'sense.control-context/1',label:item.name,kind:item.kind,region:item.region,help:item.hint,position:lastDescription?.point?position(lastDescription.point,{width:innerWidth,height:innerHeight}):'Odabrana kontrola.'};}
 explain.onclick=()=>{const item=explanation();if(item)say(item.position+' '+item.label+', '+item.kind+'. Dio: '+item.region+'. '+(item.help||'Za korištenje prvo odaberi „Pređi na kontrolu“. Unos ili pokretanje radnje potvrđuješ zasebno.'),true);};
 ask.onclick=()=>{const detail=explanation();if(!detail)return;const event=new CustomEvent('clea:sense-explain',{detail,cancelable:true});d.dispatchEvent(event);if(event.defaultPrevented)finish();else say(detail.refusal||'Ova kontrola nema povezani AI razgovor. Dostupno je lokalno objašnjenje kroz „Objasni ovu kontrolu“.',true);};
-launch.onclick=()=>{if(dialog.open)finish();else if(companionEnabled.checked){companionEnabled.checked=false;companionStop();notifyRunning(false);}else open(launch);};targets.onchange=()=>choose(Number(targets.value));previous.onclick=()=>choose(selected-1);next.onclick=()=>choose(selected+1);repeat.onclick=()=>point?explore({pointerId:pointer,clientX:point.x,clientY:point.y,type:'pointerup',preventDefault(){}}):describe();focus.onclick=()=>finish(true);close.onclick=()=>finish();dialog.addEventListener('cancel',event=>{event.preventDefault();finish();});
+launch.onclick=()=>{if(dialog.open)finish();else if(companionEnabled.checked){companionEnabled.checked=false;companionStop();notifyRunning(false);}else open(launch);};targets.onchange=()=>choose(Number(targets.value));previous.onclick=()=>choose(selected-1);next.onclick=()=>choose(selected+1);repeat.onclick=()=>point?explore({pointerId:pointer,clientX:point.x,clientY:point.y,type:'pointerup',preventDefault(){}}):describe();focus.onclick=()=>finish(true);close.onclick=()=>finish();communicate.onclick=()=>{finish();scope.CLEA7SenseExperience?.launch?.('communicate');};dialog.addEventListener('cancel',event=>{event.preventDefault();finish();});
 mode.onchange=()=>{point=null;lastDescription=null;if(mode.value==='target')choose(selected);else say('Istraživanje je uključeno. Pomjeri prst da čuješ šta je ispod njega.',true);};
 speak.onchange=()=>{if(!speak.checked)stopSpeech();else describe();};vibrate.onchange=()=>{if(vibrate.checked)cue('target',true);else try{scope.navigator?.vibrate?.(0);}catch{}};
 function attachDialogs(){for(const modal of d.querySelectorAll('dialog[open]'))if(modal!==dialog&&!modal.querySelector('[data-sense-touch-launch]')){const button=make('button','Vođenje govorom i dodirom u ovom prozoru');button.type='button';button.dataset.senseTouchLaunch='true';button.onclick=()=>open(button);modal.prepend(button);}}
