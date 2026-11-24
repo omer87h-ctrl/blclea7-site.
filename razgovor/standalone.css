@@ -1,36 +1,36 @@
-:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#eef2f8;background:#0b1019;font-synthesis:none;--accent:#ffad72;--line:#2d3c50;--muted:#b5c2d3}
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#eaf3f0;background:#10262a;font-synthesis:none;--accent:#91e6cd;--line:#426763;--muted:#b3ccc7}
 *{box-sizing:border-box}
-body{margin:0;min-width:280px;background:radial-gradient(ellipse at 85% 0,rgba(203,103,46,.08),transparent 38%),#0b1019;line-height:1.6}
+body{margin:0;min-width:280px;background:radial-gradient(ellipse at 85% 0,rgba(145,230,205,.06),transparent 38%),#10262a;line-height:1.6}
 a{color:var(--accent);text-underline-offset:4px}
 button,textarea,select,input{font:inherit}
-button,select{min-height:44px;border:1px solid #51647b;border-radius:10px;color:#f2f5fa;background:#1b293b;padding:10px 15px}
+button,select{min-height:44px;border:1px solid #63837f;border-radius:10px;color:#eaf3f0;background:#1d3c40;padding:10px 15px}
 button{cursor:pointer;transition:background .15s,border-color .15s}
-button:hover:not(:disabled){background:#293c53;border-color:#8a9bb0}
+button:hover:not(:disabled){background:#244b47;border-color:#7bb8a6}
 button:disabled{cursor:default;opacity:.52}
-button.primary{background:#ffad72;color:#21140c;border-color:#ffad72;font-weight:750}
-button.primary:hover:not(:disabled){background:#ffc195;border-color:#ffc195}
-textarea,select{background:#0b1421;border:1px solid #51647b;color:#f2f5fa}
-textarea::placeholder{color:#93a5bc}
+button.primary{background:#91e6cd;color:#10262a;border-color:#91e6cd;font-weight:750}
+button.primary:hover:not(:disabled){background:#b0f5df;border-color:#b0f5df}
+textarea,select{background:#173337;border:1px solid #63837f;color:#eaf3f0}
+textarea::placeholder{color:#b3ccc7}
 summary{cursor:pointer;min-height:44px;align-content:center}
-:focus-visible{outline:3px solid #ffc28e;outline-offset:4px}
+:focus-visible{outline:3px solid #ffc468;outline-offset:4px}
 [hidden]{display:none!important}
-.skip-link{position:fixed;z-index:10;left:12px;top:8px;transform:translateY(-180%);border-radius:8px;background:#ffad72;color:#21140c;padding:10px 16px;font-weight:700}
+.skip-link{position:fixed;z-index:10;left:12px;top:8px;transform:translateY(-180%);border-radius:8px;background:#91e6cd;color:#10262a;padding:10px 16px;font-weight:700}
 .skip-link:focus{transform:none}
 .page-header{max-width:1008px;margin:0 auto;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-.brand{display:inline-flex;align-items:center;gap:11px;text-decoration:none;color:#f6f5f4}
+.brand{display:inline-flex;align-items:center;gap:11px;text-decoration:none;color:#eaf3f0}
 .brand img{flex:none}
 .brand strong{display:block;font-size:1.25rem;line-height:1.25;letter-spacing:-.04em}
 .brand small{display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);margin-top:4px}
 .back-link{text-decoration:none;font-size:.85rem;min-height:44px;display:flex;align-items:center;gap:10px}
 .page-intro{max-width:1008px;margin:0 auto;padding:14px 24px 0}
 .intro-line{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.test-badge{font-size:.67rem;font-weight:750;letter-spacing:.1em;color:#ffc096;border:1px solid #805539;border-radius:6px;padding:5px 9px}
+.test-badge{font-size:.67rem;font-weight:750;letter-spacing:.1em;color:#91e6cd;border:1px solid #426763;border-radius:6px;padding:5px 9px}
 .local-note{font-size:.78rem;color:var(--muted)}
 #conversation-scope{font-size:.86rem;line-height:1.7;color:var(--muted);margin:14px 0 2px;max-width:850px}
-#conversation-scope strong{color:#f6dac6}
+#conversation-scope strong{color:#eaf3f0}
 #clea-chat{padding:20px 24px 0;outline-offset:-4px}
 .clea-chat-shell{grid-template-columns:minmax(0,1fr);gap:14px;max-width:960px}
-.clea-chat-room{background:#111b2a;box-shadow:0 20px 60px #0003;border-color:var(--line);overflow:hidden}
+.clea-chat-room{background:#173337;box-shadow:0 20px 60px #0003;border-color:var(--line);overflow:hidden}
 .clea-chat-heading{padding:24px 26px;border-bottom-color:var(--line);align-items:center}
 .clea-chat-heading h1{font-size:clamp(1.8rem,4.5vw,2.35rem);letter-spacing:-.045em;line-height:1.2;margin:6px 0 10px}
 .clea-chat-heading p:not(.eyebrow){font-size:.86rem;max-width:470px;color:var(--muted)}
@@ -41,25 +41,25 @@ summary{cursor:pointer;min-height:44px;align-content:center}
 .chat-welcome h2{font-size:1.2rem;letter-spacing:-.02em;line-height:1.45}
 .chat-welcome p{font-size:.9rem;line-height:1.8}
 .chat-examples{gap:9px;margin-top:20px}
-.chat-examples button{background:#172539;border-color:#344a65;font-size:.8rem;padding:11px 14px}
+.chat-examples button{background:#1d3c40;border-color:#426763;font-size:.8rem;padding:11px 14px}
 .chat-message{font-size:.9rem}
-.chat-message.user{background:#293445}
-.chat-message.assistant{background:#0d1623;border-color:var(--line)}
+.chat-message.user{background:#244b47}
+.chat-message.assistant{background:#1d3c40;border-color:var(--line)}
 .chat-response-actions button{font-size:.75rem;min-height:44px}
-.chat-response-actions summary{color:#c0cfe1}
-.chat-response-actions pre{font-size:.72rem;border-left:2px solid #5b6f87;padding-left:12px}
-#chat-form{padding:19px 26px 20px;border-top-color:var(--line);background:#101b2b}
+.chat-response-actions summary{color:#b3ccc7}
+.chat-response-actions pre{font-size:.72rem;border-left:2px solid #7bb8a6;padding-left:12px}
+#chat-form{padding:19px 26px 20px;border-top-color:var(--line);background:#10262a}
 #chat-form>label{display:block;font-size:.8rem;font-weight:650;margin-bottom:8px}
 #chat-question{min-height:84px;max-height:250px;font-size:1rem}
-.chat-composer-actions label{color:#c1ccdc;font-size:.72rem}
+.chat-composer-actions label{color:#b3ccc7;font-size:.72rem}
 .chat-composer-actions select{font-size:.82rem;min-width:125px}
 .chat-composer-actions button{min-width:108px;font-size:.88rem}
 #chat-status{font-size:.75rem;line-height:1.6;color:var(--muted)}
-#conversation-diagnostics{border:1px solid var(--line);border-radius:12px;background:#0f1826;min-width:0;overflow:hidden}
-#conversation-diagnostics>summary{padding:14px 20px;color:#d6e0ed;font-size:.84rem;font-weight:650}
+#conversation-diagnostics{border:1px solid var(--line);border-radius:12px;background:#173337;min-width:0;overflow:hidden}
+#conversation-diagnostics>summary{padding:14px 20px;color:#eaf3f0;font-size:.84rem;font-weight:650}
 #conversation-diagnostics[open]>summary{border-bottom:1px solid var(--line)}
 .clea-chat-inspector{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);padding:16px;gap:16px}
-.chat-model-card{border-color:var(--line);background:#111e2f;padding:17px}
+.chat-model-card{border-color:var(--line);background:#173337;padding:17px}
 .chat-model-card h2{font-size:1rem}
 .chat-model-card p{font-size:.8rem}
 .chat-model-card button{font-size:.78rem}
@@ -68,14 +68,14 @@ summary{cursor:pointer;min-height:44px;align-content:center}
 .chat-cache-option input{min-width:18px;min-height:18px;margin-top:3px}
 .chat-pillar strong{font-size:.78rem}
 .chat-pillar small{font-size:.7rem}
-.page-footer{max-width:1008px;margin:0 auto;padding:18px 24px 32px;color:#a8b7ca;font-size:.73rem;line-height:1.8}
+.page-footer{max-width:1008px;margin:0 auto;padding:18px 24px 32px;color:#b3ccc7;font-size:.73rem;line-height:1.8}
 .page-footer p{max-width:900px;margin:8px 0}
 .page-footer>a{display:inline-block;min-height:44px;align-content:center;font-size:.75rem}
 .page-error{max-width:960px;margin:20px auto 0;padding:20px;background:#321f25;border:1px solid #965967;border-radius:12px;color:#ffe4e7;font-size:.9rem}
 .page-error>strong{font-size:1.1rem}
 .page-error p{margin:8px 0 16px}
 .initial-loading{max-width:960px;padding:28px;margin:auto;border:1px solid var(--line);border-radius:18px}
-.no-script{padding:20px;max-width:960px;margin:0 auto;color:#ffcfad}
+.no-script{padding:20px;max-width:960px;margin:0 auto;color:#eaf3f0}
 @media(max-width:640px){
   .page-header{padding:16px 16px 12px}.brand img{width:37px;height:37px}.brand strong{font-size:1.15rem}.brand small{font-size:.58rem}.back-link{font-size:.78rem}
   .page-intro{padding:10px 16px 0}.intro-line{gap:9px}.local-note{font-size:.7rem}.test-badge{font-size:.61rem}
