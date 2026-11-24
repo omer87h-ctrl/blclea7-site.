@@ -132,3 +132,60 @@
 
 /* The private focus engine has no public settings panel. */
 #sense-focus-companion[hidden]{display:none!important}
+
+
+/* One-switch Sense surface: only orientation, confirm, communication, stop.
+ * Rich option and language controls remain internal; a blind user never has
+ * to navigate a settings menu to turn on guidance. */
+#sense-touch-guide .sense-touch-console.sense-simple{
+ display:flex;flex-direction:column;gap:8px;max-height:min(35dvh,270px);
+ padding:13px 15px;overflow:auto;
+ background:#102f31f7;color:#eaf3f0;border:2px solid #91e6cd;
+ border-radius:16px;box-shadow:0 14px 38px #07191c55;
+}
+#sense-touch-guide .sense-touch-console.sense-simple :is(
+ #sense-touch-options-toggle,#sense-touch-start,#sense-touch-explain,
+ #sense-touch-ask,.sense-touch-secondary,.sense-touch-options
+){display:none!important}
+#sense-touch-guide .sense-touch-console.sense-simple [hidden]{display:none!important}
+#sense-touch-guide .sense-touch-console.sense-simple #sense-touch-title{
+ margin:0;font-size:clamp(14px,2vw,17px);color:#91e6cd
+}
+#sense-touch-guide .sense-touch-console.sense-simple #sense-touch-status{
+ display:flex;align-items:flex-start;gap:10px;margin:2px 0;
+ font-size:clamp(15px,3vw,18px);line-height:1.45;
+}
+#sense-touch-guide .sense-touch-console.sense-simple #sense-touch-status::before{
+ content:"◎";display:grid;flex:none;place-items:center;
+ width:28px;height:28px;border:2px solid #91e6cd;border-radius:50%;
+ color:#91e6cd;font-size:19px;line-height:1;
+}
+#sense-touch-guide .sense-touch-console.sense-simple[data-sense-zone="target"] #sense-touch-status::before{content:"✓";border-radius:7px;background:#91e6cd;color:#10262a}
+#sense-touch-guide .sense-touch-console.sense-simple[data-sense-zone="near"] #sense-touch-status::before{content:"➜";border-radius:9px}
+#sense-touch-guide .sense-touch-console.sense-simple[data-sense-zone="empty"] #sense-touch-status::before{content:"–";border-style:dashed;border-radius:8px}
+#sense-touch-guide .sense-touch-console.sense-simple .sense-touch-actions{
+ display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;
+}
+#sense-touch-guide .sense-touch-console.sense-simple :is(#sense-touch-focus,#sense-touch-communicate,#sense-touch-close){
+ display:inline-flex;align-items:center;justify-content:center;flex:1 1 105px;
+ min-height:50px;padding:9px 12px;border:1px solid #75ad9d;
+ border-radius:11px;font:650 14px/1.3 system-ui;
+ background:#214f48;color:#f2fff8;
+}
+#sense-touch-guide .sense-touch-console.sense-simple #sense-touch-focus{
+ background:#91e6cd;color:#10262a;border-color:#91e6cd;
+}
+#sense-touch-guide .sense-touch-console.sense-simple :is(button,input,select):focus-visible{
+ outline:3px solid #ffd28d;outline-offset:3px
+}
+#sense-touch-guide .sense-touch-console.sense-simple[aria-busy="true"]{border-style:dashed}
+@media(max-width:560px){
+ #sense-touch-guide .sense-touch-console.sense-simple{max-height:min(40dvh,310px);padding:10px 12px;gap:7px}
+ #sense-touch-guide .sense-touch-console.sense-simple .sense-touch-actions{flex-wrap:nowrap}
+ #sense-touch-guide .sense-touch-console.sense-simple :is(#sense-touch-focus,#sense-touch-communicate,#sense-touch-close){
+  flex:1 1 0;min-width:0;padding:9px 7px;font-size:12px
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ #sense-touch-guide .sense-touch-console.sense-simple *{animation:none!important;transition:none!important}
+}
