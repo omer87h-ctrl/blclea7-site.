@@ -463,3 +463,25 @@ html[data-clea-area="sense"] body.sense-one-switch #sense-interface-toggle:focus
   display:none
  }
 }
+
+
+/* Keep the existing CV / advanced Sense screens in the CLEA palette. */
+html[data-clea-area="sense"] body.sense-experience.sense-tools-open:not(.high-contrast) #view-workspace :is(.panel,.input-panel),
+html[data-clea-area="sense"] body.sense-experience.sense-tools-open:not(.high-contrast) #view-result :is(.panel,.input-panel){
+ background:var(--sense-surface);color:var(--sense-paper);border-color:var(--sense-stroke);
+}
+html[data-clea-area="sense"] body.sense-experience.sense-tools-open:not(.high-contrast) #view-workspace :is(textarea,select,input:not([type=checkbox]):not([type=range])),
+html[data-clea-area="sense"] body.sense-experience.sense-tools-open:not(.high-contrast) #view-result :is(textarea,select,input:not([type=checkbox]):not([type=range])){
+ background:#1d3c40;color:var(--sense-paper);border-color:#77ad9e;
+}
+html[data-clea-area="sense"] body.sense-experience.sense-tools-open:not(.high-contrast) #view-workspace :is(.button.secondary,.button.subtle),
+html[data-clea-area="sense"] body.sense-experience.sense-tools-open:not(.high-contrast) #view-result :is(.button.secondary,.button.subtle){
+ background:#244b47;color:var(--sense-paper);border:1px solid #78ae9f;
+}
+html[data-clea-area="sense"] body.sense-experience.sense-tools-open:not(.high-contrast) #view-workspace :is(.panel-heading h2,.panel-heading h3),
+html[data-clea-area="sense"] body.sense-experience.sense-tools-open:not(.high-contrast) #view-result :is(.panel-heading h2,.panel-heading h3){
+ color:var(--sense-paper);
+}
+html[data-clea-area="sense"] body.sense-experience.sense-tools-open:not(.high-contrast) dialog:not(#sense-touch-guide){
+ background:var(--sense-surface);color:var(--sense-paper);border-color:#7eb4a3;
+}
