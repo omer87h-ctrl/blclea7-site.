@@ -189,3 +189,31 @@
 @media(prefers-reduced-motion:reduce){
  #sense-touch-guide .sense-touch-console.sense-simple *{animation:none!important;transition:none!important}
 }
+
+
+/* Live Sense is an invisible assistant, not a modal screen or a second Studio.
+ * Outline is visual only; pointer input keeps reaching the real application. */
+body[data-sense-live="true"] [data-sense-live-highlight="true"]{
+ outline:3px solid #91e6cd!important;
+ outline-offset:3px!important;
+ box-shadow:0 0 0 5px #10262a88!important;
+}
+#sense-touch-guide:not([open]){display:none!important}
+body[data-sense-live="true"] #sense-guidance-caption:not([hidden]){
+ pointer-events:none;
+ max-width:min(560px,calc(100vw - 24px));
+ box-shadow:0 6px 24px #07191c42;
+}
+@media (prefers-reduced-motion:reduce){
+ body[data-sense-live="true"] [data-sense-live-highlight="true"]{
+  animation:none!important;transition:none!important
+ }
+}
+
+
+/* Hidden legacy controls must never defeat the semantic hidden attribute. */
+.sense-touch-launch[hidden],
+#sense-focus-companion[hidden],
+#sense-touch-guide:not([open]){
+ display:none!important;
+}

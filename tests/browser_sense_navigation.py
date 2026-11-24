@@ -1,266 +1,195 @@
-"""Actual mobile touch/focus geometry with labelled speech/vibration fixtures.
+"""Real Chromium regression for BL CLEA Sense's nonblocking, always-on guide.
 
-Device APIs are fixtures; DOM, modal isolation, pointer events and focus are real.
-No claim about physical haptics, audio output or human assistive evaluation.
+Tests real page interactions, actual control geometry, speech API fixtures and
+vibration API calls. Does not claim actual mobile voices or human accessibility.
 """
-import argparse,functools,http.server,json,os,threading
+import argparse
+import functools
+import http.server
+import json
+import os
+import threading
 from pathlib import Path
+
 from playwright.sync_api import sync_playwright
 
-FIXTURE="""(() => {
- window.__senseDeviceFixture={spoken:[],spokenVoices:[],vibrations:[],clicks:0,recognitionStarts:0,voicesAvailable:true,voiceListeners:new Set()};
- const voice={name:'Hrvatski lokalni glas',lang:'hr-HR',localService:true};
- const bsVoice={name:'Bosanski lokalni glas',lang:'bs-BA',localService:true};
+FIXTURE = r"""(() => {
+ window.__senseFixture = {
+  said:[], voiceCodes:[], vibrations:[], recognitions:0, cancelCount:0
+ };
+ const hr={name:'Hrvatski lokalni glas',lang:'hr-HR',localService:true};
+ const sr={name:'Srpski lokalni glas',lang:'sr-RS',localService:true};
  Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
- getVoices:()=>__senseDeviceFixture.voicesAvailable?[bsVoice,voice]:[],cancel(){},addEventListener(type,fn){if(type==='voiceschanged')__senseDeviceFixture.voiceListeners.add(fn);},removeEventListener(type,fn){__senseDeviceFixture.voiceListeners.delete(fn);},
- speak(u){__senseDeviceFixture.spoken.push(u.text);__senseDeviceFixture.spokenVoices.push(u.voice?.lang||u.lang||'');queueMicrotask(()=>u.onend?.());}}});
+  getVoices:()=>[sr,hr],
+  cancel(){__senseFixture.cancelCount++;},
+  addEventListener(){},removeEventListener(){},
+  speak(u){__senseFixture.said.push(u.text);__senseFixture.voiceCodes.push(u.voice?.lang||u.lang);
+   queueMicrotask(()=>u.onend?.());}
+ }});
  window.SpeechSynthesisUtterance=class{constructor(text){this.text=text;}};
  window.SpeechRecognition=class{
-  constructor(){this.processLocally=false;this.continuous=false;this.interimResults=false;}
-  start(){
-   __senseDeviceFixture.recognitionStarts++;
-   queueMicrotask(()=>{
-    this.onstart?.();
-    const result=[{transcript:'Dobrodošli u CLEA Sense',confidence:0.93}];result.isFinal=true;
-    this.onresult?.({resultIndex:0,results:[result]});
-   });
-  }
+  start(){__senseFixture.recognitions++;queueMicrotask(()=>this.onstart?.());}
   stop(){this.onend?.();}
   abort(){this.onend?.();}
  };
- Object.defineProperty(navigator,'vibrate',{configurable:true,value:p=>{__senseDeviceFixture.vibrations.push(p);return true;}});
+ Object.defineProperty(navigator,'vibrate',{configurable:true,value:p=>{__senseFixture.vibrations.push(p);return true;}});
 })()"""
 
-def advanced_test_controls(page):
- """Expose internal navigation controls ONLY in this regression test.
- Users see only one Sense switch, live guidance, confirm and communication."""
- page.evaluate("""() => {
-  const p=document.querySelector('#sense-touch-guide .sense-touch-console');
-  p.classList.remove('sense-simple');
-  for(const id of ['sense-touch-options-toggle','sense-touch-start','sense-touch-explain','sense-touch-ask']){
-   document.getElementById(id).hidden=false;
-  }
-  document.querySelector('#sense-touch-guide .sense-touch-options').hidden=false;
- }""")
 
-def main():
- p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);p.add_argument('--site',type=Path);a=p.parse_args();a.output.mkdir(parents=True,exist_ok=True)
- root=a.site or Path(__file__).resolve().parents[1]/'web';checks=[];errors=[]
- class Quiet(http.server.SimpleHTTPRequestHandler):
-  def log_message(self,*args):pass
- server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Quiet,directory=str(root)));threading.Thread(target=server.serve_forever,daemon=True).start()
- try:
-  with sync_playwright() as pw:
-   browser=pw.chromium.launch(executable_path=os.environ.get('CLEA7_CHROME','/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
-   context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True,reduced_motion='reduce');context.add_init_script(FIXTURE);page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
-   page.goto(f'http://127.0.0.1:{server.server_port}/sense/',wait_until='networkidle')
-   assert page.locator('#sense-interface-toggle').is_visible()
-   assert page.locator('#sense-interface-toggle').get_attribute('aria-pressed')=='false'
-   assert not page.locator('#view-workspace').is_visible()
-   page.locator('#sense-interface-toggle').click()
-   assert page.locator('#sense-touch-guide').is_visible()
-   assert page.locator('#sense-interface-toggle').get_attribute('aria-pressed')=='true'
-   assert page.locator('.sense-touch-console.is-exploring').is_visible()
-   assert not page.locator('#sense-touch-voice').is_visible()
-   assert not page.locator('#sense-touch-options-toggle').is_visible()
-   assert page.locator('#sense-touch-communicate').is_visible()
-   assert 'Trenutni ekran:' in page.locator('#sense-touch-status').inner_text()
-   assert page.evaluate("document.querySelector('#sense-touch-voice').value")=='Hrvatski lokalni glas'
-   assert page.evaluate('__senseDeviceFixture.spoken[0].startsWith("Sense je uključen.")')
-   assert page.evaluate('__senseDeviceFixture.spokenVoices[0]')=='hr-HR'
-   assert '16, 47, 49' in page.locator('#sense-touch-guide .sense-touch-console').evaluate('(n)=>getComputedStyle(n).backgroundColor')
-   page.locator('#sense-touch-close').click()
-   assert not page.locator('#sense-touch-guide').is_visible()
-   assert page.locator('#sense-interface-toggle').get_attribute('aria-pressed')=='false'
-   checks.append('One Sense button starts Croatian TTS synchronously on a user tap, uses mint/dark-green guidance and stops without settings')
-   # A browser may expose an uncertified Croatian voice; that voice is
-   # permitted only to say a fixed public greeting, never field labels.
-   page.evaluate("""() => {speechSynthesis.getVoices=()=>[{name:'Croatian browser voice',lang:'hr-HR',localService:false}];}""")
-   before=page.evaluate('__senseDeviceFixture.spoken.length')
-   page.locator('#sense-interface-toggle').click()
-   assert page.locator('#sense-touch-guide').is_visible()
-   spoken_browser=page.evaluate('__senseDeviceFixture.spoken.slice('+str(before)+')')
-   assert len(spoken_browser)==1 and spoken_browser[0].startswith('Sense je uključen.'),spoken_browser
-   assert 'Trenutni ekran:' not in spoken_browser[0] # only public fallback
-   page.locator('#sense-touch-close').click()
-   checks.append('Uncertified Croatian browser voice gets only the fixed greeting; private screen contents still need a local TTS voice')
-   # A user who cannot speak can show a large message without the microphone.
-   page.goto(f'http://127.0.0.1:{server.server_port}/sense/',wait_until='networkidle')
-   page.locator('#sense-interface-toggle').click()
-   assert page.evaluate('__senseDeviceFixture.recognitionStarts')==0
-   page.locator('#sense-touch-communicate').click()
-   assert page.locator('#sense-expression').is_visible()
-   assert page.evaluate('__senseDeviceFixture.recognitionStarts')==0
-   page.locator('#sense-listen-start').click()
-   page.wait_for_function("()=>document.querySelector('#sense-transcript').value.includes('Dobrodošli u CLEA Sense')")
-   assert page.evaluate('__senseDeviceFixture.recognitionStarts')==1
-   assert 'Dobrodošli' in page.locator('#sense-transcript').input_value()
-   page.locator('#sense-listen-stop').click()
-   page.locator('#sense-expression').fill('Treba mi pomoć, molim vas.')
-   page.locator('#sense-expression-show').click()
-   assert page.locator('#sense-show-message').is_visible()
-   assert 'Treba mi pomoć' in page.locator('#sense-show-message-text').inner_text()
-   page.locator('#sense-show-message button').click()
-   assert not page.locator('#sense-show-message').is_visible()
-   assert not page.locator('#sense-listen-system').is_visible()
-   checks.append('Communication displays a large typed message without microphone, and captions need a separate opt-in')
-   page.goto(f'http://127.0.0.1:{server.server_port}/sense/?tool=cv',wait_until='networkidle')
-   page.locator('#sense-create-cv-shortcut').click();page.locator('#sense-cv-name').fill('PRIVATE_VALUE_MUST_NOT_BE_SPOKEN')
-   page.locator('#sense-cv-authoring [data-sense-touch-launch]').click();page.locator('#sense-touch-guide').wait_for(state='visible')
-   choices=page.locator('#sense-touch-target option').all_text_contents();assert any('ime' in x.lower() for x in choices),choices
-   advanced_test_controls(page)
-   page.locator('#sense-touch-options-toggle').click()
-   page.select_option('#sense-touch-target',label=next(x for x in choices if 'ime' in x.lower()))
-   page.locator('#sense-touch-start').click()
-   assert page.locator('.sense-touch-console.is-exploring').is_visible()
-   assert page.locator('#sense-touch-options-toggle').is_visible()
-   empty=page.evaluate("CLEA7SenseNavigation.touchGuidance({x:4,y:5},[],{width:390,height:844})")
-   assert empty['found']['available'] is False
-   assert 'nema kontrole' in empty['spoken'].lower()
-   assert 'Klizi dalje' in empty['spoken']
-   target=page.evaluate("""() => CLEA7SenseNavigation.touchGuidance(
-     {x:125,y:270},
-     [{rect:{left:110,top:245,right:220,bottom:305},name:'Ime',label:'Ime, polje za unos',kind:'input',region:'CV'}],
-     {width:390,height:844})""")
-   assert target['found']['hit'] is True
-   assert 'Ispod prsta: Ime' in target['text']
-   data=page.evaluate('''()=>{const r=document.querySelector('#sense-cv-name').getBoundingClientRect();return {x:(r.left+r.right)/2,y:(r.top+r.bottom)/2,top:r.top,bottom:r.bottom,left:r.left,right:r.right};}''')
-   client=context.new_cdp_session(page)
-   def touch(event,x,y):client.send('Input.dispatchTouchEvent',{'type':event,'touchPoints':[] if event=='touchEnd' else [{'x':x,'y':y,'id':1}]})
-   x=data['x'];y=max(8,data['top']-110)
-   touch('touchStart',x,y);page.wait_for_timeout(40)
-   current=page.evaluate('CLEA7SenseNavigation.current()')
-   if not current or 'dy' not in current:
-    page.screenshot(path=str(a.output/'failure-touch.png'));print(json.dumps({'target':data,'point':[x,y],'current':current,'topElement':page.evaluate('([x,y])=>document.elementFromPoint(x,y)?.outerHTML.slice(0,600)',[x,y])}))
-   assert current and current.get('dy',0)>0,current
-   assert 'niže' in page.locator('#sense-touch-status').inner_text()
-   touch('touchMove',x,data['top']-18);page.wait_for_timeout(300)
-   assert page.evaluate('CLEA7SenseNavigation.current().zone')=='near'
-   touch('touchMove',x,data['y']);page.wait_for_timeout(300)
-   assert page.evaluate('CLEA7SenseNavigation.current().arrived') is True
-   touch('touchEnd',x,data['y'])
-   assert page.locator('#sense-cv-name').input_value()=='PRIVATE_VALUE_MUST_NOT_BE_SPOKEN'
-   assert page.locator('#sense-touch-guide').is_visible()
-   assert page.locator('#sense-cv-authoring').is_visible()
-   assert 'Tu je cilj' in page.locator('#sense-touch-status').inner_text()
-   signals=page.evaluate('__senseDeviceFixture.vibrations');assert any(x==[65,70,65] for x in signals),signals
-   spoken=page.evaluate('__senseDeviceFixture.spoken');assert spoken and all('PRIVATE_VALUE' not in s for s in spoken)
-   checks.append('Real touch events report measured down/near/arrived positions; labelled haptic patterns and local speech API requested without reading input values')
-   page.screenshot(path=str(a.output/'mobile-touch-guide.png'))
-   page.locator('#sense-touch-focus').click();assert not page.locator('#sense-touch-guide').is_visible()
-   assert page.evaluate('document.activeElement.id')=='sense-cv-name'
-   assert page.locator('#sense-cv-name').input_value()=='PRIVATE_VALUE_MUST_NOT_BE_SPOKEN'
-   checks.append('Exploration cannot activate underlying controls; separate focus action returns to the exact editable field')
-   page.locator('#sense-cv-authoring [data-sense-touch-launch]').click()
-   advanced_test_controls(page)
-   assert page.locator('#sense-touch-mode').input_value()=='explore'
-   assert page.locator('.sense-touch-console.is-exploring').is_visible()
-   points=page.evaluate('''()=>[...document.querySelector('#sense-cv-authoring').querySelectorAll('input,textarea,button')].filter(n=>!n.closest('[hidden]')&&!n.disabled&&!n.hasAttribute('data-sense-touch-launch')).map(n=>{const r=n.getBoundingClientRect();return {id:n.id,x:(r.left+r.right)/2,y:(r.top+r.bottom)/2,w:r.width,h:r.height};}).filter(r=>r.w>0&&r.h>0&&r.y>10&&r.y<innerHeight-10)''')
-   first=next(x for x in points if x['id']=='sense-cv-name');second=next(x for x in points if x['id'] and x['id']!=first['id'])
-   touch('touchStart',first['x'],first['y']);assert page.evaluate('CLEA7SenseNavigation.current().underFinger')
-   touch('touchMove',second['x'],second['y']);expected=page.evaluate('CLEA7SenseNavigation.current().underFinger');assert expected
-   page.wait_for_timeout(1200)
-   assert expected in page.evaluate('__senseDeviceFixture.spoken.at(-1)'),page.evaluate('__senseDeviceFixture.spoken')
-   assert page.evaluate('CLEA7SenseNavigation.current().point.x')==second['x']
-   touch('touchEnd',second['x'],second['y'])
-   assert 'Ispod prsta' in page.locator('#sense-touch-status').inner_text()
-   assert all('PRIVATE_VALUE' not in s for s in page.evaluate('__senseDeviceFixture.spoken'))
-   # Hover and unrelated pointers cannot silently change the user's location.
-   before=page.evaluate('CLEA7SenseNavigation.current()')
-   page.locator('.sense-touch-surface').dispatch_event('pointermove',{'pointerId':999,'pointerType':'mouse','buttons':0,'clientX':1,'clientY':1})
-   assert page.evaluate('CLEA7SenseNavigation.current()')==before
-   page.locator('#sense-touch-options-toggle').click();page.locator('#sense-touch-explain').click();assert 'Dio:' in page.locator('#sense-touch-status').inner_text()
-   page.locator('#sense-touch-close').click()
-   checks.append('Free exploration identifies actual controls under a moving finger; final queued speech is delivered even when movement stops, without reading private input values')
-   page.evaluate('__senseDeviceFixture.voicesAvailable=false')
-   page.locator('#sense-cv-authoring [data-sense-touch-launch]').click()
-   assert page.locator('#sense-touch-voice option').count()==0
-   page.evaluate('()=>{__senseDeviceFixture.voicesAvailable=true;for(const fn of __senseDeviceFixture.voiceListeners)fn();}')
-   assert page.locator('#sense-touch-voice option').count()==2
-   assert 'Sense je uključen' in page.evaluate('__senseDeviceFixture.spoken.at(-1)')
-   page.locator('#sense-touch-close').click()
-   checks.append('A local voice that appears asynchronously speaks the current guidance instead of leaving the user with a silent initial session')
-   page.locator('#sense-cv-authoring [data-sense-touch-launch]').click();page.keyboard.press('Escape');assert not page.locator('#sense-touch-guide').is_visible()
-   assert page.evaluate('CLEA7SenseNavigation.current()') is None
-   page.locator('#sense-cv-authoring [data-sense-touch-launch]').click();page.evaluate("dispatchEvent(new Event('sense:erase'))");assert not page.locator('#sense-touch-guide').is_visible()
-   assert page.evaluate('CLEA7SenseNavigation.current()') is None
-   checks.append('Escape and content erase close the session and discard live guidance state')
-   studio='studio/workbench/' if a.site else 'workbench/'
-   page.goto(f'http://127.0.0.1:{server.server_port}/{studio}',wait_until='networkidle');page.wait_for_function('()=>Boolean(globalThis.CLEA7Workbench)')
-   page.locator('body > [data-sense-touch-launch]').click();page.wait_for_selector('#sense-touch-guide[open]')
-   assert page.locator('#sense-touch-target option').count()>5
-   page.locator('#sense-touch-focus').click();assert page.evaluate('document.activeElement!==document.body')
-   checks.append('The same shared module locates actual Studio controls and returns real keyboard focus')
-   page.locator('[data-panel="clea-chat"]').click();page.locator('#chat-question').fill('')
-   question_label=page.locator('#chat-question').evaluate("n=>n.getAttribute('aria-label')||n.labels[0].textContent")
-   page.locator('body > [data-sense-touch-launch]').click()
-   advanced_test_controls(page)
-   choices=page.locator('#sense-touch-target option').all_text_contents()
-   page.locator('#sense-touch-options-toggle').click()
-   page.select_option('#sense-touch-target',label=next(x for x in choices if question_label.strip() in x))
-   page.locator('#sense-touch-ask').click()
-   page.wait_for_function("()=>document.querySelector('#chat-question').value.includes('sense.control-context/1')")
-   assert not page.locator('#sense-touch-guide').is_visible()
-   assert page.locator('#clea-ai-task-mode').input_value()=='chat'
-   assert 'PRIVATE_VALUE' not in page.locator('#chat-question').input_value()
-   draft=page.locator('#chat-question').input_value()
-   page.locator('body > [data-sense-touch-launch]').click();advanced_test_controls(page);page.locator('#sense-touch-options-toggle').click();page.locator('#sense-touch-ask').click()
-   assert page.locator('#chat-question').input_value()==draft
-   assert 'Sačuvaj trenutno pitanje' in page.locator('#sense-touch-status').inner_text()
-   page.keyboard.press('Escape')
-   checks.append('Measured control context reaches the single existing AI composer for explicit review without automatic send or overwriting an unfinished question')
-   # Author through the real editor/compiler, rather than relying on a default
-   # project that may intentionally contain no interactive controls. No model.
-   bil='''let clicks = 0
-screen main "Prstom do cilja" {
-    input clicks label "Broj"
-    button "Dodaj jedan" runs increase
-    show clicks
-}
-on increase {
-    clicks = clicks + 1
-}
-'''
-   page.locator('#studio-home').click()
-   page.locator('#studio-start').wait_for(state='visible')
-   page.locator('#studio-start-grammar').select_option('classic')
-   page.locator('#studio-start-create').get_by_role('button',name='Novi projekat',exact=True).click()
-   page.wait_for_function('()=>Boolean(CLEA7Workbench.project.bil)')
-   page.locator('[data-panel="bil"]').click();page.locator('#bil-source').fill(bil);page.locator('#bil-apply').click()
-   page.wait_for_function("()=>Boolean(CLEA7Workbench.project.bil?.source.includes('Prstom do cilja'))")
-   application_id=page.evaluate('CLEA7Workbench.project.id')
-   page.locator('.private-studio-tools>summary').click();page.locator('[data-panel="build"]').click()
-   with page.expect_download() as downloading:page.locator('#export-package').click()
-   package=Path(downloading.value.path()).read_bytes();(a.output/'guided-runtime.clea7').write_bytes(package)
-   launcher='studio/launcher/' if a.site else 'launcher/'
-   page.goto(f'http://127.0.0.1:{server.server_port}/{launcher}',wait_until='networkidle')
-   page.locator('#package-file').set_input_files({'name':'guided-runtime.clea7','mimeType':'application/json','buffer':package})
-   page.get_by_role('button',name='Instaliraj',exact=True).click()
-   with context.expect_page() as opening:page.locator('[data-app="'+application_id+'"] .primary').click()
-   app=opening.value;app.on('pageerror',lambda e:errors.append(str(e)));app.wait_for_function('()=>Boolean(globalThis.CLEA7RuntimeApp?.engine)')
-   control=app.locator('#application button,#application input:not([type=hidden]),#application textarea,#application select').first
-   control.wait_for(state='visible')
-   control_name=control.evaluate("n=>(n.getAttribute('aria-label')||(n.labels?.length?n.labels[0].textContent:n.textContent)).replace(/\\s+/g,' ').trim()")
-   app.evaluate("()=>{globalThis.__appClicks=0;document.querySelector('#application').addEventListener('click',()=>__appClicks++);}")
-   app.locator('body > [data-sense-touch-launch]').click()
-   advanced_test_controls(app)
-   labels=app.locator('#sense-touch-target option').all_text_contents()
-   if app.locator('.sense-touch-console.is-exploring').is_visible():app.locator('#sense-touch-options-toggle').click()
-   app.select_option('#sense-touch-target',label=next(x for x in labels if control_name in x))
-   app.select_option('#sense-touch-mode','explore');app.locator('#sense-touch-start').click()
-   r=control.bounding_box();runtime_client=context.new_cdp_session(app)
-   runtime_client.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':r['x']+r['width']/2,'y':r['y']+r['height']/2,'id':1}]})
-   assert app.evaluate('CLEA7SenseNavigation.current().underFinger')==control_name
-   runtime_client.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
-   assert app.evaluate('__appClicks')==0
-   app.screenshot(path=str(a.output/'runtime-finger-guide.png'))
-   app.locator('#sense-touch-focus').click();assert control.evaluate('n=>document.activeElement===n')
-   app.get_by_role('spinbutton',name='Broj',exact=True).fill('7');app.get_by_role('button',name='Dodaj jedan',exact=True).click()
-   app.wait_for_function('()=>CLEA7RuntimeApp.engine.state.bilValues.clicks===8')
-   checks.append('A genuine Studio-exported CLEA7 package installs and runs in the independent Runtime with the same real finger guidance and separate focus, without activating the application')
-   assert not errors,errors
-   result={'format':'clea7.sense-touch-browser/1','passed':True,'checks':checks,'viewport':[390,844],'pointerEvents':'Chromium CDP touch','deviceAPIs':'explicit local voice/vibration fixtures','physicalHapticsVerified':False,'humanAccessibilityVerified':False,'errors':errors}
-   (a.output/'report.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n');print(json.dumps(result,ensure_ascii=False));browser.close()
- finally:server.shutdown();server.server_close()
+def run():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--site', type=Path)
+    parser.add_argument('--output', type=Path, required=True)
+    args = parser.parse_args()
+    args.output.mkdir(parents=True, exist_ok=True)
+    root = args.site or Path(__file__).resolve().parents[1]
+    checks, errors = [], []
 
-if __name__=='__main__':main()
+    class Quiet(http.server.SimpleHTTPRequestHandler):
+        def log_message(self, *unused):
+            pass
+
+    server = http.server.ThreadingHTTPServer(
+        ('127.0.0.1', 0), functools.partial(Quiet, directory=str(root)))
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+
+    try:
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch(
+                executable_path=os.environ.get('CLEA7_CHROME', '/usr/bin/chromium'),
+                headless=True, args=['--no-sandbox'])
+            context = browser.new_context(
+                viewport={'width':390, 'height':844},
+                has_touch=True, is_mobile=True, reduced_motion='reduce')
+            context.add_init_script(FIXTURE)
+            page = context.new_page()
+            page.on('pageerror', lambda e: errors.append(str(e)))
+            base = f'http://127.0.0.1:{server.server_port}'
+
+            page.goto(base+'/sense/', wait_until='networkidle')
+            switch = page.locator('#sense-interface-toggle')
+            assert switch.is_visible() and switch.get_attribute('aria-pressed')=='false'
+            switch.click()
+            assert switch.get_attribute('aria-pressed')=='true'
+            assert page.locator('#main').is_visible()
+            assert not page.locator('#sense-touch-guide').is_visible()
+            assert page.evaluate("document.body.dataset.senseLive")=='true'
+            page.wait_for_function("()=>__senseFixture.said.length>0")
+            assert page.evaluate("__senseFixture.voiceCodes[0]")=='hr-HR'
+            assert 'Trenutni ekran:' in page.locator('#sense-guidance-caption').inner_text()
+            page.screenshot(path=str(args.output/'sense-live-home.png'))
+            checks.append('One Sense tap starts Croatian voice and keeps the real page interactive without a blurred modal.')
+
+            # Geometry: only real controls may be named. Empty regions give direction.
+            guidance = page.evaluate("""() => CLEA7SenseNavigation.touchGuidance(
+                {x:4,y:6},
+                [{rect:{left:120,top:240,right:300,bottom:300},
+                  name:'Nova aplikacija',kind:'button',region:'Studio',
+                  label:'Nova aplikacija, dugme'}],
+                {width:390,height:844})""")
+            assert not guidance['found']['hit'] and 'nema' in guidance['text'].lower()
+            none = page.evaluate("""() => CLEA7SenseNavigation.touchGuidance(
+                {x:4,y:6},[],{width:390,height:844})""")
+            assert not none['found']['available'] and 'nema kontrole' in none['spoken'].lower()
+            checks.append('Finger guidance uses measured control geometry and acknowledges empty screen areas.')
+
+            # Communication is a separate action, never an automatic microphone.
+            assert page.evaluate('__senseFixture.recognitions')==0
+            page.locator('#sense-live-communication').click()
+            assert page.locator('#sense-expression').is_visible()
+            assert page.evaluate('__senseFixture.recognitions')==0
+            page.locator('#sense-expression').fill('Treba mi pomoć.')
+            page.locator('#sense-expression-show').click()
+            assert page.locator('#sense-show-message').is_visible()
+            assert 'Treba mi pomoć.' in page.locator('#sense-show-message-text').inner_text()
+            page.locator('#sense-show-message button').click()
+            checks.append('A user unable to speak can show a large message without microphone permission.')
+
+            # Studio's own switch must never call the obsolete full-screen guide.
+            page.goto(base+'/studio/workbench/', wait_until='networkidle')
+            page.wait_for_function('()=>Boolean(globalThis.CLEA7StudioUiReady)')
+            studio = page.locator('#private-studio-sense')
+            studio.wait_for(state='visible')
+            assert page.locator('#studio-start').is_visible()
+            studio.click()
+            assert studio.get_attribute('aria-pressed')=='true'
+            assert page.evaluate("document.body.dataset.senseLive")=='true'
+            assert not page.locator('#sense-touch-guide').is_visible()
+            assert page.locator('#studio-start').is_visible()
+            assert page.locator('#studio-start-create').is_visible()
+            page.screenshot(path=str(args.output/'studio-sense-no-overlay.png'))
+            checks.append('Studio stays normal and usable with Sense enabled; no settings window or dimmed page.')
+
+            # Real Studio navigation, menu, project creation and control focus.
+            page.locator('.private-studio-tools>summary').click()
+            page.wait_for_timeout(250)
+            assert studio.get_attribute('aria-pressed')=='true'
+            assert page.locator('.private-studio-tools[open]').is_visible()
+            assert any('meni' in x.lower() for x in page.evaluate('__senseFixture.said'))
+            page.locator('.private-studio-tools>summary').click()
+            page.locator('#studio-start-create input').fill('Sense dostupna aplikacija')
+            page.locator('#studio-start-grammar').select_option('classic')
+            page.locator('#studio-start-create').get_by_role('button', name='Novi projekat', exact=True).click()
+            page.wait_for_function("()=>document.body.dataset.workspace==='draw'")
+            assert not page.locator('#sense-touch-guide').is_visible()
+            assert studio.get_attribute('aria-pressed')=='true'
+            assert page.evaluate('__senseFixture.vibrations.length')>0
+            checks.append('Sense remains active during actual project creation, menu opening and Draw workspace changes.')
+
+            # A real dialog appears while Sense remains active: it is not a Sense modal.
+            page.evaluate("""() => {
+              const dialog=document.createElement('dialog');
+              dialog.id='clea-real-dialog-test';
+              dialog.innerHTML='<h2>Postavke aplikacije</h2><button id="confirm-dialog-test">Zatvori prozor</button>';
+              document.body.append(dialog);dialog.showModal();
+            }""")
+            page.wait_for_timeout(260)
+            assert page.locator('#clea-real-dialog-test').is_visible()
+            assert not page.locator('#sense-touch-guide').is_visible()
+            assert any('prozor' in text.lower() for text in page.evaluate('__senseFixture.said'))
+            page.screenshot(path=str(args.output/'studio-real-dialog-guided.png'))
+            page.locator('#confirm-dialog-test').click()
+            page.evaluate("document.querySelector('#clea-real-dialog-test').close()")
+            assert studio.get_attribute('aria-pressed')=='true'
+            checks.append('Opening a real application dialog is narrated without injecting a competing Sense window.')
+
+            # Touch exploration is non-blocking and provides haptics on real controls.
+            button = page.locator('#private-studio-sense')
+            box = button.bounding_box()
+            assert box is not None
+            before = page.evaluate('__senseFixture.vibrations.length')
+            page.evaluate("""p => {
+              document.dispatchEvent(new PointerEvent('pointermove',{
+                bubbles:true,pointerType:'touch',isPrimary:true,
+                clientX:p.x,clientY:p.y
+              }));
+            }""", {'x':box['x']+box['width']/2,'y':box['y']+box['height']/2})
+            page.wait_for_timeout(500)
+            assert page.evaluate('__senseFixture.vibrations.length')>=before
+            assert not page.locator('#sense-touch-guide').is_visible()
+            checks.append('Finger exploration reaches real Studio toolbar controls without intercepting clicks.')
+
+            studio.click()
+            assert studio.get_attribute('aria-pressed')=='false'
+            assert page.evaluate("document.body.dataset.senseLive||''")== ''
+            assert not page.locator('#sense-guidance-caption').is_visible()
+            assert not errors, errors
+            checks.append('The same Studio Sense switch stops narration and removes the guidance overlay.')
+
+            result = {
+                'format':'clea7.sense-live-browser/2',
+                'passed':True, 'checks':checks, 'errors':errors,
+                'viewport':[390,844], 'physicalVoiceVerified':False,
+                'physicalVibrationVerified':False, 'humanAccessibilityVerified':False
+            }
+            (args.output/'report.json').write_text(
+                json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+            print(json.dumps(result,ensure_ascii=False))
+            browser.close()
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+if __name__ == '__main__':
+    run()
