@@ -6,7 +6,7 @@ for(const file of ['../runtime.js','living.js','resources.js','resource-host.js'
 }
 const structure={title:'Notes',v:[['draft','Text',''],['entries','List<Text>',[]]],e:[['add','append note'],['clear','clear all notes']],s:[['home','Notes','write and view notes']]};
 const add={steps:[['set','entries','collections.append(entries,draft)']],test:{inputs:{draft:'test entry'},expect:{entries:['test entry']}}};
-const clear={steps:[['set','entries','[]']],test:{inputs:{},expect:{entries:[]}}};
+const clear={steps:[['set','entries','collections.slice(entries,0,0)']],test:{inputs:{},expect:{entries:[]}}};
 const screen={bg:'#112233',fg:'#ffffff',accent:'#445566',layout:'column',nodes:[['card','New note',[['m','draft','Note'],['b','Add','add']]],['o','entries'],['b','Clear','clear']]};
 (async()=>{
  let bad=true;const calls=[];
