@@ -365,7 +365,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  }
  async function authorApplication(body,question,mode){
   if(!author)throw Error('CLEA koordinacija kreiranja nije učitana. Nije korišten rezervni predložak.');
-  if(client.capabilities.bilAuthoring!==true)throw Error('Ovaj povezani servis još nema ugovor za BIL kreiranje. Potrebno je pokrenuti ažurirani CLEA servis.');
+  if(client.capabilities.bilAuthoring!==true)throw Error('Ovaj servis može razgovarati, ali BIL generiranje još nije aktivirano. Ponovno pokretanje runnera ne rješava problem. Projekt nije promijenjen.');
   const studio=globalThis.CLEA7Workbench,project=studio?.snapshot?.()||null;
   if(mode==='change'&&(!sourceApproved.checked||approvedSource!==CLEA7.stable(project))){sourceApproved.checked=false;approvedSource=null;throw Error('Pregledaj i odobri trenutni projekt za ovu izmjenu. Projekt se ne šalje na osnovu odobrenja starijeg projekta.');}
   authorController=new AbortController();
