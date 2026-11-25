@@ -1,0 +1,12 @@
+{
+  "version": "0.1.9-test",
+  "versionCode": 10,
+  "package": "com.brzoilokalno.clea7500",
+  "bytes": 252558,
+  "artifact": "downloads/BL-CLEA-AI-0.1.9-test.apk",
+  "sha256": "baa503d9c812b28853f74f0d282b34afdc352a49618f05f7f19485657422c925",
+  "signerCertificateSHA256": "d6506ea699cdd96c157472ee2d494cf1a36842a616f03708d6e4f84f24b2f27d",
+  "sourceBuildRun": 45647272726,
+  "ownerBootstrapIncluded": false,
+  "physicalDeviceVerified": "Owner reported successful use; not independently instrumented"
+}
