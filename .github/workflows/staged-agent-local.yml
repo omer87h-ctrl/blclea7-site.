@@ -1,8 +1,8 @@
 name: Verify staged Studio local contracts
 on:
   push:
-    branches: [fix/clea-live-plan-20261125]
-    paths: [.github/workflows/staged-agent-local.yml]
+    branches: [main]
+    paths: [.github/workflows/staged-agent-local.yml, studio/workbench/public-studio-agent.js, tests/test_staged_studio_agent.cjs]
 permissions:
   contents: read
 jobs:
