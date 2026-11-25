@@ -89,7 +89,10 @@ function design(v,screen,structure){
  }
  const nodes=arr(v.nodes,1,24).map(x=>node(x,0));
  const tree=[{kind:'card',id:screen.id+'_layout',label:screen.title,style:{background:bg,color:fg,direction:v.layout,gap:12,padding:16,radius:14,wrap:'wrap'},children:nodes}];
- return {id:screen.id,title:screen.title,items:[{kind:'bil',source:scope.CLEA7StudioTools.treeSource(tree)}]};
+ const items=[{kind:'bil',source:scope.CLEA7StudioTools.treeSource(tree)}];
+ // Standard navigation is assembled from the model's own screen plan, not a canned application.
+ if(structure.screens.length>1){const home=structure.screens[0],targets=screen.id===home.id?structure.screens.slice(1):[home];const links=targets.map((target,i)=>({kind:'button',id:screen.id+'_nav'+i,label:target.title,opens:target.id}));items.push({kind:'bil',source:scope.CLEA7StudioTools.treeSource([{kind:'row',id:screen.id+'_nav',label:'Navigacija',style:{wrap:'wrap',gap:8},children:links}])});}
+ return {id:screen.id,title:screen.title,items};
 }
 const initial=(s)=>({format:'clea7.authoring-plan/1',state:s.state,backends:[],events:[],screens:s.screens.map(x=>({id:x.id,title:x.title,items:[{kind:'heading',label:x.title}]})),start:s.screens[0].id,...(s.state.some(x=>x.type.startsWith('List<'))?{declarations:['import collections']}:{})});
 function compile(plan){const result=scope.CLEA7AppAuthoring.emitPlan(plan);scope.CLEA7BIL.compile(result.source);return result.source;}
