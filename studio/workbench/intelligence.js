@@ -130,16 +130,23 @@ async function verifyBIL(source,{metadata={},checks=[],signal,onEvent,modelAvail
      else if(test.inputs!==undefined){
       if(!object(test.inputs)||Object.keys(test.inputs).length>16)throw fail('Test','Invalid input fixture.');
       const ui=application.bil.ir.ui,walk=nodes=>nodes.flatMap(n=>[n,...walk(n.children||[])]);
-      const page=ui?.screens.find(p=>p.id===engine.state.bilScreen),nodes=walk(page?.children||[]),buttons=nodes.filter(n=>n.type==='button'&&n.handler===test.flow);
-      if(!buttons.length)throw fail('Test','Handler has no visible button on current screen: '+test.flow);
-      const fields=nodes.filter(n=>['input','select','toggle'].includes(n.type));const values={};
-      for(const [name,value]of Object.entries(test.inputs)){const field=fields.find(n=>n.name===name);if(!field)throw fail('Test','No visible input for '+name);await engine.dispatch('bil_'+field.entry,{value});}
+      if(!ui)throw fail('Test','Application has no interactive screen.');
+      const controls=Object.fromEntries(ui.screens.map(p=>[p.id,walk(p.children)]));
+      const fixtureNames=Object.keys(test.inputs);
+      const matching=nodes=>nodes.filter(n=>['button','clock'].includes(n.type)&&n.handler===test.flow);
+      const eligible=page=>matching(controls[page]).length&&fixtureNames.every(name=>controls[page].some(n=>['input','select','toggle'].includes(n.type)&&n.name===name));
+      const from=engine.state.bilScreen,paths=new Map([[from,[]]]),pending=[from];let selected=null;
+      while(pending.length){const page=pending.shift();if(eligible(page)){selected=page;break;}for(const nav of controls[page]||[]){if(nav.type==='button'&&nav.target&&controls[nav.target]&&!paths.has(nav.target)){paths.set(nav.target,[...paths.get(page),nav]);pending.push(nav.target);}}}
+      if(!selected)throw fail('Test','No reachable button/clock and visible inputs for '+test.flow);
+      for(const nav of paths.get(selected))await engine.dispatch('bil_'+nav.entry);
+      const nodes=controls[selected],button=matching(nodes)[0],fields=nodes.filter(n=>['input','select','toggle'].includes(n.type));const values={};
+      for(const [name,value]of Object.entries(test.inputs)){const field=fields.find(n=>n.name===name);await engine.dispatch('bil_'+field.entry,{value});}
       for(const field of fields)values[field.id]=engine.state.bilValues[field.name];
-      await engine.dispatch('bil_'+buttons[0].entry,{values});
+      await engine.dispatch('bil_'+button.entry,button.type==='clock'?{source:'clock'}:{values});
      }else await engine.dispatch('bil_'+test.flow);
     }catch(error){actualError=error;}
     if(test.error!==undefined){if(!actualError||!actualError.message.includes(test.error))throw fail('Verification','Runtime error expectation failed.');}else if(actualError)throw actualError;
-    for(const [name,value]of Object.entries(test.expect))if(!Object.hasOwn(application.bil.ir.globals,name)||scope.CLEA7.stable(engine.state.bilValues[name])!==scope.CLEA7.stable(value))throw fail('Verification','Runtime expectation failed for '+name+'.');
+    for(const [name,value]of Object.entries(test.expect))if(!Object.hasOwn(application.bil.ir.globals,name)||scope.CLEA7.stable(engine.state.bilValues[name])!==scope.CLEA7.stable(value))throw fail('Verification','Runtime expectation failed in '+(test.flow||'restart')+' for '+name+'.');
     if(test.screen!==undefined&&engine.state.bilScreen!==test.screen)throw fail('Verification','Runtime screen expectation failed.');
     results.push({name:test.restart?'restart':'event:'+test.flow,passed:true});
    }
