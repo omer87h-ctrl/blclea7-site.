@@ -5,7 +5,7 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape' && menu.getAtt
 document.getElementById('product-intent').addEventListener('submit', e => {
  e.preventDefault(); const text = document.getElementById('intent').value.trim(); if (!text) return;
  try {sessionStorage.setItem('clea-public-intent', text);} catch {document.getElementById('public-ai-status').textContent = 'Prenos opisa nije dostupan u ovom pregledniku. Otvori Studio i unesi opis tamo.';return;}
- location.assign('studio/workbench/?workspace=clea-chat');
+ location.assign('studio/workbench/?workspace=clea-chat&audience=public');
 });
 (async () => {
  const status = document.getElementById('public-ai-status');
@@ -14,6 +14,6 @@ document.getElementById('product-intent').addEventListener('submit', e => {
   if(!response.ok) throw Error('configuration'); const config=await response.json();
   status.textContent = config.enabled === true && config.publicHTTPSHealthVerified === true
    ? 'AI veza je podešena. Dostupnost modela provjeri u razgovoru.'
-   : 'AI model server je u pripremi. Draw, BIL, Sense i izvoz dostupni su odmah.';
- } catch {status.textContent='Dostupnost AI servera nije potvrđena. Studio i lokalni alati ostaju dostupni.';}
+   : 'Razgovor radi u Studiju na ovom uređaju, bez koda. Draw, BIL, Sense i izvoz ostaju u istom CLEA okruženju.';
+ } catch {status.textContent='Razgovor radi u Studiju na ovom uređaju. Draw, BIL i Sense ostaju dostupni.';}
 })();

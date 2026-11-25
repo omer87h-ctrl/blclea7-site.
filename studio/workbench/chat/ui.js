@@ -241,7 +241,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  document.querySelector('.clea-chat-heading').append(connectButton);
  const settings=document.createElement('details'),settingsSummary=document.createElement('summary');settings.id='clea-ai-settings';settingsSummary.textContent='Veza, privatnost i dodatna pomoć';settings.append(settingsSummary,inspector);root.querySelector('.clea-chat-shell').append(settings);
  document.querySelector('.clea-chat-heading>div>p:last-child').textContent='Razgovor, izrada i izmjena aplikacije na jednom mjestu.';
- document.getElementById('chat-ready').textContent='Server u doradi';submit.disabled=true;
+ document.getElementById('chat-ready').textContent='Učitavam CLEA na ovom uređaju';submit.disabled=true;
  if(publicAudience){
   document.body.dataset.cleaAudience='public';label.hidden=true;publicLabel.hidden=true;
   connectButton.textContent='Provjeri dostupnost';
@@ -269,7 +269,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  async function speakReply(){
   stopReplySpeech();if(!spokenReply)return;const generation=speechGeneration;
   replySpeaker=replySpeaker||globalThis.CLEA7SenseSDK?.speaker?.();
-  const voices=replySpeaker?.voices()||[],voice=voices.find(v=>/^hr(?:-|$)/i.test(v.language))||voices.find(v=>/^bs(?:-|$)/i.test(v.language))||voices.find(v=>/^sr(?:-|$)/i.test(v.language));
+  const voices=replySpeaker?.voices()||[],voice=voices.find(v=>/^(bs|hr|sr)(-|$)/i.test(v.language))||voices[0];
   if(!voice){status.textContent='Uređaj trenutno ne nudi potvrđen lokalni glas. Odgovor ostaje tekstom i dostupan je sistemskom čitaču ekrana.';return;}
   speakingReply=true;readReply.textContent='Zaustavi čitanje';
   const chunks=spokenReply.match(/[\s\S]{1,2800}(?:\s|$)|[\s\S]{1,2800}/g)||[];
@@ -432,7 +432,15 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   }catch{try{localStorage.removeItem(historyKey);}catch{}persistence.checked=false;}
  }
  persistence.addEventListener('change',persist);
- let active=false,loading=false,publicAvailable=false,previewMode=false,runtimeAuthentication=null;
+ let active=false,loading=false,publicAvailable=false,previewMode=false,runtimeAuthentication=null,deviceModel=null;
+ async function loadDeviceModel(){
+  if(deviceModel||nativeOwner)return deviceModel;
+  if(!globalThis.CLEAPublicModel)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='chat/local-model.js';script.onload=resolve;script.onerror=()=>reject(Error('CLEA model nije učitan.'));document.head.append(script);});
+  const response=await fetch('chat/clea7500-model.json');if(!response.ok)throw Error('CLEA model nije učitan.');
+  deviceModel=globalThis.CLEAPublicModel.load(await response.json());
+  document.getElementById('chat-ready').textContent='CLEA na ovom uređaju';submit.disabled=false;
+  feedback.textContent='CLEA odgovara na ovom uređaju. Nema koda ni uparivanja. Ovo nije Qwen 9B.';status.textContent=feedback.textContent;return deviceModel;
+ }
  let nativeOwner=false;
  function connectNativeOwner(){if(!globalThis.CLEA7Workbench?.nativeAI)return;nativeOwner=true;check.checked=true;note.textContent='Ovaj Windows Studio koristi tvoj postojeći lokalni CLEA9B servis. Nova aplikacija ne šalje postojeći projekt; izmjena izvora traži tvoje odobrenje.';activate(check);}
  if(globalThis.CLEA7Workbench)connectNativeOwner();else addEventListener('clea:studio-ready',connectNativeOwner,{once:true});
@@ -451,13 +459,14 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
    if(config.authentication==='desktop-loopback'){phoneShareControls();ownerKnowledgeControls();}
    activate(publicCheck);
   }
-  feedback.textContent=publicCheck.disabled?'Server u doradi · HP model trenutno nije povezan. Studio i lokalni alati su dostupni.':preview?'Provjera javne veze · još nije potvrđena dostupnost za sve korisnike.':'HP veza je podešena. Uključi je za razgovor; ne instaliraš model.';
+  feedback.textContent=publicCheck.disabled?'Javni server nije uključen. CLEA odgovara na ovom uređaju, a Studio, Draw i Sense ostaju ovdje.':preview?'Provjera javne veze · još nije potvrđena dostupnost za sve korisnike.':'HP veza je podešena. Uključi je za razgovor; ne instaliraš model.';
   if(publicAudience){
-   feedback.textContent=publicAvailable?'Provjeravam javni CLEA servis…':'Server u doradi · razgovor s modelom trenutno nije dostupan. Studio i Sense možeš koristiti.';
+   feedback.textContent=publicAvailable?'Provjeravam javni CLEA servis…':'CLEA odgovara na ovom uređaju. Nema koda ni uparivanja.';
    status.textContent=feedback.textContent;
    if(publicAvailable&&!host){publicCheck.checked=true;activate(publicCheck);}
   }
- }).catch(()=>{feedback.textContent='Konfiguracija HP veze nije dostupna. Nema slanja poruka serveru.';});
+  if(!host&&!publicAvailable)loadDeviceModel().catch(error=>{document.getElementById('chat-ready').textContent='CLEA model nije učitan';feedback.textContent=error.message;status.textContent=error.message;});
+ }).catch(()=>{feedback.textContent='Konfiguracija HP veze nije dostupna. CLEA ostaje na ovom uređaju.';loadDeviceModel().catch(()=>{});});
  async function activate(selected){
   if(loading)return;
   active=false;client.reset();
@@ -471,7 +480,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   finally{loading=false;submit.disabled=!active&&!offlineHelp.checked&&!globalThis.CLEA7Workbench;check.disabled=false;if(selected===publicCheck)publicCheck.disabled=false;}
  }
  check.addEventListener('change',()=>activate(check));publicCheck.addEventListener('change',()=>activate(publicCheck));
- connectButton.onclick=()=>{if(publicAudience&&!publicAvailable){status.textContent='Server u doradi · javni AI servis trenutno nije povezan. Tvoj uređaj ne treba privatno HP uparivanje.';return;}const selected=nativeOwner?check:publicAvailable?publicCheck:check;selected.checked=true;activate(selected);};
+ connectButton.onclick=()=>{if((publicAudience||!nativeOwner)&&!publicAvailable){status.textContent=deviceModel?'CLEA je na ovom uređaju. Ne treba privatno HP uparivanje.':'Učitavam CLEA na ovom uređaju. Ne treba privatno HP uparivanje.';if(!deviceModel)loadDeviceModel().catch(error=>{status.textContent=error.message;});return;}const selected=nativeOwner?check:publicAvailable?publicCheck:check;selected.checked=true;activate(selected);};
  offlineHelp.onchange=()=>{if(offlineHelp.checked){client.reset();active=false;check.checked=false;publicCheck.checked=false;document.getElementById('chat-retry').disabled=false;document.getElementById('chat-retry').click();helpDetails.open=true;submit.disabled=false;feedback.textContent='Offline pomoć ima 20 CLEA tema i postojeće lokalne alate. Opći razgovor i slobodna izrada aplikacija traže povezani model.';}else{globalThis.CLEA7ChatWorkspace?.cancel();submit.disabled=!active&&!globalThis.CLEA7Workbench;document.getElementById('chat-ready').textContent=active?'CLEA AI je povezan':'Model nije povezan';}};
  function phoneShareControls(){
   const button=document.createElement('button');button.type='button';button.textContent='Otvori i na telefonu';
@@ -504,6 +513,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   if(!active){
    if(taskMode.value==='tools'){feedback.textContent='Za ovu slobodnu izmjenu treba povezani model. Lokalno možeš zatražiti igrača i vrata, dodavanje komponente, pomjeranje ili promjenu udaljenosti. Ništa nije poslano.';return;}
    if(offlineHelp.checked&&['auto','chat'].includes(taskMode.value)){if(globalThis.CLEA7ChatTools?.busy)return;if(globalThis.CLEA7ChatTools?.canHandle(input.value.trim()))return globalThis.CLEA7ChatTools.run();return offlineSubmit?.call(form,event);}
+   if(deviceModel&&['auto','chat'].includes(taskMode.value)){const question=input.value.trim();if(!question)return;if(question.length>1200){feedback.textContent='Poruka prelazi 1200 znakova.';return;}message('Ti',question);input.value='';const reply=deviceModel.generate(question);message('BL CLEA AI',reply);spokenReply=reply;readReply.disabled=false;feedback.textContent='Odgovor vlastitog CLEA modela na ovom uređaju. Nije Qwen 9B i nije 70B. Studio i Draw ostaju u istom okruženju.';status.textContent=feedback.textContent;document.getElementById('chat-ready').textContent='CLEA na ovom uređaju';return;}
    feedback.textContent='Prvo poveži CLEA AI. Na HP-u otvori prečicu CLEA AI 9B; za telefon koristi „Otvori i na telefonu“.';document.getElementById('chat-ready').textContent='Model nije povezan';return;
   }
   const question=input.value.trim();if(!question)return;

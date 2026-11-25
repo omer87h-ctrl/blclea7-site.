@@ -1,0 +1,18 @@
+{
+  "format": "clea7500.public-android-download/1",
+  "version": "0.1.8-test",
+  "artifact": "downloads/BL-CLEA-AI-7500-uredjaj.apk",
+  "sha256": "295462d7dda186da31d322f801601b0ae81fe52dc2559ab501094dd1942b222a",
+  "bytes": 977831,
+  "package": "com.brzoilokalno.clea7500",
+  "trainedWeightsBundled": true,
+  "ownedParameterCount": 917841,
+  "qwenWeightsBundled": false,
+  "credentialsBundled": false,
+  "pairingRequired": false,
+  "privateServerRequired": false,
+  "physicalDeviceVerified": false,
+  "neural70BClaim": false,
+  "signerCertificateSHA256": "7b7ab1fa8e32227faed2da31b0716e1dd441fffcc8a3744a9ec4dd3c406fcc32",
+  "note": "Replaces the download button. The older 0.1.8 file stays at its original URL. Uninstall the previous BL CLEA AI before installing this one because the test signer differs."
+}
