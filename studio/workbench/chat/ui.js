@@ -331,7 +331,16 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
    const h=await fetch(publicBetaEndpoint+'/health',{headers:{'ngrok-skip-browser-warning':'1'},signal:AbortSignal.any([authorController.signal,AbortSignal.timeout(8000)]),cache:'no-store',credentials:'omit'});
    const health=await h.json();if(!h.ok||health.ready!==true)throw Error('Veza s HP serverom trenutno nije dostupna.');if(health.streaming!==true)throw Error('Ovaj servis trenutno nema aktivan prijenos modelskog odgovora.');
    input.value='';const project=CLEA7Workbench.snapshot(),tools=mode==='change'||CLEA7PublicBrain.specialized(intent),selected=mode==='change'?globalThis.CLEA7StudioTests?.activeChecks():null;
-   const proposal=await (tools?publicToolAuthor:publicAuthor).propose(intent,{project,mode,representation:tools?'tools':'public-staged',sourceApproved:mode==='change'&&sourceApproved.checked,projectContext:tools,checks:selected?.checks||[],signal:authorController.signal});
+   const options={project,mode,sourceApproved:mode==='change'&&sourceApproved.checked,checks:selected?.checks||[],signal:authorController.signal};
+   let proposal;
+   try{proposal=await (tools?publicToolAuthor:publicAuthor).propose(intent,{...options,representation:tools?'tools':'public-staged',projectContext:tools});}
+   catch(error){
+    if(tools||authorController.signal.aborted||!error.trace?.some(t=>t.passed===false))throw error;
+    feedback.textContent='Fazni plan nije završen. CLEA AI prelazi na direktne Studio alate i novu lokalnu provjeru.';
+    progress.textContent=feedback.textContent;
+    try{proposal=await publicToolAuthor.propose(intent,{...options,representation:'tools',projectContext:true});}
+    catch(fallback){fallback.trace=[...error.trace,...(fallback.attempts||fallback.trace||[])];throw fallback;}
+   }
    if(selected)proposalTests.set(proposal,selected.signature);if(mode==='create')lastAppIntent=intent;
    betaMemory.add(question,'Studio prijedlog: '+proposal.application.name+' · '+proposal.application.bil.ir.ui.screens.length+' ekrana. Kompajler i Runtime provjerili prijedlog; primjena čeka potvrdu.',persistence.checked);
    proposalUI(body,proposal);feedback.textContent='BIL prijedlog je prošao lokalnu provjeru. Pregledaj i primijeni ga.';taskMode.value='auto';taskMode.onchange();
