@@ -25,14 +25,15 @@ function expand(reply){
  if(!screens.length||!events.length||!state.length)fail('Nedostaju podaci, radnje ili ekran.');
  return {format:'clea7.authoring-plan/1',state,backends:[],events,screens,start:screens[0].id};
 }
-async function generate(intent,contract,{endpoint='https://voting-crafty-protegee.ngrok-free.dev',signal,onStatus=()=>{}}={}){
+async function requestText(question,{endpoint='https://voting-crafty-protegee.ngrok-free.dev',signal,onStatus=()=>{}}={}){
  const headers={'Content-Type':'application/json','ngrok-skip-browser-warning':'1'};
- const response=await fetch(endpoint+'/chat/stream',{method:'POST',headers,body:JSON.stringify({question:prompt(intent,contract)}),credentials:'omit',cache:'no-store',redirect:'error',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(240000)]):AbortSignal.timeout(240000)});
+ const response=await fetch(endpoint+'/chat/stream',{method:'POST',headers,body:JSON.stringify({question}),credentials:'omit',cache:'no-store',redirect:'error',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(240000)]):AbortSignal.timeout(240000)});
  if(!response.ok||!response.body||!response.headers.get('content-type')?.includes('application/x-ndjson'))fail('Qwen servis nije dostupan ('+response.status+').');
  const reader=response.body.getReader(),decoder=new TextDecoder();let carry='',reply='',done=false;
  try{while(!done){const part=await reader.read();if(part.done)break;carry+=decoder.decode(part.value,{stream:true});if(carry.length>65536)fail('Prevelik odgovor.');const lines=carry.split('\n');carry=lines.pop()||'';for(const line of lines){if(!line.trim())continue;const e=JSON.parse(line);if(e.type==='status')onStatus(e.message);else if(e.type==='delta'){if(typeof e.text!=='string'||reply.length+e.text.length>12000)fail('Prevelik plan.');reply+=e.text;onStatus('Qwen sastavlja plan · '+reply.length+' znakova');}else if(e.type==='error')fail(e.message||'Qwen nije završio prijedlog.');else if(e.type==='done'){done=true;break;}}}}finally{await reader.cancel().catch(()=>{});}
  if(!done||!reply.trim())fail('Model nije završio plan.');
  return {reply,modelProfile:'qwen3.5-9b-q4_k_m'};
 }
-scope.CLEA7PublicPlan=Object.freeze({prompt,expand,generate});
+async function generate(intent,contract,options){return requestText(prompt(intent,contract),options);}
+scope.CLEA7PublicPlan=Object.freeze({prompt,expand,generate,requestText});
 })(globalThis);
