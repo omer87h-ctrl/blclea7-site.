@@ -19,10 +19,12 @@ function unique(xs){if(new Set(xs).size!==xs.length)fail('Imena moraju biti jedi
 function outline(v){
  exact(v,['title','v','e','s']);
  const state=arr(v.v,0,16).map(row=>{
-  const [id,type,value]=tuple(row,3);name(id);
+  const [id,type]=tuple(row,2);name(id);
   if(!['Text','Number','Boolean','List<Text>','List<Number>','List<Boolean>'].includes(type))fail('Nepodržan tip podatka: '+type);
-  const matches=(val,t)=>t==='Text'?typeof val==='string'&&val.length<=400:t==='Number'?typeof val==='number'&&Number.isFinite(val):typeof val==='boolean';
-  if(type.startsWith('List<')){if(!Array.isArray(value)||value.length>16||value.some(x=>!matches(x,type.slice(5,-1))))fail('Neispravna lista.');}else if(!matches(value,type))fail('Pogrešna početna vrijednost.');
+  // This wire declares types only. Empty initial state is part of its
+  // documented semantics, not a guessed correction of model-generated values.
+  const value=type==='Text'?'':type==='Number'?0:type==='Boolean'?false:[];
+
   return {name:id,type,value};
  });
  const events=arr(v.e,1,6).map(row=>{const [id,goal]=tuple(row,2);return {name:name(id),goal:text(goal,100)};});
@@ -85,7 +87,7 @@ async function generate(intent,{signal,onStatus=()=>{},ask=scope.CLEA7PublicPlan
    catch(error){check();diagnosis=String(error.message).slice(0,300);previous=reply||'';trace.push({stage:label,attempt,passed:false,diagnostic:diagnosis});if(attempt===2)throw Object.assign(Error(label+': '+diagnosis),{trace,failedProposal:reply});}
   }
  }
- const structure=await stage('1 · Struktura','Plan app. JSON object {"title":"name","v":[["variable","Text",""]],"e":[["event","short goal"]],"s":[["home","title","purpose"]]}. v types Text,Number,Boolean,List<Text>,List<Number>,List<Boolean>. Up to 16 vars,6 events,4 screens. Use initial empty user fields. Each event has distinct goal. No network. Keep under 220 tokens.',outline);
+ const structure=await stage('1 · Struktura','Plan app. JSON object {"title":"name","v":[["variable","Text"]],"e":[["event","short goal"]],"s":[["home","title","purpose"]]}. v types Text,Number,Boolean,List<Text>,List<Number>,List<Boolean>. Up to 16 vars,6 events,4 screens. Each v row has EXACTLY TWO strings: name and type, NEVER an initial value. Runtime initializes empty typed values. Each event has distinct goal. No network. Keep under 220 tokens.',outline);
  const plan=initial(structure),ctx=q(compact(structure)),tests=[];
  function testFor(built){
   const nav=built.steps.filter(x=>x.op==='open').at(-1);
