@@ -11,9 +11,29 @@ const text=(v,max=200)=>{if(typeof v!=='string'||!v.trim()||v.length>max)fail('N
 const map=v=>{if(!v||typeof v!=='object'||Array.isArray(v))fail('Očekujem JSON objekat.');return v;};
 function exact(v,keys){map(v);if(Object.keys(v).some(k=>!keys.includes(k))||keys.some(k=>!own(v,k)))fail('Nepotpuna ili nepoznata polja: '+keys.join(', '));return v;}
 function json(raw){
- let v=String(raw).trim();
- const fence=v.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);if(fence)v=fence[1].trim();
- try{return JSON.parse(v);}catch{fail('Model nije završio valjan JSON.');}
+ let v=String(raw).trim(),fence=v.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);if(fence)v=fence[1].trim();
+ try{return JSON.parse(v);}catch{}
+ // Accept only one complete, independently parseable object. Never invent
+ // missing braces, values or a truncated suffix.
+ const objects=[];let depth=0,start=-1,quoted=false,escaped=false;
+ for(let i=0;i<v.length;i++){const c=v[i];if(depth===0){if(c==='{'){start=i;depth=1;}continue;}
+ if(quoted){if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c==='"')quoted=false;continue;}
+ if(c==='"')quoted=true;else if(c==='{')depth++;else if(c==='}'&&--depth===0){try{objects.push(JSON.parse(v.slice(start,i+1)));}catch{}start=-1;}}
+ if(depth===0&&objects.length===1)return objects[0];
+ fail('Model nije završio valjan JSON.');
+}
+function lineRows(raw,allowed){
+ const rows=[],lines=String(raw).trim().split(/\r?\n/);let ended=false;
+ for(const line of lines){const trimmed=line.trim();if(trimmed==='END'){ended=true;break;}
+ const parts=trimmed.split('|').map(x=>x.trim());if(!allowed.includes(parts[0]))continue;
+ rows.push(parts);
+ }
+ if(!ended||!rows.length)fail('Nedovršen strukturirani plan (nedostaje END).');
+ return rows;
+}
+function requestedScreens(intent){
+ const m=String(intent).toLowerCase().match(/\b(\d{1,2}|jedan|dva|tri|četiri|cetiri|pet|šest|sest|sedam|osam|devet|deset|eleven|twelve|one|two|three|four|five|six|seven|eight|nine|ten)\s+(?:ekran\w*|screen\w*)/u);
+ if(!m)return null;const words={jedan:1,dva:2,tri:3,četiri:4,cetiri:4,pet:5,šest:6,sest:6,sedam:7,osam:8,devet:9,deset:10,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12};return words[m[1]]||Number(m[1]);
 }
 function unique(xs){if(new Set(xs).size!==xs.length)fail('Imena moraju biti jedinstvena.');}
 function outline(v){
@@ -27,8 +47,8 @@ function outline(v){
 
   return {name:id,type,value};
  });
- const events=arr(v.e,1,6).map(row=>{const [id,goal]=tuple(row,2);return {name:name(id),goal:text(goal,100)};});
- const screens=arr(v.s,1,4).map(row=>{const [id,title,goal]=tuple(row,3);return {id:name(id),title:text(title,100),goal:text(goal,120)};});
+ const events=arr(v.e,1,12).map(row=>{const [id,goal]=tuple(row,2);return {name:name(id),goal:text(goal,100)};});
+ const screens=arr(v.s,1,16).map(row=>{const [id,title,goal]=tuple(row,3);return {id:name(id),title:text(title,100),goal:text(goal,120)};});
  unique(state.map(x=>x.name));unique(events.map(x=>x.name));unique(screens.map(x=>x.id));
  return {title:text(v.title,100),state,events,screens};
 }
@@ -73,21 +93,31 @@ function design(v,screen,structure){
 }
 const initial=(s)=>({format:'clea7.authoring-plan/1',state:s.state,backends:[],events:[],screens:s.screens.map(x=>({id:x.id,title:x.title,items:[{kind:'heading',label:x.title}]})),start:s.screens[0].id,...(s.state.some(x=>x.type.startsWith('List<'))?{declarations:['import collections']}:{})});
 function compile(plan){const result=scope.CLEA7AppAuthoring.emitPlan(plan);scope.CLEA7BIL.compile(result.source);return result.source;}
-const compact=s=>({v:s.state.map(x=>[x.name,x.type,x.value]),e:s.events.map(x=>x.name),s:s.screens.map(x=>x.id)});
+const compact=s=>({v:s.state.map(x=>[x.name,x.type]),e:s.events.map(x=>x.name),s:s.screens.map(x=>x.id)});
 async function generate(intent,{signal,onStatus=()=>{},ask=scope.CLEA7PublicPlan.requestText}={}){
  if(typeof intent!=='string'||!intent.trim()||intent.length>1200)fail('Opiši aplikaciju do 1200 znakova.');
  const trace=[],check=()=>{if(signal?.aborted)fail('Izrada je zaustavljena.');};
- async function stage(label,instruction,validate,initialDiagnostic=''){
+ async function stage(label,instruction,validate,initialDiagnostic='',wire='json'){
   let diagnosis=initialDiagnostic,previous='';
   for(let attempt=1;attempt<=2;attempt++){
-   check();onStatus(label+' · pokušaj '+attempt);const question=instruction+'\nTask: '+intent+(diagnosis?'\nRepair previous error: '+diagnosis+(previous?'\nRejected JSON: '+previous.slice(0,Math.max(0,2200-instruction.length-intent.length)):''):'')+'\nReturn ONLY complete compact JSON. No prose.';
+   check();onStatus(label+' · pokušaj '+attempt);const question=instruction+'\nTask: '+intent+(diagnosis?'\nRepair previous error: '+diagnosis+(previous?'\nRejected JSON: '+previous.slice(0,Math.max(0,2200-instruction.length-intent.length)):''):'')+(wire==='lines'?'\nReturn only the specified pipe-delimited rows, followed by END. No prose.':'\nReturn ONLY complete compact JSON. No prose.');
    if(question.length>3000)fail('Opis prelazi radni prozor modela.');
    let reply;
-   try{const r=await ask(question,{signal,onStatus:x=>onStatus(label+' · '+x)});reply=r.reply;check();const result=await validate(json(reply));trace.push({stage:label,attempt,passed:true});return result;}
+   try{const r=await ask(question,{signal,onStatus:x=>onStatus(label+' · '+x)});reply=r.reply;check();const result=await validate(wire==='lines'?reply:json(reply));trace.push({stage:label,attempt,passed:true});return result;}
    catch(error){check();diagnosis=String(error.message).slice(0,300);previous=reply||'';trace.push({stage:label,attempt,passed:false,diagnostic:diagnosis});if(attempt===2)throw Object.assign(Error(label+': '+diagnosis),{trace,failedProposal:reply});}
   }
  }
- const structure=await stage('1 · Struktura','Plan app. JSON object {"title":"name","v":[["variable","Text"]],"e":[["event","short goal"]],"s":[["home","title","purpose"]]}. v types Text,Number,Boolean,List<Text>,List<Number>,List<Boolean>. Up to 16 vars,6 events,4 screens. Each v row has EXACTLY TWO strings: name and type, NEVER an initial value. Runtime initializes empty typed values. Each event has distinct goal. No network. Keep under 220 tokens.',outline);
+ const count=requestedScreens(intent);if(count!==null&&(count<1||count>16))fail('Ova verzija podržava 1–16 ekrana po aplikaciji.');
+ const layout=await stage('1a · Ekrani','Plan only the app title and screens. One row TITLE|app title. Then PAGE|identifier|title|short purpose for each distinct screen. '+(count?'Exactly '+count+' PAGE rows.':'Choose 1 to 6 PAGE rows as needed.')+' ASCII identifiers, short labels, max 5 words per purpose. Last line END.',raw=>{
+  const rows=lineRows(raw,['TITLE','PAGE']),titles=rows.filter(r=>r[0]==='TITLE');if(titles.length!==1)fail('Potreban je jedan naslov aplikacije.');tuple(titles[0],2);
+  const screens=rows.filter(r=>r[0]==='PAGE').map(row=>{tuple(row,4);return row.slice(1);});
+  arr(screens,1,16);if(count!==null&&screens.length!==count)fail('Traženo '+count+' ekrana; model dao '+screens.length+'.');unique(screens.map(r=>name(r[0])));
+  return {title:text(titles[0][1],100),s:screens};
+ },'','lines');
+ const structure=await stage('1b · Podaci i radnje','Plan data and actions for screens '+q(layout.s)+'. Rows V|identifier|type, E|event|short goal. Types Text,Number,Boolean,List<Text>,List<Number>,List<Boolean>. Up to 16 V and 12 E. Do not output initial values. Include meaningful task actions, not navigation alone. Last line END.',raw=>{
+  const rows=lineRows(raw,['V','E']);const v=rows.filter(r=>r[0]==='V').map(r=>{tuple(r,3);return r.slice(1);}),e=rows.filter(r=>r[0]==='E').map(r=>{tuple(r,3);return r.slice(1);});return outline({...layout,v,e});
+ },'','lines');
+
  const plan=initial(structure),ctx=q(compact(structure)),tests=[];
  function testFor(built){
   const nav=built.steps.filter(x=>x.op==='open').at(-1);
@@ -136,5 +166,5 @@ async function generate(intent,{signal,onStatus=()=>{},ask=scope.CLEA7PublicPlan
  if(!verification)fail('Runtime nije završio provjeru.');
  return {reply:q(plan),modelProfile:'qwen3.5-9b-q4_k_m',title:structure.title,trace,checks:tests,source};
 }
-scope.CLEA7PublicStudioAgent=Object.freeze({generate,outline,handler,design});
+scope.CLEA7PublicStudioAgent=Object.freeze({generate,outline,handler,design,lineRows,requestedScreens,json});
 })(globalThis);
