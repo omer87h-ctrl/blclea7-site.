@@ -321,7 +321,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  }
  const publicAuthor=globalThis.CLEA7AppAuthoring?.create({generate:publicBetaAuthor,attempts:1,onEvent:event=>{if(event.phase==='model')feedback.textContent='Qwen sastavlja aplikaciju · pokušaj '+event.attempt;if(event.phase==='repair')feedback.textContent='BIL kompajler traži ispravku · '+event.diagnostic;if(event.phase==='verification')feedback.textContent='Kompajler i Runtime provjeravaju stvarnu aplikaciju…';}});
  async function publicCreate(question){
-  if(loading)return;
+  if(loading)return;closeAIPreview();
   if(!publicAuthor||!globalThis.CLEA7Workbench){feedback.textContent='Studio još nije spreman. Pokušaj ponovo.';return;}
   loading=true;submit.disabled=true;document.getElementById('chat-stop').disabled=false;authorController=new AbortController();
   const body=message('BL CLEA AI · izrada aplikacije (beta)','Provjeravam vezu s Qwenom…');const progress=document.createElement('p');progress.setAttribute('role','status');body.append(progress);publicProgress=progress;
@@ -335,6 +335,22 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  }
  const author=globalThis.CLEA7AppAuthoring?.create({generate:(intent,options)=>client.ask(intent,{authoring:options.authoring,onDelta:options.onDelta,language:document.getElementById('chat-language').value}),onEvent:event=>{if(event.phase==='model')feedback.textContent='Model sastavlja BIL aplikaciju · pokušaj '+event.attempt+'.';if(event.phase==='repair')feedback.textContent='Kompajler je odbio prijedlog. Model dobija stvarnu dijagnostiku za ispravku.';if(event.phase==='runtime'&&event.event.pillar){const list=document.getElementById('chat-events'),li=document.createElement('li');li.textContent=event.event.pillar+' · '+event.event.state;list.prepend(li);while(list.children.length>40)list.lastElementChild.remove();}}});
  function downloadSource(source){const url=URL.createObjectURL(new Blob([source],{type:'text/plain;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='moja-clea-aplikacija.bil';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+ let aiPreview=null;
+ function closeAIPreview(){if(aiPreview){aiPreview.engine?.close();aiPreview.host.remove();aiPreview=null;}}
+ async function showAIPreview(proposal){
+  closeAIPreview();
+  const host=document.createElement('section'),header=document.createElement('h2'),note=document.createElement('p'),surface=document.createElement('div'),close=document.createElement('button');
+  host.className='panel ai-app-preview';host.dataset.aiAppPreview='true';header.textContent=proposal.application.name;note.textContent='Interaktivni pregled · privremeni podaci · postojeći projekt nije promijenjen.';
+  close.type='button';close.textContent='Zatvori pregled';close.onclick=closeAIPreview;
+  host.append(header,note,close,surface);form.after(host);
+  const ticket={host,engine:null};aiPreview=ticket;
+  try{
+   const candidate=new CLEA7Engine.Engine(proposal.application,{vault:new CLEA7.MemoryVault(),reality:'SHADOW',modules:null,cacheEnabled:false,notify:message=>{note.textContent=message;},render:engine=>{if(aiPreview===ticket&&!engine.closed)CLEA7Engine.mount(surface,engine);}});
+   ticket.engine=candidate;await candidate.open();
+   if(aiPreview!==ticket){candidate.close();return;}
+   CLEA7Engine.mount(surface,candidate);host.scrollIntoView({block:'nearest'});
+  }catch(error){ticket.engine?.close();if(aiPreview===ticket)note.textContent='Pregled nije pokrenut: '+error.message;}
+ }
  function proposalUI(body,proposal){
   body.replaceChildren();const heading=document.createElement('h3');heading.textContent=proposal.sourceOrigin==='local-studio-tools'?'Studio radnje su izvršene u provjeri':'BIL aplikacija je pripremljena za pregled';
   const summary=document.createElement('p'),screens=proposal.application.bil.ir.ui.screens;summary.textContent=(proposal.modelInvoked===false?'Lokalni Studio alati · bez neuronskog modela. ':'')+screens.length+' ekrana · '+Object.keys(proposal.application.bil.ir.handlers||{}).length+' događaja. Kompajler i izolovano pokretanje su prošli. Ponašanje provjeri na stvarnim kontrolama.';
@@ -351,10 +367,10 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
    const studio=globalThis.CLEA7Workbench;
    if(!studio){const id=CLEA7Format.newId('handoff'),value={format:'clea7.authoring-handoff/1',source:proposal.source};sessionStorage.setItem(id,JSON.stringify(value));location.assign('/studio/workbench/?workspace=clea-chat&proposal='+encodeURIComponent(id));return;}
    const boundTests=proposalTests.get(proposal);if(boundTests&&globalThis.CLEA7StudioTests?.signature()!==boundTests)throw Error('Testovi su promijenjeni nakon prijedloga. Zatraži novu provjeru prije primjene.');
-   const before=studio.snapshot(),application=await CLEA7AppAuthoring.recheck(proposal,before);studio.applyReviewed(application,before);applied=CLEA7.stable(studio.snapshot());undo.hidden=false;
+   const before=studio.snapshot(),application=await CLEA7AppAuthoring.recheck(proposal,before);closeAIPreview();studio.applyReviewed(application,before);applied=CLEA7.stable(studio.snapshot());undo.hidden=false;
    document.querySelector('[data-panel="draw"]')?.click();const drawRun=document.getElementById('draw-run');if(drawRun)await drawRun.onclick();else await studio.run();result.textContent='Aplikacija je stvarno pokrenuta. Isprobaj unos, dugmad i navigaciju, a zatim izvezi CLEA7 paket.';status.textContent=result.textContent;
   }catch(error){result.textContent=error.message;apply.disabled=!review.checked;}};
-  body.append(heading,summary,structure,details,label,apply,download,undo,result);body.dataset.aiAppProposal='true';
+  body.append(heading,summary,structure,details,label,apply,download,undo,result);body.dataset.aiAppProposal='true';if(proposal.agentTrace?.length&&!proposal.application.remote){const preview=document.createElement('button');preview.type='button';preview.textContent='Prikaži interaktivnu aplikaciju';preview.onclick=()=>showAIPreview(proposal);body.append(preview);void showAIPreview(proposal);}
  }
  async function authorApplication(body,question,mode){
   if(!author)throw Error('CLEA koordinacija kreiranja nije učitana. Nije korišten rezervni predložak.');
@@ -596,6 +612,6 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   finally{submit.disabled=false;loading=false;check.disabled=false;publicCheck.disabled=!publicAvailable;document.getElementById('chat-stop').disabled=true;}
  },true);
  document.getElementById('chat-stop').addEventListener('click',()=>{stopReplySpeech();authorController?.abort();client.cancel();});
- document.getElementById('chat-clear').addEventListener('click',()=>{stopReplySpeech();spokenReply='';betaHistory=[];readReply.disabled=true;authorController?.abort();client.reset();persist();});
+ document.getElementById('chat-clear').addEventListener('click',()=>{closeAIPreview();stopReplySpeech();spokenReply='';betaHistory=[];readReply.disabled=true;authorController?.abort();client.reset();persist();});
  window.addEventListener('pagehide',()=>{stopReplySpeech();authorController?.abort();client.reset();});
 })();
