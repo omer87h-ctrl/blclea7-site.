@@ -304,7 +304,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  function requestedTask(question){
   if(taskMode.value!=='auto')return taskMode.value;
   const words=question.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),prefix=/^(?:clea[,!:]?\s*)?(?:napravi|kreiraj|izradi|create|build|make|generate|dodaj|add|promijeni|uredi|prilagodi|poboljsaj|change|edit|redesign)\b/;
-  if(!prefix.test(words))return 'chat';
+  if(!prefix.test(words))return /^(rokovnik|planer|kalendar|dnevnik|todo|to-do|notes|notepad|biljeznica)$/.test(words.trim())?'create':'chat';
   const app=words.search(/\b(?:aplikacija|aplikaciju|app|application|igru|game|program)\b/),component=words.search(/\b(?:prostor|space|ekran|screen|dugme|button|raspored|layout|interfejs|interface|oblik|shape|vektor|vector)[a-z]*\b/);
   if(/^(?:clea[,!:]?\s*)?(?:dodaj|add|promijeni|uredi|prilagodi|poboljsaj|change|edit|redesign)\b/.test(words)&&(app>=0||component>=0))return globalThis.CLEA7Workbench?.project?.bil?'change':'create';
   if(app>=0&&(component<0||app<component))return 'create';
@@ -464,7 +464,23 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  }
  persistence.addEventListener('change',persist);
  let active=false,loading=false,publicAvailable=false,previewMode=false,runtimeAuthentication=null,deviceModel=null;
- async function qwenBase(){for(const base of ['http://127.0.0.1:8082','http://127.0.0.1:8081','http://localhost:8082','http://localhost:8081']){try{const probe=await fetch(base+'/health',{signal:AbortSignal.timeout(1500)});if(probe.ok)return base;}catch{}}throw Error('qwen');}
+ let betaHistory=[];
+ async function betaHealth(){const res=await fetch(publicBetaEndpoint+'/health',{headers:{'ngrok-skip-browser-warning':'1'},credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(8000)});const h=await res.json();if(!res.ok||h.ready!==true||h.service!=='CLEA public beta')throw Error('CLEA Runner na HP-u trenutno nije dostupan.');return h;}
+ async function betaStatus(){try{const h=await betaHealth();document.getElementById('chat-ready').textContent='CLEA AI · Qwen 9B povezan';feedback.textContent=h.bilAuthoring?'Razgovor i izrada novih aplikacija preko HP-a.':'Razgovor preko HP-a · BIL izrada još nije aktivna.';submit.disabled=false;}catch(error){document.getElementById('chat-ready').textContent='HP servis nije dostupan';feedback.textContent=error.message;submit.disabled=false;}status.textContent=feedback.textContent;}
+ async function betaChat(question){
+  if(loading)return;loading=true;submit.disabled=true;document.getElementById('chat-stop').disabled=false;authorController=new AbortController();const controller=authorController;
+  message('Ti',question);input.value='';const body=message('BL CLEA AI','Povezujem se s HP-om…');let reply='';
+  try{
+   const h=await betaHealth(),history=betaHistory.slice(-4);
+   const res=await fetch(publicBetaEndpoint+(h.streaming?'/chat/stream':'/chat'),{method:'POST',headers:{'Content-Type':'application/json','ngrok-skip-browser-warning':'1'},body:JSON.stringify({question,history}),credentials:'omit',cache:'no-store',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(300000)])});
+   if(!res.ok){const err=await res.json().catch(()=>({}));throw Error(err.error||'HP servis: '+res.status);}
+   if(h.streaming){const reader=res.body.getReader(),decoder=new TextDecoder();let carry='',done=false,source='';try{while(!done){const part=await reader.read();if(part.done)break;carry+=decoder.decode(part.value,{stream:true});if(carry.length>65536)throw Error('Neispravan odgovor.');const lines=carry.split('\n');carry=lines.pop()||'';for(const line of lines){if(!line.trim())continue;const e=JSON.parse(line);if(e.type==='status')feedback.textContent=e.message;else if(e.type==='delta'){reply+=e.text;body.textContent=reply;}else if(e.type==='error')throw Error(e.message);else if(e.type==='done'){done=true;source=e.source;break;}}}}finally{await reader.cancel().catch(()=>{});}if(!done||!reply.trim())throw Error('Odgovor nije završen.');if(source==='CLEA opis mogućnosti')body.previousElementSibling.textContent='CLEA · opis mogućnosti';}
+   else{const data=await res.json();if(typeof data.reply!=='string'||!data.reply.trim())throw Error('Nema odgovora.');reply=data.reply;}
+   decorateReply(body,reply);betaHistory.push({role:'user',content:question.slice(0,1200)},{role:'assistant',content:reply.slice(0,1200)});betaHistory=betaHistory.slice(-4);spokenReply=reply;readReply.disabled=false;if(autoSpeech.checked)speakReply();feedback.textContent='Odgovor završen preko HP servisa.';document.getElementById('chat-ready').textContent='CLEA AI · Qwen 9B povezan';
+  }catch(error){body.textContent=(reply?reply+'\n\n':'')+(controller.signal.aborted?'Odgovor je zaustavljen.':error.message);feedback.textContent=body.textContent;input.value=question;}
+  finally{authorController=null;loading=false;submit.disabled=false;document.getElementById('chat-stop').disabled=true;status.textContent=feedback.textContent;}
+ }
+
  async function loadDeviceModel(){
   if(deviceModel||nativeOwner)return deviceModel;
   if(!globalThis.CLEAPublicModel)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='chat/local-model.js';script.onload=resolve;script.onerror=()=>reject(Error('CLEA model nije učitan.'));document.head.append(script);});
@@ -497,7 +513,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
    status.textContent=feedback.textContent;
    if(publicAvailable&&!host){publicCheck.checked=true;activate(publicCheck);}
   }
-  if(!host&&!publicAvailable){submit.disabled=false;document.getElementById('chat-ready').textContent='Qwen 9B piše';qwenBase().then(()=>{feedback.textContent='Razgovor piše Qwen 9B na ovom računaru. Tvoj CLEA plan izvršava Studio, Draw, BIL i Sense.';status.textContent=feedback.textContent;}).catch(()=>{document.getElementById('chat-ready').textContent='Qwen nije dostupan';feedback.textContent='Qwen je na ovom Windowsu, ali ga ovaj preglednik još ne vidi. Pošalji ponovo za koji trenutak.';status.textContent=feedback.textContent;});}
+  if(!host&&!publicAvailable){submit.disabled=false;betaStatus();}
  }).catch(()=>{feedback.textContent='Konfiguracija HP veze nije dostupna. CLEA ostaje na ovom uređaju.';loadDeviceModel().catch(()=>{});});
  async function activate(selected){
   if(loading)return;
@@ -512,7 +528,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   finally{loading=false;submit.disabled=!active&&!offlineHelp.checked&&!globalThis.CLEA7Workbench;check.disabled=false;if(selected===publicCheck)publicCheck.disabled=false;}
  }
  check.addEventListener('change',()=>activate(check));publicCheck.addEventListener('change',()=>activate(publicCheck));
- connectButton.onclick=()=>{if((publicAudience||!nativeOwner)&&!publicAvailable){status.textContent=deviceModel?'CLEA je na ovom uređaju. Ne treba privatno HP uparivanje.':'Učitavam CLEA na ovom uređaju. Ne treba privatno HP uparivanje.';if(!deviceModel)loadDeviceModel().catch(error=>{status.textContent=error.message;});return;}const selected=nativeOwner?check:publicAvailable?publicCheck:check;selected.checked=true;activate(selected);};
+ connectButton.onclick=()=>{if(!nativeOwner&&!publicAvailable){betaStatus();return;}const selected=nativeOwner?check:publicAvailable?publicCheck:check;selected.checked=true;activate(selected);};
  offlineHelp.onchange=()=>{if(offlineHelp.checked){client.reset();active=false;check.checked=false;publicCheck.checked=false;document.getElementById('chat-retry').disabled=false;document.getElementById('chat-retry').click();helpDetails.open=true;submit.disabled=false;feedback.textContent='Offline pomoć ima 20 CLEA tema i postojeće lokalne alate. Opći razgovor i slobodna izrada aplikacija traže povezani model.';}else{globalThis.CLEA7ChatWorkspace?.cancel();submit.disabled=!active&&!globalThis.CLEA7Workbench;document.getElementById('chat-ready').textContent=active?'CLEA AI je povezan':'Model nije povezan';}};
  function phoneShareControls(){
   const button=document.createElement('button');button.type='button';button.textContent='Otvori i na telefonu';
@@ -547,7 +563,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
    if(taskMode.value==='tools'){feedback.textContent='Za ovu slobodnu izmjenu treba povezani model. Lokalno možeš zatražiti igrača i vrata, dodavanje komponente, pomjeranje ili promjenu udaljenosti. Ništa nije poslano.';return;}
    if(['auto','chat','create'].includes(taskMode.value)&&globalThis.CLEA7ChatTools?.canHandle(input.value.trim())){if(globalThis.CLEA7ChatTools.busy)return;return globalThis.CLEA7ChatTools.run();}
    if(offlineHelp.checked&&['auto','chat'].includes(taskMode.value)){if(globalThis.CLEA7ChatTools?.busy)return;return offlineSubmit?.call(form,event);}
-   if(['auto','chat'].includes(taskMode.value)){const question=input.value.trim();if(!question)return;if(question.length>1200){feedback.textContent='Poruka prelazi 1200 znakova.';return;}message('Ti',question);input.value='';const body=message('BL CLEA AI','');feedback.textContent='Qwen piše…';status.textContent=feedback.textContent;document.getElementById('chat-ready').textContent='Qwen 9B piše';try{const qwen=await qwenBase();const response=await fetch(qwen+'/v1/chat/completions',{method:'POST',headers:{'content-type':'application/json'},signal:AbortSignal.timeout(90000),body:JSON.stringify({temperature:0.7,max_tokens:420,stream:true,messages:[{role:'system',content:'Ti si BL CLEA. Govori bosanski, jasno i pametno, potpunim rečenicama. Budi konkretan. Ne budi djetinjast i ne ponavljaj šablon. Ako ne znaš, reci to. Ne traži kod ni uparivanje. Ne tvrdi da si model od 70B. Studio, Draw, BIL i Sense izvršavaju radnju; ti objašnjavaš i razgovaraš.'},{role:'user',content:question}]})});if(!response.ok||!response.body)throw Error('qwen');const reader=response.body.getReader();const decoder=new TextDecoder();let carry='',reply='';while(true){const step=await reader.read();if(step.done)break;carry+=decoder.decode(step.value,{stream:true});const lines=carry.split('\n');carry=lines.pop()||'';for(const line of lines){const raw=line.trim();if(!raw.startsWith('data:'))continue;const payload=raw.slice(5).trim();if(!payload||payload==='[DONE]')continue;let piece='';try{piece=JSON.parse(payload).choices?.[0]?.delta?.content||'';}catch{continue;}if(!piece)continue;reply+=piece;body.textContent=reply;body.parentElement.scrollIntoView({block:'nearest'});}}reply=reply.trim();if(!reply)throw Error('prazno');body.textContent=reply;spokenReply=reply;readReply.disabled=false;if(autoSpeech.checked)speakReply();feedback.textContent='Odgovor je napisao Qwen 9B, slovo po slovo. Tvoj CLEA plan i dalje crta Studio, Draw, BIL i Sense.';status.textContent=feedback.textContent;}catch{body.textContent='Qwen na ovom računaru trenutno ne piše. Neću dati pogrešan odgovor. Stranicu, Draw, BIL i Sense i dalje možeš tražiti ovdje.';feedback.textContent=body.textContent;status.textContent=body.textContent;document.getElementById('chat-ready').textContent='Qwen nije dostupan';}return;}
+   if(['auto','chat'].includes(taskMode.value)){const question=input.value.trim();if(!question)return;if(question.length>1200){feedback.textContent='Poruka prelazi 1200 znakova.';return;}return betaChat(question);}
    feedback.textContent='Prvo poveži CLEA AI. Na HP-u otvori prečicu CLEA AI 9B; za telefon koristi „Otvori i na telefonu“.';document.getElementById('chat-ready').textContent='Model nije povezan';return;
   }
   const question=input.value.trim();if(!question)return;
@@ -587,6 +603,6 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   finally{submit.disabled=false;loading=false;check.disabled=false;publicCheck.disabled=!publicAvailable;document.getElementById('chat-stop').disabled=true;}
  },true);
  document.getElementById('chat-stop').addEventListener('click',()=>{stopReplySpeech();authorController?.abort();client.cancel();});
- document.getElementById('chat-clear').addEventListener('click',()=>{stopReplySpeech();spokenReply='';readReply.disabled=true;authorController?.abort();client.reset();persist();});
+ document.getElementById('chat-clear').addEventListener('click',()=>{stopReplySpeech();spokenReply='';betaHistory=[];readReply.disabled=true;authorController?.abort();client.reset();persist();});
  window.addEventListener('pagehide',()=>{stopReplySpeech();authorController?.abort();client.reset();});
 })();
