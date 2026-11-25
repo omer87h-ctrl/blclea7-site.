@@ -110,6 +110,7 @@ function create({generate,onEvent=()=>{},attempts=3}={}){
  let busy=false;
  async function propose(intent,{project=null,mode='create',sourceApproved=false,projectContext=false,signal,onDelta=()=>{},checks=[],representation='plan'}={}){
   if(busy)throw fault('Busy','Kreiranje aplikacije je već pokrenuto.');
+  if(representation==='public-compact'&&mode!=='create')throw fault('Permission','Javni kompaktni plan je isključivo za novu aplikaciju.');
   if(typeof intent!=='string'||!intent.trim()||intent.length>1200||!['create','change'].includes(mode))throw fault('Input','Napiši opis aplikacije do 1200 znakova.');
   if(mode==='change'&&(!project?.bil||sourceApproved!==true))throw fault('Permission','Za izmjenu izričito odobri slanje BIL izvora trenutnog projekta svom modelu.');
   const base=project?scope.CLEA7.stable(project):null;
@@ -128,7 +129,7 @@ function create({generate,onEvent=()=>{},attempts=3}={}){
     const response=await generate(intent,{authoring:contract,signal,onDelta});check();
     let source=null;
     try{
-     const conversion=decode(response.reply,{source:mode==='change'?project.bil.source:null});source=conversion.source;if(mode==='create'&&conversion.projectName)metadata.name=conversion.projectName;onEvent({phase:'verification',attempt});
+     const conversion=representation==='public-compact'?{...emitPlan(scope.CLEA7PublicPlan.expand(response.reply)),representation:'public-compact'}:decode(response.reply,{source:mode==='change'?project.bil.source:null});source=conversion.source;if(mode==='create'&&conversion.projectName)metadata.name=conversion.projectName;onEvent({phase:'verification',attempt});
      const allChecks=clone([...checks,...(conversion.checks||[])]);if(allChecks.length>20)throw fault('Test','Studio plan i odabrani testovi prelaze20 provjera.');
      const verified=await scope.CLEA7Intelligence.verifyBIL(source,{metadata,checks:allChecks,signal,modelAvailable:true,onEvent:e=>onEvent({phase:'runtime',event:e})});check();
      if(!verified.application.bil.ir.ui?.screens?.length)throw fault('UI','Prijedlog nema stvarni aplikacijski ekran.');
@@ -141,7 +142,7 @@ function create({generate,onEvent=()=>{},attempts=3}={}){
      if(attempt===attempts){error.attempts=clone(history);error.failedProposal=source||response.reply;throw error;}
      // Retry only inference/compilation. No uncertain external effect is repeated.
      // An incomplete source is never auto-repaired by guessing its missing end.
-     previous=representation==='tools'?response.reply:source||'';if(new TextEncoder().encode(previous).length>10000)previous='';diagnostic=(String(error.message)+' '+JSON.stringify(error.diagnostic||error.location||error.loc||{})).slice(0,600);
+     previous=['tools','public-compact'].includes(representation)?response.reply:source||'';if(new TextEncoder().encode(previous).length>10000)previous='';diagnostic=(String(error.message)+' '+JSON.stringify(error.diagnostic||error.location||error.loc||{})).slice(0,600);
      onEvent({phase:'repair',attempt,diagnostic});
     }
    }
