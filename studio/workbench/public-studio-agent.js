@@ -129,9 +129,9 @@ function compile(plan){const result=scope.CLEA7AppAuthoring.emitPlan(plan);scope
 const compact=s=>({v:s.state.map(x=>[x.name,x.type]),e:s.events.map(x=>x.name),s:s.screens.map(x=>x.id)});
 // A complete JSON object is an alternative wire, not a guessed END marker.
 function phaseJSON(label,raw){
- const v=json(raw);
- if(label.startsWith('1a')){exact(v,['title','s']);return [['TITLE',v.title],...arr(v.s,1,16).map(r=>['PAGE',...tuple(r,3)])].map(r=>r.join('|')).join('\n')+'\nEND';}
- if(label.startsWith('1b')){exact(v,['v','e']);return [...arr(v.v,0,16).map(r=>['V',...tuple(r,2)]),...arr(v.e,1,12).map(r=>['E',...tuple(r,2)])].map(r=>r.join('|')).join('\n')+'\nEND';}
+ const v=json(raw),rowText=r=>r.map(x=>{if(typeof x!=='string'||/[|\r\n]/.test(x))fail('JSON polje mora biti jedan tekst bez separatora.');return x;}).join('|');
+ if(label.startsWith('1a')){exact(v,['title','s']);return [['TITLE',v.title],...arr(v.s,1,16).map(r=>['PAGE',...tuple(r,3)])].map(rowText).join('\n')+'\nEND';}
+ if(label.startsWith('1b')){exact(v,['v','e']);return [...arr(v.v,0,16).map(r=>['V',...tuple(r,2)]),...arr(v.e,1,12).map(r=>['E',...tuple(r,2)])].map(rowText).join('\n')+'\nEND';}
  return v;
 }
 const phaseFormat=label=>label.startsWith('1a')?'{"title":"App title","s":[["home","Home","purpose"]]}':label.startsWith('1b')?'{"v":[["noteText","Text"]],"e":[["saveNote","save note"]]}':label.startsWith('2')?'{"steps":[["set","variable","BIL expression"]],"test":{"inputs":{},"expect":{}}}':'{"bg":"#112233","fg":"#ffffff","accent":"#335577","layout":"column","nodes":[["h","Title"]]}';
@@ -143,7 +143,7 @@ async function generate(intent,{signal,onStatus=()=>{},ask=scope.CLEA7PublicPlan
   for(let attempt=1;attempt<=3;attempt++){
    check();const alternative=wire==='lines'&&attempt===3;
    onStatus(label+' · pokušaj '+attempt+(alternative?' · alternativni JSON plan':''));
-   const suffix=alternative?'\nUse ONLY this complete JSON object shape, NOT pipe rows or END: '+phaseFormat(label)+'. Fill it with the actual task data.':wire==='lines'?'\nReturn only the specified pipe-delimited rows, followed by END. No prose.':'\nReturn ONLY complete compact JSON. No prose.';
+   const suffix=alternative?'\nIgnore the earlier row formatting instructions. Use ONLY this complete JSON object shape, NOT pipe rows or END: '+phaseFormat(label)+'. Fill it with the actual task data.':wire==='lines'?'\nReturn only the specified pipe-delimited rows, followed by END. No prose.':'\nReturn ONLY complete compact JSON. No prose.';
    const task='\nTask: '+intent;
    const repair=diagnosis?'\nRepair error: '+diagnosis:'';
    const budget=3000-instruction.length-task.length-suffix.length-repair.length;
