@@ -75,32 +75,64 @@ const compact=s=>({v:s.state.map(x=>[x.name,x.type,x.value]),e:s.events.map(x=>x
 async function generate(intent,{signal,onStatus=()=>{},ask=scope.CLEA7PublicPlan.requestText}={}){
  if(typeof intent!=='string'||!intent.trim()||intent.length>1200)fail('Opiši aplikaciju do 1200 znakova.');
  const trace=[],check=()=>{if(signal?.aborted)fail('Izrada je zaustavljena.');};
- async function stage(label,instruction,validate){
-  let diagnosis='';
+ async function stage(label,instruction,validate,initialDiagnostic=''){
+  let diagnosis=initialDiagnostic,previous='';
   for(let attempt=1;attempt<=2;attempt++){
-   check();onStatus(label+' · pokušaj '+attempt);const question=instruction+'\nTask: '+intent+(diagnosis?'\nRepair previous error: '+diagnosis:'')+'\nReturn ONLY complete compact JSON. No prose.';
+   check();onStatus(label+' · pokušaj '+attempt);const question=instruction+'\nTask: '+intent+(diagnosis?'\nRepair previous error: '+diagnosis+(previous?'\nRejected JSON: '+previous.slice(0,Math.max(0,2200-instruction.length-intent.length)):''):'')+'\nReturn ONLY complete compact JSON. No prose.';
    if(question.length>3000)fail('Opis prelazi radni prozor modela.');
    let reply;
    try{const r=await ask(question,{signal,onStatus:x=>onStatus(label+' · '+x)});reply=r.reply;check();const result=await validate(json(reply));trace.push({stage:label,attempt,passed:true});return result;}
-   catch(error){check();diagnosis=String(error.message).slice(0,300);trace.push({stage:label,attempt,passed:false,diagnostic:diagnosis});if(attempt===2)throw Object.assign(Error(label+': '+diagnosis),{trace,failedProposal:reply});}
+   catch(error){check();diagnosis=String(error.message).slice(0,300);previous=reply||'';trace.push({stage:label,attempt,passed:false,diagnostic:diagnosis});if(attempt===2)throw Object.assign(Error(label+': '+diagnosis),{trace,failedProposal:reply});}
   }
  }
  const structure=await stage('1 · Struktura','Plan app. JSON object {"title":"name","v":[["variable","Text",""]],"e":[["event","short goal"]],"s":[["home","title","purpose"]]}. v types Text,Number,Boolean,List<Text>,List<Number>,List<Boolean>. Up to 16 vars,6 events,4 screens. Use initial empty user fields. Each event has distinct goal. No network. Keep under 220 tokens.',outline);
  const plan=initial(structure),ctx=q(compact(structure)),tests=[];
- for(const event of structure.events){
-  const built=await stage('2 · BIL '+event.name,'Write event '+event.name+': '+event.goal+'. Context '+ctx+'. JSON {"steps":[["set","variable","BIL expression"]],"test":{"inputs":{"var":"sample"},"expect":{"var":"result"}}}. Steps set, open (["open","screen"]), or ["bil","if ... { ... }"]. Strings use escaped quotes; BIL + joins text; collections.append(list,value), collections.remove(list,index), collections.length(list). Test meaningful changed value with sample inputs, no device operations. Under 180 tokens.',v=>{
-   const value=handler(v,event,structure),candidate={...plan,events:[...plan.events,{name:value.name,steps:value.steps}]};compile(candidate);return value;
-  });
-  plan.events.push({name:built.name,steps:built.steps});tests.push({flow:built.name,...built.test});
+ function testFor(built){
+  const nav=built.steps.filter(x=>x.op==='open').at(-1);
+  return {flow:built.name,...built.test,...(nav?{screen:nav.screen}:{})};
  }
- for(let i=0;i<structure.screens.length;i++){
-  const screen=structure.screens[i],view=await stage('3 · Draw '+screen.title,'Design screen '+screen.id+' '+screen.goal+'. Context '+ctx+'. JSON {"bg":"#112233","fg":"#ffffff","accent":"#335577","layout":"column","nodes":[["h","Title"],["i","variable","Label"],["b","Button","event"],["o","variable"]]}. Other nodes ["m",var,label] multiline, ["t",var,label] toggle, ["nav",label,screen], ["card",label,[nodes]], ["row",label,[nodes]], ["shape",circle|square|diamond|triangle|ring,label], ["clock",milliseconds,event]. Use only declared names. Design useful accessible controls for task, choose colors. Under 250 tokens.',v=>{
+ async function eventPhase(i,diagnostic=''){
+  const event=structure.events[i],context=q({prior:tests.slice(0,i).map(x=>x.expect),view:plan.screens.map(x=>x.id)});
+  const built=await stage('2 · BIL '+event.name,'Write event '+event.name+': '+event.goal+'. Context '+ctx+'. Previous test expectations '+context+'. JSON {"steps":[["set","variable","BIL expression"]],"test":{"inputs":{"var":"sample"},"expect":{"var":"result"}}}. Steps set, open (["open","screen"]), or ["bil","if ... { ... }"]. Strings use escaped quotes; BIL + joins text; collections.append(list,value), collections.remove(list,index), collections.length(list). Test a meaningful change with sample editable inputs; tests run in event order. No device operations. Under 180 tokens.',v=>{
+   const value=handler(v,event,structure),events=plan.events.slice();events[i]={name:value.name,steps:value.steps};compile({...plan,events});return value;
+  },diagnostic);
+  plan.events[i]={name:built.name,steps:built.steps};tests[i]=testFor(built);
+ }
+ async function screenPhase(i,diagnostic=''){
+  const screen=structure.screens[i],context=q(structure.events.map((e,j)=>[e.name,e.goal,Object.keys(tests[j]?.inputs||{})]));
+  const view=await stage('3 · Draw '+screen.title,'Design screen '+screen.id+' '+screen.goal+'. Context '+ctx+'. Events and required test inputs '+context+'. JSON {"bg":"#112233","fg":"#ffffff","accent":"#335577","layout":"column","nodes":[["h","Title"],["i","variable","Label"],["b","Button","event"],["o","variable"]]}. Other nodes ["m",var,label] multiline, ["t",var,label] toggle, ["nav",label,screen], ["card",label,[nodes]], ["row",label,[nodes]], ["shape",circle|square|diamond|triangle|ring,label], ["clock",milliseconds,event]. Use only declared names. Provide visible inputs and real event controls, links to other screens. Design accessible controls. Under 250 tokens.',v=>{
    const value=design(v,screen,structure),screens=plan.screens.slice();screens[i]=value;compile({...plan,screens});return value;
-  });
+  },diagnostic);
   plan.screens[i]=view;
  }
- onStatus('4 · Kompajler i Runtime');const source=compile(plan);
- return {reply:q(plan),modelProfile:'qwen3.5-9b-q4_k_m',title:structure.title,trace,tests,source};
+ for(let i=0;i<structure.events.length;i++)await eventPhase(i);
+ for(let i=0;i<structure.screens.length;i++)await screenPhase(i);
+ // Independently compile and execute generated tests in a throwaway vault.
+ // If an actual test fails, repair the relevant event or Draw screen, not
+ // a fabricated success response. Re-run all prior checks before acceptance.
+ let source=compile(plan),verification=null;
+ for(let pass=0;pass<2;pass++){
+  check();onStatus('4 · Kompajler i Runtime · provjera '+(pass+1));
+  try{
+   verification=await scope.CLEA7Intelligence.verifyBIL(source,{metadata:{id:scope.CLEA7Format.newId('qa'),name:structure.title},checks:tests,signal,modelAvailable:true});
+   trace.push({stage:'Runtime',attempt:pass+1,passed:true});break;
+  }catch(error){
+   check();trace.push({stage:'Runtime',attempt:pass+1,passed:false,diagnostic:error.message});
+   if(pass===1)throw Object.assign(Error('Runtime nije prihvatio aplikaciju: '+error.message),{trace});
+   let failed=0;
+   for(let i=0;i<tests.length;i++){try{await scope.CLEA7Intelligence.verifyBIL(source,{metadata:{id:scope.CLEA7Format.newId('qa'),name:structure.title},checks:tests.slice(0,i+1),signal,modelAvailable:true});}catch(e){failed=i;break;}}
+   onStatus('5 · Automatska popravka · '+structure.events[failed].name);
+   const diagnosis=String(error.message).slice(0,300);
+   if(/reachable|visible input|control|navigation/i.test(diagnosis)){
+    for(let i=0;i<structure.screens.length;i++)await screenPhase(i,diagnosis+'; ensure reachable controls for '+structure.events[failed].name+' and inputs '+q(tests[failed].inputs));
+   }else{
+    await eventPhase(failed,diagnosis+'; actual test '+q(tests[failed]).slice(0,200));
+   }
+   source=compile(plan);
+  }
+ }
+ if(!verification)fail('Runtime nije završio provjeru.');
+ return {reply:q(plan),modelProfile:'qwen3.5-9b-q4_k_m',title:structure.title,trace,checks:tests,source};
 }
 scope.CLEA7PublicStudioAgent=Object.freeze({generate,outline,handler,design});
 })(globalThis);
