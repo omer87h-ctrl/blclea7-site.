@@ -7,7 +7,7 @@ const fault=(code,text)=>Object.assign(Error(text),{code});
 function emitPlan(plan){
  const bad=text=>{throw fault('Plan',text);},own=(x,k)=>Object.prototype.hasOwnProperty.call(x,k);
  const shape=(x,keys,optional=[])=>{if(!x||typeof x!=='object'||Array.isArray(x)||Object.keys(x).some(k=>!keys.includes(k)&&!optional.includes(k))||keys.some(k=>!own(x,k)))bad('Nepotpuna ili nepoznata struktura CLEA prijedloga.');};
- const text=x=>{if(typeof x!=='string'||x.length>800)bad('Tekst plana prelazi ograničenje.');return x;};
+ const text=(x,maximum=800)=>{if(typeof x!=='string'||x.length>maximum)bad('Tekst plana prelazi ograničenje.');return x;};
  const name=x=>{if(typeof x!=='string'||!/^[A-Za-z][A-Za-z0-9_]{0,47}$/.test(x)||!scope.CLEA7BIL.safe(x))bad('Neispravan identifikator plana.');return x;};
  const list=(x,max)=>{if(!Array.isArray(x)||x.length>max)bad('Previše elemenata u planu.');return x;};
  const parsed=(source,kind)=>{const body=scope.CLEA7BIL.parse(source).body;if(body.length!==1||body[0].kind!==kind)bad('Polje plana mora sadržavati jednu odgovarajuću BIL konstrukciju.');return body[0];};
@@ -74,7 +74,7 @@ function emitPlan(plan){
     case 'button':shape(item,['kind','label','runs']);source='button '+JSON.stringify(text(item.label))+' runs '+name(item.runs);break;
     case 'show':shape(item,['kind','expression']);source='show '+expression(item.expression);break;
     case 'heading':case 'text':shape(item,['kind','label']);source=item.kind+' '+JSON.stringify(text(item.label));break;
-    case 'bil':shape(item,['kind','source']);source=text(item.source);parsed('screen cleaProbe "Probe" {\n'+source+'\n}','screen');break;
+    case 'bil':shape(item,['kind','source']);source=text(item.source,4000);parsed('screen cleaProbe "Probe" {\n'+source+'\n}','screen');break;
     default:bad('Nepodržana komponenta plana.');
    }
    if(item.kind!=='bil')source+=' key ai_s'+i+'_n'+j;
