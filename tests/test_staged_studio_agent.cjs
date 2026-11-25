@@ -31,6 +31,19 @@ const screen={bg:'#112233',fg:'#ffffff',accent:'#445566',layout:'column',nodes:[
  assert.ok(compiled.ir.ui.screens.length===1);
  const checked=await CLEA7Intelligence.verifyBIL(result.source,{metadata:{id:'staged_fixture',name:'Notes'},checks:result.checks});
  assert.ok(checked.receipt.results.s3.checks.every(x=>x.passed));
+ const pages=['home','write','list','archive','settings'];
+ const planned=await CLEA7PublicStudioAgent.generate('Pet ekrana za bilješke',{ask:async question=>{
+  if(question.startsWith('Plan only the app title'))return {reply:'TITLE|Multi\n'+pages.map(id=>'PAGE|'+id+'|'+id+'|Local notes').join('\n')+'\nEND'};
+  if(question.startsWith('Plan data and actions'))return {reply:'V|draft|Text\nV|entries|List<Text>\nE|add|append note\nE|clear|clear notes\nEND'};
+  if(question.startsWith('Write event add:'))return {reply:JSON.stringify(add)};
+  if(question.startsWith('Write event clear:'))return {reply:JSON.stringify(clear)};
+  const page=pages.find(id=>question.startsWith('Design screen '+id+' '));
+  if(page)return {reply:JSON.stringify({...screen,nodes:page==='write'?[['m','draft','Note'],['b','Add','add']]:page==='list'?[['o','entries'],['b','Clear','clear']]:[['h',page]]})};
+  throw Error('Unexpected phase');
+ }});
+ const multi=CLEA7BIL.compile(planned.source);assert.equal(multi.ir.ui.screens.length,5);
+ const tested=await CLEA7Intelligence.verifyBIL(planned.source,{metadata:{id:'multi_fixture',name:'Five screens'},checks:planned.checks});assert.ok(tested.receipt.results.s3.checks.every(x=>x.passed));
+ console.log('FIVE_SCREEN_FIXTURE_NAVIGATION_AND_RUNTIME_PASS');
  console.log('STAGED_FIXTURE_REPAIR_DRAW_REAL_RUNTIME_PASS');
  if(!process.env.CLEA_REAL_MODEL_TEST)return;
  const realFetch=globalThis.fetch;
