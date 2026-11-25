@@ -6,7 +6,7 @@
 const fail=m=>{throw Error(m);},q=JSON.stringify,own=(v,k)=>Object.hasOwn(v,k);
 const arr=(v,min,max)=>{if(!Array.isArray(v)||v.length<min||v.length>max)fail('Očekujem '+(min===max?min:min+'–'+max)+' elemenata; dobijeno '+(Array.isArray(v)?v.length:'nije lista')+'.');return v;};
 const tuple=(v,n)=>arr(v,n,n);
-const name=v=>{if(typeof v!=='string'||!/^[A-Za-z][A-Za-z0-9_]{0,47}$/.test(v)||!scope.CLEA7BIL.safe(v))fail('Neispravno BIL ime.');return v;};
+const name=v=>{if(typeof v!=='string'||!/^[A-Za-z][A-Za-z0-9_]{0,47}$/.test(v)||!scope.CLEA7BIL.safe(v))fail('Neispravno BIL ime: '+JSON.stringify(v)+'. Koristi jedinstven ASCII identifikator, npr. noteText ili saveNote.');return v;};
 const text=(v,max=200)=>{if(typeof v!=='string'||!v.trim()||v.length>max)fail('Neispravan tekst.');return v;};
 const map=v=>{if(!v||typeof v!=='object'||Array.isArray(v))fail('Očekujem JSON objekat.');return v;};
 function exact(v,keys){map(v);if(Object.keys(v).some(k=>!keys.includes(k))||keys.some(k=>!own(v,k)))fail('Nepotpuna ili nepoznata polja: '+keys.join(', '));return v;}
@@ -36,6 +36,12 @@ function requestedScreens(intent){
  if(!m)return null;const words={jedan:1,dva:2,tri:3,četiri:4,cetiri:4,pet:5,šest:6,sest:6,sedam:7,osam:8,devet:9,deset:10,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12};return words[m[1]]||Number(m[1]);
 }
 function unique(xs){if(new Set(xs).size!==xs.length)fail('Imena moraju biti jedinstvena.');}
+// Model declaration identifiers can be safely normalized before any events or
+// screens refer to them. Original labels/goals remain unchanged.
+function normalizeIds(rows,prefix){const used=new Set();return rows.map((row,i)=>{let id=String(row[0]||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9_]+/g,'_').replace(/^_+|_+$/g,'').slice(0,40);
+ if(!/^[A-Za-z]/.test(id)||!scope.CLEA7BIL.safe(id))id=prefix+'_'+(id||String(i+1));
+ if(!scope.CLEA7BIL.safe(id))id=prefix+'_'+(i+1);
+ const root=id;let n=1;while(used.has(id)||!scope.CLEA7BIL.safe(id))id=root+'_'+n++;used.add(id);return [name(id),...row.slice(1)];});}
 function outline(v){
  exact(v,['title','v','e','s']);
  const state=arr(v.v,0,16).map(row=>{
@@ -127,7 +133,7 @@ async function generate(intent,{signal,onStatus=()=>{},ask=scope.CLEA7PublicPlan
  async function stage(label,instruction,validate,initialDiagnostic='',wire='json'){
   let diagnosis=initialDiagnostic,previous='';
   for(let attempt=1;attempt<=2;attempt++){
-   check();onStatus(label+' · pokušaj '+attempt);const question=instruction+'\nTask: '+intent+(diagnosis?'\nRepair previous error: '+diagnosis+(previous?'\nRejected JSON: '+previous.slice(0,Math.max(0,2200-instruction.length-intent.length)):''):'')+(wire==='lines'?'\nReturn only the specified pipe-delimited rows, followed by END. No prose.':'\nReturn ONLY complete compact JSON. No prose.');
+   check();onStatus(label+' · pokušaj '+attempt);const question=instruction+'\nTask: '+intent+(diagnosis?'\nRepair previous error: '+diagnosis+(previous?'\nRejected previous output: '+previous.slice(0,Math.max(0,2200-instruction.length-intent.length)):''):'')+(wire==='lines'?'\nReturn only the specified pipe-delimited rows, followed by END. No prose.':'\nReturn ONLY complete compact JSON. No prose.');
    if(question.length>3000)fail('Opis prelazi radni prozor modela.');
    let reply;
    try{const r=await ask(question,{signal,onStatus:x=>onStatus(label+' · '+x)});reply=r.reply;check();const result=await validate(wire==='lines'?reply:json(reply));trace.push({stage:label,attempt,passed:true});return result;}
@@ -138,11 +144,11 @@ async function generate(intent,{signal,onStatus=()=>{},ask=scope.CLEA7PublicPlan
  const layout=await stage('1a · Ekrani','Plan only the app title and screens. One row TITLE|app title. Then PAGE|identifier|title|short purpose for each distinct screen. '+(count?'Exactly '+count+' PAGE rows.':'Choose 1 to 6 PAGE rows as needed.')+' ASCII identifiers, short labels, max 5 words per purpose. Last line END.',raw=>{
   const rows=lineRows(raw,['TITLE','PAGE']),titles=rows.filter(r=>r[0]==='TITLE');if(titles.length!==1)fail('Potreban je jedan naslov aplikacije.');tuple(titles[0],2);
   const screens=rows.filter(r=>r[0]==='PAGE').map(row=>{tuple(row,4);return row.slice(1);});
-  arr(screens,1,16);if(count!==null&&screens.length!==count)fail('Traženo '+count+' ekrana; model dao '+screens.length+'.');unique(screens.map(r=>name(r[0])));
-  return {title:text(titles[0][1],100),s:screens};
+  arr(screens,1,16);if(count!==null&&screens.length!==count)fail('Traženo '+count+' ekrana; model dao '+screens.length+'.');const normalized=normalizeIds(screens,'page');
+  return {title:text(titles[0][1],100),s:normalized};
  },'','lines');
- const structure=await stage('1b · Podaci i radnje','Plan data and actions for screens '+q(layout.s)+'. Rows V|identifier|type, E|event|short goal. Types Text,Number,Boolean,List<Text>,List<Number>,List<Boolean>. Up to 16 V and 12 E. Do not output initial values. Include meaningful task actions, not navigation alone. Last line END.',raw=>{
-  const rows=lineRows(raw,['V','E']);const v=rows.filter(r=>r[0]==='V').map(r=>{tuple(r,3);return r.slice(1);}),e=rows.filter(r=>r[0]==='E').map(r=>{tuple(r,3);return r.slice(1);});return outline({...layout,v,e});
+ const structure=await stage('1b · Podaci i radnje','Plan data and actions for screens '+q(layout.s)+'. Rows V|identifier|type and E|identifier|short goal. Example V|noteText|Text and E|saveNote|save note. ASCII camelCase identifiers; no spaces, accents, BIL keywords, types or descriptions as identifiers. Types Text,Number,Boolean,List<Text>,List<Number>,List<Boolean>. Up to 16 V and 12 E. No initial values. Meaningful task actions. Last line END.',raw=>{
+  const rows=lineRows(raw,['V','E']);const v=rows.filter(r=>r[0]==='V').map(r=>{tuple(r,3);return r.slice(1);}),e=rows.filter(r=>r[0]==='E').map(r=>{tuple(r,3);return r.slice(1);});return outline({...layout,v:normalizeIds(v,'data'),e:normalizeIds(e,'action')});
  },'','lines');
 
  const plan=initial(structure),ctx=q(compact(structure)),tests=[];
