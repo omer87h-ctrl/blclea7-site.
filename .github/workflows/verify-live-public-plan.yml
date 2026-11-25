@@ -1,0 +1,23 @@
+name: Verify compact Qwen Studio authoring
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            studio
+            tests/test_live_public_plan.cjs
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify compact plan and actual public Qwen
+        env:
+          CLEA_REAL_MODEL_TEST: '1'
+        run: node tests/test_live_public_plan.cjs
