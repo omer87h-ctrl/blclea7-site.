@@ -101,7 +101,18 @@ html[data-clea-area="studio"] #studio-start>article{
   border-radius:24px;padding:clamp(22px,3vw,46px);box-shadow:0 10px 35px #071d1e25;
   min-width:0;
 }
-html[data-clea-area="studio"] #studio-start-create{display:flex;flex-direction:column;align-items:stretch;gap:10px}
+html[data-clea-area="studio"] body.studio-shell{overflow-x:hidden}
+html[data-clea-area="studio"] body.clea-product-studio .mobile-preview-note{display:none}
+html[data-clea-area="studio"] .studio-topbar{flex-wrap:wrap;max-width:100%}
+html[data-clea-area="studio"] .studio-topbar>a{margin-right:0;flex:1 1 180px;min-width:0;max-width:320px}
+html[data-clea-area="studio"] .studio-topbar>a.primary{flex:0 0 auto;max-width:none}
+html[data-clea-area="studio"] .studio-shell nav,html[data-clea-area="studio"] nav[aria-label="Radni prostor"]{flex-wrap:wrap;max-width:100%}
+html[data-clea-area="studio"] #studio-start-create{grid-column:1/-1;display:flex;flex-direction:column;align-items:stretch;gap:10px}
+html[data-clea-area="studio"] .draw-workspace{grid-template-columns:minmax(0,180px) minmax(0,1fr) minmax(0,220px)}
+html[data-clea-area="studio"] .clea-chat-room{height:min(640px,calc(100dvh - 220px));max-width:100%}
+@media(max-width:1000px){
+ html[data-clea-area="studio"] .draw-workspace{grid-template-columns:minmax(0,1fr)}
+}
 html[data-clea-area="studio"] #studio-start-create h1{
   color:#10262a;font-size:clamp(30px,3.5vw,52px);line-height:1.1;letter-spacing:-.035em;
   margin:4px 0 12px;
@@ -129,7 +140,7 @@ html[data-clea-area="studio"] #studio-recent-projects{
 html[data-clea-area="studio"] #studio-depth-start{grid-column:1/-1}
 html[data-clea-area="studio"] body[data-workspace="studio-start"] :is(#flow-dock,#runtime-dock),
 html[data-clea-area="studio"] body[data-workspace="studio-boot"] :is(#flow-dock,#runtime-dock){display:none}
-html[data-clea-area="studio"] body[data-workspace="studio-start"] nav[aria-label="Radni prostor"]>button:not(#studio-home):not(#open-project):not([data-panel="draw"]):not([data-panel="bil"]):not([data-panel="clea-chat"]){display:none}
+html[data-clea-area="studio"] body[data-workspace="studio-start"] nav[aria-label="Radni prostor"]>button:not(#studio-home):not(#open-project):not(#run-top):not([data-panel="draw"]):not([data-panel="bil"]):not([data-panel="clea-chat"]){display:none}
 @media(max-width:760px){
   html[data-clea-area="studio"] body[data-workspace="studio-start"] #studio-start{grid-template-columns:minmax(0,1fr);gap:12px}
   html[data-clea-area="studio"] #studio-start>article{padding:22px;border-radius:18px}
