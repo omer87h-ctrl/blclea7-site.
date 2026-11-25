@@ -62,13 +62,13 @@ function handler(v,event,structure){
  exact(v,['steps','test']);const states=new Set(structure.state.map(x=>x.name)),screens=new Set(structure.screens.map(x=>x.id));
  const steps=arr(v.steps,1,12).map(row=>{
   if(!Array.isArray(row))fail('Nedostaje radnja.');
-  if(row[0]==='set'){tuple(row,3);if(!states.has(name(row[1])))fail('Nepoznat podatak '+row[1]);return {op:'set',target:row[1],expression:text(row[2],400)};}
+  if(row[0]==='set'){tuple(row,3);if(!states.has(name(row[1])))fail('Nepoznat podatak '+row[1]+'. Dozvoljeni podaci: '+[...states].join(', ')+'. Za samu navigaciju koristi OPEN sa postojećim ekranom.');return {op:'set',target:row[1],expression:text(row[2],400)};}
   if(row[0]==='open'){tuple(row,2);if(!screens.has(name(row[1])))fail('Nepoznat ekran.');return {op:'open',screen:row[1]};}
   if(row[0]==='bil'){tuple(row,2);return {op:'bil',source:text(row[1],400)};}
   fail('Nepoznata radnja.');
  });
  const test=exact(v.test,['inputs','expect']);map(test.inputs);map(test.expect);
- for(const [k,val]of Object.entries({...test.inputs,...test.expect})){if(!states.has(name(k)))fail('Test koristi nedeklarisan podatak.');if(val!==null&&typeof val==='object'&&!Array.isArray(val))fail('Test očekuje tipiziranu vrijednost.');}
+ for(const [k,val]of Object.entries({...test.inputs,...test.expect})){if(!states.has(name(k)))fail('Test koristi nedeklarisan podatak '+k+'. Dozvoljeni: '+[...states].join(', ')+'. Navigacija ne zahtijeva INPUT/EXPECT.');if(val!==null&&typeof val==='object'&&!Array.isArray(val))fail('Test očekuje tipiziranu vrijednost.');}
  if(!Object.keys(test.expect).length&&!steps.some(x=>x.op==='open'))fail('Radnja treba provjerljivo očekivanje.');
  return {name:event.name,steps,test};
 }
@@ -172,8 +172,9 @@ async function generate(intent,{signal,onStatus=()=>{},ask=scope.CLEA7PublicPlan
   return {flow:built.name,...built.test,...(nav?{screen:nav.screen}:{})};
  }
  async function eventPhase(i,diagnostic=''){
-  const event=structure.events[i],context=q({prior:tests.slice(0,i).map(x=>x.expect),view:plan.screens.map(x=>x.id)});
-  const built=await stage('2 · BIL '+event.name,'Write event '+event.name+': '+event.goal+'. State and screens '+ctx+'. Prior expected state '+context+'. Output rows: SET|variable|BIL expression, optional OPEN|screen, or BIL|statement. Then INPUT|variable|JSON value for each user input and EXPECT|variable|JSON value for changed output. Quoted strings in expressions. collections.append(list,value), collections.remove(list,index), collections.length(list), clear with collections.slice(list,0,0). Real test in event order. No device operations. END.',v=>{
+  const event=structure.events[i],names=structure.state.map(x=>x.name),screens=structure.screens.map(x=>x.id),previousValues=Object.assign(Object.create(null),...structure.state.map(x=>({[x.name]:x.value})),...tests.slice(0,i).map(x=>x.expect));
+  const context='Allowed data identifiers: '+q(names)+'. Allowed screen identifiers: '+q(screens)+'. Current test values (read-only context, not identifiers): '+q(previousValues).slice(0,500)+'.';
+  const built=await stage('2 · BIL '+event.name,'Write event '+event.name+': '+event.goal+'. Types '+q(structure.state.map(x=>[x.name,x.type]))+'. '+context+' Use ONLY the listed data identifiers as SET/INPUT/EXPECT targets and variable references in expressions. Never use context labels such as prior as variables; never invent data. For navigation only, emit OPEN|exactScreenId then END, with NO SET, INPUT or EXPECT. Otherwise SET|dataId|BIL expression, optional OPEN|screenId, or BIL|statement; INPUT|dataId|JSON value only for user inputs, EXPECT|dataId|JSON value for changed data. Quote string literals. collections.append(list,value), collections.remove(list,index), collections.length(list), collections.slice(list,0,0). No device operations. END.',v=>{
    const value=handler(typeof v==='string'?eventRows(v):v,event,structure),events=plan.events.slice();events[i]={name:value.name,steps:value.steps};compile({...plan,events});return value;
   },diagnostic,'lines');
   plan.events[i]={name:built.name,steps:built.steps};tests[i]=testFor(built);
