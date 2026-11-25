@@ -93,7 +93,7 @@ async function generate(intent,{signal,onStatus=()=>{},ask=scope.CLEA7PublicPlan
  }
  async function eventPhase(i,diagnostic=''){
   const event=structure.events[i],context=q({prior:tests.slice(0,i).map(x=>x.expect),view:plan.screens.map(x=>x.id)});
-  const built=await stage('2 · BIL '+event.name,'Write event '+event.name+': '+event.goal+'. Context '+ctx+'. Previous test expectations '+context+'. JSON {"steps":[["set","variable","BIL expression"]],"test":{"inputs":{"var":"sample"},"expect":{"var":"result"}}}. Steps set, open (["open","screen"]), or ["bil","if ... { ... }"]. Strings use escaped quotes; BIL + joins text; collections.append(list,value), collections.remove(list,index), collections.length(list). Test a meaningful change with sample editable inputs; tests run in event order. No device operations. Under 180 tokens.',v=>{
+  const built=await stage('2 · BIL '+event.name,'Write event '+event.name+': '+event.goal+'. Context '+ctx+'. Previous test expectations '+context+'. JSON {"steps":[["set","variable","BIL expression"]],"test":{"inputs":{"var":"sample"},"expect":{"var":"result"}}}. Steps set, open (["open","screen"]), or ["bil","if ... { ... }"]. Strings use escaped quotes; BIL + joins text; collections.append(list,value), collections.remove(list,index), collections.length(list). Clear a typed list with collections.slice(list,0,0), not []. Test a meaningful change with sample editable inputs; tests run in event order. No device operations. Under 180 tokens.',v=>{
    const value=handler(v,event,structure),events=plan.events.slice();events[i]={name:value.name,steps:value.steps};compile({...plan,events});return value;
   },diagnostic);
   plan.events[i]={name:built.name,steps:built.steps};tests[i]=testFor(built);
