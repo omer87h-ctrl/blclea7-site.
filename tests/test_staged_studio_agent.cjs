@@ -8,6 +8,8 @@ const structure={title:'Notes',v:[['draft','Text'],['entries','List<Text>']],e:[
 const add={steps:[['set','entries','collections.append(entries,draft)']],test:{inputs:{draft:'test entry'},expect:{entries:['test entry']}}};
 const clear={steps:[['set','entries','collections.slice(entries,0,0)']],test:{inputs:{},expect:{entries:[]}}};
 const screen={bg:'#112233',fg:'#ffffff',accent:'#445566',layout:'column',nodes:[['card','New note',[['m','draft','Note'],['b','Add','add']]],['o','entries'],['b','Clear','clear']]};
+const eventWire=v=>[...v.steps.map(x=>[x[0].toUpperCase(),...x.slice(1)].join('|')),...Object.entries(v.test.inputs).map(([k,x])=>'INPUT|'+k+'|'+JSON.stringify(x)),...Object.entries(v.test.expect).map(([k,x])=>'EXPECT|'+k+'|'+JSON.stringify(x)),'END'].join('\n');
+const designWire=v=>['THEME|'+[v.bg,v.fg,v.accent,v.layout].join('|'),...v.nodes.map(n=>n[0]==='card'||n[0]==='row'?'TREE|'+JSON.stringify(n):n.map((x,i)=>i===0?x.toUpperCase():x).join('|')),'END'].join('\n');
 (async()=>{
  let bad=true;const calls=[];
  const ask=async question=>{calls.push(question);let value;
@@ -17,7 +19,7 @@ const screen={bg:'#112233',fg:'#ffffff',accent:'#445566',layout:'column',nodes:[
  else if(question.startsWith('Write event clear:'))value=clear;
  else if(question.startsWith('Design screen home '))value=screen;
  else throw Error('Unexpected phase');
- return {reply:JSON.stringify(value)};
+ return {reply:value.steps?eventWire(value):designWire(value)};
  };
  const result=await CLEA7PublicStudioAgent.generate('A new independent notes app',{ask});
  assert.equal(result.checks.length,2);assert.ok(result.trace.some(t=>!t.passed));assert.ok(result.source.includes('collections.append'));
@@ -27,6 +29,8 @@ const screen={bg:'#112233',fg:'#ffffff',accent:'#445566',layout:'column',nodes:[
  assert.throws(()=>CLEA7PublicStudioAgent.lineRows('TITLE|Notes\nPAGE|home|Notes|Write',['TITLE','PAGE']));
  assert.deepEqual(CLEA7PublicStudioAgent.json('Plan:\n{"a":1}\n'),{a:1});
  assert.throws(()=>CLEA7PublicStudioAgent.json('{"a":1'));
+ assert.throws(()=>CLEA7PublicStudioAgent.eventRows('SET|x|1\nEXPECT|x|1'));
+ assert.deepEqual(CLEA7PublicStudioAgent.designRows('THEME|#112233|#ffffff|#335577|column\nH|Hi\nEND').nodes,[['h','Hi']]);
  const compiled=CLEA7BIL.compile(result.source);
  assert.ok(compiled.ir.ui.screens.length===1);
  const checked=await CLEA7Intelligence.verifyBIL(result.source,{metadata:{id:'staged_fixture',name:'Notes'},checks:result.checks});
@@ -35,10 +39,10 @@ const screen={bg:'#112233',fg:'#ffffff',accent:'#445566',layout:'column',nodes:[
  const planned=await CLEA7PublicStudioAgent.generate('Pet ekrana za bilješke',{ask:async question=>{
   if(question.startsWith('Plan only the app title'))return {reply:'TITLE|Multi\n'+pages.map(id=>'PAGE|'+id+'|'+id+'|Local notes').join('\n')+'\nEND'};
   if(question.startsWith('Plan data and actions'))return {reply:'V|draft|Text\nV|entries|List<Text>\nE|add|append note\nE|clear|clear notes\nEND'};
-  if(question.startsWith('Write event add:'))return {reply:JSON.stringify(add)};
-  if(question.startsWith('Write event clear:'))return {reply:JSON.stringify(clear)};
+  if(question.startsWith('Write event add:'))return {reply:eventWire(add)};
+  if(question.startsWith('Write event clear:'))return {reply:eventWire(clear)};
   const page=pages.find(id=>question.startsWith('Design screen '+id+' '));
-  if(page)return {reply:JSON.stringify({...screen,nodes:page==='write'?[['m','draft','Note'],['b','Add','add']]:page==='list'?[['o','entries'],['b','Clear','clear']]:[['h',page]]})};
+  if(page)return {reply:designWire({...screen,nodes:page==='write'?[['m','draft','Note'],['b','Add','add']]:page==='list'?[['o','entries'],['b','Clear','clear']]:[['h',page]]})};
   throw Error('Unexpected phase');
  }});
  const multi=CLEA7BIL.compile(planned.source);assert.equal(multi.ir.ui.screens.length,5);
@@ -49,8 +53,8 @@ const screen={bg:'#112233',fg:'#ffffff',accent:'#445566',layout:'column',nodes:[
  const realFetch=globalThis.fetch;
  globalThis.fetch=(url,init)=>realFetch(url,{...init,headers:{...init.headers,Origin:'https://clea7.brzoilokalno.com'}});
  const creator=CLEA7AppAuthoring.create({generate:(intent,{signal})=>CLEA7PublicStudioAgent.generate(intent,{signal,onStatus:message=>console.log('MODEL_STAGE',message.replace(/ · Qwen sastavlja plan · \d+ znakova$/,''))}),attempts:1});
- const proposal=await creator.propose('Napravi mali rokovnik na bosanskom: upis naslova bilješke, dugme dodaj, prikaz svih bilješki i obriši sve.',{mode:'create',representation:'public-staged'});
- assert.ok(proposal.modelInvoked&&proposal.application.bil.ir.ui.screens.length);
+ const proposal=await creator.propose('Napravi jednostavan rokovnik na bosanskom sa pet ekrana, unos bilješki, prikaz bilješki i brisanje svih bilješki.',{mode:'create',representation:'public-staged'});
+ assert.ok(proposal.modelInvoked);assert.equal(proposal.application.bil.ir.ui.screens.length,5);
  assert.ok(proposal.agentTrace.some(t=>t.stage==='Runtime'&&t.passed));
  console.log('REAL_STAGED_QWEN_DRAW_BIL_RUNTIME_PASS',JSON.stringify({name:proposal.application.name,screens:proposal.application.bil.ir.ui.screens.length,checks:proposal.receipt.results.s3.checks,trace:proposal.agentTrace}));
  console.log('ACTUAL_MODEL_GENERATED_SOURCE',JSON.stringify(proposal.source));
