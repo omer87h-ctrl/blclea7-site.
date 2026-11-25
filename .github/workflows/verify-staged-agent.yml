@@ -23,3 +23,5 @@ jobs:
         env:
           CLEA_REAL_MODEL_TEST: '1'
         run: node tests/test_staged_studio_agent.cjs
+
+# Re-run after typed-list correction.
