@@ -127,17 +127,32 @@ function design(v,screen,structure){
 const initial=(s)=>({format:'clea7.authoring-plan/1',state:s.state,backends:[],events:[],screens:s.screens.map(x=>({id:x.id,title:x.title,items:[{kind:'heading',label:x.title}]})),start:s.screens[0].id,...(s.state.some(x=>x.type.startsWith('List<'))?{declarations:['import collections']}:{})});
 function compile(plan){const result=scope.CLEA7AppAuthoring.emitPlan(plan);scope.CLEA7BIL.compile(result.source);return result.source;}
 const compact=s=>({v:s.state.map(x=>[x.name,x.type]),e:s.events.map(x=>x.name),s:s.screens.map(x=>x.id)});
+// A complete JSON object is an alternative wire, not a guessed END marker.
+function phaseJSON(label,raw){
+ const v=json(raw);
+ if(label.startsWith('1a')){exact(v,['title','s']);return [['TITLE',v.title],...arr(v.s,1,16).map(r=>['PAGE',...tuple(r,3)])].map(r=>r.join('|')).join('\n')+'\nEND';}
+ if(label.startsWith('1b')){exact(v,['v','e']);return [...arr(v.v,0,16).map(r=>['V',...tuple(r,2)]),...arr(v.e,1,12).map(r=>['E',...tuple(r,2)])].map(r=>r.join('|')).join('\n')+'\nEND';}
+ return v;
+}
+const phaseFormat=label=>label.startsWith('1a')?'{"title":"App title","s":[["home","Home","purpose"]]}':label.startsWith('1b')?'{"v":[["noteText","Text"]],"e":[["saveNote","save note"]]}':label.startsWith('2')?'{"steps":[["set","variable","BIL expression"]],"test":{"inputs":{},"expect":{}}}':'{"bg":"#112233","fg":"#ffffff","accent":"#335577","layout":"column","nodes":[["h","Title"]]}';
 async function generate(intent,{signal,onStatus=()=>{},ask=scope.CLEA7PublicPlan.requestText}={}){
  if(typeof intent!=='string'||!intent.trim()||intent.length>1200)fail('Opiši aplikaciju do 1200 znakova.');
  const trace=[],check=()=>{if(signal?.aborted)fail('Izrada je zaustavljena.');};
  async function stage(label,instruction,validate,initialDiagnostic='',wire='json'){
   let diagnosis=initialDiagnostic,previous='';
-  for(let attempt=1;attempt<=2;attempt++){
-   check();onStatus(label+' · pokušaj '+attempt);const question=instruction+'\nTask: '+intent+(diagnosis?'\nRepair previous error: '+diagnosis+(previous?'\nRejected previous output: '+previous.slice(0,Math.max(0,2200-instruction.length-intent.length)):''):'')+(wire==='lines'?'\nReturn only the specified pipe-delimited rows, followed by END. No prose.':'\nReturn ONLY complete compact JSON. No prose.');
+  for(let attempt=1;attempt<=3;attempt++){
+   check();const alternative=wire==='lines'&&attempt===3;
+   onStatus(label+' · pokušaj '+attempt+(alternative?' · alternativni JSON plan':''));
+   const suffix=alternative?'\nUse ONLY this complete JSON object shape, NOT pipe rows or END: '+phaseFormat(label)+'. Fill it with the actual task data.':wire==='lines'?'\nReturn only the specified pipe-delimited rows, followed by END. No prose.':'\nReturn ONLY complete compact JSON. No prose.';
+   const task='\nTask: '+intent;
+   const repair=diagnosis?'\nRepair error: '+diagnosis:'';
+   const budget=3000-instruction.length-task.length-suffix.length-repair.length;
+   const prior=previous&&budget>40&&!alternative?'\nRejected output: '+previous.slice(0,budget-20):'';
+   const question=instruction+task+repair+prior+suffix;
    if(question.length>3000)fail('Opis prelazi radni prozor modela.');
    let reply;
-   try{const r=await ask(question,{signal,onStatus:x=>onStatus(label+' · '+x)});reply=r.reply;check();const result=await validate(wire==='lines'?reply:json(reply));trace.push({stage:label,attempt,passed:true});return result;}
-   catch(error){check();diagnosis=String(error.message).slice(0,300);previous=reply||'';trace.push({stage:label,attempt,passed:false,diagnostic:diagnosis});if(attempt===2)throw Object.assign(Error(label+': '+diagnosis),{trace,failedProposal:reply});}
+   try{const r=await ask(question,{signal,onStatus:x=>onStatus(label+' · '+x)});reply=r.reply;check();const result=await validate(alternative?phaseJSON(label,reply):wire==='lines'?reply:json(reply));trace.push({stage:label,attempt,passed:true,wire:alternative?'json':wire});return result;}
+   catch(error){check();diagnosis=String(error.message).slice(0,180);previous=reply||'';trace.push({stage:label,attempt,passed:false,diagnostic:diagnosis,wire:alternative?'json':wire});if(attempt===3)throw Object.assign(Error(label+': '+diagnosis),{trace,failedProposal:reply});}
   }
  }
  const count=requestedScreens(intent);if(count!==null&&(count<1||count>16))fail('Ova verzija podržava 1–16 ekrana po aplikaciji.');
@@ -199,5 +214,5 @@ async function generate(intent,{signal,onStatus=()=>{},ask=scope.CLEA7PublicPlan
  if(!verification)fail('Runtime nije završio provjeru.');
  return {reply:q(plan),modelProfile:'qwen3.5-9b-q4_k_m',title:structure.title,trace,checks:tests,source};
 }
-scope.CLEA7PublicStudioAgent=Object.freeze({generate,outline,handler,design,lineRows,requestedScreens,json,eventRows,designRows});
+scope.CLEA7PublicStudioAgent=Object.freeze({generate,outline,handler,design,lineRows,requestedScreens,json,eventRows,designRows,phaseJSON});
 })(globalThis);
