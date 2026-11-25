@@ -1,0 +1,23 @@
+name: Verify staged Studio local contracts
+on:
+  push:
+    branches: [fix/clea-live-plan-20261125]
+    paths: [.github/workflows/staged-agent-local.yml]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            studio
+            tests/test_staged_studio_agent.cjs
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check actual compiler, Draw and Runtime contracts without using HP
+        run: node tests/test_staged_studio_agent.cjs
