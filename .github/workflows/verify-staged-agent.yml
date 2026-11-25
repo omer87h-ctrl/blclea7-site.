@@ -25,3 +25,5 @@ jobs:
         run: node tests/test_staged_studio_agent.cjs
 
 # Re-run after typed-list correction.
+
+# Verify the simplified two-field typed planning wire.
