@@ -324,7 +324,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   if(loading)return;
   if(!publicAuthor||!globalThis.CLEA7Workbench){feedback.textContent='Studio još nije spreman. Pokušaj ponovo.';return;}
   loading=true;submit.disabled=true;document.getElementById('chat-stop').disabled=false;authorController=new AbortController();
-  const body=message('BL CLEA AI · izrada aplikacije','Provjeravam vezu s Qwenom…');
+  const body=message('BL CLEA AI · izrada aplikacije (beta)','Provjeravam vezu s Qwenom…');
   try{
    const h=await fetch(publicBetaEndpoint+'/health',{headers:{'ngrok-skip-browser-warning':'1'},signal:AbortSignal.any([authorController.signal,AbortSignal.timeout(8000)]),cache:'no-store',credentials:'omit'});
    const health=await h.json();if(!h.ok||health.ready!==true)throw Error('Veza s HP serverom trenutno nije dostupna.');if(health.streaming!==true)throw Error('Ovaj servis trenutno nema aktivan prijenos modelskog odgovora.');
