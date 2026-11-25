@@ -334,7 +334,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   const body=message('BL CLEA AI · izrada aplikacije','Provjeravam vezu s Qwenom…');
   try{
    const h=await fetch(publicBetaEndpoint+'/health',{headers:{'ngrok-skip-browser-warning':'1'},signal:AbortSignal.any([authorController.signal,AbortSignal.timeout(8000)]),cache:'no-store',credentials:'omit'});
-   const health=await h.json();if(!h.ok||health.ready!==true||health.bilAuthoring!==true||health.authoringMode!=='create')throw Error('Pokreni ažurirani CLEA Runner na HP-u. Javni BIL servis još nije dostupan.');
+   const health=await h.json();if(!h.ok||health.ready!==true)throw Error('Veza s HP serverom trenutno nije dostupna.');if(health.bilAuthoring!==true||health.authoringMode!=='create')throw Error('Qwen je povezan za razgovor. Izrada aplikacija preko BIL servisa još nije aktivirana. Ponovno pokretanje runnera sada ne rješava ovaj problem. Tvoj zahtjev ostaje sačuvan u unosu.');
    input.value='';const proposal=await publicAuthor.propose(question,{project:CLEA7Workbench.snapshot(),mode:'create',representation:'plan',signal:authorController.signal,onDelta:()=>{body.textContent='Qwen je vratio plan. Provjeravam stvarni BIL i Runtime…';}});
    proposalUI(body,proposal);feedback.textContent='BIL prijedlog je prošao lokalnu provjeru. Pregledaj i primijeni ga.';
   }catch(error){body.textContent=error.message;feedback.textContent='Aplikacija nije primijenjena. Postojeći projekt je sačuvan.';input.value=question;}
