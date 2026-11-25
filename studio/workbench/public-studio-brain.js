@@ -2,10 +2,13 @@
 (function(s){
 const K='clea.public.history.v2',q=JSON.stringify,fit=(v,n)=>String(v||'').slice(0,n);
 function memory(session,local){
- function read(store){try{const a=JSON.parse(store?.getItem(K)||'[]');if(!Array.isArray(a)||a.length%2||a.some((x,i)=>x?.role!==(i%2?'assistant':'user')||typeof x.content!=='string'))return [];return a.slice(-80);}catch{return [];}}
- let rows=read(local),saved=rows.length>0;if(!saved)rows=read(session);
- function save(persist){try{session?.setItem(K,q(rows));if(persist)local?.setItem(K,q(rows));else local?.removeItem(K);}catch{}}
- return {saved,all:()=>rows.slice(),save,add(user,reply,persist){rows.push({role:'user',content:fit(user,1200)},{role:'assistant',content:fit(reply,1600)});rows=rows.slice(-80);save(persist);},clear(){rows=[];try{session?.removeItem(K);local?.removeItem(K);}catch{}},wire:()=>rows.slice(-6).map(x=>({...x,content:fit(x.content,800)})),recall(question){const words=question.toLowerCase().match(/[\p{L}\p{N}_]{4,}/gu)||[];return rows.slice(0,-6).map(x=>({x,score:words.filter(w=>x.content.toLowerCase().includes(w)).length})).filter(x=>x.score).sort((a,b)=>b.score-a.score).slice(0,2).map(x=>x.x.role+': '+x.x.content).join('\n').slice(0,420);}};
+ function read(store){try{const raw=store?.getItem(K);if(raw==null)return null;const a=JSON.parse(raw);if(!Array.isArray(a)||a.length%2||a.some((x,i)=>x?.role!==(i%2?'assistant':'user')||typeof x.content!=='string'))return null;return a.slice(-80).map(x=>({role:x.role,content:fit(x.content,x.role==='user'?1200:1600)}));}catch{return null;}}
+ const persisted=read(local),current=read(session);let rows=current??persisted??[];
+ function write(store,value){try{if(value===null)store?.removeItem(K);else store?.setItem(K,q(value));}catch{}}
+ function save(persist){write(session,rows);write(local,persist?rows:null);}
+ const normalize=x=>String(x).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ const words=x=>[...new Set(normalize(x).match(/[\p{L}\p{N}_]{4,}/gu)||[])].filter(w=>!['kako','mozes','moze','koji','koja','koliko','treba','napravi','aplikaciju','this','that','what','with','please'].includes(w));
+ return {saved:persisted!==null,all:()=>rows.map(x=>({...x})),save,add(user,reply,persist){rows.push({role:'user',content:fit(user,1200)},{role:'assistant',content:fit(reply,1600)});rows=rows.slice(-80);save(persist);},clear(){rows=[];write(session,null);write(local,null);},wire:()=>rows.slice(-6).map(x=>({...x,content:fit(x.content,800)})),recall(question){const terms=words(question);if(!terms.length)return '';const older=rows.slice(0,Math.max(0,rows.length-6));const pairs=[];for(let i=0;i<older.length;i+=2){const pair=older.slice(i,i+2);const tokens=new Set(words(pair.map(x=>x.content).join(' ')));const score=terms.filter(w=>tokens.has(w)).length;if(score)pairs.push({pair,score,i});}return pairs.sort((a,b)=>b.score-a.score||b.i-a.i).slice(0,2).map(({pair})=>pair.map(x=>x.role+': '+fit(x.content,200)).join('\n')).join('\n').slice(0,420);}};
 }
 const catalog=()=>s.CLEA7StudioTools?.manifest?.().tools||[];
 function chatQuestion(question,mem){
@@ -14,13 +17,16 @@ function chatQuestion(question,mem){
 }
 const schema='project.create(screen,title[,grammar]); screen.add(screen,title); object.remember(object,field,type,value); object.derive(object,field,expression[,whenTrue,whenFalse]); object.action(object,field,action,expression[,label]); object.label(object,field,label); ui.add(spec); ui.collection(spec); ui.compose(screen,nodes[,parent]); ui.style(target,style); ui.label(target,label); ui.move(target,parent); ui.duplicate(target); ui.remove(target); draw.add(spec); draw.position(object,x,y); draw.proximity(object,actor,radius); scene.add(screen,id); depth.transform(target[,origin,extent,rotation,surface,tint]); depth.from-drawing(drawing,world,id,origin,extent[,rotation,surface,tint]); resource.declare(id,kind); sense.cv(); sense.ocr(screen,id[,language,label]); bil.declaration(source); bil.event(source); bil.item(screen,source).';
 function toolPrompt(intent,c){
- const st=c.structure||{},ctx={screens:st.screens||[],state:st.state||[],events:st.events||[],components:(st.components||[]).map(({id,key,kind,label,screen})=>({id,key,kind,label,screen})),grammar:st.grammar,objectModel:st.objectModel};
- const intro='Plan actual CLEA tools. Return only complete JSON {"format":"clea7.studio-tools/1","operations":[{"tool":"...","...":"..."}]}. '+(c.mode==='change'?'Edit existing project; do not create or replace it. Use existing keys.':'First project.create or sense.cv; implement functional controls.')+' ASCII names. Every operation must compile. '+schema+' ui.add spec={screen,id,label,kind}; draw.add spec={screen,id,label,role,x,y,width,height}; ui.compose nodes={kind,id,label,children}. BIL declaration: let n = 0; event: on inc { n = n + 1 }. No external effects.';
+ const st=c.structure||{},ctx={screens:[...(st.screens||[])],state:[...(st.state||[])],events:[...(st.events||[])],components:(st.components||[]).map(({id,key,kind,label,screen})=>({id,key,kind,label,screen})),grammar:st.grammar,objectModel:st.objectModel};
+ const registered=new Set(catalog().map(t=>t.id));if(!registered.size)throw Error('Studio registar alata nije učitan.');
+ const activeSchema=schema.split('; ').filter(t=>registered.has(t.split('(')[0])).join('; ');
+ const intro='Plan actual CLEA tools. Return only complete JSON {"format":"clea7.studio-tools/1","operations":[{"tool":"...","...":"..."}]}. '+(c.mode==='change'?'Edit existing project; do not create or replace it. Use existing keys.':'First project.create or sense.cv; implement functional controls.')+' ASCII names. Every operation must compile. '+activeSchema+' ui.add spec={screen,id,label,kind}; draw.add spec={screen,id,label,role,x,y,width,height}; ui.compose nodes={kind,id,label,children}. BIL declaration: let n = 0; event: on inc { n = n + 1 }. No external effects.';
  const tail=(c.diagnostic?'\nRepair: '+fit(c.diagnostic,180):'')+'\nTask: '+intent;
  while(q(ctx).length>Math.max(150,2950-intro.length-tail.length)){if(ctx.components.length)ctx.components.pop();else if(ctx.state.length>2)ctx.state.pop();else if(ctx.events.length>2)ctx.events.pop();else if(ctx.screens.length>1)ctx.screens.pop();else if(ctx.objectModel)delete ctx.objectModel;else break;}
  const p=intro+(c.mode==='change'?'\nProject: '+q(ctx):'')+tail;if(p.length>3000)throw Error('Opis je predug za model.');return p;
 }
-async function generateTools(intent,{authoring,signal,ask=s.CLEA7PublicPlan.requestText}={}){
+async function generateTools(intent,{authoring,signal,ask=s.CLEA7PublicPlan?.requestText}={}){
+ if(typeof ask!=='function')throw Error('CLEA transport za Studio alate nije učitan.');
  const r=await ask(toolPrompt(intent,authoring),{signal});
  return r;
 }

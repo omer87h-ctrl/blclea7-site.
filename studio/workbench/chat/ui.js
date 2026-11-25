@@ -567,9 +567,26 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   for(const row of [...log.querySelectorAll('.chat-message')].slice(0,-24))row.remove();article.scrollIntoView({block:'nearest'});return body;
  }
  taskMode.onchange();
+ function restoreStudioIntent(){
+  if(!globalThis.CLEA7Workbench)return;
+  try{const key='clea.public.pending-intent.v1',raw=sessionStorage.getItem(key);if(!raw)return;const value=JSON.parse(raw);sessionStorage.removeItem(key);if(typeof value?.question!=='string'||!value.question.trim()||value.question.length>1200||!['create','change'].includes(value.mode))return;
+   input.value=value.question;taskMode.value=value.mode==='change'&&CLEA7Workbench.project?.bil?'change':'create';taskMode.onchange();feedback.textContent='Zahtjev iz razgovora je spreman. Pregledaj ga i pošalji kada želiš.';
+  }catch{}
+ }
+ if(globalThis.CLEA7Workbench)restoreStudioIntent();else globalThis.addEventListener('clea:studio-ready',restoreStudioIntent,{once:true});
  form.addEventListener('submit',async event=>{
   event.preventDefault();event.stopImmediatePropagation();if(loading)return;
   const studioQuestion=input.value.trim();
+  if(ownerPublicHost&&studioQuestion&&!globalThis.CLEA7Workbench&&location.pathname.includes('/razgovor/')){
+   const task=requestedTask(studioQuestion);
+   if(['create','change','tools'].includes(task)){
+    if(studioQuestion.length>1200){feedback.textContent='Poruka prelazi 1200 znakova.';return;}
+    message('Ti',studioQuestion);const body=message('BL CLEA AI','Za stvarnu izradu i testiranje aplikacije potreban je Studio. Prenesi zahtjev u isti CLEA AI radni prostor; projekt neće biti izmijenjen bez pregleda.');
+    const link=document.createElement('button');link.type='button';link.textContent='Nastavi izradu u Studiju';
+    link.onclick=()=>{try{sessionStorage.setItem('clea.public.pending-intent.v1',JSON.stringify({question:studioQuestion,mode:task==='change'?'change':'create'}));location.assign('/studio/workbench/?workspace=clea-chat');}catch{feedback.textContent='Preglednik ne dozvoljava lokalni prijenos. Kopiraj zahtjev i otvori Studio.';}};
+    body.append(link);return;
+   }
+  }
   if(ownerPublicHost&&(!active||client.capabilities.bilAuthoring!==true)&&studioQuestion&&globalThis.CLEA7Workbench){
    const task=requestedTask(studioQuestion),project=CLEA7Workbench.snapshot(),mode=task==='tools'?(project.bil?'change':'create'):task;
    if(mode==='create'||mode==='change'){
