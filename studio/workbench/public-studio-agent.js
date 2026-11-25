@@ -4,7 +4,7 @@
    interpret the result. No canned application, executable JS or remote grants. */
 (function(scope){
 const fail=m=>{throw Error(m);},q=JSON.stringify,own=(v,k)=>Object.hasOwn(v,k);
-const arr=(v,min,max)=>{if(!Array.isArray(v)||v.length<min||v.length>max)fail('Neispravan broj elemenata.');return v;};
+const arr=(v,min,max)=>{if(!Array.isArray(v)||v.length<min||v.length>max)fail('Očekujem '+(min===max?min:min+'–'+max)+' elemenata; dobijeno '+(Array.isArray(v)?v.length:'nije lista')+'.');return v;};
 const tuple=(v,n)=>arr(v,n,n);
 const name=v=>{if(typeof v!=='string'||!/^[A-Za-z][A-Za-z0-9_]{0,47}$/.test(v)||!scope.CLEA7BIL.safe(v))fail('Neispravno BIL ime.');return v;};
 const text=(v,max=200)=>{if(typeof v!=='string'||!v.trim()||v.length>max)fail('Neispravan tekst.');return v;};
@@ -24,8 +24,8 @@ function json(raw){
 }
 function lineRows(raw,allowed){
  const rows=[],lines=String(raw).trim().split(/\r?\n/);let ended=false;
- for(const line of lines){const trimmed=line.trim();if(trimmed==='END'){ended=true;break;}
- const parts=trimmed.split('|').map(x=>x.trim());if(!allowed.includes(parts[0]))continue;
+ for(const line of lines){const trimmed=line.trim();if(/^END[.!]?$/i.test(trimmed)){ended=true;break;}
+ const parts=trimmed.replace(/^(?:[-*]\s+|\d+[.)]\s+)/,'').split('|').map(x=>x.trim());parts[0]=parts[0].toUpperCase();if(!allowed.includes(parts[0]))continue;
  rows.push(parts);
  }
  if(!ended||!rows.length)fail('Nedovršen strukturirani plan (nedostaje END).');
@@ -65,6 +65,30 @@ function handler(v,event,structure){
  for(const [k,val]of Object.entries({...test.inputs,...test.expect})){if(!states.has(name(k)))fail('Test koristi nedeklarisan podatak.');if(val!==null&&typeof val==='object'&&!Array.isArray(val))fail('Test očekuje tipiziranu vrijednost.');}
  if(!Object.keys(test.expect).length&&!steps.some(x=>x.op==='open'))fail('Radnja treba provjerljivo očekivanje.');
  return {name:event.name,steps,test};
+}
+function eventRows(raw){
+ const rows=lineRows(raw,['SET','OPEN','BIL','INPUT','EXPECT']),steps=[],inputs=Object.create(null),expect=Object.create(null);
+ for(const row of rows){
+  const [kind,key,...rest]=row;
+  if(kind==='SET'){if(rest.length!==1)fail('SET treba ime i BIL izraz.');steps.push(['set',key,rest[0]]);}
+  else if(kind==='OPEN'||kind==='BIL'){tuple(row,2);steps.push([kind.toLowerCase(),key]);}
+  else{
+   tuple(row,3);const target=kind==='INPUT'?inputs:expect;name(key);if(own(target,key))fail('Duplikat testnog polja '+key);
+   try{target[key]=JSON.parse(rest[0]);}catch{fail(kind+' '+key+' treba potpunu JSON vrijednost.');}
+  }
+ }
+ return {steps,test:{inputs,expect}};
+}
+function designRows(raw){
+ const rows=lineRows(raw,['THEME','H','P','I','M','T','SELECT','B','O','NAV','SHAPE','CLOCK','TREE']),themes=rows.filter(r=>r[0]==='THEME');if(themes.length!==1)fail('Potreban je jedan THEME red.');
+ const [_,bg,fg,accent,layout]=tuple(themes[0],5),nodes=[];
+ for(const row of rows){const [kind,...parts]=row;if(kind==='THEME')continue;
+  if(kind==='TREE'){tuple(row,2);nodes.push(json(parts[0]));continue;}
+  if(kind==='SELECT'){tuple(row,4);nodes.push(['select',parts[0],parts[1],JSON.parse(parts[2])]);continue;}
+  if(kind==='CLOCK'){tuple(row,3);nodes.push(['clock',Number(parts[0]),parts[1]]);continue;}
+  nodes.push([kind.toLowerCase(),...parts]);
+ }
+ return {bg,fg,accent,layout,nodes};
 }
 const palettes=v=>{if(typeof v!=='string'||!/^#[0-9a-f]{6}$/i.test(v))fail('Boja mora biti heksadecimalna.');return v;};
 function design(v,screen,structure){
@@ -128,16 +152,16 @@ async function generate(intent,{signal,onStatus=()=>{},ask=scope.CLEA7PublicPlan
  }
  async function eventPhase(i,diagnostic=''){
   const event=structure.events[i],context=q({prior:tests.slice(0,i).map(x=>x.expect),view:plan.screens.map(x=>x.id)});
-  const built=await stage('2 · BIL '+event.name,'Write event '+event.name+': '+event.goal+'. Context '+ctx+'. Previous test expectations '+context+'. JSON {"steps":[["set","variable","BIL expression"]],"test":{"inputs":{"var":"sample"},"expect":{"var":"result"}}}. Steps set, open (["open","screen"]), or ["bil","if ... { ... }"]. Strings use escaped quotes; BIL + joins text; collections.append(list,value), collections.remove(list,index), collections.length(list). Clear a typed list with collections.slice(list,0,0), not []. Test a meaningful change with sample editable inputs; tests run in event order. No device operations. Under 180 tokens.',v=>{
-   const value=handler(v,event,structure),events=plan.events.slice();events[i]={name:value.name,steps:value.steps};compile({...plan,events});return value;
-  },diagnostic);
+  const built=await stage('2 · BIL '+event.name,'Write event '+event.name+': '+event.goal+'. State and screens '+ctx+'. Prior expected state '+context+'. Output rows: SET|variable|BIL expression, optional OPEN|screen, or BIL|statement. Then INPUT|variable|JSON value for each user input and EXPECT|variable|JSON value for changed output. Quoted strings in expressions. collections.append(list,value), collections.remove(list,index), collections.length(list), clear with collections.slice(list,0,0). Real test in event order. No device operations. END.',v=>{
+   const value=handler(typeof v==='string'?eventRows(v):v,event,structure),events=plan.events.slice();events[i]={name:value.name,steps:value.steps};compile({...plan,events});return value;
+  },diagnostic,'lines');
   plan.events[i]={name:built.name,steps:built.steps};tests[i]=testFor(built);
  }
  async function screenPhase(i,diagnostic=''){
   const screen=structure.screens[i],context=q(structure.events.map((e,j)=>[e.name,e.goal,Object.keys(tests[j]?.inputs||{})]));
-  const view=await stage('3 · Draw '+screen.title,'Design screen '+screen.id+' '+screen.goal+'. Context '+ctx+'. Events and required test inputs '+context+'. JSON {"bg":"#112233","fg":"#ffffff","accent":"#335577","layout":"column","nodes":[["h","Title"],["i","variable","Label"],["b","Button","event"],["o","variable"]]}. Other nodes ["m",var,label] multiline, ["t",var,label] toggle, ["nav",label,screen], ["card",label,[nodes]], ["row",label,[nodes]], ["shape",circle|square|diamond|triangle|ring,label], ["clock",milliseconds,event]. Use only declared names. Provide visible inputs and real event controls, links to other screens. Design accessible controls. Under 250 tokens.',v=>{
-   const value=design(v,screen,structure),screens=plan.screens.slice();screens[i]=value;compile({...plan,screens});return value;
-  },diagnostic);
+  const view=await stage('3 · Draw '+screen.title,'Design screen '+screen.id+' '+screen.goal+'. Context '+ctx+'. Events and test inputs '+context+'. Output THEME|#112233|#ffffff|#335577|column (choose colors), then rows H|heading, P|text, I|variable|label, M|variable|multiline label, T|variable|toggle label, B|label|event, O|variable, NAV|label|screen, SHAPE|circle|label, CLOCK|milliseconds|event, SELECT|variable|label|JSON array options. Only declared names. Include usable controls for this screen. Navigation to home is added automatically. END.',v=>{
+   const value=design(typeof v==='string'?designRows(v):v,screen,structure),screens=plan.screens.slice();screens[i]=value;compile({...plan,screens});return value;
+  },diagnostic,'lines');
   plan.screens[i]=view;
  }
  for(let i=0;i<structure.events.length;i++)await eventPhase(i);
@@ -169,5 +193,5 @@ async function generate(intent,{signal,onStatus=()=>{},ask=scope.CLEA7PublicPlan
  if(!verification)fail('Runtime nije završio provjeru.');
  return {reply:q(plan),modelProfile:'qwen3.5-9b-q4_k_m',title:structure.title,trace,checks:tests,source};
 }
-scope.CLEA7PublicStudioAgent=Object.freeze({generate,outline,handler,design,lineRows,requestedScreens,json});
+scope.CLEA7PublicStudioAgent=Object.freeze({generate,outline,handler,design,lineRows,requestedScreens,json,eventRows,designRows});
 })(globalThis);
