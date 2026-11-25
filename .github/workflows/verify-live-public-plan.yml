@@ -1,8 +1,6 @@
 name: Verify compact Qwen Studio authoring
 on:
-  push:
-    branches: [fix/clea-live-plan-20261125]
-    paths: [.github/workflows/verify-live-public-plan.yml, studio/workbench/public-plan.js, studio/workbench/ai-authoring.js, tests/test_live_public_plan.cjs]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
