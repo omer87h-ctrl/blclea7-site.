@@ -303,6 +303,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  };
  function requestedTask(question){
   if(taskMode.value!=='auto')return taskMode.value;
+  const route=globalThis.CLEA7PublicBrain?.classify(question,Boolean(globalThis.CLEA7Workbench?.project?.bil),lastAppIntent);if(route)return route;
   const words=question.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),prefix=/^(?:clea[,!:]?\s*)?(?:napravi|kreiraj|izradi|create|build|make|generate|dodaj|add|promijeni|uredi|prilagodi|poboljsaj|change|edit|redesign)\b/;
   if(!prefix.test(words))return /^(rokovnik|planer|kalendar|dnevnik|todo|to-do|notes|notepad|biljeznica)$/.test(words.trim())?'create':'chat';
   const app=words.search(/\b(?:aplikacija|aplikaciju|app|application|igru|game|program)\b/),component=words.search(/\b(?:prostor|space|ekran|screen|dugme|button|raspored|layout|interfejs|interface|oblik|shape|vektor|vector)[a-z]*\b/);
@@ -320,7 +321,8 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   return CLEA7PublicStudioAgent.generate(intent,{signal,onStatus:message=>{feedback.textContent=message;status.textContent=message;if(publicProgress)publicProgress.textContent=message;}});
  }
  const publicAuthor=globalThis.CLEA7AppAuthoring?.create({generate:publicBetaAuthor,attempts:1,onEvent:event=>{if(event.phase==='model')feedback.textContent='Qwen sastavlja aplikaciju · pokušaj '+event.attempt;if(event.phase==='repair')feedback.textContent='BIL kompajler traži ispravku · '+event.diagnostic;if(event.phase==='verification')feedback.textContent='Kompajler i Runtime provjeravaju stvarnu aplikaciju…';}});
- async function publicCreate(question){
+ const publicToolAuthor=globalThis.CLEA7AppAuthoring?.create({generate:(intent,options)=>CLEA7PublicBrain.generateTools(intent,options),attempts:3,onEvent:event=>{feedback.textContent=event.phase==='repair'?'Studio kompajler traži popravku · '+event.diagnostic:'CLEA AI koristi registrovane Studio alate · '+event.phase;if(publicProgress)publicProgress.textContent=feedback.textContent;}});
+ async function publicCreate(question,mode='create',intent=question){
   if(loading)return;closeAIPreview();
   if(!publicAuthor||!globalThis.CLEA7Workbench){feedback.textContent='Studio još nije spreman. Pokušaj ponovo.';return;}
   loading=true;submit.disabled=true;document.getElementById('chat-stop').disabled=false;authorController=new AbortController();
@@ -328,9 +330,12 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   try{
    const h=await fetch(publicBetaEndpoint+'/health',{headers:{'ngrok-skip-browser-warning':'1'},signal:AbortSignal.any([authorController.signal,AbortSignal.timeout(8000)]),cache:'no-store',credentials:'omit'});
    const health=await h.json();if(!h.ok||health.ready!==true)throw Error('Veza s HP serverom trenutno nije dostupna.');if(health.streaming!==true)throw Error('Ovaj servis trenutno nema aktivan prijenos modelskog odgovora.');
-   input.value='';const proposal=await publicAuthor.propose(question,{project:CLEA7Workbench.snapshot(),mode:'create',representation:'public-staged',signal:authorController.signal});
-   proposalUI(body,proposal);feedback.textContent='BIL prijedlog je prošao lokalnu provjeru. Pregledaj i primijeni ga.';
-  }catch(error){body.textContent=error.message;if(error.trace||error.attempts){const detail=document.createElement('details'),title=document.createElement('summary'),pre=document.createElement('pre');title.textContent='Prikaži dijagnostiku izrade';pre.textContent=JSON.stringify(error.trace||error.attempts,null,2);detail.append(title,pre);body.append(detail);}feedback.textContent='Izrada nije uspjela. Postojeći projekt je sačuvan.';status.textContent=feedback.textContent;input.value=question;body.parentElement.scrollIntoView({block:'nearest'});}
+   input.value='';const project=CLEA7Workbench.snapshot(),tools=mode==='change'||CLEA7PublicBrain.specialized(intent),selected=mode==='change'?globalThis.CLEA7StudioTests?.activeChecks():null;
+   const proposal=await (tools?publicToolAuthor:publicAuthor).propose(intent,{project,mode,representation:tools?'tools':'public-staged',sourceApproved:mode==='change'&&sourceApproved.checked,projectContext:tools,checks:selected?.checks||[],signal:authorController.signal});
+   if(selected)proposalTests.set(proposal,selected.signature);if(mode==='create')lastAppIntent=intent;
+   betaMemory.add(question,'Studio prijedlog: '+proposal.application.name+' · '+proposal.application.bil.ir.ui.screens.length+' ekrana. Kompajler i Runtime provjerili prijedlog; primjena čeka potvrdu.',persistence.checked);
+   proposalUI(body,proposal);feedback.textContent='BIL prijedlog je prošao lokalnu provjeru. Pregledaj i primijeni ga.';taskMode.value='auto';taskMode.onchange();
+  }catch(error){body.textContent=error.message;if(error.trace||error.attempts){const detail=document.createElement('details'),title=document.createElement('summary'),pre=document.createElement('pre');title.textContent='Prikaži dijagnostiku izrade';pre.textContent=JSON.stringify(error.trace||error.attempts,null,2);detail.append(title,pre);body.append(detail);}feedback.textContent='Izrada nije uspjela. Postojeći projekt je sačuvan.';betaMemory.add(question,'Izrada nije uspjela: '+String(error.message).slice(0,300),persistence.checked);status.textContent=feedback.textContent;input.value=question;body.parentElement.scrollIntoView({block:'nearest'});}
   finally{publicProgress=null;authorController=null;loading=false;submit.disabled=false;document.getElementById('chat-stop').disabled=true;}
  }
  const author=globalThis.CLEA7AppAuthoring?.create({generate:(intent,options)=>client.ask(intent,{authoring:options.authoring,onDelta:options.onDelta,language:document.getElementById('chat-language').value}),onEvent:event=>{if(event.phase==='model')feedback.textContent='Model sastavlja BIL aplikaciju · pokušaj '+event.attempt+'.';if(event.phase==='repair')feedback.textContent='Kompajler je odbio prijedlog. Model dobija stvarnu dijagnostiku za ispravku.';if(event.phase==='runtime'&&event.event.pillar){const list=document.getElementById('chat-events'),li=document.createElement('li');li.textContent=event.event.pillar+' · '+event.event.state;list.prepend(li);while(list.children.length>40)list.lastElementChild.remove();}}});
@@ -370,7 +375,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
    const before=studio.snapshot(),application=await CLEA7AppAuthoring.recheck(proposal,before);closeAIPreview();studio.applyReviewed(application,before);applied=CLEA7.stable(studio.snapshot());undo.hidden=false;
    document.querySelector('[data-panel="draw"]')?.click();const drawRun=document.getElementById('draw-run');if(drawRun)await drawRun.onclick();else await studio.run();result.textContent='Aplikacija je stvarno pokrenuta. Isprobaj unos, dugmad i navigaciju, a zatim izvezi CLEA7 paket.';status.textContent=result.textContent;
   }catch(error){result.textContent=error.message;apply.disabled=!review.checked;}};
-  body.append(heading,summary,structure,details,label,apply,download,undo,result);body.dataset.aiAppProposal='true';if(proposal.agentTrace?.length&&!proposal.application.remote){const preview=document.createElement('button');preview.type='button';preview.textContent='Prikaži interaktivnu aplikaciju';preview.onclick=()=>showAIPreview(proposal);body.append(preview);void showAIPreview(proposal);}
+  body.append(heading,summary,structure,details,label,apply,download,undo,result);body.dataset.aiAppProposal='true';if((proposal.agentTrace?.length||proposal.conversion?.representation==='tools')&&!proposal.application.remote){const preview=document.createElement('button');preview.type='button';preview.textContent='Prikaži interaktivnu aplikaciju';preview.onclick=()=>showAIPreview(proposal);body.append(preview);void showAIPreview(proposal);}
  }
  async function authorApplication(body,question,mode){
   if(!author)throw Error('CLEA koordinacija kreiranja nije učitana. Nije korišten rezervni predložak.');
@@ -410,7 +415,7 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  if(globalThis.CLEA7Workbench)receiveHandoff();else addEventListener('clea:studio-ready',receiveHandoff,{once:true});
  const persistenceLabel=document.createElement('label'),persistence=document.createElement('input');persistence.type='checkbox';persistence.id='clea-save-conversation';
  persistenceLabel.append(persistence,document.createTextNode(' Sačuvaj historiju na ovom uređaju'));
- const persistenceNote=document.createElement('small');persistenceNote.textContent='Opcionalno: posljednje četiri razmjene ostaju u pregledniku do brisanja. Nisu šifrirane; izbjegavaj zajednički računar.';
+ const persistenceNote=document.createElement('small');persistenceNote.textContent='Historija javnog razgovora: do 40 razmjena u ovoj kartici; označi za čuvanje i nakon zatvaranja. Nije šifrirana. Model dobija posljednje tri razmjene i relevantni stariji kontekst. Novi razgovor briše historiju.';
  controls.append(persistenceLabel,persistenceNote);
  const webLabel=document.createElement('label'),webCheck=document.createElement('input');webCheck.type='checkbox';webCheck.id='clea-public-sources';webCheck.disabled=true;
  webLabel.append(webCheck,document.createTextNode(' Koristi internetske izvore za ovo pitanje'));
@@ -471,21 +476,23 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
    if(!log.querySelector('.chat-message[data-restored]'))for(const item of items){const body=message(item.role==='user'?'Ti':'BL CLEA AI',item.content);body.parentElement.dataset.restored='true';}
   }catch{try{localStorage.removeItem(historyKey);}catch{}persistence.checked=false;}
  }
- persistence.addEventListener('change',persist);
+ persistence.addEventListener('change',()=>{if(ownerPublicHost&&!active)betaMemory.save(persistence.checked);else persist();});
  let active=false,loading=false,publicAvailable=false,previewMode=false,runtimeAuthentication=null,deviceModel=null;
- let betaHistory=[];
+ const betaMemory=CLEA7PublicBrain.memory(sessionStorage,localStorage);
+ let lastAppIntent='';
+ if(ownerPublicHost){if(betaMemory.saved)persistence.checked=true;for(const item of betaMemory.all().slice(-24)){message(item.role==='user'?'Ti':'BL CLEA AI',item.content);if(item.role==='user'&&CLEA7PublicBrain.classify(item.content,false,'')==='create')lastAppIntent=item.content;}}
  async function betaHealth(){const res=await fetch(publicBetaEndpoint+'/health',{headers:{'ngrok-skip-browser-warning':'1'},credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(8000)});const h=await res.json();if(!res.ok||h.ready!==true||h.service!=='CLEA public beta')throw Error('CLEA Runner na HP-u trenutno nije dostupan.');return h;}
  async function betaStatus(){try{const h=await betaHealth();document.getElementById('chat-ready').textContent='CLEA AI · Qwen 9B povezan';feedback.textContent=h.streaming?'Qwen na HP-u · razgovor i eksperimentalna AI izrada lokalnih aplikacija (beta).':'Razgovor preko HP-a.';submit.disabled=false;}catch(error){document.getElementById('chat-ready').textContent='HP servis nije dostupan';feedback.textContent=error.message;submit.disabled=false;}status.textContent=feedback.textContent;}
  async function betaChat(question){
   if(loading)return;loading=true;submit.disabled=true;document.getElementById('chat-stop').disabled=false;authorController=new AbortController();const controller=authorController;
   message('Ti',question);input.value='';const body=message('BL CLEA AI','Povezujem se s HP-om…');let reply='';
   try{
-   const h=await betaHealth(),history=betaHistory.slice(-4);
-   const res=await fetch(publicBetaEndpoint+(h.streaming?'/chat/stream':'/chat'),{method:'POST',headers:{'Content-Type':'application/json','ngrok-skip-browser-warning':'1'},body:JSON.stringify({question,history}),credentials:'omit',cache:'no-store',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(300000)])});
+   const h=await betaHealth(),history=betaMemory.wire(),modelQuestion=CLEA7PublicBrain.chatQuestion(question,betaMemory);
+   const res=await fetch(publicBetaEndpoint+(h.streaming?'/chat/stream':'/chat'),{method:'POST',headers:{'Content-Type':'application/json','ngrok-skip-browser-warning':'1'},body:JSON.stringify({question:modelQuestion,history}),credentials:'omit',cache:'no-store',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(300000)])});
    if(!res.ok){const err=await res.json().catch(()=>({}));throw Error(err.error||'HP servis: '+res.status);}
    if(h.streaming){const reader=res.body.getReader(),decoder=new TextDecoder();let carry='',done=false,source='';try{while(!done){const part=await reader.read();if(part.done)break;carry+=decoder.decode(part.value,{stream:true});if(carry.length>65536)throw Error('Neispravan odgovor.');const lines=carry.split('\n');carry=lines.pop()||'';for(const line of lines){if(!line.trim())continue;const e=JSON.parse(line);if(e.type==='status')feedback.textContent=e.message;else if(e.type==='delta'){reply+=e.text;body.textContent=reply;}else if(e.type==='error')throw Error(e.message);else if(e.type==='done'){done=true;source=e.source;break;}}}}finally{await reader.cancel().catch(()=>{});}if(!done||!reply.trim())throw Error('Odgovor nije završen.');if(source==='CLEA opis mogućnosti')body.previousElementSibling.textContent='CLEA · opis mogućnosti';}
    else{const data=await res.json();if(typeof data.reply!=='string'||!data.reply.trim())throw Error('Nema odgovora.');reply=data.reply;}
-   decorateReply(body,reply);betaHistory.push({role:'user',content:question.slice(0,1200)},{role:'assistant',content:reply.slice(0,1200)});betaHistory=betaHistory.slice(-4);spokenReply=reply;readReply.disabled=false;if(autoSpeech.checked)speakReply();feedback.textContent='Odgovor završen preko HP servisa.';document.getElementById('chat-ready').textContent='CLEA AI · Qwen 9B povezan';
+   decorateReply(body,reply);betaMemory.add(question,reply,persistence.checked);spokenReply=reply;readReply.disabled=false;if(autoSpeech.checked)speakReply();feedback.textContent='Odgovor završen preko HP servisa.';document.getElementById('chat-ready').textContent='CLEA AI · Qwen 9B povezan';
   }catch(error){body.textContent=(reply?reply+'\n\n':'')+(controller.signal.aborted?'Odgovor je zaustavljen.':error.message);feedback.textContent=body.textContent;input.value=question;}
   finally{authorController=null;loading=false;submit.disabled=false;document.getElementById('chat-stop').disabled=true;status.textContent=feedback.textContent;}
  }
@@ -563,7 +570,15 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
  form.addEventListener('submit',async event=>{
   event.preventDefault();event.stopImmediatePropagation();if(loading)return;
   const studioQuestion=input.value.trim();
-  if(ownerPublicHost&&(!active||client.capabilities.bilAuthoring!==true)&&studioQuestion&&requestedTask(studioQuestion)==='create'&&globalThis.CLEA7Workbench){message('Ti',studioQuestion);return publicCreate(studioQuestion);}
+  if(ownerPublicHost&&(!active||client.capabilities.bilAuthoring!==true)&&studioQuestion&&globalThis.CLEA7Workbench){
+   const task=requestedTask(studioQuestion),project=CLEA7Workbench.snapshot(),mode=task==='tools'?(project.bil?'change':'create'):task;
+   if(mode==='create'||mode==='change'){
+    if(mode==='change'&&(!sourceApproved.checked||approvedSource!==CLEA7.stable(project))){sourceApproved.checked=false;approvedSource=null;taskMode.value='change';taskMode.onchange();feedback.textContent='Odobri slanje strukture trenutnog projekta svom Qwen servisu, pa ponovo pošalji poruku. Projekt ostaje sačuvan.';return;}
+    const followup=mode==='create'&&lastAppIntent&&/^(?:\d+|jedan|dva|tri|četiri|cetiri|pet|šest|sest|sedam|osam|devet|deset)\s+ekran/i.test(studioQuestion);
+    const intent=followup?(lastAppIntent+'\n'+studioQuestion).slice(0,1200):studioQuestion;
+    message('Ti',studioQuestion);return publicCreate(studioQuestion,mode,intent);
+   }
+  }
   if(!active&&globalThis.CLEA7Workbench&&globalThis.CLEA7StudioTools&&['auto','tools'].includes(taskMode.value)&&studioQuestion){
    try{const project=CLEA7Workbench.snapshot(),resolved=CLEA7StudioTools.resolve(studioQuestion,project.bil?.source||null,studioIntent);if(resolved)return studioOperation(studioQuestion,resolved);}
    catch(error){feedback.textContent=error.message;return;}
@@ -612,6 +627,6 @@ scope.addEventListener('beforeunload',()=>{disposed=true;runtime.close();scope.s
   finally{submit.disabled=false;loading=false;check.disabled=false;publicCheck.disabled=!publicAvailable;document.getElementById('chat-stop').disabled=true;}
  },true);
  document.getElementById('chat-stop').addEventListener('click',()=>{stopReplySpeech();authorController?.abort();client.cancel();});
- document.getElementById('chat-clear').addEventListener('click',()=>{closeAIPreview();stopReplySpeech();spokenReply='';betaHistory=[];readReply.disabled=true;authorController?.abort();client.reset();persist();});
+ document.getElementById('chat-clear').addEventListener('click',()=>{closeAIPreview();stopReplySpeech();spokenReply='';betaMemory.clear();lastAppIntent='';readReply.disabled=true;authorController?.abort();client.reset();persist();});
  window.addEventListener('pagehide',()=>{stopReplySpeech();authorController?.abort();client.reset();});
 })();
