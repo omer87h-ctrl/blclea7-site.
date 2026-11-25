@@ -11,7 +11,8 @@ const screen={bg:'#112233',fg:'#ffffff',accent:'#445566',layout:'column',nodes:[
 (async()=>{
  let bad=true;const calls=[];
  const ask=async question=>{calls.push(question);let value;
- if(question.startsWith('Plan app.'))value=structure;
+ if(question.startsWith('Plan only the app title'))return {reply:'TITLE|Notes\nPAGE|home|Notes|Write notes\nEND'};
+ else if(question.startsWith('Plan data and actions'))return {reply:'V|draft|Text\nV|entries|List<Text>\nE|add|append note\nE|clear|clear all notes\nEND'};
  else if(question.startsWith('Write event add:')){if(bad){bad=false;return {reply:'{"broken":true}'};}value=add;}
  else if(question.startsWith('Write event clear:'))value=clear;
  else if(question.startsWith('Design screen home '))value=screen;
@@ -21,7 +22,11 @@ const screen={bg:'#112233',fg:'#ffffff',accent:'#445566',layout:'column',nodes:[
  const result=await CLEA7PublicStudioAgent.generate('A new independent notes app',{ask});
  assert.equal(result.checks.length,2);assert.ok(result.trace.some(t=>!t.passed));assert.ok(result.source.includes('collections.append'));
  assert.ok(result.source.includes('background "#112233"'));
- assert.equal(calls.length,5);
+ assert.equal(calls.length,6);
+ assert.equal(CLEA7PublicStudioAgent.requestedScreens('Pet ekrana i to je rokovnik'),5);
+ assert.throws(()=>CLEA7PublicStudioAgent.lineRows('TITLE|Notes\nPAGE|home|Notes|Write',['TITLE','PAGE']));
+ assert.deepEqual(CLEA7PublicStudioAgent.json('Plan:\n{"a":1}\n'),{a:1});
+ assert.throws(()=>CLEA7PublicStudioAgent.json('{"a":1'));
  const compiled=CLEA7BIL.compile(result.source);
  assert.ok(compiled.ir.ui.screens.length===1);
  const checked=await CLEA7Intelligence.verifyBIL(result.source,{metadata:{id:'staged_fixture',name:'Notes'},checks:result.checks});
