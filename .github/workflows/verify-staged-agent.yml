@@ -1,14 +1,14 @@
 name: Verify staged CLEA Studio agent
 on:
   push:
-    branches: [fix/clea-live-plan-20261125]
+    branches: [main]
     paths: [.github/workflows/verify-staged-agent.yml]
 permissions:
   contents: read
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,3 +27,5 @@ jobs:
 # Re-run after typed-list correction.
 
 # Verify the simplified two-field typed planning wire.
+
+# Run actual Qwen acceptance with the five-screen request and line protocol.
